@@ -78,10 +78,14 @@ data.with.raw.accuracy <-
 
 # TODO Figure out wtf is wrong here.
 label.counts <-
-  accuracy.data %>%
-  filter(binary == FALSE, is.turker == FALSE, granularity == 'street') %>%
-  group_by(label.type) %>%
-  summarize(count = sum(true.pos, false.neg))
+  data_frame(
+    count = c(2784, 77, 242, 772, 256, 1129),
+    label.type = c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','NoSidewalk','ProbVsNoProb')
+    )
+  # accuracy.data %>%
+  # filter(binary == FALSE, is.turker == FALSE, granularity == 'street') %>%
+  # group_by(label.type) %>%
+  # summarize(count = sum(true.pos, false.neg))
 gt.label.count.lookup <- setNames(label.counts$count, label.counts$label.type)
 
 label.count.labeller <- Vectorize(
