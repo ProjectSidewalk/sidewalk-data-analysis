@@ -1,0 +1,321 @@
+---
+title: 'Accuracy Summary'
+author: 'Mikey Saugstad'
+date: 'October 10, 2017'
+output:
+  html_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+library(ggplot2)
+library(gridExtra)
+library(reshape2)
+library(lattice)
+library(dplyr)
+library(knitr)
+library(tidyr)
+```
+
+## Preliminary Notes
+
+* In the case of 5 meter and 10 meter segment granularity, raw accuracy and specificity get a huge boost from a large number of true negatives.
+* Very little confidence should be given to precision for the NoSidewalk label, since GT labelers only placed the label at intersections and at places where a sidewalk ends. This would lead to many false positives for users who place a NoSidewalk label every panorama.
+
+```{r reading-cleaning-data-combined, include=FALSE, cache=TRUE}
+# TODO fixed binary case in JS code
+
+# read in data
+setwd('~/Dropbox/sidewalk-data-analysis/')
+c <- c(replicate(6, 'factor'), 'numeric', 'numeric', replicate(3, 'logical'), 'factor', 'factor',
+       replicate(8, 'numeric'))
+volunteer.data <- read.csv('data/accuracies-volunteer.csv', colClasses = c, na.strings = c('null'))
+turker.data <- read.csv('data/accuracies-turker.csv', colClasses = c, na.strings = c('null'))
+
+# Combine datasets
+accuracy.data <-
+  (volunteer.data %>% mutate(is.turker = FALSE)) %>%
+  rbind(turker.data %>% mutate(is.turker = TRUE))
+
+# Remove occlusion label type
+accuracy.data <- subset(accuracy.data, label.type != 'Occlusion')
+accuracy.data$label.type <- droplevels(accuracy.data$label.type)
+
+# Rename Problem label type as ProbVsNoProb
+label.type.levs <- levels(accuracy.data$label.type)
+label.type.levs[5:6] <- c('ProbVsNoProb', 'SurfaceProb')
+levels(accuracy.data$label.type) <- label.type.levs
+
+# Reorder label type levels.
+label.type.levs <- c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','NoSidewalk','ProbVsNoProb')
+accuracy.data$label.type <- factor(accuracy.data$label.type, label.type.levs)
+
+# More setup: remove binary analysis (needs to be fixed), add is.anon.route column, add
+#             raw.accuracy column, add worker.type column, give granularity an ordering.
+# Note that we convert condition.id from factor -> character -> numeric, b/c converting directly to
+# numeric from factor starts from 0 instead of using the contents of the string to get the number.
+get.worker.type <- Vectorize(
+  function(is.turker, is.anon.route) {
+    if (is.turker == TRUE) 'turker'
+    else if (is.anon.route == TRUE) 'anon.vol'
+    else 'reg.vol'
+  }
+)
+data.with.raw.accuracy <-
+  accuracy.data %>%
+  filter(binary == FALSE) %>%
+  mutate(is.anon.route = as.numeric(as.character(condition.id)) > 121) %>%
+  mutate(worker.type = factor(get.worker.type(is.turker, is.anon.route))) %>%
+  mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg)) %>%
+  mutate(granularity = ordered(granularity, levels = c('5_meter', '10_meter', 'street')))
+  
+# volunteer.summary <-
+#   volunteer.with.raw.accuracy %>%
+#   group_by(label.type, granularity) %>%
+#   summarise_at(c('specificity', 'recall', 'f.measure', 'precision', 'raw.accuracy'), mean, na.rm = TRUE)
+
+# TODO Figure out wtf is wrong here.
+label.counts <-
+  accuracy.data %>%
+  filter(binary == FALSE, is.turker == FALSE, granularity == 'street') %>%
+  group_by(label.type) %>%
+  summarize(count = sum(true.pos, false.neg))
+gt.label.count.lookup <- setNames(label.counts$count, label.counts$label.type)
+
+label.count.labeller <- Vectorize(
+  function(curr.type) {
+    paste0(curr.type, ', GT=', gt.label.count.lookup[curr.type])
+  }
+)
+```
+
+```{r reading-cleaning-data-turker, include=FALSE}
+# add column for vote threshold
+f <- Vectorize(
+    function(workers, threshold) {
+    if (threshold == 1) 'one'
+    else if (workers == threshold) 'consensus'
+    else 'majority'
+  }
+)
+with.vote <-
+  data.with.raw.accuracy %>%
+  filter(is.turker == TRUE) %>%
+  mutate(vote.threshold = factor(f(n.workers, worker.thresh)))
+
+# summary((with.vote %>% slice(rep(worker.thresh == n.workers, each=3)) )$vote.threshold)
+set1 <- with.vote %>% filter(n.workers == 1) %>% mutate(vote.threshold = factor('consensus'))
+set2 <- with.vote %>% filter(n.workers == 1) %>% mutate(vote.threshold = factor('majority'))
+expanded.vote <- with.vote %>% rbind(set1, set2)
+```
+
+```{r reading-cleaning-data-volunteer, include=FALSE}
+volunteer.with.raw.accuracy <- data.with.raw.accuracy %>% filter(is.turker == FALSE)
+```
+
+
+## Comparing Turkers vs. Anon vs. Registered Volunteers
+
+This section has a series of boxplots that compare performance of anonymous volunteers, registered volunteers, and turkers. Here, turker mean just a single turker (the first turker to complete each set of routes).
+
+```{r worker-types-setup, echo=FALSE, warning=FALSE}
+# Defines the function that produces the boxplots that compare different worker types. It takes in
+# the accuracy measure you are plotting as a string.
+worker.type.trellis.boxplot <- function(accuracy.type) {
+  ggplot(data = data.with.raw.accuracy, aes_string(x = 'worker.type', y = accuracy.type)) +
+  geom_boxplot() +
+  facet_grid(granularity ~ label.type,
+             labeller = labeller(label.type = label.count.labeller)) +
+  theme_bw() +
+  theme(legend.position = 'top')
+}
+```
+
+#### Raw Accuracy
+Defined as $\frac{TP + TN}{TP + TN + FP + FN}$. Just the percentage of things they got correct.
+
+```{r worker-types-raw-accuracy, echo=FALSE, fig.height=4, fig.width=10, warning=FALSE}
+worker.type.trellis.boxplot('raw.accuracy')
+```
+
+#### Recall
+Defined as $\frac{TP}{TP + FN}$. High recall means that they found most of the issues/features.
+
+```{r worker-types-recall, echo=FALSE, fig.height=4, fig.width=10, warning=FALSE}
+worker.type.trellis.boxplot('recall')
+```
+
+#### Precision
+Defined as $\frac{TP}{TP + FP}$. High precision means that they rarely placed a label when they shouldn't have.
+
+```{r worker-types-precision, echo=FALSE, fig.height=4, fig.width=10, warning=FALSE}
+worker.type.trellis.boxplot('precision')
+```
+
+#### F-measure
+Defined as $2 * \frac{precision * recall}{precision + recall}$. It is essentially a balance between recall and precision.
+
+```{r worker-types-f-measure, echo=FALSE, fig.height=4, fig.width=10, warning=FALSE}
+worker.type.trellis.boxplot('f.measure')
+```
+
+#### Specificity
+Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means that they rarely placed a label when they shouldn't have, but specificity gives more weight to true _negatives_, while precision gives more weight to true _positives_.
+
+```{r worker-types-specificity, echo=FALSE, fig.height=4, fig.width=10, warning=FALSE}
+worker.type.trellis.boxplot('specificity')
+```
+
+
+## Volunteer Data
+In this section, there are a series of ograms that help to visualize the distribution of volunteers' accuracy. For each accuracy measure, there is a grid of histograms split by label type and granularity (street, 5 meter, 10 meter).
+
+Note that these histograms have lines representing the _mean_ of each group (not the _median_; lmk if you want to see median instead).
+
+```{r volunteer-histograms-setup, echo=FALSE, warning=FALSE}
+volunteer.grouped <- volunteer.with.raw.accuracy %>% group_by(granularity, label.type)
+
+# Defines the function that produces the boxplots that compare different worker types. It takes in
+# the accuracy measure you are plotting as a string.
+volunteer.trellis.histogram <- function(accuracy.type) {
+  ggplot(data = volunteer.grouped %>% mutate(mean = mean(accuracy.type, na.rm = TRUE)),
+         aes_string(accuracy.type)) +
+    geom_histogram(binwidth = 0.1) +
+    geom_vline(aes(xintercept = mean)) +
+    facet_grid(granularity ~ label.type,
+               labeller = labeller(label.type = label.count.labeller)) +
+    theme_bw() +
+    theme(legend.position = 'top') +
+    scale_y_continuous(expand = c(0, 0)) # removes weird white space at bottom of plot
+}
+```
+
+#### Raw accuracy
+Defined as $\frac{TP + TN}{TP + TN + FP + FN}$. Just the percentage of things they got correct.
+
+```{r volunteer-raw-accuracy, echo=FALSE, fig.height=4, fig.width=10, warning=FALSE}
+volunteer.trellis.histogram('raw.accuracy')
+```
+
+#### Recall
+Defined as $\frac{TP}{TP + FN}$. High recall means that they found most of the issues/features.
+
+```{r volunteer-recall, echo=FALSE, fig.height=4, fig.width=10, warning=FALSE}
+volunteer.trellis.histogram('recall')
+```
+
+#### Precision
+Defined as $\frac{TP}{TP + FP}$. High precision means that they rarely placed a label when they shouldn't have.
+
+*Note*: Very little confidence should be given to precision for the NoSidewalk label, since GT labelers only placed the label at intersections and at places where a sidewalk ends.
+
+```{r volunteer-precision, echo=FALSE, fig.height=4, fig.width=10, warning=FALSE}
+volunteer.trellis.histogram('precision')
+```
+
+#### F-measure
+Defined as $2 * \frac{precision * recall}{precision + recall}$. It is essentially a balance between recall and precision.
+
+```{r volunteer-f-measure, echo=FALSE, fig.height=4, fig.width=10, warning=FALSE}
+volunteer.trellis.histogram('f.measure')
+```
+
+#### Specificity
+Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means that they rarely placed a label when they shouldn't have, but specificity gives more weight to true _negatives_, while precision gives more weight to true _positives_.
+
+```{r volunteer-specificity, echo=FALSE, fig.height=4, fig.width=10, warning=FALSE}
+volunteer.trellis.histogram('specificity')
+```
+
+
+## Turker Data
+
+### Comparing effects of number of turkers and vote type on accuracy
+In this section, there are a series of line graphs to help visualize how the number of turkers used and the method of voting affects the various accuracy measures. For each accuracy measure, there is a grid of line graphs, split by label type and granularity (same as above). However, each graph also has a line for each of the voting methods. You will notice that all voting methods are equivalent when looking at only one turker.
+
+```{r vote-type-setup, echo=FALSE, warning=FALSE}
+# Defines the function that produces the line charts that compare different voting thresholds. It
+# takes in the accuracy measure you are plotting as a string.
+vote.type.trellis.linechart <- function(accuracy.type) {
+  ggplot(data =
+           expanded.vote %>%
+           drop_na(accuracy.type) %>%
+           group_by(label.type, n.workers, vote.threshold, granularity) %>%
+           summarise_at(c(accuracy.type), mean),
+         aes(n.workers)) +
+    geom_line(aes_string(y = accuracy.type, colour = 'vote.threshold')) +
+    facet_grid(granularity ~ label.type,
+               labeller = labeller(label.type = label.count.labeller)) +
+    ylim(0, 1) +
+    theme_bw() +
+    theme(legend.position = 'top')
+}
+```
+
+#### Raw Accuracy
+Defined as $\frac{TP + TN}{TP + TN + FP + FN}$. Just the percentage of things they got correct.
+
+```{r vote-type-raw-accuracy, echo=FALSE, fig.height=6, fig.width=10}
+vote.type.trellis.linechart('raw.accuracy')
+```
+
+#### Recall
+Defined as $\frac{TP}{TP + FN}$. High recall means that they found most of the issues/features.
+
+```{r vote-type-recall, echo=FALSE, fig.height=6, fig.width=10}
+vote.type.trellis.linechart('recall')
+```
+
+#### Precision
+Defined as $\frac{TP}{TP + FP}$. High precision means that they rarely placed a label when they shouldn't have.
+
+```{r vote-type-precision, echo=FALSE, fig.height=6, fig.width=10}
+vote.type.trellis.linechart('precision')
+```
+
+#### F-measure
+Defined as $2 * \frac{precision * recall}{precision + recall}$. It is essentially a balance between recall and precision.
+
+```{r vote-type-f-measure, echo=FALSE, fig.height=6, fig.width=10}
+vote.type.trellis.linechart('f.measure')
+```
+
+#### Specificity
+Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means that they rarely placed a label when they shouldn't have, but specificity gives more weight to true _negatives_, while precision gives more weight to true _positives_.
+
+```{r vote-type-specificity, echo=FALSE, fig.height=6, fig.width=10}
+vote.type.trellis.linechart('specificity')
+```
+
+```{r maybe-later, echo=FALSE, fig.height=3, fig.width=10, message=FALSE}
+# Example of how to display the data in a table, not currently in use.
+# volunteer.reg.vs.anon.summary <-
+#   data.with.raw.accuracy %>%
+#   group_by(label.type, granularity, is.anon.route) %>%
+#   summarise_at(c('specificity', 'recall', 'f.measure', 'precision', 'raw.accuracy'), mean, na.rm = TRUE)
+
+# volunteer.reg.vs.anon.summary %>%
+#   kable(format = 'markdown')
+
+# Example of how to display the data in a table, not currently in use.
+# kable(summarized.raw.accuracy %>%
+#         filter(vote.threshold == 'majority') %>%
+#         select(-vote.threshold) %>%
+#         spread(label.type, raw.accuracy),
+#       format = 'markdown', digits = 2, align = 'l')
+
+
+# turker.majority.vote <- subset(street.turker, ceiling(n.workers / 2) == worker.thresh)
+
+# ggplot(data = turker.majority.vote, aes(recall)) +
+#   geom_histogram(binwidth = 0.1, na.rm = TRUE) +
+#   facet_grid(n.workers ~ label.type) +
+#   theme_bw()
+# 
+# ggplot(data = turker.majority.vote, aes(recall)) +
+#   stat_bin(aes(y = ..density..), binwidth = 0.1, na.rm = TRUE) +
+#   facet_grid(label.type ~ n.workers) +
+#   theme_bw()
+```
