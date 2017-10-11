@@ -43,13 +43,13 @@ accuracy.data <-
 accuracy.data <- subset(accuracy.data, label.type != 'Occlusion')
 accuracy.data$label.type <- droplevels(accuracy.data$label.type)
 
-# Rename Problem label type as ProbVsNoProb
+# Rename SurfaceProblem label type as SurfaceProb for easier visualization
 label.type.levs <- levels(accuracy.data$label.type)
-label.type.levs[5:6] <- c('ProbVsNoProb', 'SurfaceProb')
+label.type.levs[6] <- c('SurfaceProb')
 levels(accuracy.data$label.type) <- label.type.levs
 
 # Reorder label type levels.
-label.type.levs <- c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','NoSidewalk','ProbVsNoProb')
+label.type.levs <- c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','NoSidewalk','Problem')
 accuracy.data$label.type <- factor(accuracy.data$label.type, label.type.levs)
 
 # More setup: remove binary analysis (needs to be fixed), add is.anon.route column, add
@@ -80,7 +80,7 @@ data.with.raw.accuracy <-
 label.counts <-
   data_frame(
     count = c(2784, 77, 242, 772, 256, 1129),
-    label.type = c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','NoSidewalk','ProbVsNoProb')
+    label.type = c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','NoSidewalk','Problem')
     )
   # accuracy.data %>%
   # filter(binary == FALSE, is.turker == FALSE, granularity == 'street') %>%
