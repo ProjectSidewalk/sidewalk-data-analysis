@@ -17,6 +17,7 @@ library(lattice)
 library(dplyr)
 library(knitr)
 library(tidyr)
+library(rlang)
 ```
 
 ## Preliminary Notes
@@ -44,6 +45,7 @@ accuracy.data <- subset(accuracy.data, label.type != 'Occlusion')
 accuracy.data$label.type <- droplevels(accuracy.data$label.type)
 
 # Rename SurfaceProblem label type as SurfaceProb for easier visualization
+# possibly redo using https://stackoverflow.com/questions/28190435/changing-factor-levels-with-dplyr-mutate
 label.type.levs <- levels(accuracy.data$label.type)
 label.type.levs[6] <- c('SurfaceProb')
 levels(accuracy.data$label.type) <- label.type.levs
@@ -184,14 +186,23 @@ volunteer.grouped <- volunteer.with.raw.accuracy %>% group_by(granularity, label
 # Defines the function that produces the boxplots that compare different worker types. It takes in
 # the accuracy measure you are plotting as a string.
 volunteer.trellis.histogram <- function(accuracy.type) {
-  ggplot(data = volunteer.grouped %>% mutate(mean = mean(accuracy.type, na.rm = TRUE)),
+  ggplot(data =
+           volunteer.grouped %>%
+           mutate(mean = mean(!!sym(accuracy.type), na.rm = TRUE),
+                  median = median(!!sym(accuracy.type), na.rm = TRUE),
+                  sd = sd(!!sym(accuracy.type), na.rm = TRUE)),
          aes_string(accuracy.type)) +
     geom_histogram(binwidth = 0.1) +
     geom_vline(aes(xintercept = mean)) +
+    geom_label(
+      aes(x = -Inf, y = Inf, hjust = 'inward', vjust = 'inward',
+          label = paste0("mn=", sprintf('%.2f', mean), "\n",
+                         "md=", sprintf('%.2f', median), '\n',
+                         "sd=", sprintf('%.2f', sd))),
+      size = 2.2, label.padding = unit(0.15, "lines")) +
     facet_grid(granularity ~ label.type,
                labeller = labeller(label.type = label.count.labeller)) +
     theme_bw() +
-    theme(legend.position = 'top') +
     scale_y_continuous(expand = c(0, 0)) # removes weird white space at bottom of plot
 }
 ```
