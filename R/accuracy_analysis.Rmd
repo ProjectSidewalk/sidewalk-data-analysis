@@ -18,6 +18,7 @@ library(dplyr)
 library(knitr)
 library(tidyr)
 library(rlang)
+library(data.table)
 ```
 
 ## Preliminary Notes
@@ -134,21 +135,49 @@ volunteer.with.raw.accuracy <- data.with.raw.accuracy %>% filter(is.turker == FA
 
 ## Comparing Turkers vs. Anon vs. Registered Volunteers
 
-This section has a series of boxplots that compare performance of anonymous volunteers, registered volunteers, and turkers. Here, turker means just a single turker (the first turker to complete each set of routes).
+This section has a series of boxplots that compare performance of anonymous volunteers, registered volunteers, a single turker, and 5 turkers with majority vote. Here, a the single turker is the first turker to complete that set of routes.
+
+For each granularity and label type, an ANOVA test was run, with the p-value being reported in the top-right corner of each boxplot. I appeneded a `**` if the p-value was less than 0.01, and just a `*` if the p-value was less than 0.05, to make finding significant results easier.
+
+To make room for the p-value on each boxplot, I expanded the y-limit past 1.0, and then added a dotted line at the 1.0 mark so that we still have that reference point. However, it makes the graphs look a bit ugly, so LMK if you want to remove it.
 
 ```{r worker-types-setup, echo=FALSE, warning=FALSE}
 single.worker.accuracy <-
   data.with.raw.accuracy %>%
   filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3))
+
+# Takes a p-value, returns a * if it is below 0.05, and ** if below 0.01; an empty string o/w.
+sig.sym <- Vectorize(
+  function(significance) {
+  if (significance < 0.01) '**'
+  else if (significance < 0.05) '*'
+  else ''
+  }
+)
+
 # Defines the function that produces the boxplots that compare different worker types. It takes in
-# the accuracy measure you are plotting as a string.
+# the accuracy measure you are plotting as a string. It also runs an ANOVA test and puts the p-val
+# as a label in the top-left corner of each boxplot.
 worker.type.trellis.boxplot <- function(accuracy.type) {
+  
+  # Run ANOVA, and format p-value appropriately for visualizing on the plot (in the form 'x.xxx**')
+  pval <-
+    single.worker.accuracy %>%
+    group_by(granularity, label.type) %>%
+    do(model = aov(as.formula(paste0(accuracy.type, ' ~ worker.type')), data = .)) %>%
+    mutate(p = summary(model)[[1]][["Pr(>F)"]][1]) %>%
+    mutate(p.str = paste0("p = ", sprintf("%.3f", p), sig.sym(p)))
+  
+  # Create the trellis boxplots.
   ggplot(data = single.worker.accuracy, aes_string(x = 'worker.type', y = accuracy.type)) +
-  geom_boxplot() +
-  facet_grid(granularity ~ label.type,
-             labeller = labeller(label.type = label.count.labeller)) +
-  theme_bw() +
-  theme(legend.position = 'top')
+    geom_boxplot() +
+    scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
+    geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
+    geom_label(data = pval, aes(x = -Inf, y = 1.13, hjust = 'inward', label = p.str),
+               size = 3.0, label.padding = unit(0.15, "lines")) +
+    facet_grid(granularity ~ label.type, labeller = labeller(label.type = label.count.labeller)) +
+    theme_bw() +
+    theme(legend.position = 'top')
 }
 ```
 
@@ -186,7 +215,6 @@ Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means th
 ```{r worker-types-specificity, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
 worker.type.trellis.boxplot('specificity')
 ```
-
 
 ## Volunteer Data
 In this section, there are a series of ograms that help to visualize the distribution of volunteers' accuracy. For each accuracy measure, there is a grid of histograms split by label type and granularity (street, 5 meter, 10 meter).
