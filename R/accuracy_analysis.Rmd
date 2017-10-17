@@ -302,6 +302,7 @@ vote.type.trellis.linechart <- function(accuracy.type) {
            summarise_at(c(accuracy.type), mean),
          aes(n.workers)) +
     geom_line(aes_string(y = accuracy.type, colour = 'vote.threshold')) +
+    geom_point(aes_string(y = accuracy.type, colour = 'vote.threshold'), size = 1) +
     facet_grid(granularity ~ label.type,
                labeller = labeller(label.type = label.count.labeller)) +
     ylim(0, 1) +
