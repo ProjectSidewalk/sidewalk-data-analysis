@@ -110,9 +110,9 @@ label.count.labeller <- Vectorize(
 
 ```{r reading-cleaning-data-turker, include=FALSE}
 # add column for vote threshold
-f <- Vectorize(
+get.threshold.factor <- Vectorize(
     function(workers, threshold) {
-    if (threshold == 1) 'one'
+    if (threshold == 1) 'at.least.one'
     else if (workers == threshold) 'consensus'
     else 'majority'
   }
@@ -120,7 +120,8 @@ f <- Vectorize(
 with.vote <-
   data.with.raw.accuracy %>%
   filter(is.turker == TRUE) %>%
-  mutate(vote.threshold = factor(f(n.workers, worker.thresh)))
+  mutate(vote.threshold = ordered(get.threshold.factor(n.workers, worker.thresh),
+                                  levels = c('at.least.one', 'majority', 'consensus')))
 
 # summary((with.vote %>% slice(rep(worker.thresh == n.workers, each=3)) )$vote.threshold)
 set1 <- with.vote %>% filter(n.workers == 1) %>% mutate(vote.threshold = factor('consensus'))
