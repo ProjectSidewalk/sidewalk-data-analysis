@@ -31,7 +31,7 @@ library(data.table)
 
 # read in data
 setwd('~/Dropbox/sidewalk-data-analysis/')
-c <- c(replicate(6, 'factor'), 'numeric', 'numeric', replicate(3, 'logical'), 'factor', 'factor',
+c <- c(replicate(6, 'factor'), 'numeric', 'numeric', 'logical', 'logical', replicate(3, 'factor'),
        replicate(8, 'numeric'))
 volunteer.data <- read.csv('data/accuracies-volunteer.csv', colClasses = c, na.strings = c('null'))
 turker.data <- read.csv('data/accuracies-turker.csv', colClasses = c, na.strings = c('null'))
@@ -120,6 +120,7 @@ get.threshold.factor <- Vectorize(
 with.vote <-
   data.with.raw.accuracy %>%
   filter(is.turker == TRUE) %>%
+  filter(remove.low.severity == FALSE) %>%
   mutate(vote.threshold = ordered(get.threshold.factor(n.workers, worker.thresh),
                                   levels = c('at.least.one', 'majority', 'consensus')))
 
@@ -130,7 +131,10 @@ expanded.vote <- with.vote %>% rbind(set1, set2)
 ```
 
 ```{r reading-cleaning-data-volunteer, include=FALSE}
-volunteer.with.raw.accuracy <- data.with.raw.accuracy %>% filter(is.turker == FALSE)
+volunteer.with.raw.accuracy <-
+  data.with.raw.accuracy %>%
+  filter(is.turker == FALSE) %>%
+  filter(remove.low.severity == FALSE)
 ```
 
 
@@ -143,8 +147,9 @@ For each granularity and label type, an ANOVA test was run, with the p-value bei
 To make room for the p-value on each boxplot, I expanded the y-limit past 1.0, and then added a dotted line at the 1.0 mark so that we still have that reference point. However, it makes the graphs look a bit ugly, so LMK if you want to remove it.
 
 ```{r worker-types-setup, echo=FALSE, warning=FALSE}
-single.worker.accuracy <-
+worker.type.accuracy <-
   data.with.raw.accuracy %>%
+  filter(remove.low.severity == FALSE) %>%
   filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3))
 
 # Takes a p-value, returns a * if it is below 0.05, and ** if below 0.01; an empty string o/w.
@@ -163,14 +168,14 @@ worker.type.trellis.boxplot <- function(accuracy.type) {
   
   # Run ANOVA, and format p-value appropriately for visualizing on the plot (in the form 'x.xxx**')
   pval <-
-    single.worker.accuracy %>%
+    worker.type.accuracy %>%
     group_by(granularity, label.type) %>%
     do(model = aov(as.formula(paste0(accuracy.type, ' ~ worker.type')), data = .)) %>%
     mutate(p = summary(model)[[1]][["Pr(>F)"]][1]) %>%
     mutate(p.str = paste0("p = ", sprintf("%.3f", p), sig.sym(p)))
   
   # Create the trellis boxplots.
-  ggplot(data = single.worker.accuracy, aes_string(x = 'worker.type', y = accuracy.type)) +
+  ggplot(data = worker.type.accuracy, aes_string(x = 'worker.type', y = accuracy.type)) +
     geom_boxplot() +
     scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
     geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
@@ -310,6 +315,7 @@ vote.type.trellis.linechart <- function(accuracy.type) {
     theme_bw() +
     theme(legend.position = 'top')
 }
+vote.type.trellis.linechart('raw.accuracy')
 ```
 
 #### Raw Accuracy
@@ -346,6 +352,82 @@ Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means th
 ```{r vote-type-specificity, echo=FALSE, fig.height=6, fig.width=10}
 vote.type.trellis.linechart('specificity')
 ```
+
+
+## Removing Low Severity
+In this section, we are looking at how accuracy is effected when we remove low severity labels from the GT set. The idea is that higher severity problems (as defined by the GT labelers) will be easier to crowd workers to see, and will give higher recall. This would be a nice result to have, to say that crowd workers can at least find the most severe problems. The two expected outcomes here, are for recall to go up and for precision to go down. I've included all accuracy types for now in case we see anything interesting.
+
+```{r low-severity-setup, echo=FALSE, warning=FALSE}
+# Gives a more informative name to low.severity.thresh factor, also fills NAs
+name.thresh <- Vectorize(
+  function(thresh) {
+  if (is.na(thresh)) '>=1'
+  else paste0('>=', as.character(thresh))
+  }
+)
+
+# Removes label types that don't have severity (plus CurbRamp).
+low.severity.check.data <-
+  data.with.raw.accuracy %>%
+  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+  droplevels %>%
+  mutate(low.severity.thresh = ordered(name.thresh(low.severity.thresh), levels = c('>=1', '>=3', '>=4')))
+
+# Constructs a trellis of line charts that show accuracy, faceted by label type and granularity.
+# It compares removing low severity and different thresholds on the x-axis, and has a different
+# line colour for each worker type (anon, reg, turker, turker w/ majority vote).
+low.severity.trellis.linechart <- function(accuracy.type) {
+  ggplot(data =
+           low.severity.check.data %>%
+           drop_na(accuracy.type) %>%
+           group_by(label.type, worker.type, low.severity.thresh, granularity) %>%
+           summarise_at(c(accuracy.type), mean),
+         aes(low.severity.thresh)) +
+    geom_line(aes_string(y = accuracy.type, colour = 'worker.type', group = 'worker.type')) +
+    geom_point(aes_string(y = accuracy.type, colour = 'worker.type'), size = 1) +
+    facet_grid(granularity ~ label.type,
+               labeller = labeller(label.type = label.count.labeller)) +
+    ylim(0, 1) +
+    theme_bw() +
+    theme(legend.position = 'top')
+}
+```
+
+#### Raw Accuracy
+Defined as $\frac{TP + TN}{TP + TN + FP + FN}$. Just the percentage of things they got correct.
+
+```{r low-severity-raw-accuracy, echo=FALSE, fig.height=6, fig.width=8}
+low.severity.trellis.linechart('raw.accuracy')
+```
+
+#### Recall
+Defined as $\frac{TP}{TP + FN}$. High recall means that they found most of the issues/features.
+
+```{r low-severity-recall, echo=FALSE, fig.height=6, fig.width=8}
+low.severity.trellis.linechart('recall')
+```
+
+#### Precision
+Defined as $\frac{TP}{TP + FP}$. High precision means that they rarely placed a label when they shouldn't have.
+
+```{r low-severity-precision, echo=FALSE, fig.height=6, fig.width=8}
+low.severity.trellis.linechart('precision')
+```
+
+#### F-measure
+Defined as $2 * \frac{precision * recall}{precision + recall}$. It is essentially a balance between recall and precision.
+
+```{r low-severity-f-measure, echo=FALSE, fig.height=6, fig.width=8}
+low.severity.trellis.linechart('f.measure')
+```
+
+#### Specificity
+Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means that they rarely placed a label when they shouldn't have, but specificity gives more weight to true _negatives_, while precision gives more weight to true _positives_.
+
+```{r low-severity-specificity, echo=FALSE, fig.height=6, fig.width=8}
+low.severity.trellis.linechart('specificity')
+```
+
 
 ```{r maybe-later, echo=FALSE, fig.height=3, fig.width=10, message=FALSE}
 # Example of how to display the data in a table, not currently in use.
