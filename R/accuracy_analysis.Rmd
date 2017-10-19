@@ -391,6 +391,14 @@ low.severity.trellis.linechart <- function(accuracy.type) {
     theme_bw() +
     theme(legend.position = 'top')
 }
+
+
+count.table <- matrix(c('>= 1', '77', '100%', '242', '100%', '772', '100%',
+                        '>= 3', '66', '86%', '85', '35%', '130', '17%',
+                        '>= 4', '38', '49%', '45', '19%', '47', '6%'),
+                      ncol = 7, byrow = TRUE)
+colnames(count.table) <- c('Severity', 'NoRamp.cnt', 'NoRamp.pct', 'Obs.cnt', 'Obs.pct', 'SurfaceProb.cnt', 'SurfaceProb.pct')
+kable(count.table)
 ```
 
 #### Raw Accuracy
