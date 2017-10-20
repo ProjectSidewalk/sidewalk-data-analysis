@@ -194,35 +194,35 @@ worker.type.trellis.boxplot <- function(accuracy.type) {
 #### Raw Accuracy
 Defined as $\frac{TP + TN}{TP + TN + FP + FN}$. Just the percentage of things they got correct.
 
-```{r worker-types-raw-accuracy, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
+```{r worker-types-raw-accuracy, echo=FALSE, fig.height=7, fig.width=10, warning=FALSE}
 worker.type.trellis.boxplot('raw.accuracy')
 ```
 
 #### Recall
 Defined as $\frac{TP}{TP + FN}$. High recall means that they found most of the issues/features.
 
-```{r worker-types-recall, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
+```{r worker-types-recall, echo=FALSE, fig.height=7, fig.width=10, warning=FALSE}
 worker.type.trellis.boxplot('recall')
 ```
 
 #### Precision
 Defined as $\frac{TP}{TP + FP}$. High precision means that they rarely placed a label when they shouldn't have.
 
-```{r worker-types-precision, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
+```{r worker-types-precision, echo=FALSE, fig.height=7, fig.width=10, warning=FALSE}
 worker.type.trellis.boxplot('precision')
 ```
 
 #### F-measure
 Defined as $2 * \frac{precision * recall}{precision + recall}$. It is essentially a balance between recall and precision.
 
-```{r worker-types-f-measure, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
+```{r worker-types-f-measure, echo=FALSE, fig.height=7, fig.width=10, warning=FALSE}
 worker.type.trellis.boxplot('f.measure')
 ```
 
 #### Specificity
 Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means that they rarely placed a label when they shouldn't have, but specificity gives more weight to true _negatives_, while precision gives more weight to true _positives_.
 
-```{r worker-types-specificity, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
+```{r worker-types-specificity, echo=FALSE, fig.height=7, fig.width=10, warning=FALSE}
 worker.type.trellis.boxplot('specificity')
 ```
 
@@ -261,14 +261,14 @@ volunteer.trellis.histogram <- function(accuracy.type) {
 #### Raw accuracy
 Defined as $\frac{TP + TN}{TP + TN + FP + FN}$. Just the percentage of things they got correct.
 
-```{r volunteer-raw-accuracy, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
+```{r volunteer-raw-accuracy, echo=FALSE, fig.height=7, fig.width=10, warning=FALSE}
 volunteer.trellis.histogram('raw.accuracy')
 ```
 
 #### Recall
 Defined as $\frac{TP}{TP + FN}$. High recall means that they found most of the issues/features.
 
-```{r volunteer-recall, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
+```{r volunteer-recall, echo=FALSE, fig.height=7, fig.width=10, warning=FALSE}
 volunteer.trellis.histogram('recall')
 ```
 
@@ -277,21 +277,21 @@ Defined as $\frac{TP}{TP + FP}$. High precision means that they rarely placed a 
 
 *Note*: Very little confidence should be given to precision for the NoSidewalk label, since GT labelers only placed the label at intersections and at places where a sidewalk ends.
 
-```{r volunteer-precision, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
+```{r volunteer-precision, echo=FALSE, fig.height=7, fig.width=10, warning=FALSE}
 volunteer.trellis.histogram('precision')
 ```
 
 #### F-measure
 Defined as $2 * \frac{precision * recall}{precision + recall}$. It is essentially a balance between recall and precision.
 
-```{r volunteer-f-measure, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
+```{r volunteer-f-measure, echo=FALSE, fig.height=7, fig.width=10, warning=FALSE}
 volunteer.trellis.histogram('f.measure')
 ```
 
 #### Specificity
 Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means that they rarely placed a label when they shouldn't have, but specificity gives more weight to true _negatives_, while precision gives more weight to true _positives_.
 
-```{r volunteer-specificity, echo=FALSE, fig.height=5, fig.width=10, warning=FALSE}
+```{r volunteer-specificity, echo=FALSE, fig.height=7, fig.width=10, warning=FALSE}
 volunteer.trellis.histogram('specificity')
 ```
 
@@ -324,35 +324,35 @@ vote.type.trellis.linechart <- function(accuracy.type) {
 #### Raw Accuracy
 Defined as $\frac{TP + TN}{TP + TN + FP + FN}$. Just the percentage of things they got correct.
 
-```{r vote-type-raw-accuracy, echo=FALSE, fig.height=6, fig.width=10}
+```{r vote-type-raw-accuracy, echo=FALSE, fig.height=7, fig.width=10}
 vote.type.trellis.linechart('raw.accuracy')
 ```
 
 #### Recall
 Defined as $\frac{TP}{TP + FN}$. High recall means that they found most of the issues/features.
 
-```{r vote-type-recall, echo=FALSE, fig.height=6, fig.width=10}
+```{r vote-type-recall, echo=FALSE, fig.height=7, fig.width=10}
 vote.type.trellis.linechart('recall')
 ```
 
 #### Precision
 Defined as $\frac{TP}{TP + FP}$. High precision means that they rarely placed a label when they shouldn't have.
 
-```{r vote-type-precision, echo=FALSE, fig.height=6, fig.width=10}
+```{r vote-type-precision, echo=FALSE, fig.height=7, fig.width=10}
 vote.type.trellis.linechart('precision')
 ```
 
 #### F-measure
 Defined as $2 * \frac{precision * recall}{precision + recall}$. It is essentially a balance between recall and precision.
 
-```{r vote-type-f-measure, echo=FALSE, fig.height=6, fig.width=10}
+```{r vote-type-f-measure, echo=FALSE, fig.height=7, fig.width=10}
 vote.type.trellis.linechart('f.measure')
 ```
 
 #### Specificity
 Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means that they rarely placed a label when they shouldn't have, but specificity gives more weight to true _negatives_, while precision gives more weight to true _positives_.
 
-```{r vote-type-specificity, echo=FALSE, fig.height=6, fig.width=10}
+```{r vote-type-specificity, echo=FALSE, fig.height=7, fig.width=10}
 vote.type.trellis.linechart('specificity')
 ```
 
@@ -372,6 +372,7 @@ name.thresh <- Vectorize(
 # Removes label types that don't have severity (plus CurbRamp).
 low.severity.check.data <-
   data.with.raw.accuracy %>%
+  filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3)) %>%
   filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
   droplevels %>%
   mutate(low.severity.thresh = ordered(name.thresh(low.severity.thresh), levels = c('>=1', '>=3', '>=4')))
@@ -394,48 +395,77 @@ low.severity.trellis.linechart <- function(accuracy.type) {
     theme_bw() +
     theme(legend.position = 'top')
 }
-
-
-count.table <- matrix(c('>= 1', '77', '100%', '242', '100%', '772', '100%',
-                        '>= 3', '66', '86%', '85', '35%', '130', '17%',
-                        '>= 4', '38', '49%', '45', '19%', '47', '6%'),
-                      ncol = 7, byrow = TRUE)
-colnames(count.table) <- c('Severity', 'NoRamp.cnt', 'NoRamp.pct', 'Obs.cnt', 'Obs.pct', 'SurfaceProb.cnt', 'SurfaceProb.pct')
-kable(count.table)
 ```
+
+### How many low severity problems are there?
+Below is a graph that shows the number of conditions (sets of routes) containing at least one label (split by label type), and how that is affected by removing low severity labels. On that first graph, the horizontal line shows the number of conditions that is in the current data set (some still need to be added once I fix some bugs and such).
+
+The second graph shows the GT label counts, and how they are affected by removing low severity labels.
+
+```{r low-severity-label-counts, echo=FALSE, fig.height=3, fig.width=8}
+total.conditions <- length(levels(accuracy.data$condition.id))
+label.count.summary <- 
+  low.severity.check.data %>%
+           filter(granularity == 'street') %>%
+           filter(is.turker == FALSE) %>%
+           mutate(num.labs = true.pos + false.neg) %>%
+           group_by(low.severity.thresh, label.type) %>%
+           summarise(gt.labels = sum(num.labs), conditions.with.labels = sum(num.labs > 0))
+ggplot(data = label.count.summary, aes(low.severity.thresh)) +
+  geom_line(aes(y = conditions.with.labels, group = 1)) +
+  geom_point(aes(y = conditions.with.labels), size = 1) +
+  geom_hline(aes(yintercept = total.conditions)) +
+  facet_grid(. ~ label.type) +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 60), expand = c(0, 0))
+ggplot(data = label.count.summary, aes(low.severity.thresh)) +
+  geom_line(aes(y = gt.labels, group = 1)) +
+  geom_point(aes(y = gt.labels), size = 1) +
+  facet_grid(. ~ label.type) +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 800), expand = c(0, 0))
+
+# count.table <- matrix(c('>= 1', '77', '100%', '242', '100%', '772', '100%',
+#                         '>= 3', '66', '86%', '85', '35%', '130', '17%',
+#                         '>= 4', '38', '49%', '45', '19%', '47', '6%'),
+#                       ncol = 7, byrow = TRUE)
+# colnames(count.table) <- c('Severity', 'NoRamp.cnt', 'NoRamp.pct', 'Obs.cnt', 'Obs.pct', 'SurfaceProb.cnt', 'SurfaceProb.pct')
+# kable(count.table)
+```
+
 
 #### Raw Accuracy
 Defined as $\frac{TP + TN}{TP + TN + FP + FN}$. Just the percentage of things they got correct.
 
-```{r low-severity-raw-accuracy, echo=FALSE, fig.height=6, fig.width=8}
+```{r low-severity-raw-accuracy, echo=FALSE, fig.height=7, fig.width=8}
 low.severity.trellis.linechart('raw.accuracy')
 ```
 
 #### Recall
 Defined as $\frac{TP}{TP + FN}$. High recall means that they found most of the issues/features.
 
-```{r low-severity-recall, echo=FALSE, fig.height=6, fig.width=8}
+```{r low-severity-recall, echo=FALSE, fig.height=7, fig.width=8}
 low.severity.trellis.linechart('recall')
 ```
 
 #### Precision
 Defined as $\frac{TP}{TP + FP}$. High precision means that they rarely placed a label when they shouldn't have.
 
-```{r low-severity-precision, echo=FALSE, fig.height=6, fig.width=8}
+```{r low-severity-precision, echo=FALSE, fig.height=7, fig.width=8}
 low.severity.trellis.linechart('precision')
 ```
 
 #### F-measure
 Defined as $2 * \frac{precision * recall}{precision + recall}$. It is essentially a balance between recall and precision.
 
-```{r low-severity-f-measure, echo=FALSE, fig.height=6, fig.width=8}
+```{r low-severity-f-measure, echo=FALSE, fig.height=7, fig.width=8}
 low.severity.trellis.linechart('f.measure')
 ```
 
 #### Specificity
 Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means that they rarely placed a label when they shouldn't have, but specificity gives more weight to true _negatives_, while precision gives more weight to true _positives_.
 
-```{r low-severity-specificity, echo=FALSE, fig.height=6, fig.width=8}
+```{r low-severity-specificity, echo=FALSE, fig.height=7, fig.width=8}
 low.severity.trellis.linechart('specificity')
 ```
 
