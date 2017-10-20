@@ -37,3 +37,4 @@ R/*.knit.md
 
 # Data files, for privacy protection purposes
 data/*
+.Rproj.user
