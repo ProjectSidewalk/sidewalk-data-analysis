@@ -366,7 +366,7 @@ _Note_: Low severity labels were removed from the _ground truth data only_. This
 # Gives a more informative name to low.severity.thresh factor, also fills NAs
 name.thresh <- Vectorize(
   function(thresh) {
-  if (is.na(thresh)) '>=1'
+  if (is.na(thresh)) 'baseline'
   else paste0('>=', as.character(thresh))
   }
 )
@@ -377,7 +377,8 @@ low.severity.check.data <-
   filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3)) %>%
   filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
   droplevels %>%
-  mutate(low.severity.thresh = ordered(name.thresh(low.severity.thresh), levels = c('>=1', '>=3', '>=4')))
+  mutate(low.severity.thresh = ordered(name.thresh(low.severity.thresh),
+                                       levels = c('baseline', '>=3', '>=4')))
 
 # Constructs a trellis of line charts that show accuracy, faceted by label type and granularity.
 # It compares removing low severity and different thresholds on the x-axis, and has a different
