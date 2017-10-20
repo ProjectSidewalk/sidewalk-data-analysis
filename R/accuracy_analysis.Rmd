@@ -30,11 +30,14 @@ library(data.table)
 # TODO fixed binary case in JS code
 
 # read in data
-setwd('~/Dropbox/sidewalk-data-analysis/')
-c <- c(replicate(6, 'factor'), 'numeric', 'numeric', 'logical', 'logical', replicate(3, 'factor'),
-       replicate(8, 'numeric'))
-volunteer.data <- read.csv('data/accuracies-volunteer.csv', colClasses = c, na.strings = c('null'))
-turker.data <- read.csv('data/accuracies-turker.csv', colClasses = c, na.strings = c('null'))
+classes <- c(replicate(6, 'factor'), 'numeric', 'numeric', 'logical', 'logical',
+             replicate(3, 'factor'), replicate(8, 'numeric'))
+volunteer.data <- read.csv('../data/accuracies-volunteer.csv',
+                           colClasses = classes,
+                           na.strings = c('null'))
+turker.data <- read.csv('../data/accuracies-turker.csv',
+                        colClasses = classes,
+                        na.strings = c('null'))
 
 # Combine datasets
 accuracy.data <-
@@ -67,18 +70,19 @@ get.worker.type <- Vectorize(
     else 'reg'
   }
 )
-# Copies the current granularity, but adds a separate granularity for street level binary.
+# Copies the current granularity, but adds separate granularity for street&5m level binary.
 get.granularity <- Vectorize(
   function(gran, binary) {
     if (binary == TRUE & gran == 'street') 'street.binary'
+    else if (binary == TRUE & gran == '5_meter') '5_meter.binary'
     else as.character(gran)
   }
 )
 data.with.raw.accuracy <-
   accuracy.data %>%
-  filter(binary == FALSE | granularity == 'street') %>%
+  filter(binary == FALSE | granularity != '10_meter') %>%
   mutate(granularity = ordered(get.granularity(granularity, binary),
-                               levels = c('5_meter', '10_meter', 'street', 'street.binary'))) %>%
+                               levels = c('5_meter', '5_meter.binary', '10_meter', 'street', 'street.binary'))) %>%
   mutate(is.anon.route = as.numeric(as.character(condition.id)) > 121) %>%
   mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
                               levels = c('anon', 'reg', 'turk', 'maj'))) %>%
@@ -315,7 +319,6 @@ vote.type.trellis.linechart <- function(accuracy.type) {
     theme_bw() +
     theme(legend.position = 'top')
 }
-vote.type.trellis.linechart('raw.accuracy')
 ```
 
 #### Raw Accuracy
