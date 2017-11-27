@@ -142,7 +142,9 @@ volunteer.with.raw.accuracy <-
 ```
 
 
-## Comparing Turkers vs. Anon vs. Registered Volunteers
+## Comparing Anon vs. Registered Volunteers vs. Turkers
+
+*Takeaways*: 
 
 This section has a series of boxplots that compare performance of anonymous volunteers, registered volunteers, a single turker, and 5 turkers with majority vote. Here, a the single turker is the first turker to complete that set of routes.
 
@@ -471,6 +473,20 @@ Defined as $\frac{TN}{TN + FP}$. Similar to precision, high specificity means th
 ```{r low-severity-specificity, echo=FALSE, fig.height=7, fig.width=8}
 low.severity.trellis.linechart('specificity')
 ```
+
+
+## Incorporating single-user clustering
+
+#### Expected effects
+
+* There will be _significantly fewer_ ramp labels, and _slightly_ fewer labels from the other label types: since ramp labels often come in pairs, although a much lower distance threshold is being used for the clustering of ramp labels, we can expect a fair number of legitimate ramp labels to be excluded.
+* For larger numbers of turkers being clustered, the _reduction in labels might be more pronounced_: (something to do with labels that have just enough votes without the single-user clustering).
+* Precision will _improve slightly_ for label types: in situations where a user labeled the same problem/feature multiple times, clustering should remove the duplicate label, thus improving precision.
+* Recall will be _slightly worse_ for all non-ramp label types: there are some cases where there are, in fact, multiple distinct issues in close proximity to one another. In such cases, clustering will remove one of the labels from the volunteer's data, thus lowering recall.
+* Recall with be _significantly worse_ for CurbRamp and NoCurbRamp labels: due to there being significantly fewer ramp labels.
+* Confidence intervals will get _slightly larger_ for turkers with majority vote: fewer individual labels -> fewer labels that pass majority vote -> more conditions where turkers couldn't agree on any labels
+* Confidence intervals will be _slightly larger_ for precision and f-measure: fewer labels => fewer true/false positives => more users with no true or false positives => more users with null precision (since denominator is TP + FP), and f-measure (since precision is used to computer f-meausure) => larger confidence intervals for those accuracy types (b/c smaller n).
+* Specificity will _improve slightly_ across the board: fewer labels => more true negatives and fewer false positives => higher specificity.
 
 
 ```{r maybe-later, echo=FALSE, fig.height=3, fig.width=10, message=FALSE, cache=TRUE}
