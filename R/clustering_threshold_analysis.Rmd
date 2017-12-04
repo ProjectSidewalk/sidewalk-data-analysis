@@ -1,0 +1,53 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+# read in data
+classes <- c(replicate(6, 'factor'), 'numeric', 'numeric', 'logical', 'logical',
+             replicate(3, 'factor'), replicate(8, 'numeric'))
+
+turker.data <- read.csv(paste0('../data/accuracies-turker-0.000.csv'),
+                          colClasses = classes,
+                          na.strings = c('null')) %>%
+  mutate(threshold = 1000 * 0.000)
+thresholds <- seq(0.005, 0.050, 0.005)
+threshold.strings <- format(thresholds, digits = 3)
+for (i in seq(1, length(thresholds))) {
+  threshold <- thresholds[i]
+  threshold.string <- format(threshold.strings[i], digits = 3)
+  new.data <- read.csv(paste0('../data/accuracies-turker-', threshold.string, '.csv'),
+                          colClasses = classes,
+                          na.strings = c('null')) %>%
+    mutate(threshold = 1000 * threshold)
+  turker.data <- bind_rows(turker.data, new.data)
+}
+
+# filter out occlusions labels, compute number of issues per row
+turker.data.filtered <-
+  turker.data %>%
+  filter(label.type != 'Occlusion') %>%
+  mutate(issue.count = true.pos + false.pos)
+
+summarized.by.threshold <-
+  turker.data.filtered %>%
+  group_by(threshold, label.type) %>%
+  summarize_at('issue.count', mean)
+
+# plot line charts to see decrease in labels per label type
+ggplot(data = turker.data.filtered, aes(x = threshold, y = issue.count)) +
+  geom_smooth(aes(colour = label.type)) +
+  scale_color_manual(values = c('green', 'red', 'black', 'blue', 'orange'))
+
+ggplot(data = summarized.by.threshold, aes(x = threshold, y = issue.count)) +
+  geom_line(aes(colour = label.type)) +
+  scale_color_manual(values = c('green', 'red', 'black', 'blue', 'orange'))
+```
