@@ -1,29 +1,32 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: 'Clustering Threshold Analysis'
+author: 'Mikey Saugstad'
+date: 'December 10, 2017'
+output:
+  html_document:
+    toc: yes
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
-
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
-
-```{r}
+```{r setup, include=FALSE}
 library(dplyr)
 library(ggplot2)
+```
 
-# read in data
+```{r reading-cleaning-data, include=FALSE, cache=FALSE}
+# read in data, it is in a large number of CSV's right now, so read them all in a loop
 classes <- c(replicate(6, 'factor'), 'numeric', 'numeric', 'logical', 'logical',
              replicate(3, 'factor'), replicate(8, 'numeric'))
 
-turker.data <- read.csv(paste0('../data/accuracies-turker-0.000.csv'),
+turker.data <- read.csv(paste0('../data/accuracies-turker-0.00000.csv'),
                           colClasses = classes,
                           na.strings = c('null')) %>%
-  mutate(threshold = 1000 * 0.000)
-thresholds <- seq(0.005, 0.050, 0.005)
-threshold.strings <- format(thresholds, digits = 3)
+  mutate(threshold = 1000 * 0.00000)
+
+thresholds <- c(seq(0.00025, 0.01000, 0.00025), seq(0.02000, 0.05000, 0.01000))
+threshold.strings <- format(thresholds, digits = 5)
 for (i in seq(1, length(thresholds))) {
   threshold <- thresholds[i]
-  threshold.string <- format(threshold.strings[i], digits = 3)
+  threshold.string <- format(threshold.strings[i], digits = 5)
   new.data <- read.csv(paste0('../data/accuracies-turker-', threshold.string, '.csv'),
                           colClasses = classes,
                           na.strings = c('null')) %>%
@@ -31,23 +34,70 @@ for (i in seq(1, length(thresholds))) {
   turker.data <- bind_rows(turker.data, new.data)
 }
 
-# filter out occlusions labels, compute number of issues per row
+# Filter out occlusions labels, compute number of issues per row
 turker.data.filtered <-
   turker.data %>%
-  filter(label.type != 'Occlusion') %>%
-  mutate(issue.count = true.pos + false.pos)
+  filter(!(label.type %in% c('Occlusion', 'NoSidewalk'))) %>%
+  # filter(threshold <= 10) %>%
+  mutate(issue.count = true.pos + false.pos) %>%
+  select(label.type, threshold, issue.count)
 
+# Summarize the data for easier plotting
 summarized.by.threshold <-
   turker.data.filtered %>%
   group_by(threshold, label.type) %>%
-  summarize_at('issue.count', mean)
+  summarize_at('issue.count', c('avg.issue.count' = mean, 'issue.count' = sum))
 
-# plot line charts to see decrease in labels per label type
-ggplot(data = turker.data.filtered, aes(x = threshold, y = issue.count)) +
-  geom_smooth(aes(colour = label.type)) +
-  scale_color_manual(values = c('green', 'red', 'black', 'blue', 'orange'))
+# Grab the count of the max number of issues from the entries where the threshold is 0
+max.count <-
+  summarized.by.threshold %>%
+  filter(threshold == 0)
+max.count.vec <- setNames(c(max.count$issue.count), max.count$label.type)
+max.avg.vec <- setNames(c(max.count$avg.issue.count), max.count$label.type)
 
+# Compute the percentage of the original for each entry
+turker.data.with.percent <-
+  turker.data.filtered %>%
+  mutate(percent = issue.count / max.avg.vec[as.character(label.type)])
+
+summarized.percentage <-
+  summarized.by.threshold %>%
+  mutate(percent = 100 * issue.count / max.count.vec[as.character(label.type)])
+
+```
+
+```{r plotting, echo=FALSE, cache=FALSE}
+theme_set(theme_bw())
+# Plot line charts to see decrease in labels by label type
 ggplot(data = summarized.by.threshold, aes(x = threshold, y = issue.count)) +
   geom_line(aes(colour = label.type)) +
-  scale_color_manual(values = c('green', 'red', 'black', 'blue', 'orange'))
+  scale_color_manual(values = c('green', 'red', 'blue', 'orange')) +
+  scale_y_continuous(expand = c(0.01,0.01))
+
+# Take a closer look at the percentage of the max issue count, at varying resolutions
+create.linechart <- function(data, thresh.max, break.dist, x.intercepts, colors) {
+ggplot(data = data, aes(x = threshold, y = percent)) +
+  geom_line(aes(colour = label.type)) +
+  scale_color_manual(values = colors) +
+  scale_x_continuous(breaks = seq(0, thresh.max, break.dist), expand = c(0,0)) +
+  geom_vline(xintercept = x.intercepts) +
+  scale_y_continuous(expand = c(0.01,0.01))
+}
+create.linechart(data = summarized.percentage,
+                 thresh.max = 50, break.dist = 5, x.intercepts = c(2.5, 7.5),
+                 colors = c('green', 'red', 'blue', 'orange'))
+create.linechart(data = summarized.percentage %>% filter(threshold < 10),
+                 thresh.max = 10, break.dist = 0.5, x.intercepts = 2.5,
+                 colors = c('green', 'red', 'blue', 'orange'))
+create.linechart(data = summarized.percentage %>%
+                   filter(threshold < 3.5) %>%
+                   filter(label.type %in% c('CurbRamp', 'NoCurbRamp')),
+                 thresh.max = 3.5, break.dist = 0.25, x.intercepts = c(2, 2.5),
+                 colors = c('green', 'red'))
+create.linechart(data = summarized.percentage %>%
+                   filter(threshold < 10) %>%
+                   filter(label.type %in% c('Obstacle', 'SurfaceProblem')),
+                 thresh.max = 10, break.dist = 0.5, x.intercepts = 7.5,
+                 colors = c('blue', 'orange'))
+
 ```
