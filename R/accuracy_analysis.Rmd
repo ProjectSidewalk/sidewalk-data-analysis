@@ -360,7 +360,7 @@ vote.type.trellis.linechart('specificity')
 
 
 ## Removing Low Severity
-In this section, we are looking at how accuracy is effected when we remove low severity labels from the GT set. The idea is that higher severity problems (as defined by the GT labelers) will be easier for crowd workers to find, resultint in higher recall. This would be a nice result to have, to say that crowd workers can at least find the most severe problems. The two expected outcomes here: recall goes up, and for precision to go down. I've included all accuracy types for now in case we see anything interesting.
+In this section, we are looking at how accuracy is effected when we remove low severity labels from the GT set. The idea is that higher severity problems (as defined by the GT labelers) will be easier for crowd workers to find, resulting in higher recall. This would be a nice result to have, to say that crowd workers can at least find the most severe problems. The two expected outcomes here: recall goes up, and for precision to go down. I've included all accuracy types for now in case we see anything interesting.
 
 _Note_: Low severity labels were removed from the _ground truth data only_. This is why we expect precision to go down, as legitimate problems have been removed from the ground truth, that crowd workers may have seen. Removing only crowd worker labels, but not GT labels, would likely result in higher precision and lower recall. Removing labels from both GT and crowd workers would probably result in lower precision _and_ recall, due to the variability in how people label severity. Discrepency between GT and crowd worker severity ratings will be addressed in a separate section.
 
