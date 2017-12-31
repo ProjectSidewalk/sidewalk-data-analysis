@@ -24,7 +24,7 @@ library(data.table)
 ## Preliminary Notes
 
 * In the case of 5 meter and 10 meter segment granularity, raw accuracy and specificity get a huge boost from a large number of true negatives.
-* Very little confidence should be given to precision for the NoSidewalk label, since GT labelers only placed the label at intersections and at places where a sidewalk ends. This would lead to many false positives for users who place a NoSidewalk label every panorama.
+* For NoSidewalk issues, these should only be looked at in the street-level, binary case. Both because there is not an established way to label, and because that is the level of granularity that users would actually care about.
 
 ```{r reading-cleaning-data-combined, include=FALSE, cache=FALSE}
 # TODO fixed binary case in JS code
