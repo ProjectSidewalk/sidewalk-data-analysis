@@ -229,7 +229,7 @@ worker.type.trellis.boxplot('specificity')
 ```
 
 ## Volunteer Data
-In this section, there are a series of ograms that help to visualize the distribution of volunteers' accuracy. For each accuracy measure, there is a grid of histograms split by label type and granularity (street, 5 meter, 10 meter).
+In this section, there are a series of histograms that help to visualize the distribution of volunteers' accuracy. For each accuracy measure, there is a grid of histograms split by label type and granularity (street, 5 meter, 10 meter).
 
 Note that these histograms have lines representing the _mean_ of each group (not the _median_; lmk if you want to see median instead).
 
