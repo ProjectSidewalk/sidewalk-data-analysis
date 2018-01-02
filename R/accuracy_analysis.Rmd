@@ -23,12 +23,11 @@ library(data.table)
 
 ## Preliminary Notes
 
+* For all graphs relating to accuracy, each data point is a single user (or a set of clustered users) over a single condition (i.e., 2-3 routes, or 2000/4000ft).
 * In the case of 5 meter and 10 meter segment granularity, raw accuracy and specificity get a huge boost from a large number of true negatives.
 * For NoSidewalk issues, these should only be looked at in the street-level, binary case. Both because there is not an established way to label, and because that is the level of granularity that users would actually care about.
 
 ```{r reading-cleaning-data-combined, include=FALSE, cache=FALSE}
-# TODO fixed binary case in JS code
-
 # read in data
 classes <- c(replicate(6, 'factor'), 'numeric', 'numeric', 'logical', 'logical',
              replicate(3, 'factor'), replicate(8, 'numeric'))
