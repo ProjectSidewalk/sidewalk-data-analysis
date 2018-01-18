@@ -95,8 +95,10 @@ streets.left <-
 ```
 
 ```{r plotting, echo=FALSE}
-ggplot(data = streets.left, aes(x = threshold, y = streets.left / num.streets)) +
+ggplot(data = streets.left, aes(x = threshold, y = 100 - (100 * streets.left / num.streets))) +
   geom_line() +
+  xlab('Labels per 100 Meters Threshold') +
+  ylab('Percentage to Re-Audit (distance)') +
   theme_bw()
 ```
 
