@@ -34,7 +34,9 @@ labels <-
             INNER JOIN label 
             ON audit_task.audit_task_id = label.audit_task_id
             WHERE label.deleted = FALSE')
+```
 
+```{r transforming.data, echo=FALSE}
 label.counts <-
   labels %>%
   mutate(user_id = factor(user_id)) %>%
@@ -92,7 +94,9 @@ streets.left <-
   mutate(streets.left = streets.after.removal(threshold, 0)) %>%
   mutate(streets.left.8 = streets.after.removal(threshold, 8)) %>%
   mutate(streets.left.10 = streets.after.removal(threshold, 100))
+```
 
+```{r plotting, echo=FALSE}
 ggplot(data = streets.left, aes(x = threshold, y = streets.left / num.streets)) +
   geom_line() +
   geom_line(aes(y = streets.left.8 / num.streets)) +
