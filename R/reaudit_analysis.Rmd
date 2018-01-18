@@ -91,7 +91,7 @@ num.streets <-
   n_distinct()
 
 streets.left <-
-  data.frame(threshold = seq(0, 10, by = 1)) %>%
+  data.frame(threshold = seq(0, 10, by = 0.1)) %>%
   mutate(streets.left = streets.after.removal(threshold, 0))
 ```
 
