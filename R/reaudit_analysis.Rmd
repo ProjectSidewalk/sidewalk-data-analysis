@@ -33,7 +33,8 @@ labels <-
             ON street_edge.street_edge_id = audit_task.street_edge_id
             INNER JOIN label 
             ON audit_task.audit_task_id = label.audit_task_id
-            WHERE label.deleted = FALSE')
+            WHERE label.deleted = FALSE
+            AND street_edge.deleted = FALSE')
 ```
 
 ```{r transforming.data, echo=FALSE, warning=FALSE}
