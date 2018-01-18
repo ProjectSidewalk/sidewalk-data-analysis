@@ -36,7 +36,7 @@ labels <-
             WHERE label.deleted = FALSE')
 ```
 
-```{r transforming.data, echo=FALSE}
+```{r transforming.data, echo=FALSE, warning=FALSE}
 label.counts <-
   labels %>%
   filter(label_type_id != 7) %>%
