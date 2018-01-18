@@ -91,16 +91,12 @@ num.streets <-
 
 streets.left <-
   data.frame(threshold = seq(0, 10, by = 1)) %>%
-  mutate(streets.left = streets.after.removal(threshold, 0)) %>%
-  mutate(streets.left.8 = streets.after.removal(threshold, 8)) %>%
-  mutate(streets.left.10 = streets.after.removal(threshold, 100))
+  mutate(streets.left = streets.after.removal(threshold, 0))
 ```
 
 ```{r plotting, echo=FALSE}
 ggplot(data = streets.left, aes(x = threshold, y = streets.left / num.streets)) +
   geom_line() +
-  geom_line(aes(y = streets.left.8 / num.streets)) +
-  # geom_line(aes(y = streets.left.10 / num.streets)) +
   theme_bw()
 ```
 
