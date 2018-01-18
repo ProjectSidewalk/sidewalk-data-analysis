@@ -12,18 +12,18 @@ library(dplyr)
 library(ggplot2)
 ```
 
-```{r connect}
+```{r connect, echo=FALSE}
 pw <- {'sidewalk'}
 drv <- dbDriver("PostgreSQL")
 con <- dbConnect(drv, dbname = "sidewalk",
                  host = "localhost", port = 5432,
                  user = "sidewalk", password = pw)
 rm(pw)
-dbExistsTable(con, "audit_task")
+# dbExistsTable(con, "audit_task")
 ```
 
 
-```{r reading.data}
+```{r reading.data, echo=FALSE}
 labels <-
   dbGetQuery(con,
             'SELECT label_id, user_id, label_type_id, completed, audit_task.audit_task_id,
