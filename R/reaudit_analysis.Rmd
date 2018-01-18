@@ -1,0 +1,102 @@
+---
+title: "reaudit_analysis"
+author: "Mikey Saugstad"
+date: "January 17, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(RPostgreSQL)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r connect}
+pw <- {'sidewalk'}
+drv <- dbDriver("PostgreSQL")
+con <- dbConnect(drv, dbname = "sidewalk",
+                 host = "localhost", port = 5432,
+                 user = "sidewalk", password = pw)
+rm(pw)
+dbExistsTable(con, "audit_task")
+```
+
+
+```{r reading.data}
+labels <-
+  dbGetQuery(con,
+            'SELECT label_id, user_id, label_type_id, completed, audit_task.audit_task_id,
+                    street_edge.street_edge_id, ST_LENGTH(ST_TRANSFORM(geom,26918))
+            FROM street_edge
+            INNER JOIN audit_task
+            ON street_edge.street_edge_id = audit_task.street_edge_id
+            INNER JOIN label 
+            ON audit_task.audit_task_id = label.audit_task_id
+            WHERE label.deleted = FALSE')
+
+label.counts <-
+  labels %>%
+  mutate(user_id = factor(user_id)) %>%
+  # count(user_id)
+  group_by(user_id) %>%
+  summarize_at(vars(label_id), n_distinct)
+
+# completed.audit.counts <-
+#   labels %>%
+#   mutate(user_id = factor(user_id)) %>%
+#   filter(completed == TRUE) %>%
+#   group_by(user_id) %>%
+#   summarize_at(vars(audit_task_id), n_distinct)
+
+audit.length <-
+  labels %>%
+  mutate(user_id = factor(user_id)) %>%
+  filter(completed == TRUE) %>%
+  group_by(user_id) %>%
+  distinct(audit_task_id, .keep_all = TRUE) %>%
+  summarize_at(vars(st_length), sum)
+
+counts <-
+  audit.length %>%
+  inner_join(label.counts, by = 'user_id') %>%
+  mutate(labels.per.100m = 100 * label_id / st_length)
+
+
+streets.after.removal <-
+  Vectorize(
+    function(labels.per.100m.threshold, labels.threshold) {
+      good.users <-
+        counts %>%
+        filter(labels.per.100m >= labels.per.100m.threshold) %>%
+        filter(label_id >= labels.threshold)
+      
+      new.num.streets <-
+        labels %>%
+        filter(completed == TRUE) %>%
+        filter(user_id %in% good.users$user_id) %>%
+        select(street_edge_id) %>%
+        n_distinct()
+      new.num.streets
+    }
+  )
+
+num.streets <-
+  labels %>%
+  filter(completed == TRUE) %>%
+  select(street_edge_id) %>%
+  n_distinct()
+
+streets.left <-
+  data.frame(threshold = seq(0, 10, by = 1)) %>%
+  mutate(streets.left = streets.after.removal(threshold, 0)) %>%
+  mutate(streets.left.8 = streets.after.removal(threshold, 8)) %>%
+  mutate(streets.left.10 = streets.after.removal(threshold, 100))
+
+ggplot(data = streets.left, aes(x = threshold, y = streets.left / num.streets)) +
+  geom_line() +
+  geom_line(aes(y = streets.left.8 / num.streets)) +
+  # geom_line(aes(y = streets.left.10 / num.streets)) +
+  theme_bw()
+```
+
