@@ -106,3 +106,10 @@ ggplot(data = streets.left, aes(x = threshold, y = 100 - (100 * streets.left / n
   theme_bw()
 ```
 
+And here are some summary statistics for the users:
+```{r user.summary.stats, echo=FALSE}
+summary(counts %>%
+          rename(distance.audited.meters = st_length, total.label.count = label_id) %>%
+          select(-user_id))
+```
+
