@@ -66,6 +66,8 @@ counts <-
   inner_join(label.counts, by = 'user_id') %>%
   mutate(labels.per.100m = 100 * label_id / st_length)
 
+mikey.freq <- (counts %>% filter(user_id == '9efaca05-53bb-492e-83ab-2b47219ee863'))$labels.per.100m
+jon.freq <- (counts %>% filter(user_id == '49787727-e427-4835-a153-9af6a83d1ed1'))$labels.per.100m
 
 streets.after.removal <-
   Vectorize(
@@ -92,16 +94,18 @@ num.streets <-
   n_distinct()
 
 streets.left <-
-  data.frame(threshold = seq(0, 10, by = 0.1)) %>%
+  data.frame(threshold = seq(0, 15, by = 0.1)) %>%
   mutate(streets.left = streets.after.removal(threshold, 0))
 ```
 
-This graph shows what percentage of DC we would have to re-audit (in terms of distance), given different labels/100 meter thresholds for users. For example at x = 5.0, I looked at what our completion percentage would be if we removed the audits from all users who have a labeling frequency of less than 5 labels per 100 meters. For reference, Mikey's label frequency is 6.5 labels/100m, and Jon's is 9.6 labels/100m.
+This graph shows what percentage of DC we would have to re-audit (in terms of distance), given different labels/100 meter thresholds for users. For example at x = 5.0, I looked at what our completion percentage would be if we removed the audits from all users who have a labeling frequency of less than 5 labels per 100 meters. For reference, Mikey's label frequency is 6.5 labels/100m, and Jon's is 10.1 labels/100m.
 
 I removed the NoSidewalk labels for this analysis, since the labeling style for those are drastically different. With NoSidewalk labels, Mikeys label frequency is 8.7/100m and Jon's is 14.1/100m. Not much changes when keeping those labels, but let me know if you'd like to see that graph as well.
 ```{r plotting, echo=FALSE}
 ggplot(data = streets.left, aes(x = threshold, y = 100 - (100 * streets.left / num.streets))) +
   geom_line() +
+  geom_vline(xintercept = mikey.freq) +
+  geom_vline(xintercept = jon.freq) +
   xlab('Labels per 100 Meters Threshold') +
   ylab('Percentage to Re-Audit (distance)') +
   theme_bw()
