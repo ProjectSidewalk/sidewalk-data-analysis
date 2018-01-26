@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(RPostgreSQL)
 library(dplyr)
 library(ggplot2)
+library(tidyr)
 ```
 
 ```{r connect, echo=FALSE}
@@ -24,17 +25,52 @@ rm(pw)
 
 
 ```{r reading.data, echo=FALSE, include=FALSE}
-labels <-
+reg.labels <-
   dbGetQuery(con,
-            'SELECT label_id, user_id, label_type_id, completed, audit_task.audit_task_id,
+            'SELECT label_id, user_id, label_type_id, audit_task.audit_task_id
+            FROM audit_task
+            INNER JOIN label
+            ON audit_task.audit_task_id = label.audit_task_id
+            WHERE label.deleted = FALSE
+            AND user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+            AND completed = TRUE')
+anon.labels <-
+  dbGetQuery(con,
+            'SELECT DISTINCT label_id, ip_address AS user_id, label_type_id, audit_task.audit_task_id
+            FROM audit_task
+            INNER JOIN label
+            ON audit_task.audit_task_id = label.audit_task_id
+            INNER JOIN audit_task_environment
+            ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+            WHERE label.deleted = FALSE
+            AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+            AND completed = TRUE')
+reg.audits <-
+  dbGetQuery(con,
+             'SELECT audit_task.user_id, role.role, audit_task.audit_task_id,
                     street_edge.street_edge_id, ST_LENGTH(ST_TRANSFORM(geom,26918))
             FROM street_edge
             INNER JOIN audit_task
             ON street_edge.street_edge_id = audit_task.street_edge_id
-            INNER JOIN label 
-            ON audit_task.audit_task_id = label.audit_task_id
-            WHERE label.deleted = FALSE
-            AND street_edge.deleted = FALSE')
+            INNER JOIN user_role
+            ON audit_task.user_id = user_role.user_id
+            INNER JOIN role
+            ON user_role.role_id = role.role_id
+            WHERE street_edge.deleted = FALSE
+            AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+            AND completed = TRUE')
+anon.audits <-
+  dbGetQuery(con,
+             'SELECT DISTINCT ip_address AS user_id, \'Anonymous\' AS role, audit_task.audit_task_id,
+                    street_edge.street_edge_id, ST_LENGTH(ST_TRANSFORM(geom,26918))
+            FROM street_edge
+            INNER JOIN audit_task
+            ON street_edge.street_edge_id = audit_task.street_edge_id
+            INNER JOIN audit_task_environment
+            ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+            WHERE street_edge.deleted = FALSE
+            AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+            AND completed = TRUE')
 total.street.distance <-
   dbGetQuery(con,
              'SELECT SUM(ST_LENGTH(ST_TRANSFORM(geom,26918)))
@@ -44,33 +80,31 @@ dbDisconnect(con)
 ```
 
 ```{r transforming.data, echo=FALSE, warning=FALSE}
+labels <- bind_rows(reg.labels, anon.labels)
+audits <- bind_rows(reg.audits, anon.audits)
+
 label.counts <-
   labels %>%
   # filter(label_type_id != 7) %>%
   mutate(user_id = factor(user_id)) %>%
-  # count(user_id)
   group_by(user_id) %>%
-  summarize_at(vars(label_id), n_distinct)
-
-# completed.audit.counts <-
-#   labels %>%
-#   mutate(user_id = factor(user_id)) %>%
-#   filter(completed == TRUE) %>%
-#   group_by(user_id) %>%
-#   summarize_at(vars(audit_task_id), n_distinct)
+  summarize_at(vars(label_id), n_distinct) %>%
+  rename(label_count = label_id)
 
 audit.length <-
-  labels %>%
+  audits %>%
+  mutate(role = factor(role)) %>%
   mutate(user_id = factor(user_id)) %>%
-  filter(completed == TRUE) %>%
-  group_by(user_id) %>%
+  group_by(user_id, role) %>%
   distinct(audit_task_id, .keep_all = TRUE) %>%
-  summarize_at(vars(st_length), sum)
+  summarize_at(vars(st_length), sum) %>%
+  rename(distance_audited = st_length)
 
 counts <-
   audit.length %>%
-  inner_join(label.counts, by = 'user_id') %>%
-  mutate(labels.per.100m = 100 * label_id / st_length)
+  left_join(label.counts, by = 'user_id') %>%
+  replace_na(list(label_count = 0)) %>%
+  mutate(labels.per.100m = 100 * label_count / distance_audited)
 
 mikey.freq <- (counts %>% filter(user_id == '9efaca05-53bb-492e-83ab-2b47219ee863'))$labels.per.100m
 jon.freq <- (counts %>% filter(user_id == '49787727-e427-4835-a153-9af6a83d1ed1'))$labels.per.100m
@@ -81,11 +115,10 @@ dist.after.removal <-
       good.users <-
         counts %>%
         filter(labels.per.100m >= labels.per.100m.threshold) %>%
-        filter(label_id >= labels.threshold)
+        filter(label_count >= labels.threshold)
       
       new.total.dist <-
-        labels %>%
-        filter(completed == TRUE) %>%
+        audits %>%
         filter(user_id %in% good.users$user_id) %>%
         distinct(street_edge_id, .keep_all = TRUE) %>%
         summarize_at(vars(st_length), sum)
@@ -94,8 +127,7 @@ dist.after.removal <-
   )
 
 total.dist <- (
-  labels %>%
-  filter(completed == TRUE) %>%
+  audits %>%
   distinct(street_edge_id, .keep_all = TRUE) %>%
   summarize_at(vars(st_length), sum)
 )[[1]]
@@ -122,7 +154,6 @@ And here are some summary statistics for the users:
 
 ```{r user.summary.stats, echo=FALSE}
 summary(counts %>%
-          rename(distance.audited.meters = st_length, total.label.count = label_id) %>%
           select(-user_id))
 ```
 
