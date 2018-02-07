@@ -598,7 +598,7 @@ _Expected_: For higher vote thresholds, and for larger numbers of turkers being 
 
 _Observed_: In the histograms below, we see that both of the above turned out to be correct. More clusters no longer met the vote threshold for larger numbers of turkers, and for higher vote thresholds.
 
-```{r single-user-clustering-label-counts-2, echo=FALSE, fig.height=5, fig.width=7}
+```{r single-user-clustering-label-counts-2, echo=FALSE, warning=FALSE, fig.height=5, fig.width=7}
 single.user.clust.turk.ramp.counts <-
   expanded.vote %>%
   filter(granularity == 'street',
