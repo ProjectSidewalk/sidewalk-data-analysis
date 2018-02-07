@@ -156,7 +156,7 @@ volunteer.with.raw.accuracy <-
 
 This section has a series of boxplots that compare performance of anonymous volunteers, registered volunteers, a single turker, and 5 turkers with majority vote. Here, a the single turker is the first turker to complete that set of routes.
 
-For each granularity and label type, an ANOVA test was run, with the p-value being reported in the top-right corner of each boxplot. I appeneded a `**` if the p-value was less than 0.01, and just a `*` if the p-value was less than 0.05, to make finding significant results easier.
+For each granularity and label type, an ANOVA test was run, with the p-value being reported in the top-right corner of each boxplot. I appended a `**` if the p-value was less than 0.01, and just a `*` if the p-value was less than 0.05, to make finding significant results easier.
 
 To make room for the p-value on each boxplot, I expanded the y-limit past 1.0, and then added a dotted line at the 1.0 mark so that we still have that reference point. However, it makes the graphs look a bit ugly, so LMK if you want to remove it.
 
@@ -376,7 +376,7 @@ vote.type.trellis.linechart('specificity')
 ## Removing Low Severity
 In this section, we are looking at how accuracy is effected when we remove low severity labels from the GT set. The idea is that higher severity problems (as defined by the GT labelers) will be easier for crowd workers to find, resulting in higher recall. This would be a nice result to have, to say that crowd workers can at least find the most severe problems. The two expected outcomes here: recall goes up, and for precision to go down. I've included all accuracy types for now in case we see anything interesting.
 
-_Note_: Low severity labels were removed from the _ground truth data only_. This is why we expect precision to go down, as legitimate problems have been removed from the ground truth, that crowd workers may have seen. Removing only crowd worker labels, but not GT labels, would likely result in higher precision and lower recall. Removing labels from both GT and crowd workers would probably result in lower precision _and_ recall, due to the variability in how people label severity. Discrepency between GT and crowd worker severity ratings will be addressed in a separate section.
+_Note_: Low severity labels were removed from the _ground truth data only_. This is why we expect precision to go down, as legitimate problems have been removed from the ground truth, that crowd workers may have seen. Removing only crowd worker labels, but not GT labels, would likely result in higher precision and lower recall. Removing labels from both GT and crowd workers would probably result in lower precision _and_ recall, due to the variability in how people label severity. Discrepancy between GT and crowd worker severity ratings will be addressed in a separate section.
 
 ```{r low-severity-setup, echo=FALSE, warning=FALSE, cache=FALSE}
 # Gives a more informative name to low.severity.thresh factor, also fills NAs
@@ -496,10 +496,12 @@ low.severity.trellis.linechart('specificity')
 worker.type.single.user.clust <-
   data.with.raw.accuracy %>%
   filter(granularity == '5_meter') %>%
-  filter(label.type != 'Problem') %>%
+  filter(!(label.type %in% c('NoSidewalk', 'Problem'))) %>%
   filter(remove.low.severity == FALSE) %>%
+  mutate(single.user.clust = factor(single.user.clust, labels = c('without', 'with'))) %>%
   # filter(worker.type %in% c('turk', 'maj')) %>%
-  filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3))
+  # filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3))
+  filter(worker.type != 'maj', n.workers == 1)
 
 # Defines the function that produces the boxplots that compare different worker types. It takes in
 # the accuracy measure you are plotting as a string. It also runs an ANOVA test and puts the p-val
@@ -516,8 +518,8 @@ worker.type.single.user.clust.trellis.boxplot <- function(accuracy.type) {
   n.obs <-
     worker.type.single.user.clust %>%
     group_by(worker.type, label.type) %>%
-    summarise(n1 = sum(!single.user.clust & !is.na(!!sym(accuracy.type))),
-              n2 = sum(single.user.clust & !is.na(!!sym(accuracy.type))))
+    summarise(n1 = sum(single.user.clust == 'without' & !is.na(!!sym(accuracy.type))),
+              n2 = sum(single.user.clust == 'with' & !is.na(!!sym(accuracy.type))))
 
   pval <-
     inner_join(models, n.obs, by = c('worker.type', 'label.type')) %>%
@@ -527,7 +529,7 @@ worker.type.single.user.clust.trellis.boxplot <- function(accuracy.type) {
   # Create the trellis boxplots.
   ggplot(data = worker.type.single.user.clust, aes_string(x = 'single.user.clust', y = accuracy.type)) +
     # geom_boxplot() +
-    geom_violin(draw_quantiles = 0.5) +
+    geom_violin(draw_quantiles = 0.5, na.rm = TRUE) +
     scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
     geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
     geom_label(data = pval, aes(x = -Inf, y = 1.12, hjust = 'inward', label = p.str),
@@ -542,10 +544,11 @@ worker.type.single.user.clust.trellis.boxplot <- function(accuracy.type) {
 
 _Expected_: There will be _significantly fewer_ ramp labels, and _slightly_ fewer labels from the other label types: since ramp labels often come in pairs, although a much lower distance threshold is being used for the clustering of ramp labels, we can expect a fair number of legitimate ramp labels to be excluded.
 
-For larger numbers of turkers being clustered, the _reduction in labels might be more pronounced_: (something to do with labels that have just enough votes without the single-user clustering).
+_Observed_: It is interesting that a higher proportion of NoSidewalk labels were removed than any other label type. I just used the 7.5 meter distance threshold that we used for Obstacle and SurfaceProblem for the NoSidewalk. This certainly indicates that there are quite a few users (of all user groups) who placed the NoSidewalk label frequently (possibly in the same way that Jon places NoSidewalk labels).
 
-_Observed_:
+For turkers, after single-user clustering the percentage of ramp labels removed is actually much lower than that of other the label types, and the percentage of NoCurbRamp labels removed is the lowest for each user group.
 
+What I find most interesting about comparing user groups is the difference in this graph between registered users and turkers (I talk specifically about them, since the group of anon users is quite small -- though it is interesting that it anonymous users seem to match up with turkers). I don't really have a guess right now for why 22% of registered users CurbRamp labels are gone, but only 7% of turker CurbRamps are.
 
 ```{r single-user-clustering-label-counts-1, echo=FALSE, fig.height=3, fig.width=8}
 single.user.clust.ramp.counts <-
@@ -558,39 +561,73 @@ single.user.clust.ramp.counts <-
   group_by(single.user.clust, label.type, worker.type) %>%
   summarize(n.labels = sum(true.pos, false.pos)) %>%
   group_by(label.type, worker.type) %>%
-  mutate(n.labels = 100 * n.labels / max(n.labels)) %>%
+  mutate(percentage.labels.removed = 100 - 100 * n.labels / max(n.labels)) %>%
+  # mutate(n.labels.removed = max(n.labels) - n.labels) %>%
   ungroup() %>%
   filter(single.user.clust == TRUE)
 
-ggplot(data = single.user.clust.ramp.counts, aes(x = label.type, y = n.labels)) +
+count.labs <-
+  data.with.raw.accuracy %>%
+  filter(granularity == 'street', # any non-binary granularity gives same label counts
+         remove.low.severity == FALSE,
+         worker.type != 'maj',
+         n.workers == 1,
+         label.type != 'Problem',
+         single.user.clust == TRUE) %>%
+  group_by(worker.type) %>%
+  summarize(workers = n() / 5, labels = sum(true.pos, false.pos)) %>%
+  mutate(txt = paste0('# workers = ', workers, '\n# labels = ', labels))
+
+ggplot(data = single.user.clust.ramp.counts, aes(x = label.type, y = percentage.labels.removed)) +
   geom_col(aes(fill = label.type)) +
   scale_fill_manual(values = c('green', 'red', 'blue', 'orange', 'grey')) +
   theme.histogram +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) + # removes weird white space at bottom of plot
+  # scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) + # removes weird white space at bottom of plot
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 1.05 * max(single.user.clust.ramp.counts$percentage.labels.removed))) +
+  geom_label(data = count.labs, aes(x = 1.6, y = 30, label = txt),
+             size = 3.0, label.padding = unit(0.15, "lines")) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1.05, vjust = 1.05)) +
   facet_grid(. ~ worker.type)
 ```
+
+*SKIP THE REST OF THIS SECTION*
+
+_Expected_: For higher vote thresholds, _reduction in labels might be more pronounced_, 
+
+_Expected_: For higher vote thresholds, and for larger numbers of turkers being clustered, the _reduction in labels might be more pronounced_. The rationale is that in both those situations, there are more turkers involved, and thus there is a higher probability that one of the labels in the cluster is removed after single-user clustering... Increasing the probability that said cluster will no longer make the vote threshold.
+
+_Observed_: In the histograms below, we see that both of the above turned out to be correct. More clusters no longer met the vote threshold for larger numbers of turkers, and for higher vote thresholds.
 
 ```{r single-user-clustering-label-counts-2, echo=FALSE, fig.height=5, fig.width=7}
 single.user.clust.turk.ramp.counts <-
   expanded.vote %>%
   filter(granularity == 'street',
          remove.low.severity == FALSE,
-         n.workers > 1,
+         # n.workers > 1,
          label.type != 'Problem') %>%
   group_by(single.user.clust, label.type, n.workers, vote.threshold) %>%
   summarize(n.labels = sum(true.pos, false.pos)) %>%
   group_by(label.type, n.workers, vote.threshold) %>%
-  mutate(n.labels = 100 * n.labels / max(n.labels)) %>%
+  mutate(percentage.labels.removed = 100 - 100 * n.labels / max(n.labels)) %>%
   ungroup() %>%
   filter(single.user.clust == TRUE)
-
+  
 ggplot(data = single.user.clust.turk.ramp.counts,
-       aes(x = as.factor(n.workers), y = n.labels)) +
+       aes(x = as.factor(n.workers), y = percentage.labels.removed)) +
+  geom_col() +
+  theme.histogram +
+  xlab('Number of Turkers') +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) + # removes weird white space at bottom of plot
+  facet_grid(vote.threshold ~ label.type)
+
+ggplot(data = single.user.clust.turk.ramp.counts %>% filter(n.workers > 1),
+       aes(x = vote.threshold, y = percentage.labels.removed)) +
   geom_col() +
   theme.histogram +
   scale_y_continuous(expand = c(0, 0), limits = c(0, 100)) + # removes weird white space at bottom of plot
-  facet_grid(vote.threshold ~ label.type)
+  # scale_y_continuous(expand = c(0, 0)) + # removes weird white space at bottom of plot
+  theme(axis.text.x = element_text(angle = 45, hjust = 1.05, vjust = 1.05)) +
+  facet_grid(as.factor(n.workers) ~ label.type)
 ```
 
 #### Recall
@@ -598,20 +635,36 @@ _Expected_: Recall will be _slightly worse_ for all non-ramp label types: there 
 
 Recall with be _significantly worse_ for CurbRamp and NoCurbRamp labels: due to there being significantly fewer ramp labels.
 
-_Observed_: 
+_Observed_: At least for individual users, recall does decrease very slightly, and more so for ramp label types. But this is a very small difference; average recall decreased by about 0.01 for ramp label types, and by 0.005 for non ramp label types... This will likely be more pronounced once we look at clustered turkers.
 
 ```{r single-user-clustering-recall, echo=FALSE, fig.height=7, fig.width=8}
 worker.type.single.user.clust.trellis.boxplot('recall')
+
+# worker.type.single.user.clust %>%
+#   group_by(label.type, single.user.clust) %>%
+#   summarise_at(vars(recall), mean, na.rm = TRUE) %>%
+#   group_by(label.type) %>%
+#   summarise(recall.diff = 100 * (max(recall) - min(recall))) %>%
+#   group_by(label.type) %>%
+#   summarize(recall.ave.diff = mean(recall.diff))
 ```
 
 #### Precision
 
 _Expected_: Precision will _improve slightly_ for all label types: in situations where a user labeled the same problem/feature multiple times, clustering should remove the duplicate label, thus improving precision.
 
-_Observed_: 
+_Observed_: In almost all cases, we do see a slight improvement in precision. The outliers are CurbRamp labels, which have a sizable improvement in precision (especially for registered users); anonymous users, whose precision does not seem to have been affected; and SurfaceProblem labels for turker, where precision actually slightly decreased.
 
 ```{r single-user-clustering-precision, echo=FALSE, fig.height=7, fig.width=8}
 worker.type.single.user.clust.trellis.boxplot('precision')
+
+# worker.type.single.user.clust %>%
+#   group_by(label.type, single.user.clust) %>%
+#   summarise_at(vars(precision), mean, na.rm = TRUE) %>%
+#   group_by(label.type) %>%
+#   summarise(precision.diff = 100 * (max(precision) - min(precision))) %>%
+#   group_by(label.type) %>%
+#   summarize(precision.ave.diff = mean(precision.diff))
 ```
 
 
@@ -619,22 +672,28 @@ worker.type.single.user.clust.trellis.boxplot('precision')
 
 _Expected_: Specificity will _improve slightly_ across the board: fewer labels => more true negatives and fewer false positives => higher specificity.
 
-_Observed_: 
+_Observed_: It is not exceptionally obvious from the graph, but specificity does improve slightly across the board. There is no way that specificity could get worse, since the formula includes only true negatives and false positives, which can only improve if we take away some labels. The largest improvement is with CurbRamps placed by registered users.
 
 ```{r single-user-clustering-specificity, echo=FALSE, fig.height=7, fig.width=8}
 worker.type.single.user.clust.trellis.boxplot('specificity')
+
+# worker.type.single.user.clust %>%
+#   group_by(label.type, single.user.clust) %>%
+#   summarise_at(vars(specificity), mean, na.rm = TRUE) %>%
+#   group_by(label.type) %>%
+#   summarise(specificity.diff = 100 * (max(specificity) - min(specificity))) %>%
+#   group_by(label.type) %>%
+#   summarize(specificity.ave.diff = mean(specificity.diff))
 ```
 
-#### Variance in accuracy
+#### Variance in accuracy (NOT READY)
 
-_Expected_: Confidence intervals (variance..?) will be _slightly larger_ for turkers with majority vote: fewer individual labels -> fewer labels that pass majority vote -> more conditions where turkers couldn't agree on any labels
+_Expected_: Variance will be _slightly larger_ for precision and f-measure, for turkers with vote thresholds greater than 1: fewer labels => fewer labels that pass majority vote => fewer true/false positives => more sets of turkers with no true or false positives (for a given label type) => more sets of turkers with null precision (since denominator is TP + FP), and f-measure (since precision is used to compute f-measure) => larger confidence intervals for those accuracy types (b/c smaller n).
 
-Confidence intervals will be _slightly larger_ for precision and f-measure: fewer labels => fewer true/false positives => more users with no true or false positives => more users with null precision (since denominator is TP + FP), and f-measure (since precision is used to computer f-meausure) => larger confidence intervals for those accuracy types (b/c smaller n).
-
-_Observed_: 
+_Observed_: TBD
 
 ```{r single-user-clustering-variance, echo=FALSE, fig.height=7, fig.width=8}
-single.user.clust.variance <-
+single.user.clust.variance.no.vote <-
   data.with.raw.accuracy %>%
   mutate(single.user.clust = factor(single.user.clust, labels = c('without', 'with'))) %>%
   filter(granularity == '5_meter',
@@ -649,11 +708,42 @@ single.user.clust.variance <-
   # mutate(n.labels = n.labels / max(n.labels)) %>%
   # ungroup()
 
-ggplot(data = single.user.clust.variance, aes(x = single.user.clust, y = f.measure)) +
+single.user.clust.variance <-
+  data.with.raw.accuracy %>%
+  mutate(single.user.clust = factor(single.user.clust, labels = c('without', 'with'))) %>%
+  filter(granularity == '5_meter',
+         label.type != 'Problem',
+         remove.low.severity == FALSE,
+         n.workers == 5 & worker.thresh == 3) %>%
+  group_by(single.user.clust, label.type) %>%
+  summarize_at(vars(raw.accuracy, recall, precision, f.measure), var, na.rm = TRUE) %>%
+  gather(accuracy.type, accuracy.value, raw.accuracy, recall, precision, f.measure)
+
+ggplot(data = single.user.clust.variance, aes(x = single.user.clust, y = accuracy.value)) +
   geom_col() +
   theme.histogram +
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 1.1 * max(single.user.clust.variance$f.measure))) +
-  facet_grid(worker.type ~ label.type)
+  # scale_y_continuous(expand = c(0, 0), limits = c(0, 1.1 * max(single.user.clust.variance$accuracy.value))) +
+  facet_grid(accuracy.type ~ label.type, scales = 'free_y')
+
+
+  # expanded.vote %>%
+  # filter(granularity == 'street',
+  #        remove.low.severity == FALSE,
+  #        # n.workers > 1,
+  #        label.type != 'Problem') %>%
+  # group_by(single.user.clust, label.type, n.workers, vote.threshold) %>%
+  # summarize(n.labels = sum(true.pos, false.pos)) %>%
+  # group_by(label.type, n.workers, vote.threshold) %>%
+  # mutate(percentage.labels.removed = 100 - 100 * n.labels / max(n.labels)) %>%
+  # ungroup() %>%
+  # filter(single.user.clust == TRUE)
+  
+
+# ggplot(data = single.user.clust.variance, aes(x = single.user.clust, y = f.measure)) +
+#   geom_col() +
+#   theme.histogram +
+#   scale_y_continuous(expand = c(0, 0), limits = c(0, 1.1 * max(single.user.clust.variance$f.measure))) +
+#   facet_grid(worker.type ~ label.type)
 
 ```
 
