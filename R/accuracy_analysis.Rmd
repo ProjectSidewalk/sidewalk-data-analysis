@@ -96,7 +96,8 @@ data.with.raw.accuracy <-
   mutate(is.anon.route = as.numeric(as.character(condition.id)) > 121) %>%
   mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
                               levels = c('anon', 'reg', 'turk', 'maj'))) %>%
-  mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg))
+  mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg)) %>%
+  filter(label.type != 'Problem')
 # volunteer.summary <-
 #   volunteer.with.raw.accuracy %>%
 #   group_by(label.type, granularity) %>%
