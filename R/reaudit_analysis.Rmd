@@ -11,6 +11,9 @@ library(RPostgreSQL)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+
+FIVE_HUNDRED_FEET <- 152.4 # in meters
+ONE_THOUSAND_FEET <- 304.8 # in meters
 ```
 
 ```{r connect, echo=FALSE}
@@ -126,15 +129,79 @@ dist.after.removal <-
     }
   )
 
+users.after.removal <-
+  Vectorize(
+    function(labels.per.100m.threshold, current.role, dist.thresh) {
+      good.users <- counts %>%
+        filter(distance_audited > dist.thresh) %>%
+        filter(labels.per.100m >= labels.per.100m.threshold)
+      if (current.role != 'All') good.users <- good.users %>% filter(role == current.role)
+      nrow(good.users)
+    }
+  )
+
 total.dist <- (
   audits %>%
   distinct(street_edge_id, .keep_all = TRUE) %>%
   summarize_at(vars(st_length), sum)
 )[[1]]
 
+total.users <- counts %>% nrow()
+total.users.five.hundred.feet <- counts %>% filter(distance_audited > FIVE_HUNDRED_FEET) %>% nrow()
+total.users.thousand.feet <- counts %>% filter(distance_audited > ONE_THOUSAND_FEET) %>% nrow()
+
+total.users.df <-
+  rbind(
+    counts %>% group_by(role) %>% summarize(n = n()) %>% mutate(dist.thresh = 0),
+    counts %>% filter(distance_audited > FIVE_HUNDRED_FEET) %>%
+      group_by(role) %>% summarize(n = n()) %>%
+      mutate(dist.thresh = FIVE_HUNDRED_FEET),
+    counts %>% filter(distance_audited > ONE_THOUSAND_FEET) %>%
+      group_by(role) %>% summarize(n = n()) %>%
+      mutate(dist.thresh = ONE_THOUSAND_FEET)
+    ) %>%
+  mutate(role = as.character(role)) %>%
+  add_row(role = 'All', n = total.users, dist.thresh = 0) %>%
+  add_row(role = 'All', n = total.users.five.hundred.feet, dist.thresh = FIVE_HUNDRED_FEET) %>%
+  add_row(role = 'All', n = total.users.thousand.feet, dist.thresh = ONE_THOUSAND_FEET) %>%
+  mutate(role = as.factor(role))
+  
+get.total.users <-
+  Vectorize(
+    function(current.role, thresh) {
+      total.users.df %>%
+        filter(role == current.role, dist.thresh == thresh) %>%
+        select(n) %>% as.integer()
+    }
+  )
+
+max.thresh <- 10
+thresh.step <- 0.05
+roles.to.look.at <- c('All', 'Anonymous', 'Turker', 'User')
+dists.to.look.at <- c(0, FIVE_HUNDRED_FEET, ONE_THOUSAND_FEET)
+thresholds.to.look.at <- seq(0, max.thresh, by = thresh.step)
+
 dist.left <-
-  data.frame(threshold = seq(0, 15, by = 0.05)) %>%
+  data.frame(threshold = thresholds.to.look.at) %>%
   mutate(dist.left = dist.after.removal(threshold, 0))
+
+users.left <-
+  expand.grid(threshold = thresholds.to.look.at,
+              role = roles.to.look.at,
+              dist.thresh = dists.to.look.at,
+              stringsAsFactors = FALSE) %>%
+  mutate(users.left = users.after.removal(threshold, role, dist.thresh)) %>%
+  mutate(percent.of.users = users.left / (get.total.users(role, dist.thresh))) %>%
+  mutate(user.definition = factor(dist.thresh, labels = c('Completed >= 1 audit task',
+                                                              'Audited >= 500 feet',
+                                                              'Audited >= 1000 feet')))
+
+# total.users
+# counts %>% filter(distance_audited > FIVE_HUNDRED_FEET) %>% nrow()
+# counts %>% filter(distance_audited > FIVE_HUNDRED_FEET) %>% select(role) %>% summary()
+# # users.left
+# counts %>% filter(distance_audited > FIVE_HUNDRED_FEET) %>% filter(labels.per.100m < 3.75) %>% nrow()
+# counts %>% filter(distance_audited > FIVE_HUNDRED_FEET) %>% filter(labels.per.100m < 3.75) %>% select(role) %>% summary()
 ```
 
 This graph shows what percentage of DC we would have to re-audit (in terms of distance), given different labels/100 meter thresholds for users. For example at x = 5.0, I looked at what our completion percentage would be if we removed the audits from all users who have a labeling frequency of less than 5 labels per 100 meters. For reference, Mikey's label frequency is 6.5 labels/100m, and Jon's is 10.1 labels/100m. I added lines vertical lines on the graph below for each of us; I also added a line at my recommended cutoff of 3.75 labels/100m.
@@ -143,10 +210,45 @@ This graph shows what percentage of DC we would have to re-audit (in terms of di
 ggplot(data = dist.left, aes(x = threshold, y = 100 - (100 * dist.left / total.dist))) +
   geom_line() +
   geom_vline(xintercept = mikey.freq) +
-  geom_vline(xintercept = jon.freq) +
   geom_vline(xintercept = 3.75) +
   xlab('Labels per 100 Meters Threshold') +
   ylab('Percentage to Re-Audit (distance)') +
+  theme_bw()
+
+ggplot(data = users.left %>% filter(role == 'All'),
+       aes(x = threshold, y = 100 - (100 * percent.of.users))) +
+  geom_line(aes(colour = user.definition)) +
+  geom_vline(xintercept = mikey.freq) +
+  geom_vline(xintercept = 3.75) +
+  xlab('Labels per 100 Meters Threshold') +
+  ylab('Percentage of Users Removed') +
+  theme_bw()
+ggplot(data = users.left %>% filter(dist.thresh == 0),
+       aes(x = threshold, y = 100 - (100 * percent.of.users))) +
+  geom_line(aes(colour = role)) +
+  geom_vline(xintercept = mikey.freq) +
+  geom_vline(xintercept = 3.75) +
+  xlab('Labels per 100 Meters Threshold') +
+  ylab('Percentage of Users Removed') +
+  ggtitle('Users Who Completed >= 1 Audit Task') +
+  theme_bw()
+ggplot(data = users.left %>% filter(dist.thresh == FIVE_HUNDRED_FEET),
+       aes(x = threshold, y = 100 - (100 * percent.of.users))) +
+  geom_line(aes(colour = role)) +
+  geom_vline(xintercept = mikey.freq) +
+  geom_vline(xintercept = 3.75) +
+  xlab('Labels per 100 Meters Threshold') +
+  ylab('Percentage of Users Removed') +
+  ggtitle('Users Who Audited >= 500ft') +
+  theme_bw()
+ggplot(data = users.left %>% filter(dist.thresh == ONE_THOUSAND_FEET),
+       aes(x = threshold, y = 100 - (100 * percent.of.users))) +
+  geom_line(aes(colour = role)) +
+  geom_vline(xintercept = mikey.freq) +
+  geom_vline(xintercept = 3.75) +
+  xlab('Labels per 100 Meters Threshold') +
+  ylab('Percentage of Users Removed') +
+  ggtitle('Users Who Audited >= 1000ft') +
   theme_bw()
 ```
 
