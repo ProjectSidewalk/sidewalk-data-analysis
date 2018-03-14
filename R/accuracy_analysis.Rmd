@@ -175,16 +175,28 @@ sig.sym <- Vectorize(
 
 # Defines the function that produces the boxplots that compare different worker types. It takes in
 # the accuracy measure you are plotting as a string. It also runs an ANOVA test and puts the p-val
-# as a label in the top-left corner of each boxplot.
+# as a label in the top-left corner of each boxplot, along with N for each box.
 worker.type.trellis.boxplot <- function(accuracy.type) {
   
-  # Run ANOVA, and format p-value appropriately for visualizing on the plot (in the form 'x.xxx**')
+  # Get the counts of workers with non NA accuracy for this type
+  non.na.worker.counts <-
+    worker.type.accuracy %>%
+    group_by(granularity, label.type) %>%
+    summarise(n.anon = sum(worker.type == 'anon' & !is.na(!!sym(accuracy.type))),
+           n.reg = sum(worker.type == 'reg' & !is.na(!!sym(accuracy.type))),
+           n.turk = sum(worker.type == 'turk' & !is.na(!!sym(accuracy.type))),
+           n.maj = sum(worker.type == 'maj' & !is.na(!!sym(accuracy.type))))
+  
+  # Run ANOVA, and format p-value appropriately for visualizing on the plot. Labels are of the form
+  # 'p=x.xxx** n=(n1,n2,n3,n4)
   pval <-
     worker.type.accuracy %>%
     group_by(granularity, label.type) %>%
     do(model = aov(as.formula(paste0(accuracy.type, ' ~ worker.type')), data = .)) %>%
     mutate(p = summary(model)[[1]][["Pr(>F)"]][1]) %>%
-    mutate(p.str = paste0("p = ", sprintf("%.3f", p), sig.sym(p)))
+    inner_join(non.na.worker.counts, by = c('granularity', 'label.type')) %>%
+    mutate(p.str = paste0("p=", sprintf("%.3f", p), sig.sym(p),
+                          ' n=(', n.anon, ',', n.reg, ',', n.turk, ',', n.maj, ')'))
   
   # Create the trellis boxplots.
   ggplot(data = worker.type.accuracy, aes_string(x = 'worker.type', y = accuracy.type)) +
