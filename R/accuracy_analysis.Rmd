@@ -96,25 +96,17 @@ data.with.raw.accuracy <-
   mutate(is.anon.route = as.numeric(as.character(condition.id)) > 121) %>%
   mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
                               levels = c('anon', 'reg', 'turk', 'maj'))) %>%
-  mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg)) %>%
-  filter(label.type != 'Problem')
-# volunteer.summary <-
-#   volunteer.with.raw.accuracy %>%
-#   group_by(label.type, granularity) %>%
-#   summarise_at(c('specificity', 'recall', 'f.measure', 'precision', 'raw.accuracy'), mean, na.rm = TRUE)
+  mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg))
 
-# TODO Figure out wtf is wrong here. I included counts that I got from a SQL query temporarily.
+# Gets the count of GT labels so we can include them as labels in graphs below.
 label.counts <-
-  data_frame(
-    count = c(2784, 77, 242, 772, 256, 1129),
-    label.type = c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','NoSidewalk','Problem')
-    )
-  # accuracy.data %>%
-  # filter(binary == FALSE, is.turker == FALSE, granularity == 'street', remove.low.severity == FALSE) %>%
-  # group_by(label.type) %>%
-  # summarize(count = sum(true.pos, false.neg))
+  data.with.raw.accuracy %>%
+  filter(!binary, !is.turker, granularity == 'street', !remove.low.severity, single.user.clust) %>%
+  group_by(label.type) %>%
+  summarize(count = sum(true.pos, false.neg))
 gt.label.count.lookup <- setNames(label.counts$count, label.counts$label.type)
 
+# Helper function that is passed, it generates labels that show GT label counts.
 label.count.labeller <- Vectorize(
   function(curr.type) {
     paste0(curr.type, ', GT=', gt.label.count.lookup[curr.type])
