@@ -14,99 +14,114 @@ library(RPostgreSQL)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+
+REFRESH_DATA = FALSE
 ```
 
 ```{r connect, echo=FALSE}
-pw <- {'sidewalk'}
-drv <- dbDriver("PostgreSQL")
-con <- dbConnect(drv, dbname = "sidewalk",
-                 host = "localhost", port = 5432,
-                 user = "sidewalk", password = pw)
-rm(pw)
-# dbExistsTable(con, "audit_task")
+if (REFRESH_DATA) {
+  pw <- {'sidewalk'}
+  drv <- dbDriver("PostgreSQL")
+  con <- dbConnect(drv, dbname = "sidewalk",
+                   host = "localhost", port = 5432,
+                   user = "sidewalk", password = pw)
+  rm(pw)
+}
 ```
 
 
 ```{r reading.data, echo=FALSE, include=FALSE}
-reg.audits <-
-  dbGetQuery(
-    con,
-    'SELECT audit_task.user_id, role.role, audit_task.audit_task_id,
-            street_edge.street_edge_id,
-            ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS distance_audited
-    FROM street_edge
-    INNER JOIN audit_task
-    ON street_edge.street_edge_id = audit_task.street_edge_id
-    INNER JOIN user_role
-    ON audit_task.user_id = user_role.user_id
-    INNER JOIN role
-    ON user_role.role_id = role.role_id
-    WHERE street_edge.deleted = FALSE
-    AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-    AND completed = TRUE'
-    )
-anon.audits <-
-  dbGetQuery(
-    con,
-    'SELECT DISTINCT ip_address AS user_id, \'Anonymous\' AS role, audit_task.audit_task_id,
-            street_edge.street_edge_id,
-            ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS distance_audited
-    FROM street_edge
-    INNER JOIN audit_task
-    ON street_edge.street_edge_id = audit_task.street_edge_id
-    INNER JOIN audit_task_environment
-    ON audit_task.audit_task_id = audit_task_environment.audit_task_id
-    WHERE street_edge.deleted = FALSE
-    AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-    AND completed = TRUE'
-    )
-reg.times <-
-  dbGetQuery(
-    con,
-    'SELECT user_audit_times.user_id,
-           CAST(extract( second from SUM(diff) ) / 60 +
-                extract( minute from SUM(diff) ) +
-                extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS auditing_time
-    FROM (
-        SELECT audit_task.user_id,
-               (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
-        FROM audit_task_interaction
-        INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
-        WHERE action = \'ViewControl_MouseDown\'
-            AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-        ) user_audit_times
-    WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
-    GROUP BY user_audit_times.user_id;'
-    )
-anon.times <-
-  dbGetQuery(
-    con,
-    'SELECT user_audit_times.ip_address AS user_id,
-           CAST(extract( second from SUM(diff) ) /60 +
-                extract( minute from SUM(diff) ) +
-                extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS auditing_time
-    FROM
-    (
-        SELECT user_id, ip_address,
-               (timestamp - Lag(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
-        FROM audit_task_interaction
-        INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
-        INNER JOIN audit_task_environment
-            ON audit_task.audit_task_id = audit_task_environment.audit_task_id
-        WHERE action = \'ViewControl_MouseDown\'
-        AND audit_task.user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-        AND ip_address IN
-        (
-            SELECT ip_address
-            FROM audit_task_environment
-            INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_environment.audit_task_id
-            WHERE completed = true
-        )
-    ) user_audit_times
-    WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
-    GROUP BY ip_address;'
-    )
-dbDisconnect(con)
+if (REFRESH_DATA) {
+  reg.audits <-
+    dbGetQuery(
+      con,
+      'SELECT audit_task.user_id, role.role, audit_task.audit_task_id,
+              street_edge.street_edge_id,
+              ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS distance_audited
+      FROM street_edge
+      INNER JOIN audit_task
+      ON street_edge.street_edge_id = audit_task.street_edge_id
+      INNER JOIN user_role
+      ON audit_task.user_id = user_role.user_id
+      INNER JOIN role
+      ON user_role.role_id = role.role_id
+      WHERE street_edge.deleted = FALSE
+      AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+      AND completed = TRUE'
+      )
+  anon.audits <-
+    dbGetQuery(
+      con,
+      'SELECT DISTINCT ip_address AS user_id, \'Anonymous\' AS role, audit_task.audit_task_id,
+              street_edge.street_edge_id,
+              ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS distance_audited
+      FROM street_edge
+      INNER JOIN audit_task
+      ON street_edge.street_edge_id = audit_task.street_edge_id
+      INNER JOIN audit_task_environment
+      ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+      WHERE street_edge.deleted = FALSE
+      AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+      AND completed = TRUE'
+      )
+  reg.times <-
+    dbGetQuery(
+      con,
+      'SELECT user_audit_times.user_id,
+             CAST(extract( second from SUM(diff) ) / 60 +
+                  extract( minute from SUM(diff) ) +
+                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS auditing_time
+      FROM (
+          SELECT audit_task.user_id,
+                 (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+          FROM audit_task_interaction
+          INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+          WHERE action = \'ViewControl_MouseDown\'
+              AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+          ) user_audit_times
+      WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
+      GROUP BY user_audit_times.user_id;'
+      )
+  anon.times <-
+    dbGetQuery(
+      con,
+      'SELECT user_audit_times.ip_address AS user_id,
+             CAST(extract( second from SUM(diff) ) /60 +
+                  extract( minute from SUM(diff) ) +
+                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS auditing_time
+      FROM
+      (
+          SELECT user_id, ip_address,
+                 (timestamp - Lag(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+          FROM audit_task_interaction
+          INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+          INNER JOIN audit_task_environment
+              ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+          WHERE action = \'ViewControl_MouseDown\'
+          AND audit_task.user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+          AND ip_address IN
+          (
+              SELECT ip_address
+              FROM audit_task_environment
+              INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+              WHERE completed = true
+          )
+      ) user_audit_times
+      WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
+      GROUP BY ip_address;'
+      )
+  dbDisconnect(con)
+  
+  audits <- bind_rows(reg.audits, anon.audits)
+  times <- bind_rows(reg.times, anon.times)
+  write.csv(audits, '../data/stats_for_paper_audits.csv', row.names = FALSE)
+  write.csv(times, '../data/stats_for_paper_times.csv', row.names = FALSE)
+} else {
+  audit.classes <- c('character', 'character', 'numeric', 'numeric', 'numeric')
+  audits <- read.csv('../data/stats_for_paper_audits.csv', colClasses = audit.classes)
+  time.classes <- c('character', 'numeric')
+  times <- read.csv('../data/stats_for_paper_times.csv', colClasses = time.classes)
+}
 ```
 
 ```{r transforming.data, echo=FALSE, warning=FALSE}
@@ -134,9 +149,6 @@ approximate.minutes.per.mission <- Vectorize(
     else 500 * time.audited / dist.in.feet
   }
 )
-
-audits <- bind_rows(reg.audits, anon.audits)
-times <- bind_rows(reg.times, anon.times)
 
 # Selects distinct on audit_task_id, then sums dist audited & computes missions completed by user.
 audit.length <-
