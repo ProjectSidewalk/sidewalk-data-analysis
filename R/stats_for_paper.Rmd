@@ -1,0 +1,185 @@
+---
+title: "Statistics for Paper"
+author: "Mikey Saugstad"
+date: "March 14, 2018"
+output:
+  html_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(RPostgreSQL)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+```
+
+```{r connect, echo=FALSE}
+pw <- {'sidewalk'}
+drv <- dbDriver("PostgreSQL")
+con <- dbConnect(drv, dbname = "sidewalk",
+                 host = "localhost", port = 5432,
+                 user = "sidewalk", password = pw)
+rm(pw)
+# dbExistsTable(con, "audit_task")
+```
+
+
+```{r reading.data, echo=FALSE, include=FALSE}
+reg.audits <-
+  dbGetQuery(
+    con,
+    'SELECT audit_task.user_id, role.role, audit_task.audit_task_id,
+            street_edge.street_edge_id,
+            ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS distance_audited
+    FROM street_edge
+    INNER JOIN audit_task
+    ON street_edge.street_edge_id = audit_task.street_edge_id
+    INNER JOIN user_role
+    ON audit_task.user_id = user_role.user_id
+    INNER JOIN role
+    ON user_role.role_id = role.role_id
+    WHERE street_edge.deleted = FALSE
+    AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+    AND completed = TRUE'
+    )
+anon.audits <-
+  dbGetQuery(
+    con,
+    'SELECT DISTINCT ip_address AS user_id, \'Anonymous\' AS role, audit_task.audit_task_id,
+            street_edge.street_edge_id,
+            ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS distance_audited
+    FROM street_edge
+    INNER JOIN audit_task
+    ON street_edge.street_edge_id = audit_task.street_edge_id
+    INNER JOIN audit_task_environment
+    ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+    WHERE street_edge.deleted = FALSE
+    AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+    AND completed = TRUE'
+    )
+reg.times <-
+  dbGetQuery(
+    con,
+    'SELECT user_audit_times.user_id,
+           CAST(extract( second from SUM(diff) ) / 60 +
+                extract( minute from SUM(diff) ) +
+                extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS auditing_time
+    FROM (
+        SELECT audit_task.user_id,
+               (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+        FROM audit_task_interaction
+        INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+        WHERE action = \'ViewControl_MouseDown\'
+            AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+        ) user_audit_times
+    WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
+    GROUP BY user_audit_times.user_id;'
+    )
+anon.times <-
+  dbGetQuery(
+    con,
+    'SELECT user_audit_times.ip_address AS user_id,
+           CAST(extract( second from SUM(diff) ) /60 +
+                extract( minute from SUM(diff) ) +
+                extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS auditing_time
+    FROM
+    (
+        SELECT user_id, ip_address,
+               (timestamp - Lag(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+        FROM audit_task_interaction
+        INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+        INNER JOIN audit_task_environment
+            ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+        WHERE action = \'ViewControl_MouseDown\'
+        AND audit_task.user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+        AND ip_address IN
+        (
+            SELECT ip_address
+            FROM audit_task_environment
+            INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+            WHERE completed = true
+        )
+    ) user_audit_times
+    WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
+    GROUP BY ip_address;'
+    )
+dbDisconnect(con)
+```
+
+```{r transforming.data, echo=FALSE, warning=FALSE}
+# Takes a distance in feet and approximates the number of missions the user completed. The
+# approximation assumes that the first missions are 500, 500, 1000, 2000, and 1280 feet, and all the
+# remaining missions are half a mile (2640 feet).
+approximate.missions.completed <- Vectorize(
+  function(dist.in.feet) {
+    if (dist.in.feet > 7920) 5 + floor((dist.in.feet - 5280) / 2640)
+    else if (dist.in.feet > 5280) 5
+    else if (dist.in.feet > 4000) 4
+    else if (dist.in.feet > 2000) 3
+    else if (dist.in.feet > 1000) 2
+    else if (dist.in.feet > 500) 1
+    else 0
+  }
+)
+
+# Computes minutes_per_mission as either minutes_audited / missions_completed if at least one
+# mission was completed, other wise 500 * minutes_audited / feet_audited (how long the first mission
+# would take, given the auditing speed for what they had done)
+approximate.minutes.per.mission <- Vectorize(
+  function(time.audited, missions.completed, dist.in.feet) {
+    if (missions.completed > 0) time.audited / missions.completed
+    else 500 * time.audited / dist.in.feet
+  }
+)
+
+audits <- bind_rows(reg.audits, anon.audits)
+times <- bind_rows(reg.times, anon.times)
+
+# Selects distinct on audit_task_id, then sums dist audited & computes missions completed by user.
+audit.length <-
+  audits %>%
+  mutate(role = factor(role)) %>%
+  mutate(user_id = factor(user_id)) %>%
+  group_by(user_id, role) %>%
+  distinct(audit_task_id, .keep_all = TRUE) %>%
+  summarize_at(vars(distance_audited), sum) %>%
+  mutate(missions_completed = approximate.missions.completed(distance_audited))
+
+# Computes a few metrics based on distance audited, time auditing, and missions completed.
+speeds <-
+  audit.length %>%
+  left_join(times, by = 'user_id') %>%
+  mutate(feet_per_min = distance_audited / auditing_time,
+         minutes_per_mission = approximate.minutes.per.mission(auditing_time, missions_completed, distance_audited))
+         # minutes_per_mission = auditing_time / missions_completed)
+```
+
+Below are the medians for a few metrics, split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task. The second table shows results assuming a minimum threshold of having audited 500 feet (or one mission-ish).
+
+It would probably be useful to see the metrics, filtering out turkers who's HITs we rejected, for example. Or users with low labeling frequency.
+
+```{r showing.stats, echo=FALSE, warning=FALSE}
+kable(
+  speeds %>%
+    group_by(role) %>%
+    summarise_at(
+      vars(distance_audited, missions_completed, auditing_time, feet_per_min, minutes_per_mission),
+      median, na.rm = TRUE
+      ),
+  digits = 4
+  )
+
+kable(
+  speeds %>%
+    filter(distance_audited >= 500) %>%
+    group_by(role) %>%
+    summarise_at(
+      vars(distance_audited, missions_completed, auditing_time, feet_per_min, minutes_per_mission),
+      median, na.rm = TRUE
+      ),
+  digits = 4
+  )
+```
