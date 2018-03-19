@@ -37,7 +37,7 @@ if (REFRESH_DATA) {
       con,
       'SELECT audit_task.user_id, role.role, audit_task.audit_task_id,
               street_edge.street_edge_id,
-              ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS distance_audited
+              ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS feet_audited
       FROM street_edge
       INNER JOIN audit_task
       ON street_edge.street_edge_id = audit_task.street_edge_id
@@ -54,7 +54,7 @@ if (REFRESH_DATA) {
       con,
       'SELECT DISTINCT ip_address AS user_id, \'Anonymous\' AS role, audit_task.audit_task_id,
               street_edge.street_edge_id,
-              ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS distance_audited
+              ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS feet_audited
       FROM street_edge
       INNER JOIN audit_task
       ON street_edge.street_edge_id = audit_task.street_edge_id
@@ -110,17 +110,36 @@ if (REFRESH_DATA) {
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
       GROUP BY ip_address;'
       )
+  reg.missions <-
+    dbGetQuery(
+      con,
+      'SELECT "user".user_id, COALESCE(count, 0) AS mission_count
+      FROM "user"
+      LEFT JOIN
+      (
+        SELECT "user".user_id, COUNT(mission_user_id)
+        FROM "user"
+        INNER JOIN mission_user
+        ON "user".user_id = mission_user.user_id
+        GROUP BY "user".user_id
+      ) "nonzero_counts"
+      ON nonzero_counts.user_id = "user".user_id
+      WHERE "user".user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\''
+      )
   dbDisconnect(con)
   
   audits <- bind_rows(reg.audits, anon.audits)
   times <- bind_rows(reg.times, anon.times)
   write.csv(audits, '../data/stats_for_paper_audits.csv', row.names = FALSE)
   write.csv(times, '../data/stats_for_paper_times.csv', row.names = FALSE)
+  write.csv(reg.missions, '../data/stats_for_paper_reg_missions.csv', row.names = FALSE)
 } else {
   audit.classes <- c('character', 'character', 'numeric', 'numeric', 'numeric')
   audits <- read.csv('../data/stats_for_paper_audits.csv', colClasses = audit.classes)
   time.classes <- c('character', 'numeric')
   times <- read.csv('../data/stats_for_paper_times.csv', colClasses = time.classes)
+  mission.classes <- c('character', 'numeric')
+  reg.missions <- read.csv('../data/stats_for_paper_reg_missions.csv', colClasses = mission.classes)
 }
 ```
 
@@ -150,23 +169,31 @@ approximate.minutes.per.mission <- Vectorize(
   }
 )
 
-# Selects distinct on audit_task_id, then sums dist audited & computes missions completed by user.
+# Selects distinct on audit_task_id, then sums dist audited.
 audit.length <-
   audits %>%
   mutate(role = factor(role)) %>%
   mutate(user_id = factor(user_id)) %>%
   group_by(user_id, role) %>%
   distinct(audit_task_id, .keep_all = TRUE) %>%
-  summarize_at(vars(distance_audited), sum) %>%
-  mutate(missions_completed = approximate.missions.completed(distance_audited))
+  summarize_at(vars(feet_audited), sum)
+
+# Computes approximate missions completed for anon users.
+all.mission.counts <-
+  audit.length %>%
+  filter(role == "Anonymous") %>%
+  mutate(mission_count = approximate.missions.completed(feet_audited)) %>%
+  select(user_id, mission_count) %>%
+  bind_rows(reg.missions)
 
 # Computes a few metrics based on distance audited, time auditing, and missions completed.
 speeds <-
   audit.length %>%
+  left_join(all.mission.counts, by = 'user_id') %>%
   left_join(times, by = 'user_id') %>%
-  mutate(feet_per_min = distance_audited / auditing_time,
-         minutes_per_mission = approximate.minutes.per.mission(auditing_time, missions_completed, distance_audited))
-         # minutes_per_mission = auditing_time / missions_completed)
+  mutate(feet_per_min = feet_audited / auditing_time,
+         minutes_per_mission = approximate.minutes.per.mission(auditing_time, mission_count, feet_audited))
+         # minutes_per_mission = auditing_time / mission_count)
 ```
 
 Below are the medians for a few metrics, split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task. The second table shows results assuming a minimum threshold of having audited 500 feet (or one mission-ish).
@@ -178,7 +205,7 @@ kable(
   speeds %>%
     group_by(role) %>%
     summarise_at(
-      vars(distance_audited, missions_completed, auditing_time, feet_per_min, minutes_per_mission),
+      vars(feet_audited, mission_count, auditing_time, feet_per_min, minutes_per_mission),
       median, na.rm = TRUE
       ),
   digits = 4
@@ -186,10 +213,10 @@ kable(
 
 kable(
   speeds %>%
-    filter(distance_audited >= 500) %>%
+    filter(feet_audited >= 500) %>%
     group_by(role) %>%
     summarise_at(
-      vars(distance_audited, missions_completed, auditing_time, feet_per_min, minutes_per_mission),
+      vars(feet_audited, mission_count, auditing_time, feet_per_min, minutes_per_mission),
       median, na.rm = TRUE
       ),
   digits = 4
