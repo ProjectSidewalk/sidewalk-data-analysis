@@ -11,9 +11,9 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
 library(RPostgreSQL)
-library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(dplyr)
 
 REFRESH_DATA = FALSE
 ```
@@ -200,7 +200,6 @@ approximate.minutes.per.mission <- Vectorize(
 label.counts <-
   labels %>%
   # filter(label_type_id != 7) %>%
-  mutate(user_id = factor(user_id)) %>%
   group_by(user_id) %>%
   summarize_at(vars(label_id), n_distinct) %>%
   rename(label_count = label_id)
@@ -208,15 +207,16 @@ label.counts <-
 # Selects distinct on audit_task_id, then sums dist audited.
 audit.length <-
   audits %>%
-  mutate(role = factor(role)) %>%
-  mutate(user_id = factor(user_id)) %>%
+  mutate(role = factor(role),
+         role = recode(role, User = 'Registered', .default = levels(role))) %>%
   group_by(user_id, role) %>%
   distinct(audit_task_id, .keep_all = TRUE) %>%
-  summarize(feet_audited = sum(feet_audited), audit_count = n()) %>%
+  summarise(feet_audited = sum(feet_audited), audit_count = n()) %>%
+  ungroup() %>%
   mutate(miles_audited = feet_audited / 5280) %>%
   left_join(label.counts, by = 'user_id') %>%
   replace_na(list(label_count = 0)) %>%
-mutate(labels_per_100m = 328.084 * label_count / feet_audited)
+  mutate(labels_per_100m = 328.084 * label_count / feet_audited)
 
 # Computes approximate missions completed for anon users.
 all.mission.counts <-
