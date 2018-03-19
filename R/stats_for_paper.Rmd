@@ -32,6 +32,30 @@ if (REFRESH_DATA) {
 
 ```{r reading.data, echo=FALSE, include=FALSE}
 if (REFRESH_DATA) {
+  reg.labels <-
+    dbGetQuery(
+      con,
+      'SELECT label_id, user_id, label_type_id, audit_task.audit_task_id
+      FROM audit_task
+      INNER JOIN label
+      ON audit_task.audit_task_id = label.audit_task_id
+      WHERE label.deleted = FALSE
+      AND user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+      AND completed = TRUE'
+      )
+  anon.labels <-
+    dbGetQuery(
+      con,
+      'SELECT DISTINCT label_id, ip_address AS user_id, label_type_id, audit_task.audit_task_id
+      FROM audit_task
+      INNER JOIN label
+      ON audit_task.audit_task_id = label.audit_task_id
+      INNER JOIN audit_task_environment
+      ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+      WHERE label.deleted = FALSE
+      AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+      AND completed = TRUE'
+      )
   reg.audits <-
     dbGetQuery(
       con,
@@ -130,14 +154,18 @@ if (REFRESH_DATA) {
   
   audits <- bind_rows(reg.audits, anon.audits)
   times <- bind_rows(reg.times, anon.times)
+  labels <- bind_rows(reg.labels, anon.labels)
   write.csv(audits, '../data/stats_for_paper_audits.csv', row.names = FALSE)
   write.csv(times, '../data/stats_for_paper_times.csv', row.names = FALSE)
+  write.csv(labels, '../data/stats_for_paper_labels.csv', row.names = FALSE)
   write.csv(reg.missions, '../data/stats_for_paper_reg_missions.csv', row.names = FALSE)
 } else {
   audit.classes <- c('character', 'character', 'numeric', 'numeric', 'numeric')
   audits <- read.csv('../data/stats_for_paper_audits.csv', colClasses = audit.classes)
   time.classes <- c('character', 'numeric')
   times <- read.csv('../data/stats_for_paper_times.csv', colClasses = time.classes)
+  label.classes <- c('numeric', 'character', 'numeric', 'numeric')
+  labels <- read.csv('../data/stats_for_paper_labels.csv', colClasses = label.classes)
   mission.classes <- c('character', 'numeric')
   reg.missions <- read.csv('../data/stats_for_paper_reg_missions.csv', colClasses = mission.classes)
 }
@@ -169,6 +197,14 @@ approximate.minutes.per.mission <- Vectorize(
   }
 )
 
+label.counts <-
+  labels %>%
+  # filter(label_type_id != 7) %>%
+  mutate(user_id = factor(user_id)) %>%
+  group_by(user_id) %>%
+  summarize_at(vars(label_id), n_distinct) %>%
+  rename(label_count = label_id)
+
 # Selects distinct on audit_task_id, then sums dist audited.
 audit.length <-
   audits %>%
@@ -177,7 +213,10 @@ audit.length <-
   group_by(user_id, role) %>%
   distinct(audit_task_id, .keep_all = TRUE) %>%
   summarize_at(vars(feet_audited), sum) %>%
-  mutate(miles_audited = feet_audited / 5280)
+  mutate(miles_audited = feet_audited / 5280) %>%
+  left_join(label.counts, by = 'user_id') %>%
+  replace_na(list(label_count = 0)) %>%
+mutate(labels_per_100m = 328.084 * label_count / feet_audited)
 
 # Computes approximate missions completed for anon users.
 all.mission.counts <-
@@ -206,7 +245,7 @@ kable(
   speeds %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, minutes_audited, minutes_per_1k_ft, minutes_per_mission),
+      vars(miles_audited, mission_count, minutes_audited, minutes_per_1k_ft, label_count, labels_per_100m),
       median, na.rm = TRUE
       ),
   digits = 3
@@ -217,7 +256,7 @@ kable(
     filter(feet_audited >= 500) %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, minutes_audited, minutes_per_1k_ft, minutes_per_mission),
+      vars(miles_audited, mission_count, minutes_audited, minutes_per_1k_ft, label_count, labels_per_100m),
       median, na.rm = TRUE
       ),
   digits = 3
@@ -227,7 +266,7 @@ kable(
   speeds %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, minutes_audited),
+      vars(miles_audited, mission_count, minutes_audited, label_count),
       sum, na.rm = TRUE
       ),
   digits = 3
@@ -238,7 +277,7 @@ kable(
     filter(feet_audited >= 500) %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, minutes_audited),
+      vars(miles_audited, mission_count, minutes_audited, label_count),
       sum, na.rm = TRUE
       ),
   digits = 3
