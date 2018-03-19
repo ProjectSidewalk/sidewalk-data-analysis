@@ -240,24 +240,37 @@ speeds <-
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
 ```{r showing.stats, echo=FALSE, warning=FALSE}
-kable(
+stats.to.display <-
   speeds %>%
-    filter(labels_per_100m >= 3.75) %>%
+  filter(role %in% c('Registered', 'Anonymous', 'Turker'),
+         labels_per_100m >= 3.75)
+
+kable(
+  stats.to.display %>%
     group_by(role) %>%
-    summarise_at(
-      vars(miles_audited, mission_count, audit_count, minutes_audited, minutes_per_1k_ft, label_count, labels_per_100m),
-      median, na.rm = TRUE
+    summarise(
+      n_users = n(),
+      miles = median(miles_audited, na.rm = TRUE),
+      missions = median(mission_count, na.rm = TRUE),
+      audits = median(audit_count, na.rm = TRUE),
+      minutes_audited = median(minutes_audited, na.rm = TRUE),
+      minutes_per_1k_ft = median(minutes_per_1k_ft, na.rm = TRUE),
+      labels = median(label_count, na.rm = TRUE),
+      labels_per_100m = median(labels_per_100m, na.rm = TRUE)
       ),
   digits = 3
   )
 
 kable(
-  speeds %>%
-    filter(labels_per_100m >= 3.75) %>%
+  stats.to.display %>%
     group_by(role) %>%
-    summarise_at(
-      vars(miles_audited, mission_count, audit_count, hours_audited, label_count),
-      sum, na.rm = TRUE
+    summarise(
+      n_users = n(),
+      miles = sum(miles_audited, na.rm = TRUE),
+      missions = sum(mission_count, na.rm = TRUE),
+      audits = sum(audit_count, na.rm = TRUE),
+      hours_audited = sum(hours_audited, na.rm = TRUE),
+      labels = sum(label_count, na.rm = TRUE)
       ),
   digits = 3
   )
