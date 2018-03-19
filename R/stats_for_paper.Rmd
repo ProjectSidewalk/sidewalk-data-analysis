@@ -70,7 +70,7 @@ if (REFRESH_DATA) {
       'SELECT user_audit_times.user_id,
              CAST(extract( second from SUM(diff) ) / 60 +
                   extract( minute from SUM(diff) ) +
-                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS auditing_time
+                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS minutes_audited
       FROM (
           SELECT audit_task.user_id,
                  (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
@@ -88,7 +88,7 @@ if (REFRESH_DATA) {
       'SELECT user_audit_times.ip_address AS user_id,
              CAST(extract( second from SUM(diff) ) /60 +
                   extract( minute from SUM(diff) ) +
-                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS auditing_time
+                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS minutes_audited
       FROM
       (
           SELECT user_id, ip_address,
@@ -192,9 +192,9 @@ speeds <-
   audit.length %>%
   left_join(all.mission.counts, by = 'user_id') %>%
   left_join(times, by = 'user_id') %>%
-  mutate(feet_per_min = feet_audited / auditing_time,
-         minutes_per_mission = approximate.minutes.per.mission(auditing_time, mission_count, feet_audited))
-         # minutes_per_mission = auditing_time / mission_count)
+  mutate(feet_per_min = feet_audited / minutes_audited,
+         minutes_per_mission = approximate.minutes.per.mission(minutes_audited, mission_count, feet_audited),
+         minutes_per_1k_ft = 1000 * minutes_audited / feet_audited)
 ```
 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task. The second table shows results assuming a minimum threshold of having audited 500 feet (or one mission-ish).
@@ -206,10 +206,10 @@ kable(
   speeds %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, auditing_time, feet_per_min, minutes_per_mission),
+      vars(miles_audited, mission_count, minutes_audited, minutes_per_1k_ft, minutes_per_mission),
       median, na.rm = TRUE
       ),
-  digits = 4
+  digits = 3
   )
 
 kable(
@@ -217,20 +217,20 @@ kable(
     filter(feet_audited >= 500) %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, auditing_time, feet_per_min, minutes_per_mission),
+      vars(miles_audited, mission_count, minutes_audited, minutes_per_1k_ft, minutes_per_mission),
       median, na.rm = TRUE
       ),
-  digits = 4
+  digits = 3
   )
 
 kable(
   speeds %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, auditing_time, feet_per_min, minutes_per_mission),
+      vars(miles_audited, mission_count, minutes_audited),
       sum, na.rm = TRUE
       ),
-  digits = 4
+  digits = 3
   )
 
 kable(
@@ -238,9 +238,9 @@ kable(
     filter(feet_audited >= 500) %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, auditing_time, feet_per_min, minutes_per_mission),
+      vars(miles_audited, mission_count, minutes_audited),
       sum, na.rm = TRUE
       ),
-  digits = 4
+  digits = 3
   )
 ```
