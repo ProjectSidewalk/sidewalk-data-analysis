@@ -212,7 +212,7 @@ audit.length <-
   mutate(user_id = factor(user_id)) %>%
   group_by(user_id, role) %>%
   distinct(audit_task_id, .keep_all = TRUE) %>%
-  summarize_at(vars(feet_audited), sum) %>%
+  summarize(feet_audited = sum(feet_audited), audit_count = n()) %>%
   mutate(miles_audited = feet_audited / 5280) %>%
   left_join(label.counts, by = 'user_id') %>%
   replace_na(list(label_count = 0)) %>%
@@ -245,7 +245,7 @@ kable(
     filter(labels_per_100m >= 3.75) %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, minutes_audited, minutes_per_1k_ft, label_count, labels_per_100m),
+      vars(miles_audited, mission_count, audit_count, minutes_audited, minutes_per_1k_ft, label_count, labels_per_100m),
       median, na.rm = TRUE
       ),
   digits = 3
@@ -256,7 +256,7 @@ kable(
     filter(labels_per_100m >= 3.75) %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, hours_audited, label_count),
+      vars(miles_audited, mission_count, audit_count, hours_audited, label_count),
       sum, na.rm = TRUE
       ),
   digits = 3
