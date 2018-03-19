@@ -1,7 +1,7 @@
 ---
 title: "Statistics for Paper"
 author: "Mikey Saugstad"
-date: "March 14, 2018"
+date: "March 19, 2018"
 output:
   html_document:
     toc: yes
@@ -233,16 +233,16 @@ speeds <-
   left_join(times, by = 'user_id') %>%
   mutate(feet_per_min = feet_audited / minutes_audited,
          minutes_per_mission = approximate.minutes.per.mission(minutes_audited, mission_count, feet_audited),
-         minutes_per_1k_ft = 1000 * minutes_audited / feet_audited)
+         minutes_per_1k_ft = 1000 * minutes_audited / feet_audited,
+         hours_audited = minutes_audited / 60)
 ```
 
-Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task. The second table shows results assuming a minimum threshold of having audited 500 feet (or one mission-ish).
-
-It would probably be useful to see the metrics, filtering out turkers who's HITs we rejected, for example. Or users with low labeling frequency.
+Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
 ```{r showing.stats, echo=FALSE, warning=FALSE}
 kable(
   speeds %>%
+    filter(labels_per_100m >= 3.75) %>%
     group_by(role) %>%
     summarise_at(
       vars(miles_audited, mission_count, minutes_audited, minutes_per_1k_ft, label_count, labels_per_100m),
@@ -253,31 +253,10 @@ kable(
 
 kable(
   speeds %>%
-    filter(feet_audited >= 500) %>%
+    filter(labels_per_100m >= 3.75) %>%
     group_by(role) %>%
     summarise_at(
-      vars(miles_audited, mission_count, minutes_audited, minutes_per_1k_ft, label_count, labels_per_100m),
-      median, na.rm = TRUE
-      ),
-  digits = 3
-  )
-
-kable(
-  speeds %>%
-    group_by(role) %>%
-    summarise_at(
-      vars(miles_audited, mission_count, minutes_audited, label_count),
-      sum, na.rm = TRUE
-      ),
-  digits = 3
-  )
-
-kable(
-  speeds %>%
-    filter(feet_audited >= 500) %>%
-    group_by(role) %>%
-    summarise_at(
-      vars(miles_audited, mission_count, minutes_audited, label_count),
+      vars(miles_audited, mission_count, hours_audited, label_count),
       sum, na.rm = TRUE
       ),
   digits = 3
