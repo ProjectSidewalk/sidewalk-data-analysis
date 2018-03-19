@@ -124,13 +124,13 @@ $(document).ready(function () {
 </div>
 
 
-<p>Below are the medians for a few metrics, split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task. The second table shows results assuming a minimum threshold of having audited 500 feet (or one mission-ish).</p>
+<p>Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task. The second table shows results assuming a minimum threshold of having audited 500 feet (or one mission-ish).</p>
 <p>It would probably be useful to see the metrics, filtering out turkers who’s HITs we rejected, for example. Or users with low labeling frequency.</p>
 <table>
 <thead>
 <tr class="header">
 <th align="left">role</th>
-<th align="right">feet_audited</th>
+<th align="right">miles_audited</th>
 <th align="right">mission_count</th>
 <th align="right">auditing_time</th>
 <th align="right">feet_per_min</th>
@@ -140,7 +140,7 @@ $(document).ready(function () {
 <tbody>
 <tr class="odd">
 <td align="left">Administrator</td>
-<td align="right">46475.390</td>
+<td align="right">8.8022</td>
 <td align="right">26.5</td>
 <td align="right">229.710</td>
 <td align="right">202.0719</td>
@@ -148,7 +148,7 @@ $(document).ready(function () {
 </tr>
 <tr class="even">
 <td align="left">Anonymous</td>
-<td align="right">446.928</td>
+<td align="right">0.0846</td>
 <td align="right">0.0</td>
 <td align="right">8.750</td>
 <td align="right">74.4353</td>
@@ -156,7 +156,7 @@ $(document).ready(function () {
 </tr>
 <tr class="odd">
 <td align="left">Owner</td>
-<td align="right">366320.661</td>
+<td align="right">69.3789</td>
 <td align="right">217.0</td>
 <td align="right">2040.250</td>
 <td align="right">179.5469</td>
@@ -164,7 +164,7 @@ $(document).ready(function () {
 </tr>
 <tr class="even">
 <td align="left">Researcher</td>
-<td align="right">4956.886</td>
+<td align="right">0.9388</td>
 <td align="right">4.0</td>
 <td align="right">22.860</td>
 <td align="right">171.9690</td>
@@ -172,7 +172,7 @@ $(document).ready(function () {
 </tr>
 <tr class="odd">
 <td align="left">Turker</td>
-<td align="right">10335.572</td>
+<td align="right">1.9575</td>
 <td align="right">8.0</td>
 <td align="right">74.730</td>
 <td align="right">132.1926</td>
@@ -180,7 +180,7 @@ $(document).ready(function () {
 </tr>
 <tr class="even">
 <td align="left">User</td>
-<td align="right">3869.903</td>
+<td align="right">0.7329</td>
 <td align="right">4.0</td>
 <td align="right">28.135</td>
 <td align="right">164.6205</td>
@@ -192,7 +192,7 @@ $(document).ready(function () {
 <thead>
 <tr class="header">
 <th align="left">role</th>
-<th align="right">feet_audited</th>
+<th align="right">miles_audited</th>
 <th align="right">mission_count</th>
 <th align="right">auditing_time</th>
 <th align="right">feet_per_min</th>
@@ -202,7 +202,7 @@ $(document).ready(function () {
 <tbody>
 <tr class="odd">
 <td align="left">Administrator</td>
-<td align="right">46475.390</td>
+<td align="right">8.8022</td>
 <td align="right">26.5</td>
 <td align="right">229.710</td>
 <td align="right">202.0719</td>
@@ -210,7 +210,7 @@ $(document).ready(function () {
 </tr>
 <tr class="even">
 <td align="left">Anonymous</td>
-<td align="right">1556.159</td>
+<td align="right">0.2947</td>
 <td align="right">2.0</td>
 <td align="right">12.065</td>
 <td align="right">141.4030</td>
@@ -218,7 +218,7 @@ $(document).ready(function () {
 </tr>
 <tr class="odd">
 <td align="left">Owner</td>
-<td align="right">366320.661</td>
+<td align="right">69.3789</td>
 <td align="right">217.0</td>
 <td align="right">2040.250</td>
 <td align="right">179.5469</td>
@@ -226,7 +226,7 @@ $(document).ready(function () {
 </tr>
 <tr class="even">
 <td align="left">Researcher</td>
-<td align="right">5018.849</td>
+<td align="right">0.9505</td>
 <td align="right">4.5</td>
 <td align="right">26.680</td>
 <td align="right">186.2430</td>
@@ -234,7 +234,7 @@ $(document).ready(function () {
 </tr>
 <tr class="odd">
 <td align="left">Turker</td>
-<td align="right">13080.287</td>
+<td align="right">2.4773</td>
 <td align="right">9.0</td>
 <td align="right">96.170</td>
 <td align="right">136.1713</td>
@@ -242,11 +242,135 @@ $(document).ready(function () {
 </tr>
 <tr class="even">
 <td align="left">User</td>
-<td align="right">5437.534</td>
+<td align="right">1.0298</td>
 <td align="right">5.0</td>
 <td align="right">35.370</td>
 <td align="right">185.7829</td>
 <td align="right">7.6267</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">role</th>
+<th align="right">miles_audited</th>
+<th align="right">mission_count</th>
+<th align="right">auditing_time</th>
+<th align="right">feet_per_min</th>
+<th align="right">minutes_per_mission</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Administrator</td>
+<td align="right">141.0918</td>
+<td align="right">393</td>
+<td align="right">2390.67</td>
+<td align="right">1489.0418</td>
+<td align="right">53.8749</td>
+</tr>
+<tr class="even">
+<td align="left">Anonymous</td>
+<td align="right">199.3966</td>
+<td align="right">686</td>
+<td align="right">6327.20</td>
+<td align="right">70846.5247</td>
+<td align="right">7858.6457</td>
+</tr>
+<tr class="odd">
+<td align="left">Owner</td>
+<td align="right">69.3789</td>
+<td align="right">217</td>
+<td align="right">2040.25</td>
+<td align="right">179.5469</td>
+<td align="right">9.4021</td>
+</tr>
+<tr class="even">
+<td align="left">Researcher</td>
+<td align="right">24.3752</td>
+<td align="right">95</td>
+<td align="right">636.32</td>
+<td align="right">4495.5245</td>
+<td align="right">97.8062</td>
+</tr>
+<tr class="odd">
+<td align="left">Turker</td>
+<td align="right">1427.3685</td>
+<td align="right">3655</td>
+<td align="right">26726.61</td>
+<td align="right">12090.7892</td>
+<td align="right">360.7894</td>
+</tr>
+<tr class="even">
+<td align="left">User</td>
+<td align="right">534.0849</td>
+<td align="right">1642</td>
+<td align="right">12015.73</td>
+<td align="right">Inf</td>
+<td align="right">2151.3905</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">role</th>
+<th align="right">miles_audited</th>
+<th align="right">mission_count</th>
+<th align="right">auditing_time</th>
+<th align="right">feet_per_min</th>
+<th align="right">minutes_per_mission</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Administrator</td>
+<td align="right">141.0918</td>
+<td align="right">393</td>
+<td align="right">2390.67</td>
+<td align="right">1489.0418</td>
+<td align="right">53.8749</td>
+</tr>
+<tr class="even">
+<td align="left">Anonymous</td>
+<td align="right">189.5583</td>
+<td align="right">686</td>
+<td align="right">4696.12</td>
+<td align="right">52390.7102</td>
+<td align="right">1619.5285</td>
+</tr>
+<tr class="odd">
+<td align="left">Owner</td>
+<td align="right">69.3789</td>
+<td align="right">217</td>
+<td align="right">2040.25</td>
+<td align="right">179.5469</td>
+<td align="right">9.4021</td>
+</tr>
+<tr class="even">
+<td align="left">Researcher</td>
+<td align="right">24.3282</td>
+<td align="right">94</td>
+<td align="right">634.35</td>
+<td align="right">4369.7392</td>
+<td align="right">95.8362</td>
+</tr>
+<tr class="odd">
+<td align="left">Turker</td>
+<td align="right">1426.9727</td>
+<td align="right">3643</td>
+<td align="right">26659.59</td>
+<td align="right">11774.4820</td>
+<td align="right">327.2794</td>
+</tr>
+<tr class="even">
+<td align="left">User</td>
+<td align="right">532.5258</td>
+<td align="right">1596</td>
+<td align="right">11647.74</td>
+<td align="right">Inf</td>
+<td align="right">1812.3295</td>
 </tr>
 </tbody>
 </table>
