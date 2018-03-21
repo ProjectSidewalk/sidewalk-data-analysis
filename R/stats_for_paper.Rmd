@@ -23,6 +23,15 @@ library(dplyr)
 # If true, queries local postges database for data (could take a very long time), then saves in
 # CSVs, so you should set to FALSE after running with the actual queries once.
 REFRESH_DATA = FALSE
+label.type.mapping <- c(
+  '1' = 'CurbRamp',
+  '2' = 'NoCurbRamp',
+  '3' = 'Obstacle',
+  '4' = 'SurfaceProblem',
+  '5' = 'Other',
+  '6' = 'Occlusion',
+  '7' = 'NoSidewalk'
+)
 ```
 
 ```{r connect, echo=FALSE}
@@ -244,6 +253,39 @@ speeds <-
          hours_audited = minutes_audited / 60)
 ```
 
+## Public Deployment
+
+NOTE: The public deployment dataset being used right now is not all that recent, so do not draw conclusions from what is below right now.
+
+### How much data was collected?
+
+Labels, labels by label type, anything else? (this is the one section before filtering low quality work)
+```{r how.much.data, echo=FALSE, warning=FALSE}
+kable(
+labels %>%
+  distinct(label_id, .keep_all = TRUE) %>%
+  count(label_type_id) %>%
+  mutate(label_type = label.type.mapping[label_type_id]) %>%
+  select(label_type, n) %>%
+  bind_rows(list(label_type = 'Total', n = nrow(labels))) %>%
+  spread(label_type, n),
+align = 'l'
+)
+```
+
+### Data characteristics
+
+TODO: Number of labels (only high quality users)<br>
+TODO: labels by label type<br>
+TODO: number of audits<br>
+TODO: anything else?
+
+### User stats and tool usage
+
+TODO: coverage for each user group<br>
+TODO: how long users stay on tool (use same method as computing total time spent, just with bigger time difference)<br>
+TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)
+
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
 ```{r showing.stats, echo=FALSE, warning=FALSE}
@@ -265,7 +307,8 @@ kable(
       labels = median(label_count, na.rm = TRUE),
       labels_per_100m = median(labels_per_100m, na.rm = TRUE)
       ),
-  digits = 3
+  digits = 3,
+  align = 'l'
   )
 
 kable(
@@ -279,6 +322,13 @@ kable(
       hours_audited = sum(hours_audited, na.rm = TRUE),
       labels = sum(label_count, na.rm = TRUE)
       ),
-  digits = 3
+  digits = 3,
+  align = 'l'
   )
 ```
+
+### Possible Story 1: Data overlap and agreement between users
+
+Amongst all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement amongst them? (see comment in Outline document for details on implementation)
+
+## Turk Study
