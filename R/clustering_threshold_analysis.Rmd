@@ -11,6 +11,10 @@ output:
 library(dplyr)
 library(ggplot2)
 theme_set(theme_bw() + theme(text = element_text(size = 16)))
+
+# Run the following in console when you want to generate github flavored markdown as well.
+# library(rmarkdown)
+# render('R/clustering_threshold_analysis.Rmd', c('html_document', 'github_document'))
 ```
 
 ## Single-user clustering

@@ -19,6 +19,10 @@ library(knitr)
 library(tidyr)
 library(rlang)
 library(data.table)
+
+# Run the following in console when you want to generate github flavored markdown as well.
+# library(rmarkdown)
+# render('R/accuracy_analysis-pre_single_user_clustering.Rmd', c('html_document', 'github_document'))
 ```
 
 ## Preliminary Notes

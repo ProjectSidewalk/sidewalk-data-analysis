@@ -21,6 +21,10 @@ library(rlang)
 library(data.table)
 
 my.theme.discrete.x <- theme_bw() + theme(panel.grid.major.x = element_blank())
+
+# Run the following in console when you want to generate github flavored markdown as well.
+# library(rmarkdown)
+# render('R/accuracy_analysis.Rmd', c('html_document', 'github_document'))
 ```
 
 ## Preliminary Notes

@@ -12,6 +12,10 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 
+# Run the following in console when you want to generate github flavored markdown as well.
+# library(rmarkdown)
+# render('R/reaudit_analysis.Rmd', c('html_document', 'github_document'))
+
 FIVE_HUNDRED_FEET <- 152.4 # in meters
 ONE_THOUSAND_FEET <- 304.8 # in meters
 ```
