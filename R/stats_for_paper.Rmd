@@ -4,8 +4,10 @@ author: "Mikey Saugstad"
 date: "March 19, 2018"
 output:
   html_document:
-    keep_md: true
     toc: yes
+  github_document:
+    toc: yes
+  
 ---
 
 ```{r setup, include=FALSE}
@@ -15,7 +17,13 @@ library(RPostgreSQL)
 library(ggplot2)
 library(tidyr)
 library(dplyr)
+library(rmarkdown)
 
+# Run the following in console when you want to generate github flavored markdown as well.
+# render("R/stats_for_paper.Rmd", output_format = "all")
+
+# If true, queries local postges database for data (could take a very long time), then saves in
+# CSVs, so you should set to FALSE after running with the actual queries once.
 REFRESH_DATA = FALSE
 ```
 
