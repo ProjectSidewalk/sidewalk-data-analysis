@@ -113,7 +113,8 @@ if (REFRESH_DATA) {
              CAST(extract( second from SUM(diff) ) / 60 +
                   extract( minute from SUM(diff) ) +
                   extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS minutes_audited
-      FROM (
+      FROM
+      (
           SELECT audit_task.user_id,
                  (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
           FROM audit_task_interaction
@@ -152,6 +153,62 @@ if (REFRESH_DATA) {
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
       GROUP BY ip_address;'
       )
+  reg.sessions <-
+    dbGetQuery(
+      con,
+      'SELECT "user".user_id, 1 + COALESCE(n_sessions_minus_one, 0) AS n_sessions
+      FROM
+      (
+          SELECT user_audit_times.user_id, COUNT(diff) AS n_sessions_minus_one
+          FROM
+          (
+              SELECT audit_task.user_id,
+                     (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+              FROM audit_task_interaction
+              INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+              WHERE action = \'ViewControl_MouseDown\'
+                  AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+          ) user_audit_times
+          WHERE diff > \'01:00:00.000\'
+          GROUP BY user_audit_times.user_id
+      ) sess_counts
+      RIGHT JOIN "user" ON sess_counts.user_id = "user".user_id;'
+      )
+  anon.sessions <-
+    dbGetQuery(
+      con,
+      'SELECT ips.ip_address AS user_id, 1 + COALESCE(n_sessions_minus_one, 0) AS n_sessions
+      FROM
+      (
+          SELECT DISTINCT(ip_address) FROM audit_task_environment
+      ) ips
+      LEFT JOIN
+      (
+          SELECT user_audit_times.ip_address, COUNT(diff) AS n_sessions_minus_one
+          FROM
+          (
+              SELECT user_id,
+                     ip_address,
+                     (timestamp - Lag(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+              FROM audit_task_interaction
+              INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+              INNER JOIN audit_task_environment
+                  ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+              WHERE action = \'ViewControl_MouseDown\'
+              AND audit_task.user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+              AND ip_address IN
+              (
+                  SELECT ip_address
+                  FROM audit_task_environment
+                  INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+                  WHERE completed = true
+              )
+          ) user_audit_times
+          WHERE diff > \'01:00:00.000\'
+          GROUP BY ip_address
+      ) sess_counts
+      ON ips.ip_address = sess_counts.ip_address;'
+      )
   reg.missions <-
     dbGetQuery(
       con,
@@ -173,9 +230,11 @@ if (REFRESH_DATA) {
   audits <- bind_rows(reg.audits, anon.audits)
   times <- bind_rows(reg.times, anon.times)
   labels <- bind_rows(reg.labels, anon.labels)
+  sessions <- bind_rows(reg.sessions, anon.sessions)
   write.csv(audits, '../data/stats_for_paper_audits.csv', row.names = FALSE)
   write.csv(times, '../data/stats_for_paper_times.csv', row.names = FALSE)
   write.csv(labels, '../data/stats_for_paper_labels.csv', row.names = FALSE)
+  write.csv(sessions, '../data/stats_for_paper_sessions.csv', row.names = FALSE)
   write.csv(reg.missions, '../data/stats_for_paper_reg_missions.csv', row.names = FALSE)
 } else {
   audit.classes <- c('character', 'character', 'numeric', 'numeric', 'numeric')
@@ -184,6 +243,8 @@ if (REFRESH_DATA) {
   times <- read.csv('../data/stats_for_paper_times.csv', colClasses = time.classes)
   label.classes <- c('numeric', 'character', 'numeric', 'numeric')
   labels <- read.csv('../data/stats_for_paper_labels.csv', colClasses = label.classes)
+  session.classes <- c('character', 'numeric')
+  sessions <- read.csv('../data/stats_for_paper_sessions.csv', colClasses = session.classes)
   mission.classes <- c('character', 'numeric')
   reg.missions <- read.csv('../data/stats_for_paper_reg_missions.csv', colClasses = mission.classes)
 }
@@ -234,6 +295,7 @@ audit.length <-
   mutate(miles_audited = feet_audited / 5280) %>%
   left_join(label.counts, by = 'user_id') %>%
   replace_na(list(label_count = 0)) %>%
+  left_join(sessions, by = 'user_id') %>%
   mutate(labels_per_100m = 328.084 * label_count / feet_audited)
 
 # Computes approximate missions completed for anon users.
@@ -252,7 +314,8 @@ speeds <-
   mutate(feet_per_min = feet_audited / minutes_audited,
          minutes_per_mission = approximate.minutes.per.mission(minutes_audited, mission_count, feet_audited),
          minutes_per_1k_ft = 1000 * minutes_audited / feet_audited,
-         hours_audited = minutes_audited / 60)
+         hours_audited = minutes_audited / 60,
+         minutes_per_session = minutes_audited / n_sessions)
 
 filtered.speeds <-
   speeds %>%
@@ -309,8 +372,7 @@ There have been a total of `r n.audits` audits by our users across `r n.streets`
 
 ### User stats and tool usage
 
-TODO: coverage for each user group<br>
-TODO: how long users stay on tool (use same method as computing total time spent, just with bigger time difference)<br>
+TODO: how long users stay on tool in a single sitting (use same method as computing total time spent, just with bigger time difference)<br>
 TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)
 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
@@ -327,7 +389,9 @@ kable(
       minutes_audited = median(minutes_audited, na.rm = TRUE),
       minutes_per_1k_ft = median(minutes_per_1k_ft, na.rm = TRUE),
       labels = median(label_count, na.rm = TRUE),
-      labels_per_100m = median(labels_per_100m, na.rm = TRUE)
+      labels_per_100m = median(labels_per_100m, na.rm = TRUE),
+      sessions = median(n_sessions, na.rm = TRUE),
+      mins_per_sess = median(minutes_per_session, na.rm = TRUE)
       ),
   digits = 3,
   align = 'l'
@@ -345,7 +409,8 @@ kable(
       missions = sum(mission_count, na.rm = TRUE),
       audits = sum(audit_count, na.rm = TRUE),
       hours_audited = sum(hours_audited, na.rm = TRUE),
-      labels = sum(label_count, na.rm = TRUE)
+      labels = sum(label_count, na.rm = TRUE),
+      '>1 sess' = paste0(format(100 * sum(n_sessions > 1) / n(), digits = 2), '%')
       ),
   digits = 3,
   align = 'l'

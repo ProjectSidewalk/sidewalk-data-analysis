@@ -14,9 +14,9 @@ Note that this is the only section for the public deployment where we are not fi
 
 TODO: anything else?
 
-| CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
-|:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
-| 95976    | 13678      | 23772      | 16255    | 813       | 546   | 5960           | 157000 |
+| CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total |
+|:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:------|
+| 39786    | 4118       | 12142      | 3783     | 555       | 178   | 3582           | 64144 |
 
 ### Data characteristics
 
@@ -26,27 +26,25 @@ TODO: anything else?
 
 | CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total |
 |:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:------|
-| 52841    | 5054       | 16141      | 13788    | 399       | 330   | 3086           | 91639 |
+| 20097    | 2373       | 4595       | 2186     | 225       | 105   | 1328           | 30909 |
 
-There have been a total of 13455 audits by our users across 9822 streets, averaging 1.37 audits per street.
+There have been a total of 4802 audits by our users across 4111 streets, averaging 1.17 audits per street.
 
 ### User stats and tool usage
 
-TODO: coverage for each user group<br> TODO: how long users stay on tool (use same method as computing total time spent, just with bigger time difference)<br> TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)
+TODO: how long users stay on tool in a single sitting (use same method as computing total time spent, just with bigger time difference)<br> TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)
 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
-| role       | n\_users | miles | missions | audits | minutes\_audited | minutes\_per\_1k\_ft | labels | labels\_per\_100m |
-|:-----------|:---------|:------|:---------|:-------|:-----------------|:---------------------|:-------|:------------------|
-| Anonymous  | 224      | 0.088 | 0        | 2      | 9.83             | 15.519               | 10.5   | 6.838             |
-| Turker     | 33       | 0.537 | 5        | 8      | 34.33            | 10.917               | 86.0   | 7.682             |
-| Registered | 149      | 0.737 | 4        | 9      | 31.17            | 6.821                | 69.0   | 5.909             |
+| role       | n\_users | miles | missions | audits | minutes\_audited | minutes\_per\_1k\_ft | labels | labels\_per\_100m | sessions | mins\_per\_sess |
+|:-----------|:---------|:------|:---------|:-------|:-----------------|:---------------------|:-------|:------------------|:---------|:----------------|
+| Anonymous  | 132      | 0.084 | 0        | 2      | 10.685           | 16.507               | 10     | 6.348             | 2        | 6.969           |
+| Registered | 123      | 0.801 | 4        | 12     | 37.470           | 6.719                | 78     | 5.792             | 1        | 23.013          |
 
-| role       | n\_users | miles   | coverage | missions | audits | hours\_audited | labels |
-|:-----------|:---------|:--------|:---------|:---------|:-------|:---------------|:-------|
-| Anonymous  | 224      | 72.250  | 6.7%     | 278      | 1046   | 58.236         | 6919   |
-| Turker     | 33       | 600.387 | 56%      | 1669     | 7635   | 247.206        | 53543  |
-| Registered | 149      | 362.728 | 34%      | 1091     | 4774   | 139.700        | 31177  |
+| role       | n\_users | miles   | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
+|:-----------|:---------|:--------|:---------|:---------|:-------|:---------------|:-------|:-----------|
+| Anonymous  | 132      | 41.781  | 3.9%     | 168      | 611    | 35.250         | 3751   | 63%        |
+| Registered | 123      | 316.462 | 29%      | 878      | 4191   | 116.209        | 27158  | 39%        |
 
 ### Possible Story 1: Data overlap and agreement between users
 

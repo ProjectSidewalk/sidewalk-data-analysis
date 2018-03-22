@@ -48,14 +48,14 @@ March 19, 2018</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">95976</td>
-<td align="left">13678</td>
-<td align="left">23772</td>
-<td align="left">16255</td>
-<td align="left">813</td>
-<td align="left">546</td>
-<td align="left">5960</td>
-<td align="left">157000</td>
+<td align="left">39786</td>
+<td align="left">4118</td>
+<td align="left">12142</td>
+<td align="left">3783</td>
+<td align="left">555</td>
+<td align="left">178</td>
+<td align="left">3582</td>
+<td align="left">64144</td>
 </tr>
 </tbody>
 </table>
@@ -77,32 +77,34 @@ March 19, 2018</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">52841</td>
-<td align="left">5054</td>
-<td align="left">16141</td>
-<td align="left">13788</td>
-<td align="left">399</td>
-<td align="left">330</td>
-<td align="left">3086</td>
-<td align="left">91639</td>
+<td align="left">20097</td>
+<td align="left">2373</td>
+<td align="left">4595</td>
+<td align="left">2186</td>
+<td align="left">225</td>
+<td align="left">105</td>
+<td align="left">1328</td>
+<td align="left">30909</td>
 </tr>
 </tbody>
 </table>
-<p>There have been a total of 13455 audits by our users across 9822 streets, averaging 1.37 audits per street.</p>
+<p>There have been a total of 4802 audits by our users across 4111 streets, averaging 1.17 audits per street.</p>
 <h3 id="user-stats-and-tool-usage">User stats and tool usage</h3>
-<p>TODO: coverage for each user group<br> TODO: how long users stay on tool (use same method as computing total time spent, just with bigger time difference)<br> TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)</p>
+<p>TODO: how long users stay on tool in a single sitting (use same method as computing total time spent, just with bigger time difference)<br> TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)</p>
 <p>Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.</p>
-<table style="width:100%;">
+<table>
 <colgroup>
-<col width="10%"></col>
-<col width="8%"></col>
-<col width="6%"></col>
 <col width="8%"></col>
 <col width="7%"></col>
+<col width="5%"></col>
+<col width="7%"></col>
+<col width="5%"></col>
+<col width="12%"></col>
 <col width="15%"></col>
-<col width="18%"></col>
+<col width="5%"></col>
+<col width="13%"></col>
 <col width="7%"></col>
-<col width="16%"></col>
+<col width="11%"></col>
 </colgroup>
 <thead>
 <tr class="header">
@@ -115,41 +117,36 @@ March 19, 2018</p>
 <th align="left">minutes_per_1k_ft</th>
 <th align="left">labels</th>
 <th align="left">labels_per_100m</th>
+<th align="left">sessions</th>
+<th align="left">mins_per_sess</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">Anonymous</td>
-<td align="left">224</td>
-<td align="left">0.088</td>
+<td align="left">132</td>
+<td align="left">0.084</td>
 <td align="left">0</td>
 <td align="left">2</td>
-<td align="left">9.83</td>
-<td align="left">15.519</td>
-<td align="left">10.5</td>
-<td align="left">6.838</td>
+<td align="left">10.685</td>
+<td align="left">16.507</td>
+<td align="left">10</td>
+<td align="left">6.348</td>
+<td align="left">2</td>
+<td align="left">6.969</td>
 </tr>
 <tr class="even">
-<td align="left">Turker</td>
-<td align="left">33</td>
-<td align="left">0.537</td>
-<td align="left">5</td>
-<td align="left">8</td>
-<td align="left">34.33</td>
-<td align="left">10.917</td>
-<td align="left">86.0</td>
-<td align="left">7.682</td>
-</tr>
-<tr class="odd">
 <td align="left">Registered</td>
-<td align="left">149</td>
-<td align="left">0.737</td>
+<td align="left">123</td>
+<td align="left">0.801</td>
 <td align="left">4</td>
-<td align="left">9</td>
-<td align="left">31.17</td>
-<td align="left">6.821</td>
-<td align="left">69.0</td>
-<td align="left">5.909</td>
+<td align="left">12</td>
+<td align="left">37.470</td>
+<td align="left">6.719</td>
+<td align="left">78</td>
+<td align="left">5.792</td>
+<td align="left">1</td>
+<td align="left">23.013</td>
 </tr>
 </tbody>
 </table>
@@ -164,38 +161,31 @@ March 19, 2018</p>
 <th align="left">audits</th>
 <th align="left">hours_audited</th>
 <th align="left">labels</th>
+<th align="left">&gt;1 sess</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">Anonymous</td>
-<td align="left">224</td>
-<td align="left">72.250</td>
-<td align="left">6.7%</td>
-<td align="left">278</td>
-<td align="left">1046</td>
-<td align="left">58.236</td>
-<td align="left">6919</td>
+<td align="left">132</td>
+<td align="left">41.781</td>
+<td align="left">3.9%</td>
+<td align="left">168</td>
+<td align="left">611</td>
+<td align="left">35.250</td>
+<td align="left">3751</td>
+<td align="left">63%</td>
 </tr>
 <tr class="even">
-<td align="left">Turker</td>
-<td align="left">33</td>
-<td align="left">600.387</td>
-<td align="left">56%</td>
-<td align="left">1669</td>
-<td align="left">7635</td>
-<td align="left">247.206</td>
-<td align="left">53543</td>
-</tr>
-<tr class="odd">
 <td align="left">Registered</td>
-<td align="left">149</td>
-<td align="left">362.728</td>
-<td align="left">34%</td>
-<td align="left">1091</td>
-<td align="left">4774</td>
-<td align="left">139.700</td>
-<td align="left">31177</td>
+<td align="left">123</td>
+<td align="left">316.462</td>
+<td align="left">29%</td>
+<td align="left">878</td>
+<td align="left">4191</td>
+<td align="left">116.209</td>
+<td align="left">27158</td>
+<td align="left">39%</td>
 </tr>
 </tbody>
 </table>
