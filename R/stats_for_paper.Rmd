@@ -23,7 +23,7 @@ library(dplyr)
 # If true, queries local postges database for data (could take a very long time), then saves in
 # CSVs, so you should set to FALSE after running with the actual queries once.
 REFRESH_DATA = FALSE
-label.type.mapping <- c(
+LABEL_TYPE_MAPPING <- c(
   '1' = 'CurbRamp',
   '2' = 'NoCurbRamp',
   '3' = 'Obstacle',
@@ -32,6 +32,8 @@ label.type.mapping <- c(
   '6' = 'Occlusion',
   '7' = 'NoSidewalk'
 )
+TOTAL_STREET_DIST_METERS <- 1730179
+TOTAL_STREET_DIST_MILES <- TOTAL_STREET_DIST_METERS / 1609.34
 ```
 
 ```{r connect, echo=FALSE}
@@ -272,7 +274,7 @@ TODO: anything else?
 kable(
   labels %>%
     count(label_type_id) %>%
-    mutate(label_type = label.type.mapping[label_type_id]) %>%
+    mutate(label_type = LABEL_TYPE_MAPPING[label_type_id]) %>%
     select(label_type, n) %>%
     bind_rows(list(label_type = 'Total', n = nrow(labels))) %>%
     spread(label_type, n),
@@ -283,7 +285,7 @@ kable(
 ### Data characteristics
 
 This is the start of filtering out users with low labeling frequency (also filtering out researchers).
-TODO: number of audits<br>
+
 TODO: anything else?
 
 ```{r data.characteristics, echo=FALSE, warning=FALSE}
@@ -291,7 +293,7 @@ filtered.labels <- filter(labels, user_id %in% filtered.speeds$user_id)
 kable(
   filtered.labels %>%
     count(label_type_id) %>%
-    mutate(label_type = label.type.mapping[label_type_id]) %>%
+    mutate(label_type = LABEL_TYPE_MAPPING[label_type_id]) %>%
     select(label_type, n) %>%
     bind_rows(list(label_type = 'Total', n = nrow(filtered.labels))) %>%
     spread(label_type, n),
@@ -337,6 +339,9 @@ kable(
     summarise(
       n_users = n(),
       miles = sum(miles_audited, na.rm = TRUE),
+      coverage = paste0(format(100 * sum(miles_audited, na.rm = TRUE) / TOTAL_STREET_DIST_MILES,
+                               digits = 2),
+                        '%'),
       missions = sum(mission_count, na.rm = TRUE),
       audits = sum(audit_count, na.rm = TRUE),
       hours_audited = sum(hours_audited, na.rm = TRUE),

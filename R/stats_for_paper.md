@@ -20,7 +20,9 @@ TODO: anything else?
 
 ### Data characteristics
 
-This is the start of filtering out users with low labeling frequency (also filtering out researchers). TODO: number of audits<br> TODO: anything else?
+This is the start of filtering out users with low labeling frequency (also filtering out researchers).
+
+TODO: anything else?
 
 | CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total |
 |:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:------|
@@ -40,11 +42,11 @@ Below are the medians for a few metrics (followed by sums), split by user group.
 | Turker     | 33       | 0.537 | 5        | 8      | 34.33            | 10.917               | 86.0   | 7.682             |
 | Registered | 149      | 0.737 | 4        | 9      | 31.17            | 6.821                | 69.0   | 5.909             |
 
-| role       | n\_users | miles   | missions | audits | hours\_audited | labels |
-|:-----------|:---------|:--------|:---------|:-------|:---------------|:-------|
-| Anonymous  | 224      | 72.250  | 278      | 1046   | 58.236         | 6919   |
-| Turker     | 33       | 600.387 | 1669     | 7635   | 247.206        | 53543  |
-| Registered | 149      | 362.728 | 1091     | 4774   | 139.700        | 31177  |
+| role       | n\_users | miles   | coverage | missions | audits | hours\_audited | labels |
+|:-----------|:---------|:--------|:---------|:---------|:-------|:---------------|:-------|
+| Anonymous  | 224      | 72.250  | 6.7%     | 278      | 1046   | 58.236         | 6919   |
+| Turker     | 33       | 600.387 | 56%      | 1669     | 7635   | 247.206        | 53543  |
+| Registered | 149      | 362.728 | 34%      | 1091     | 4774   | 139.700        | 31177  |
 
 ### Possible Story 1: Data overlap and agreement between users
 
