@@ -20,13 +20,13 @@ TODO: anything else?
 
 ### Data characteristics
 
-This is the start of filtering out users with low labeling frequency (also filtering out researchers).
-
-TODO: number of audits<br> TODO: anything else?
+This is the start of filtering out users with low labeling frequency (also filtering out researchers). TODO: number of audits<br> TODO: anything else?
 
 | CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total |
 |:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:------|
 | 52841    | 5054       | 16141      | 13788    | 399       | 330   | 3086           | 91639 |
+
+There have been a total of 13455 audits by our users across 9822 streets, averaging 1.37 audits per street.
 
 ### User stats and tool usage
 

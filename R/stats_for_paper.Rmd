@@ -283,7 +283,6 @@ kable(
 ### Data characteristics
 
 This is the start of filtering out users with low labeling frequency (also filtering out researchers).
-
 TODO: number of audits<br>
 TODO: anything else?
 
@@ -298,7 +297,13 @@ kable(
     spread(label_type, n),
   align = 'l'
 )
+
+filtered.audits <- filter(audits, user_id %in% filtered.speeds$user_id)
+n.audits <- nrow(filtered.audits)
+n.streets <- n_distinct(filtered.audits$street_edge_id)
 ```
+
+There have been a total of `r n.audits` audits by our users across `r n.streets` streets, averaging `r format(n.audits/n.streets, digits = 3)` audits per street.
 
 ### User stats and tool usage
 
