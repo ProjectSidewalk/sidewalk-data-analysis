@@ -30,8 +30,9 @@ body {
 March 19, 2018</p>
 <h2 id="public-deployment">Public Deployment</h2>
 <p>NOTE: The public deployment dataset being used right now is not all that recent, so do not draw conclusions from what is below right now.</p>
-<h3 id="how-much-data-was-collected">How much data was collected?</h3>
-<p>Labels, labels by label type, anything else? (this is the one section before filtering low quality work)</p>
+<h3 id="top-line-numbers-no-filtering">Top-line numbers (no filtering)</h3>
+<p>Note that this is the only section for the public deployment where we are not filtering out users below the labeling frequency threshold (I am also filtering out researcher data below for now).</p>
+<p>TODO: anything else?</p>
 <table>
 <thead>
 <tr class="header">
@@ -47,10 +48,10 @@ March 19, 2018</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">95907</td>
-<td align="left">13676</td>
+<td align="left">95976</td>
+<td align="left">13678</td>
 <td align="left">23772</td>
-<td align="left">16252</td>
+<td align="left">16255</td>
 <td align="left">813</td>
 <td align="left">546</td>
 <td align="left">5960</td>
@@ -59,7 +60,34 @@ March 19, 2018</p>
 </tbody>
 </table>
 <h3 id="data-characteristics">Data characteristics</h3>
-<p>TODO: Number of labels (only high quality users)<br> TODO: labels by label type<br> TODO: number of audits<br> TODO: anything else?</p>
+<p>This is the start of filtering out users with low labeling frequency (also filtering out researchers).</p>
+<p>TODO: number of audits<br> TODO: anything else?</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">CurbRamp</th>
+<th align="left">NoCurbRamp</th>
+<th align="left">NoSidewalk</th>
+<th align="left">Obstacle</th>
+<th align="left">Occlusion</th>
+<th align="left">Other</th>
+<th align="left">SurfaceProblem</th>
+<th align="left">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">52841</td>
+<td align="left">5054</td>
+<td align="left">16141</td>
+<td align="left">13788</td>
+<td align="left">399</td>
+<td align="left">330</td>
+<td align="left">3086</td>
+<td align="left">91639</td>
+</tr>
+</tbody>
+</table>
 <h3 id="user-stats-and-tool-usage">User stats and tool usage</h3>
 <p>TODO: coverage for each user group<br> TODO: how long users stay on tool (use same method as computing total time spent, just with bigger time difference)<br> TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)</p>
 <p>Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.</p>

@@ -8,17 +8,25 @@ Public Deployment
 
 NOTE: The public deployment dataset being used right now is not all that recent, so do not draw conclusions from what is below right now.
 
-### How much data was collected?
+### Top-line numbers (no filtering)
 
-Labels, labels by label type, anything else? (this is the one section before filtering low quality work)
+Note that this is the only section for the public deployment where we are not filtering out users below the labeling frequency threshold (I am also filtering out researcher data below for now).
+
+TODO: anything else?
 
 | CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
 |:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
-| 95907    | 13676      | 23772      | 16252    | 813       | 546   | 5960           | 157000 |
+| 95976    | 13678      | 23772      | 16255    | 813       | 546   | 5960           | 157000 |
 
 ### Data characteristics
 
-TODO: Number of labels (only high quality users)<br> TODO: labels by label type<br> TODO: number of audits<br> TODO: anything else?
+This is the start of filtering out users with low labeling frequency (also filtering out researchers).
+
+TODO: number of audits<br> TODO: anything else?
+
+| CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total |
+|:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:------|
+| 52841    | 5054       | 16141      | 13788    | 399       | 330   | 3086           | 91639 |
 
 ### User stats and tool usage
 

@@ -251,34 +251,54 @@ speeds <-
          minutes_per_mission = approximate.minutes.per.mission(minutes_audited, mission_count, feet_audited),
          minutes_per_1k_ft = 1000 * minutes_audited / feet_audited,
          hours_audited = minutes_audited / 60)
+
+filtered.speeds <-
+  speeds %>%
+  filter(role %in% c('Registered', 'Anonymous', 'Turker'),
+         labels_per_100m >= 3.75)
 ```
 
 ## Public Deployment
 
 NOTE: The public deployment dataset being used right now is not all that recent, so do not draw conclusions from what is below right now.
 
-### How much data was collected?
+### Top-line numbers (no filtering)
 
-Labels, labels by label type, anything else? (this is the one section before filtering low quality work)
+Note that this is the only section for the public deployment where we are not filtering out users below the labeling frequency threshold (I am also filtering out researcher data below for now).
+
+TODO: anything else?
+
 ```{r how.much.data, echo=FALSE, warning=FALSE}
 kable(
-labels %>%
-  distinct(label_id, .keep_all = TRUE) %>%
-  count(label_type_id) %>%
-  mutate(label_type = label.type.mapping[label_type_id]) %>%
-  select(label_type, n) %>%
-  bind_rows(list(label_type = 'Total', n = nrow(labels))) %>%
-  spread(label_type, n),
-align = 'l'
+  labels %>%
+    count(label_type_id) %>%
+    mutate(label_type = label.type.mapping[label_type_id]) %>%
+    select(label_type, n) %>%
+    bind_rows(list(label_type = 'Total', n = nrow(labels))) %>%
+    spread(label_type, n),
+  align = 'l'
 )
 ```
 
 ### Data characteristics
 
-TODO: Number of labels (only high quality users)<br>
-TODO: labels by label type<br>
+This is the start of filtering out users with low labeling frequency (also filtering out researchers).
+
 TODO: number of audits<br>
 TODO: anything else?
+
+```{r data.characteristics, echo=FALSE, warning=FALSE}
+filtered.labels <- filter(labels, user_id %in% filtered.speeds$user_id)
+kable(
+  filtered.labels %>%
+    count(label_type_id) %>%
+    mutate(label_type = label.type.mapping[label_type_id]) %>%
+    select(label_type, n) %>%
+    bind_rows(list(label_type = 'Total', n = nrow(filtered.labels))) %>%
+    spread(label_type, n),
+  align = 'l'
+)
+```
 
 ### User stats and tool usage
 
@@ -289,13 +309,8 @@ TODO: missions started vs missions completed (not sure we can do this; I expect 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
 ```{r showing.stats, echo=FALSE, warning=FALSE}
-stats.to.display <-
-  speeds %>%
-  filter(role %in% c('Registered', 'Anonymous', 'Turker'),
-         labels_per_100m >= 3.75)
-
 kable(
-  stats.to.display %>%
+  filtered.speeds %>%
     group_by(role) %>%
     summarise(
       n_users = n(),
@@ -312,7 +327,7 @@ kable(
   )
 
 kable(
-  stats.to.display %>%
+  filtered.speeds %>%
     group_by(role) %>%
     summarise(
       n_users = n(),
