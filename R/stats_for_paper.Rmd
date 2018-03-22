@@ -421,3 +421,90 @@ kable(
 Amongst all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement amongst them? (see comment in Outline document for details on implementation)
 
 ## Turk Study
+
+This is most of the data... I think there are just a couple "conditions" (i.e., "sets of routes") that were missing some amount of data in my local dump, so I need to investigate. I also think I may have failed to remove the conditions for anonymous users who didn't place any labels. So most of these numbers are trustworthy (though they aren't the *final* numbers), I would just be wary about drawing conclusions from the anonymous user data.
+
+### High level results
+
+```{r reading.cleaning.turk.data, echo=FALSE, include=FALSE}
+classes <- c(replicate(6, 'factor'), 'numeric', 'numeric', 'logical', 'logical',
+             replicate(3, 'factor'), replicate(8, 'numeric'))
+volunteer.data <- read.csv('../data/accuracies-volunteer.csv',
+                           colClasses = classes,
+                           na.strings = c('null')) %>%
+  mutate(is.turker = FALSE)
+turker.data <- read.csv('../data/accuracies-turker.csv',
+                        colClasses = classes,
+                        na.strings = c('null')) %>%
+  mutate(is.turker = TRUE)
+
+# Combine datasets
+accuracy.data <- rbind(volunteer.data, turker.data)
+
+# Remove occlusion label type
+accuracy.data <- subset(accuracy.data, !(label.type %in% c('Other', 'NoSidewalk', 'Occlusion')))
+accuracy.data$label.type <- droplevels(accuracy.data$label.type)
+
+# Rename SurfaceProblem label type as SurfaceProb for easier visualization
+# possibly redo using https://stackoverflow.com/questions/28190435/changing-factor-levels-with-dplyr-mutate
+label.type.levs <- levels(accuracy.data$label.type)
+label.type.levs[5] <- c('SurfaceProb')
+levels(accuracy.data$label.type) <- label.type.levs
+
+# Reorder label type levels.
+label.type.levs <- c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','Problem')
+accuracy.data$label.type <- factor(accuracy.data$label.type, label.type.levs)
+
+# More setup: remove binary analysis (except street level), add is.anon.route column, add
+#             raw.accuracy column, add worker.type column, give granularity an ordering.
+# Note that we convert condition.id from factor -> character -> numeric, b/c converting directly to
+# numeric from factor starts from 0 instead of using the contents of the string to get the number.
+get.worker.type <- Vectorize(
+  function(n.workers, worker.thresh, is.turker, is.anon.route) {
+    if (n.workers == 5 & worker.thresh == 3) 'maj'
+    else if (is.turker == TRUE) 'turk'
+    else if (is.anon.route == TRUE) 'anon'
+    else 'reg'
+  }
+)
+# Copies the current granularity, but adds separate granularity for street&5m level binary.
+get.granularity <- Vectorize(
+  function(gran, binary) {
+    if (binary == TRUE & gran == 'street') 'street.binary'
+    else if (binary == TRUE & gran == '5_meter') '5_meter.binary'
+    else as.character(gran)
+  }
+)
+new.gran.names <- c('5_meter', '5_meter.binary', '10_meter', 'street', 'street.binary')
+data.with.raw.accuracy <-
+  accuracy.data %>%
+  filter(binary == FALSE | granularity != '10_meter') %>%
+  mutate(granularity = ordered(get.granularity(granularity, binary), levels = new.gran.names)) %>%
+  mutate(is.anon.route = as.numeric(as.character(condition.id)) > 121) %>%
+  mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
+                              levels = c('anon', 'reg', 'turk', 'maj'))) %>%
+  mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg))
+```
+
+TODO total missions by user group <br>
+TODO total distance by user group <br>
+TODO total labels by user group <br>
+TODO auditing speed by user group <br>
+TODO labeling frequency by user group <br>
+TODO percentage of turkers who completed the HIT (maybe?)
+TODO anything else?
+
+```{r turk.high.level.results, echo=FALSE, include=FALSE}
+unique.turkers <-
+  data.with.raw.accuracy %>%
+  filter(n.workers == 5, worker.thresh == 3, !binary, !remove.low.severity, granularity == 'street', label.type == 'CurbRamp') %>%
+  select(worker1, worker2, worker3, worker4, worker5) %>%
+  gather(worker.index, turker.id) %>%
+  select(turker.id)
+
+n.turkers <- nrow(unique.turkers)
+n.reg <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, !is.anon.route) %>% select(worker1))
+n.anon <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, is.anon.route) %>% select(worker1))
+```
+
+A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users are part of this study.

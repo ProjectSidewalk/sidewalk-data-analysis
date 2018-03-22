@@ -52,3 +52,11 @@ Amongst all the data collected in DC, how much of DC is labeled by multiple user
 
 Turk Study
 ----------
+
+This is most of the data... I think there are just a couple "conditions" (i.e., "sets of routes") that were missing some amount of data in my local dump, so I need to investigate. I also think I may have failed to remove the conditions for anonymous users who didn't place any labels. So most of these numbers are trustworthy (though they aren't the *final* numbers), I would just be wary about drawing conclusions from the anonymous user data.
+
+### High level results
+
+TODO total missions by user group <br> TODO total distance by user group <br> TODO total labels by user group <br> TODO auditing speed by user group <br> TODO labeling frequency by user group <br> TODO percentage of turkers who completed the HIT (maybe?) TODO anything else?
+
+A total of 320 turkers, 49 registered users, and 15 anonymous users are part of this study.
