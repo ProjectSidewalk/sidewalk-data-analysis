@@ -32,7 +32,7 @@ There have been a total of 4802 audits by our users across 4111 streets, averagi
 
 ### User stats and tool usage
 
-TODO: how long users stay on tool in a single sitting (use same method as computing total time spent, just with bigger time difference)<br> TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)
+TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)
 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
