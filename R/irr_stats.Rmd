@@ -1,0 +1,64 @@
+---
+title: "IRR Stats"
+author: "Mikey Saugstad"
+date: "March 30, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(ggplot2)
+
+my.theme.discrete.x <- theme_bw() + theme(panel.grid.major.x = element_blank())
+
+# Run the following in console when you want to generate github flavored markdown as well.
+# library(rmarkdown)
+# render('R/irr_stats.Rmd', c('html_document', 'github_document'))
+```
+
+
+```{r reading.cleaning, echo=FALSE}
+agreement.classes <- c('numeric', 'factor', 'factor', 'factor', 'numeric', 'numeric')
+agreement.data <- read.csv('../data/irr_results-not_for_humans.csv', colClasses = agreement.classes)
+# attach(agreement.data)
+
+label.type.levels.in.order <- c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','Problem')
+clean.agreement.data <-
+  agreement.data %>%
+  mutate(label.type = case_when(
+            data.type %in% c('prob.binary', 'prob.ordinal') ~ 'Problem',
+            label.type == 'SurfaceProblem'                  ~ 'SurfaceProb',
+            TRUE                                            ~ as.character(label.type)
+          ),
+         data.type = if_else(data.type %in% c('prob.binary', 'binary'),
+                             'binary',
+                             'ordinal')) %>%
+  filter(level != '10m',
+         label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb', 'Problem')) %>%
+  mutate(data.type = factor(data.type),
+         level = factor(level),
+         label.type = factor(label.type, label.type.levels.in.order))
+```
+
+```{r lattice.plots, echo=FALSE, fig.height=6, fig.width=8}
+ggplot(data = clean.agreement.data, aes(x = round.code, y = kripp.alpha)) +
+  geom_line(aes(color = level)) +
+  scale_x_continuous(breaks = 1:7) +
+  scale_y_continuous(limits = c(0, 1), expand = c(0.02, 0)) +
+  facet_grid(label.type ~ data.type) +
+  my.theme.discrete.x +
+  ggtitle('Krippendorff\'s Alpha Across Rounds') +
+  xlab('Round') +
+  ylab('Krippendorff\'s Alpha')
+
+ggplot(data = clean.agreement.data, aes(x = round.code, y = agreement)) +
+  geom_line(aes(color = level)) +
+  scale_x_continuous(breaks = 1:7) +
+  scale_y_continuous(limits = c(0, 100), expand = c(0.02, 0)) +
+  facet_grid(label.type ~ data.type) +
+  my.theme.discrete.x +
+  ggtitle('Percentage Agreement Across Rounds') +
+  xlab('Round') +
+  ylab('Percentage Agreement')
+```
