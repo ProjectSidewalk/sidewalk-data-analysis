@@ -23,7 +23,7 @@ library(dplyr)
 # If true, queries local postges database for data (could take a very long time), then saves in
 # CSVs, so you should set to FALSE after running with the actual queries once.
 REFRESH_PUBLIC_DEPLOYMENT_DATA = FALSE
-REFRESH_TURK_STUDY_DATA = TRUE
+REFRESH_TURK_STUDY_DATA = FALSE
 
 LABEL_TYPE_MAPPING <- c(
   '1' = 'CurbRamp',
@@ -289,8 +289,8 @@ if (REFRESH_TURK_STUDY_DATA) {
       )
   turker.labels.turk.study <-
     dbGetQuery(
-      db.connection.turk.study.production,
-      'SELECT label_id, turker_id, label_type_id, audit_task.audit_task_id, condition_id
+      db.connection.turk.study,
+      'SELECT label_id, turker_id AS user_id, label_type_id, audit_task.audit_task_id, condition_id
       FROM amt_assignment
       INNER JOIN audit_task ON amt_assignment.amt_assignment_id = audit_task.amt_assignment_id
       INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
@@ -501,8 +501,8 @@ This is most of the data... I think there are just a couple "conditions" (i.e., 
 ### High level results
 
 ```{r turk.reading.cleaning.data, echo=FALSE, include=FALSE}
-classes <- c(replicate(6, 'factor'), 'numeric', 'numeric', 'logical', 'logical',
-             replicate(3, 'factor'), replicate(8, 'numeric'))
+classes <- c('numeric', replicate(5, 'character'), 'numeric', 'numeric', 'logical', 'logical',
+             'numeric', 'factor', 'factor', replicate(8, 'numeric'))
 volunteer.data <- read.csv('../data/accuracies-volunteer.csv',
                            colClasses = classes,
                            na.strings = c('null')) %>%
@@ -531,8 +531,6 @@ accuracy.data$label.type <- factor(accuracy.data$label.type, label.type.levs)
 
 # More setup: remove binary analysis (except street level), add is.anon.route column, add
 #             raw.accuracy column, add worker.type column, give granularity an ordering.
-# Note that we convert condition.id from factor -> character -> numeric, b/c converting directly to
-# numeric from factor starts from 0 instead of using the contents of the string to get the number.
 get.worker.type <- Vectorize(
   function(n.workers, worker.thresh, is.turker, is.anon.route) {
     if (n.workers == 5 & worker.thresh == 3) 'maj'
@@ -549,15 +547,28 @@ get.granularity <- Vectorize(
     else as.character(gran)
   }
 )
+# The user.id column has the user id for reg and turk users, but for anon they are of the form
+# '<anon.user.id>---<ip.address>'. Since the anon user id is the same for everyone, we just want the
+# ip address. So this function splits on '---' (which only occurs for anon users), reverses the
+# output of the split (meaning no ip address is now first in output list for anon users, and no
+# change for other users, since the list is of length one), then takes first element of that list.
+fix.anon.names <- Vectorize(
+  function(user.id) {
+    rev(strsplit(user.id, '---', fixed = TRUE)[[1]])[1]
+  }
+)
 new.gran.names <- c('5_meter', '5_meter.binary', '10_meter', 'street', 'street.binary')
 data.with.raw.accuracy <-
   accuracy.data %>%
   filter(binary == FALSE | granularity != '10_meter') %>%
-  mutate(granularity = ordered(get.granularity(granularity, binary), levels = new.gran.names)) %>%
-  mutate(is.anon.route = as.numeric(as.character(condition.id)) > 121) %>%
-  mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
-                              levels = c('anon', 'reg', 'turk', 'maj'))) %>%
-  mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg))
+  mutate(granularity = ordered(get.granularity(granularity, binary), levels = new.gran.names),
+         is.anon.route = condition.id > 121,
+         worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
+                              levels = c('anon', 'reg', 'turk', 'maj')),
+         worker1 = fix.anon.names(worker1),
+         raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg))
+
+
 ```
 
 TODO total labels by user group <br>
@@ -579,15 +590,19 @@ n.reg <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, !is.anon.route
 n.anon <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, is.anon.route) %>% select(worker1))
 
 # NOTE Multiply turker set by 5 if you want to count each turker who did each set of routes separately
-missions.by.user.group <-
+turk.study.summary.stats.by.user.group <-
   data.with.raw.accuracy %>%
   filter(n.workers == 1, !binary, !remove.low.severity, granularity == 'street', label.type == 'CurbRamp') %>%
+  left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
+  group_by(worker1) %>%
+  summarise(n.labels = n_distinct(label_id, na.rm = TRUE),
+            is.anon.route = first(is.anon.route),
+            worker.type = first(worker.type)) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
          distance.feet = if_else(is.anon.route, 2000, 4000)) %>%
   group_by(worker.type) %>%
-  summarize_at(vars(n.missions, distance.feet), sum) %>%
-  mutate(distance.miles = distance.feet / 5280) %>%
-  select(worker.type, n.missions, distance.miles)
+  summarize_at(vars(n.missions, distance.feet, n.labels), sum) %>%
+  mutate(distance.miles = distance.feet / 5280)
 ```
 
 A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users were part of this study.
@@ -595,7 +610,8 @@ A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` ano
 
 ```{r turk.showing.stats, echo=FALSE}
 kable(
-  missions.by.user.group,
+  turk.study.summary.stats.by.user.group %>%
+    select(worker.type, n.missions, distance.miles, n.labels),
   digits = 3,
   align = 'l'
   )
