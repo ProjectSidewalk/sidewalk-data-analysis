@@ -57,6 +57,12 @@ This is most of the data... I think there are just a couple "conditions" (i.e., 
 
 ### High level results
 
-TODO total missions by user group <br> TODO total distance by user group <br> TODO total labels by user group <br> TODO auditing speed by user group <br> TODO labeling frequency by user group <br> TODO percentage of turkers who completed the HIT (maybe?) TODO anything else?
+TODO total labels by user group <br> TODO auditing speed by user group <br> TODO labeling frequency by user group <br> TODO percentage of turkers who completed the HIT (maybe?) TODO anything else?
 
-A total of 320 turkers, 49 registered users, and 15 anonymous users are part of this study.
+A total of 320 turkers, 49 registered users, and 15 anonymous users were part of this study.
+
+| worker.type | n.missions | distance.miles |
+|:------------|:-----------|:---------------|
+| anon        | 30         | 5.682          |
+| reg         | 147        | 37.121         |
+| turk        | 177        | 42.803         |

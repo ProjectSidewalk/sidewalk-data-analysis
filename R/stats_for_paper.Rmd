@@ -333,7 +333,7 @@ Note that this is the only section for the public deployment where we are not fi
 
 TODO: anything else?
 
-```{r how.much.data, echo=FALSE, warning=FALSE}
+```{r public.deployment.how.much.data, echo=FALSE, warning=FALSE}
 kable(
   labels %>%
     count(label_type_id) %>%
@@ -351,7 +351,7 @@ This is the start of filtering out users with low labeling frequency (also filte
 
 TODO: anything else?
 
-```{r data.characteristics, echo=FALSE, warning=FALSE}
+```{r public.deployment.data.characteristics, echo=FALSE, warning=FALSE}
 filtered.labels <- filter(labels, user_id %in% filtered.speeds$user_id)
 kable(
   filtered.labels %>%
@@ -376,7 +376,7 @@ TODO: missions started vs missions completed (not sure we can do this; I expect 
 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
-```{r showing.stats, echo=FALSE, warning=FALSE}
+```{r public.deployment.showing.stats, echo=FALSE, warning=FALSE}
 kable(
   filtered.speeds %>%
     group_by(role) %>%
@@ -426,7 +426,7 @@ This is most of the data... I think there are just a couple "conditions" (i.e., 
 
 ### High level results
 
-```{r reading.cleaning.turk.data, echo=FALSE, include=FALSE}
+```{r turk.reading.cleaning.data, echo=FALSE, include=FALSE}
 classes <- c(replicate(6, 'factor'), 'numeric', 'numeric', 'logical', 'logical',
              replicate(3, 'factor'), replicate(8, 'numeric'))
 volunteer.data <- read.csv('../data/accuracies-volunteer.csv',
@@ -486,8 +486,6 @@ data.with.raw.accuracy <-
   mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg))
 ```
 
-TODO total missions by user group <br>
-TODO total distance by user group <br>
 TODO total labels by user group <br>
 TODO auditing speed by user group <br>
 TODO labeling frequency by user group <br>
@@ -505,6 +503,26 @@ unique.turkers <-
 n.turkers <- nrow(unique.turkers)
 n.reg <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, !is.anon.route) %>% select(worker1))
 n.anon <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, is.anon.route) %>% select(worker1))
+
+# NOTE Multiply turker set by 5 if you want to count each turker who did each set of routes separately
+missions.by.user.group <-
+  data.with.raw.accuracy %>%
+  filter(n.workers == 1, !binary, !remove.low.severity, granularity == 'street', label.type == 'CurbRamp') %>%
+  mutate(n.missions = if_else(is.anon.route, 2, 3),
+         distance.feet = if_else(is.anon.route, 2000, 4000)) %>%
+  group_by(worker.type) %>%
+  summarize_at(vars(n.missions, distance.feet), sum) %>%
+  mutate(distance.miles = distance.feet / 5280) %>%
+  select(worker.type, n.missions, distance.miles)
 ```
 
-A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users are part of this study.
+A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users were part of this study.
+
+
+```{r turk.showing.stats, echo=FALSE}
+kable(
+  missions.by.user.group,
+  digits = 3,
+  align = 'l'
+  )
+```
