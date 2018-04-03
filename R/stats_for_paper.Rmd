@@ -287,7 +287,7 @@ if (REFRESH_TURK_STUDY_DATA) {
       WHERE amt_condition.amt_condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
       AND label.deleted <> TRUE'
       )
-  turker.labels.turk.study <-
+  turk.labels.turk.study <-
     dbGetQuery(
       db.connection.turk.study,
       'SELECT label_id, turker_id AS user_id, label_type_id, audit_task.audit_task_id, condition_id
@@ -297,24 +297,91 @@ if (REFRESH_TURK_STUDY_DATA) {
       WHERE amt_assignment.condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
       AND label.deleted <> TRUE'
       )
+  reg.times.turk.study <-
+    dbGetQuery(
+      db.connection.turk.study.production,
+      'SELECT user_audit_times.user_id,
+             CAST(extract( second from SUM(diff) ) / 60 +
+                  extract( minute from SUM(diff) ) +
+                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS minutes_audited
+      FROM
+      (
+          SELECT audit_task.user_id,
+                 (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+          FROM amt_condition
+          INNER JOIN amt_volunteer_route ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
+          INNER JOIN route_street ON amt_volunteer_route.route_id = route_street.route_id
+          INNER JOIN audit_task ON route_street.current_street_edge_id = audit_task.street_edge_id
+              AND amt_volunteer_route.volunteer_id = audit_task.user_id
+          INNER JOIN audit_task_interaction ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+          WHERE action = \'ViewControl_MouseDown\'
+              AND amt_condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
+          ) user_audit_times
+      WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
+      GROUP BY user_audit_times.user_id;'
+      )
+  anon.times.turk.study <-
+    dbGetQuery(
+      db.connection.turk.study.production,
+      'SELECT user_audit_times.user_id,
+             CAST(extract( second from SUM(diff) ) / 60 +
+                  extract( minute from SUM(diff) ) +
+                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS minutes_audited
+      FROM
+      (
+          SELECT amt_volunteer_route.ip_address AS user_id,
+                 (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+          FROM amt_condition
+          INNER JOIN amt_volunteer_route ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
+          INNER JOIN route_street ON amt_volunteer_route.route_id = route_street.route_id
+          INNER JOIN audit_task ON route_street.current_street_edge_id = audit_task.street_edge_id
+          INNER JOIN audit_task_environment ON  audit_task.audit_task_id = audit_task_environment.audit_task_id
+                                            AND amt_volunteer_route.ip_address = audit_task_environment.ip_address
+          INNER JOIN audit_task_interaction ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+          WHERE action = \'ViewControl_MouseDown\'
+              AND amt_condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
+          ) user_audit_times
+      WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
+      GROUP BY user_audit_times.user_id;'
+      )
+  turk.times.turk.study <-
+    dbGetQuery(
+      db.connection.turk.study,
+      'SELECT user_audit_times.user_id,
+             CAST(extract( second from SUM(diff) ) / 60 +
+                  extract( minute from SUM(diff) ) +
+                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS minutes_audited
+      FROM
+      (
+          SELECT turker_id AS user_id,
+                 (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+          FROM amt_assignment
+          INNER JOIN audit_task ON amt_assignment.amt_assignment_id = audit_task.amt_assignment_id
+          INNER JOIN audit_task_interaction ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+          WHERE action = \'ViewControl_MouseDown\'
+              AND condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
+          ) user_audit_times
+      WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
+      GROUP BY user_audit_times.user_id;'
+      )
   dbDisconnect(db.connection.turk.study.production)
   dbDisconnect(db.connection.turk.study)
   
   # audits.turk.study <- bind_rows(reg.audits.turk.study, anon.audits.turk.study, turk.audits.turk.study)
-  # times.turk.study <- bind_rows(reg.times.turk.study, anon.times.turk.study, turk.times.turk.study)
-  labels.turk.study <- bind_rows(reg.labels.turk.study, anon.labels.turk.study, turker.labels.turk.study)
+  times.turk.study <- bind_rows(reg.times.turk.study, anon.times.turk.study, turk.times.turk.study)
+  labels.turk.study <- bind_rows(reg.labels.turk.study, anon.labels.turk.study, turk.labels.turk.study)
   # sessions.turk.study <- bind_rows(reg.sessions.turk.study, anon.sessions.turk.study, turk.sessions.turk.study)
   # write.csv(audits.turk.study, '../data/stats_for_paper_audits-turk_study.csv', row.names = FALSE)
-  # write.csv(times.turk.study, '../data/stats_for_paper_times-turk_study.csv', row.names = FALSE)
+  write.csv(times.turk.study, '../data/stats_for_paper_times-turk_study.csv', row.names = FALSE)
   write.csv(labels.turk.study, '../data/stats_for_paper_labels-turk_study.csv', row.names = FALSE)
   # write.csv(sessions.turk.study, '../data/stats_for_paper_sessions-turk_study.csv', row.names = FALSE)
 } else {
   # audit.classes.turk.study <- c('character', 'character', 'numeric', 'numeric', 'numeric')
   # audits.turk.study <- read.csv('../data/stats_for_paper_audits-turk_study.csv',
   #                               colClasses = audit.classes.turk.study)
-  # time.classes.turk.study <- c('character', 'numeric')
-  # times.turk.study <- read.csv('../data/stats_for_paper_times-turk_study.csv',
-  #                              colClasses = time.classes.turk.study)
+  time.classes.turk.study <- c('character', 'numeric')
+  times.turk.study <- read.csv('../data/stats_for_paper_times-turk_study.csv',
+                               colClasses = time.classes.turk.study)
   label.classes.turk.study <- c('numeric', 'character', 'numeric', 'numeric', 'numeric')
   labels.turk.study <- read.csv('../data/stats_for_paper_labels-turk_study.csv',
                                 colClasses = label.classes.turk.study)
@@ -571,8 +638,7 @@ data.with.raw.accuracy <-
 
 ```
 
-TODO auditing speed by user group <br>
-TODO percentage of turkers who completed the HIT (maybe?)
+TODO percentage of turkers who completed the HIT (maybe?) <br>
 TODO anything else?
 
 ```{r turk.high.level.results, echo=FALSE, include=FALSE}
@@ -596,28 +662,31 @@ turk.study.summary.stats <-
   summarise(n.labels = n_distinct(label_id, na.rm = TRUE),
             is.anon.route = first(is.anon.route),
             worker.type = first(worker.type)) %>%
+  left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
          distance.feet = if_else(is.anon.route, 2000, 4000),
-         labels.per.100m = 100 * n.labels / (distance.feet / 3.28084))
-
-turk.study.summary.stats.by.user.group <-
-  turk.study.summary.stats %>%
-  group_by(worker.type) %>%
-  summarize_at(vars(n.missions, distance.feet, n.labels), sum) %>%
-  mutate(distance.miles = distance.feet / 5280)
+         labels.per.100m = 100 * n.labels / (distance.feet / 3.28084),
+         feet.per.min = distance.feet / minutes_audited,
+         minutes.per.1k.ft = 1000 * minutes_audited / distance.feet,
+         hours.audited = minutes_audited / 60)
+         # minutes_per_session = minutes_audited / n_sessions)
 ```
 
 A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users were part of this study.
 
-Next we have medians, followed by sums.
+Next we have average (median) stats, followed by aggregate (sum) stats.
 
 
 ```{r turk.showing.stats, echo=FALSE}
 kable(
   turk.study.summary.stats %>%
     group_by(worker.type) %>%
-    summarize_at(vars(labels.per.100m), median) %>%
-    select(worker.type, labels.per.100m),
+    summarize(
+      labels.per.100m = median(labels.per.100m, na.rm = TRUE),
+      feet.per.min = median(feet.per.min, na.rm = TRUE),
+      minutes.per.1k.ft = median(minutes.per.1k.ft, na.rm = TRUE),
+      minutes_audited = median(minutes_audited, na.rm = TRUE)
+    ),
   digits = 3,
   align = 'l'
   )
@@ -625,9 +694,14 @@ kable(
 kable(
   turk.study.summary.stats %>%
     group_by(worker.type) %>%
-    summarize_at(vars(n.missions, distance.feet, n.labels), sum) %>%
+    summarize(
+      n.missions = sum(n.missions, na.rm = TRUE),
+      distance.feet = sum(distance.feet, na.rm = TRUE),
+      n.labels = sum(n.labels, na.rm = TRUE),
+      hours.audited = sum(hours.audited, na.rm = TRUE)
+    ) %>%
     mutate(distance.miles = distance.feet / 5280) %>%
-    select(worker.type, n.missions, distance.miles, n.labels),
+    select(worker.type, n.missions, distance.miles, n.labels, hours.audited),
   digits = 3,
   align = 'l'
   )

@@ -57,20 +57,20 @@ This is most of the data... I think there are just a couple "conditions" (i.e., 
 
 ### High level results
 
-TODO auditing speed by user group <br> TODO percentage of turkers who completed the HIT (maybe?) TODO anything else?
+TODO percentage of turkers who completed the HIT (maybe?) <br> TODO anything else?
 
 A total of 320 turkers, 49 registered users, and 15 anonymous users were part of this study.
 
-Next we have medians, followed by sums.
+Next we have average (median) stats, followed by aggregate (sum) stats.
 
-| worker.type | labels.per.100m |
-|:------------|:----------------|
-| anon        | 5.413           |
-| reg         | 5.988           |
-| turk        | 7.423           |
+| worker.type | labels.per.100m | feet.per.min | minutes.per.1k.ft | minutes\_audited |
+|:------------|:----------------|:-------------|:------------------|:-----------------|
+| anon        | 5.413           | 150.830      | 6.630             | 13.260           |
+| reg         | 5.988           | 163.800      | 6.105             | 24.420           |
+| turk        | 7.423           | 628.456      | 1.591             | 6.365            |
 
-| worker.type | n.missions | distance.miles | n.labels |
-|:------------|:-----------|:---------------|:---------|
-| anon        | 30         | 5.682          | 481      |
-| reg         | 147        | 37.121         | 3626     |
-| turk        | 177        | 42.803         | 5559     |
+| worker.type | n.missions | distance.miles | n.labels | hours.audited |
+|:------------|:-----------|:---------------|:---------|:--------------|
+| anon        | 30         | 5.682          | 481      | 3.547         |
+| reg         | 147        | 37.121         | 3626     | 21.518        |
+| turk        | 177        | 42.803         | 5559     | 9.037         |
