@@ -100,11 +100,12 @@ data.with.raw.accuracy <-
   mutate(is.anon.route = as.numeric(as.character(condition.id)) > 121) %>%
   mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
                               levels = c('anon', 'reg', 'turk', 'maj'))) %>%
-  mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg))
+  mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg)) %>%
+  filter(label.type != 'NoSidewalk' | granularity == 'street.binary')
 
 # Gets the count of GT labels so we can include them as labels in graphs below.
 label.counts <-
-  data.with.raw.accuracy %>%
+  accuracy.data %>%
   filter(!binary, !is.turker, granularity == 'street', !remove.low.severity, single.user.clust) %>%
   group_by(label.type) %>%
   summarize(count = sum(true.pos, false.neg))
