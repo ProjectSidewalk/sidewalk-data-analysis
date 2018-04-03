@@ -85,4 +85,6 @@ Binary, 5m-level, agreement:
 | SurfaceProb | 94.8  | 94.4 | 95.4 | 91.7 | 94.3  | 95.4  | 87.7 |
 | Problem     | 94.0  | 90.6 | 92.9 | 91.2 | 92.2  | 94.7  | 86.3 |
 
+And now for the plots!
+
 ![](irr_stats_files/figure-markdown_github-ascii_identifiers/lattice.plots-1.png)![](irr_stats_files/figure-markdown_github-ascii_identifiers/lattice.plots-2.png)

@@ -141,6 +141,8 @@ kable(
 )
 ```
 
+And now for the plots!
+
 ```{r lattice.plots, echo=FALSE, fig.height=6, fig.width=8}
 ggplot(data = clean.agreement.data, aes(x = round.code, y = kripp.alpha)) +
   geom_line(aes(color = level)) +
