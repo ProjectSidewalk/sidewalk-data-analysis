@@ -7,6 +7,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+library(tidyr)
 library(dplyr)
 library(ggplot2)
 
@@ -39,6 +41,104 @@ clean.agreement.data <-
   mutate(data.type = factor(data.type),
          level = factor(level),
          label.type = factor(label.type, label.type.levels.in.order))
+```
+
+Graphs are at the bottom, but here are the IRR numbers in tables...
+
+Ordinal, street-level, kripp alpha:
+
+```{r table.ordinal.street.kripp, echo=FALSE}
+kable(
+  clean.agreement.data %>%
+    filter(data.type == 'ordinal', level == 'street') %>%
+    select(round.code, label.type, kripp.alpha) %>%
+    spread(round.code, kripp.alpha),
+  align = 'l'
+)
+```
+
+Ordinal, street-level, agreement:
+
+```{r table.ordinal.street.agreement, echo=FALSE}
+kable(
+  clean.agreement.data %>%
+    filter(data.type == 'ordinal', level == 'street') %>%
+    select(round.code, label.type, agreement) %>%
+    spread(round.code, agreement),
+  align = 'l'
+)
+```
+
+Ordinal, 5m-level, kripp alpha:
+
+```{r table.ordinal.5m.kripp, echo=FALSE}
+kable(
+  clean.agreement.data %>%
+    filter(data.type == 'ordinal', level == '5m') %>%
+    select(round.code, label.type, kripp.alpha) %>%
+    spread(round.code, kripp.alpha),
+  align = 'l'
+)
+```
+
+Ordinal, 5m-level, agreement:
+
+```{r table.ordinal.5m.agreement, echo=FALSE}
+kable(
+  clean.agreement.data %>%
+    filter(data.type == 'ordinal', level == '5m') %>%
+    select(round.code, label.type, agreement) %>%
+    spread(round.code, agreement),
+  align = 'l'
+)
+```
+
+Binary, street-level, kripp alpha:
+
+```{r table.binary.street.kripp, echo=FALSE}
+kable(
+  clean.agreement.data %>%
+    filter(data.type == 'binary', level == 'street') %>%
+    select(round.code, label.type, kripp.alpha) %>%
+    spread(round.code, kripp.alpha),
+  align = 'l'
+)
+```
+
+Binary, street-level, agreement:
+
+```{r table.binary.street.agreement, echo=FALSE}
+kable(
+  clean.agreement.data %>%
+    filter(data.type == 'binary', level == 'street') %>%
+    select(round.code, label.type, agreement) %>%
+    spread(round.code, agreement),
+  align = 'l'
+)
+```
+
+Binary, 5m-level, kripp alpha:
+
+```{r table.binary.5m.kripp, echo=FALSE}
+kable(
+  clean.agreement.data %>%
+    filter(data.type == 'binary', level == '5m') %>%
+    select(round.code, label.type, kripp.alpha) %>%
+    spread(round.code, kripp.alpha),
+  align = 'l'
+)
+```
+
+Binary, 5m-level, agreement:
+
+```{r table.binary.5m.agreement, echo=FALSE}
+kable(
+  clean.agreement.data %>%
+    filter(data.type == 'binary', level == '5m') %>%
+    select(round.code, label.type, agreement) %>%
+    spread(round.code, agreement),
+  align = 'l'
+)
 ```
 
 ```{r lattice.plots, echo=FALSE, fig.height=6, fig.width=8}
