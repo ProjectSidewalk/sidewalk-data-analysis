@@ -14,9 +14,9 @@ Note that this is the only section for the public deployment where we are not fi
 
 TODO: anything else?
 
-| CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total |
-|:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:------|
-| 39786    | 4118       | 12142      | 3783     | 555       | 178   | 3582           | 64144 |
+| CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
+|:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
+| 133698   | 17799      | 41095      | 20290    | 1193      | 1317  | 7665           | 223057 |
 
 ### Data characteristics
 
@@ -24,11 +24,11 @@ This is the start of filtering out users with low labeling frequency (also filte
 
 TODO: anything else?
 
-| CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total |
-|:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:------|
-| 20097    | 2373       | 4595       | 2186     | 225       | 105   | 1328           | 30909 |
+| CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
+|:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
+| 78363    | 7739       | 30308      | 17048    | 640       | 1008  | 4203           | 139309 |
 
-There have been a total of 4802 audits by our users across 4111 streets, averaging 1.17 audits per street.
+There have been a total of 19081 audits by our users across 12799 streets, averaging 1.49 audits per street.
 
 ### User stats and tool usage
 
@@ -38,13 +38,15 @@ Below are the medians for a few metrics (followed by sums), split by user group.
 
 | role       | n\_users | miles | missions | audits | minutes\_audited | minutes\_per\_1k\_ft | labels | labels\_per\_100m | sessions | mins\_per\_sess |
 |:-----------|:---------|:------|:---------|:-------|:-----------------|:---------------------|:-------|:------------------|:---------|:----------------|
-| Anonymous  | 132      | 0.084 | 0        | 2      | 10.685           | 16.507               | 10     | 6.348             | 2        | 6.969           |
-| Registered | 123      | 0.801 | 4        | 12     | 37.470           | 6.719                | 78     | 5.792             | 1        | 23.013          |
+| Anonymous  | 247      | 0.087 | 0        | 2      | 9.880            | 16.144               | 10     | 6.815             | 2        | 5.470           |
+| Turker     | 114      | 0.376 | 4        | 5      | 29.235           | 12.322               | 56     | 7.642             | 1        | 27.020          |
+| Registered | 152      | 0.733 | 4        | 9      | 30.520           | 7.225                | 66     | 6.051             | 1        | 20.323          |
 
-| role       | n\_users | miles   | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
-|:-----------|:---------|:--------|:---------|:---------|:-------|:---------------|:-------|:-----------|
-| Anonymous  | 132      | 41.781  | 3.9%     | 168      | 611    | 35.250         | 3751   | 63%        |
-| Registered | 123      | 316.462 | 29%      | 878      | 4191   | 116.209        | 27158  | 39%        |
+| role       | n\_users | miles    | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
+|:-----------|:---------|:---------|:---------|:---------|:-------|:---------------|:-------|:-----------|
+| Anonymous  | 247      | 76.586   | 7.1%     | 297      | 1109   | 65.259         | 7361   | 71%        |
+| Turker     | 114      | 1015.264 | 94%      | 3060     | 13188  | 442.177        | 100732 | 25%        |
+| Registered | 152      | 363.140  | 34%      | 1097     | 4784   | 140.594        | 31216  | 39%        |
 
 ### Possible Story 1: Data overlap and agreement between users
 
