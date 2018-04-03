@@ -571,9 +571,7 @@ data.with.raw.accuracy <-
 
 ```
 
-TODO total labels by user group <br>
 TODO auditing speed by user group <br>
-TODO labeling frequency by user group <br>
 TODO percentage of turkers who completed the HIT (maybe?)
 TODO anything else?
 
@@ -590,7 +588,7 @@ n.reg <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, !is.anon.route
 n.anon <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, is.anon.route) %>% select(worker1))
 
 # NOTE Multiply turker set by 5 if you want to count each turker who did each set of routes separately
-turk.study.summary.stats.by.user.group <-
+turk.study.summary.stats <-
   data.with.raw.accuracy %>%
   filter(n.workers == 1, !binary, !remove.low.severity, granularity == 'street', label.type == 'CurbRamp') %>%
   left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
@@ -599,7 +597,11 @@ turk.study.summary.stats.by.user.group <-
             is.anon.route = first(is.anon.route),
             worker.type = first(worker.type)) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
-         distance.feet = if_else(is.anon.route, 2000, 4000)) %>%
+         distance.feet = if_else(is.anon.route, 2000, 4000),
+         labels.per.100m = 100 * n.labels / (distance.feet / 3.28084))
+
+turk.study.summary.stats.by.user.group <-
+  turk.study.summary.stats %>%
   group_by(worker.type) %>%
   summarize_at(vars(n.missions, distance.feet, n.labels), sum) %>%
   mutate(distance.miles = distance.feet / 5280)
@@ -607,10 +609,24 @@ turk.study.summary.stats.by.user.group <-
 
 A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users were part of this study.
 
+Next we have medians, followed by sums.
+
 
 ```{r turk.showing.stats, echo=FALSE}
 kable(
-  turk.study.summary.stats.by.user.group %>%
+  turk.study.summary.stats %>%
+    group_by(worker.type) %>%
+    summarize_at(vars(labels.per.100m), median) %>%
+    select(worker.type, labels.per.100m),
+  digits = 3,
+  align = 'l'
+  )
+
+kable(
+  turk.study.summary.stats %>%
+    group_by(worker.type) %>%
+    summarize_at(vars(n.missions, distance.feet, n.labels), sum) %>%
+    mutate(distance.miles = distance.feet / 5280) %>%
     select(worker.type, n.missions, distance.miles, n.labels),
   digits = 3,
   align = 'l'
