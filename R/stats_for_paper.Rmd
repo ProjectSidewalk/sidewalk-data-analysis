@@ -66,8 +66,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       INNER JOIN label
       ON audit_task.audit_task_id = label.audit_task_id
       WHERE label.deleted = FALSE
-      AND user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-      AND completed = TRUE'
+      AND user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
   anon.labels <-
     dbGetQuery(
@@ -79,8 +78,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       INNER JOIN audit_task_environment
       ON audit_task.audit_task_id = audit_task_environment.audit_task_id
       WHERE label.deleted = FALSE
-      AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-      AND completed = TRUE'
+      AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
   reg.audits <-
     dbGetQuery(
@@ -477,10 +475,11 @@ TODO: anything else?
 ```{r public.deployment.how.much.data, echo=FALSE, warning=FALSE}
 kable(
   labels %>%
+    distinct(label_id, .keep_all = TRUE) %>%
     count(label_type_id) %>%
     mutate(label_type = LABEL_TYPE_MAPPING[label_type_id]) %>%
     select(label_type, n) %>%
-    bind_rows(list(label_type = 'Total', n = nrow(labels))) %>%
+    bind_rows(list(label_type = 'Total', n = n_distinct(labels$label_id))) %>%
     spread(label_type, n),
   align = 'l'
 )
@@ -496,10 +495,11 @@ TODO: anything else?
 filtered.labels <- filter(labels, user_id %in% filtered.speeds$user_id)
 kable(
   filtered.labels %>%
+    distinct(label_id, .keep_all = TRUE) %>%
     count(label_type_id) %>%
     mutate(label_type = LABEL_TYPE_MAPPING[label_type_id]) %>%
     select(label_type, n) %>%
-    bind_rows(list(label_type = 'Total', n = nrow(filtered.labels))) %>%
+    bind_rows(list(label_type = 'Total', n = n_distinct(filtered.labels$label_id))) %>%
     spread(label_type, n),
   align = 'l'
 )
