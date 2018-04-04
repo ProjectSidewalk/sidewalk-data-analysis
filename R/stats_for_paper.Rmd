@@ -1,7 +1,7 @@
 ---
 title: "Statistics for Paper"
 author: "Mikey Saugstad"
-date: "March 19, 2018"
+date: "April 3, 2018"
 output:
   html_document:
     toc: yes
@@ -36,6 +36,8 @@ LABEL_TYPE_MAPPING <- c(
 )
 TOTAL_STREET_DIST_METERS <- 1730179
 TOTAL_STREET_DIST_MILES <- TOTAL_STREET_DIST_METERS / 1609.34
+
+my.theme.discrete.x <- theme_bw() + theme(panel.grid.major.x = element_blank())
 ```
 
 ```{r connect, echo=FALSE}
@@ -464,11 +466,9 @@ filtered.speeds <-
 
 ## Public Deployment
 
-NOTE: The public deployment dataset being used right now is not all that recent, so do not draw conclusions from what is below right now.
+NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This incldues all data through the most recent deployment on mturk.
 
 ### Top-line numbers (no filtering)
-
-Note that this is the only section for the public deployment where we are not filtering out users below the labeling frequency threshold (I am also filtering out researcher data below for now).
 
 TODO: anything else?
 
@@ -565,6 +565,8 @@ Amongst all the data collected in DC, how much of DC is labeled by multiple user
 
 This is most of the data... I think there are just a couple "conditions" (i.e., "sets of routes") that were missing some amount of data in my local dump, so I need to investigate. I also think I may have failed to remove the conditions for anonymous users who didn't place any labels. So most of these numbers are trustworthy (though they aren't the *final* numbers), I would just be wary about drawing conclusions from the anonymous user data.
 
+Also for the turkers' stats, this data is only looking at the first turker who completed each set of routes. I will be adding in the rest of the turkers at some point soon.
+
 ### High level results
 
 ```{r turk.reading.cleaning.data, echo=FALSE, include=FALSE}
@@ -582,18 +584,18 @@ turker.data <- read.csv('../data/accuracies-turker.csv',
 # Combine datasets
 accuracy.data <- rbind(volunteer.data, turker.data)
 
-# Remove occlusion label type
-accuracy.data <- subset(accuracy.data, !(label.type %in% c('Other', 'NoSidewalk', 'Occlusion')))
+# Remove occlusion and other label types
+accuracy.data <- subset(accuracy.data, !(label.type %in% c('Other', 'Occlusion')))
 accuracy.data$label.type <- droplevels(accuracy.data$label.type)
 
 # Rename SurfaceProblem label type as SurfaceProb for easier visualization
 # possibly redo using https://stackoverflow.com/questions/28190435/changing-factor-levels-with-dplyr-mutate
 label.type.levs <- levels(accuracy.data$label.type)
-label.type.levs[5] <- c('SurfaceProb')
+label.type.levs[6] <- c('SurfaceProb')
 levels(accuracy.data$label.type) <- label.type.levs
 
 # Reorder label type levels.
-label.type.levs <- c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','Problem')
+label.type.levs <- c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb', 'NoSidewalk','Problem')
 accuracy.data$label.type <- factor(accuracy.data$label.type, label.type.levs)
 
 # More setup: remove binary analysis (except street level), add is.anon.route column, add
@@ -624,16 +626,17 @@ fix.anon.names <- Vectorize(
     rev(strsplit(user.id, '---', fixed = TRUE)[[1]])[1]
   }
 )
-new.gran.names <- c('5_meter', '5_meter.binary', '10_meter', 'street', 'street.binary')
+new.gran.names <- c('5_meter', '5_meter.binary', 'street', 'street.binary')
 data.with.raw.accuracy <-
   accuracy.data %>%
-  filter(binary == FALSE | granularity != '10_meter') %>%
-  mutate(granularity = ordered(get.granularity(granularity, binary), levels = new.gran.names),
-         is.anon.route = condition.id > 121,
-         worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
-                              levels = c('anon', 'reg', 'turk', 'maj')),
-         worker1 = fix.anon.names(worker1),
-         raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg))
+  filter(granularity != '10_meter') %>%
+  mutate(granularity = ordered(get.granularity(granularity, binary), levels = new.gran.names)) %>%
+  mutate(is.anon.route = condition.id > 121) %>%
+  mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
+                              levels = c('anon', 'reg', 'turk', 'maj'))) %>%
+  mutate(worker1 = fix.anon.names(worker1)) %>%
+  mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg)) %>%
+  filter(label.type != 'NoSidewalk' | granularity == 'street.binary')
 
 
 ```
@@ -705,4 +708,52 @@ kable(
   digits = 3,
   align = 'l'
   )
+```
+
+
+### Possible Story 1: Street-level vs. 5 meter-level
+
+For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, individual turkers, and 5 turkers with majority vote).
+
+*Takeaways*:
+
+* Analyzing at the 5 meter level shows higher raw accuracy and specificity, both because of the large number of true negatives that we get from splitting into 5 meter segments; there are very few street segments with no labels at all.
+
+* Analyzing at the street level shows higher recall, implying that there were relatively fewer false negatives at the street level. This may mean that users aren't finding _every_ issue, but they are more likely to find _at least one_ issue of that type when there are multiple that occur on the same street.
+
+* Analyzing at the street level shows higher precision, implying that there were relatively fewer false positives at the street level. I suspect that this is due to fundamental misunderstandings about how to label (implying both that labeling is complex and difficult and that our onboarding is insufficient) which are persistent/consistent and frequent (think: labeling driveways as curb ramps, labeling storm drains as missing curb ramps, and labeling fire hydrants or street signs that are not in the way as obstacles). In those cases where the mistake is made frequently (multiple times per street), relatively fewer false positives makes sense when moving to street level analysis.
+
+* Analyzing at the street level shows higher f-measure. This clearly comes from the higher recall and precision.
+
+* CurbRamp pretty much outperforms all other lable types across the board, regardless of accuracy type of 5 meter vs. street level. This is likely because curb ramps are the easiest label type to understand and find in GSV (both because they are large and easy to see, and because you know where to expect them -- at intersections).
+
+* The SurfaceProblem label type seems to have the highest precision and lowest recall among the different types of issues (I'm excluding CurbRamp here). I guess that, relative to the other types of issues, there are just fewer cases of mistaking something of a surface problem and more cases of not finding a surface problem that was vsisible in GSV (so maybe surface problems require increased diligence from users, and the other issues require better treatment in onboarding).
+
+* The Problem type seems to perform better than the surface problem and obstacle label types (except for surface problem precision, mentioned in the previous bullet).
+
+* NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
+
+
+```{r turk.granularity.analysis, echo=FALSE, fig.width=8, fig.height=6}
+granularity.analysis.data <-
+  data.with.raw.accuracy %>%
+  filter(remove.low.severity == FALSE) %>%
+  filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3)) %>%
+  filter(label.type != 'NoSidewalk') %>%
+  filter(granularity %in% c('5_meter.binary', 'street.binary')) %>%
+  mutate(granularity = droplevels(granularity),
+         granularity = factor(granularity,
+                              levels = c('5_meter.binary', 'street.binary'),
+                              labels = c('5_meter', 'street'))) %>%
+  select(-specificity) %>%
+  gather(accuracy.type, accuracy.value,
+         recall, precision, f.measure, raw.accuracy,
+         na.rm = TRUE, factor_key = TRUE)
+
+
+# Create the trellis boxplot.
+ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value)) +
+  geom_boxplot() +
+  facet_grid(accuracy.type ~ label.type) +#, labeller = labeller(label.type = label.count.labeller)) +
+  my.theme.discrete.x
 ```

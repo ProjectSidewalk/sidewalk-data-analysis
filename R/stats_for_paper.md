@@ -1,16 +1,14 @@
 Statistics for Paper
 ================
 Mikey Saugstad
-March 19, 2018
+April 3, 2018
 
 Public Deployment
 -----------------
 
-NOTE: The public deployment dataset being used right now is not all that recent, so do not draw conclusions from what is below right now.
+NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This incldues all data through the most recent deployment on mturk.
 
 ### Top-line numbers (no filtering)
-
-Note that this is the only section for the public deployment where we are not filtering out users below the labeling frequency threshold (I am also filtering out researcher data below for now).
 
 TODO: anything else?
 
@@ -57,6 +55,8 @@ Turk Study
 
 This is most of the data... I think there are just a couple "conditions" (i.e., "sets of routes") that were missing some amount of data in my local dump, so I need to investigate. I also think I may have failed to remove the conditions for anonymous users who didn't place any labels. So most of these numbers are trustworthy (though they aren't the *final* numbers), I would just be wary about drawing conclusions from the anonymous user data.
 
+Also for the turkers' stats, this data is only looking at the first turker who completed each set of routes. I will be adding in the rest of the turkers at some point soon.
+
 ### High level results
 
 TODO percentage of turkers who completed the HIT (maybe?) <br> TODO anything else?
@@ -76,3 +76,27 @@ Next we have average (median) stats, followed by aggregate (sum) stats.
 | anon        | 30         | 5.682          | 481      | 3.547         |
 | reg         | 147        | 37.121         | 3626     | 21.518        |
 | turk        | 177        | 42.803         | 5559     | 9.037         |
+
+### Possible Story 1: Street-level vs. 5 meter-level
+
+For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, individual turkers, and 5 turkers with majority vote).
+
+*Takeaways*:
+
+-   Analyzing at the 5 meter level shows higher raw accuracy and specificity, both because of the large number of true negatives that we get from splitting into 5 meter segments; there are very few street segments with no labels at all.
+
+-   Analyzing at the street level shows higher recall, implying that there were relatively fewer false negatives at the street level. This may mean that users aren't finding *every* issue, but they are more likely to find *at least one* issue of that type when there are multiple that occur on the same street.
+
+-   Analyzing at the street level shows higher precision, implying that there were relatively fewer false positives at the street level. I suspect that this is due to fundamental misunderstandings about how to label (implying both that labeling is complex and difficult and that our onboarding is insufficient) which are persistent/consistent and frequent (think: labeling driveways as curb ramps, labeling storm drains as missing curb ramps, and labeling fire hydrants or street signs that are not in the way as obstacles). In those cases where the mistake is made frequently (multiple times per street), relatively fewer false positives makes sense when moving to street level analysis.
+
+-   Analyzing at the street level shows higher f-measure. This clearly comes from the higher recall and precision.
+
+-   CurbRamp pretty much outperforms all other lable types across the board, regardless of accuracy type of 5 meter vs. street level. This is likely because curb ramps are the easiest label type to understand and find in GSV (both because they are large and easy to see, and because you know where to expect them -- at intersections).
+
+-   The SurfaceProblem label type seems to have the highest precision and lowest recall among the different types of issues (I'm excluding CurbRamp here). I guess that, relative to the other types of issues, there are just fewer cases of mistaking something of a surface problem and more cases of not finding a surface problem that was vsisible in GSV (so maybe surface problems require increased diligence from users, and the other issues require better treatment in onboarding).
+
+-   The Problem type seems to perform better than the surface problem and obstacle label types (except for surface problem precision, mentioned in the previous bullet).
+
+-   NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
+
+![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.granularity.analysis-1.png)
