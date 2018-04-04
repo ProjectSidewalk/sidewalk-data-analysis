@@ -608,14 +608,6 @@ get.worker.type <- Vectorize(
     else 'reg'
   }
 )
-# Copies the current granularity, but adds separate granularity for street&5m level binary.
-get.granularity <- Vectorize(
-  function(gran, binary) {
-    if (binary == TRUE & gran == 'street') 'street.binary'
-    else if (binary == TRUE & gran == '5_meter') '5_meter.binary'
-    else as.character(gran)
-  }
-)
 # The user.id column has the user id for reg and turk users, but for anon they are of the form
 # '<anon.user.id>---<ip.address>'. Since the anon user id is the same for everyone, we just want the
 # ip address. So this function splits on '---' (which only occurs for anon users), reverses the
@@ -626,19 +618,15 @@ fix.anon.names <- Vectorize(
     rev(strsplit(user.id, '---', fixed = TRUE)[[1]])[1]
   }
 )
-new.gran.names <- c('5_meter', '5_meter.binary', 'street', 'street.binary')
 data.with.raw.accuracy <-
   accuracy.data %>%
   filter(granularity != '10_meter') %>%
-  mutate(granularity = ordered(get.granularity(granularity, binary), levels = new.gran.names)) %>%
   mutate(is.anon.route = condition.id > 121) %>%
   mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
                               levels = c('anon', 'reg', 'turk', 'maj'))) %>%
   mutate(worker1 = fix.anon.names(worker1)) %>%
   mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg)) %>%
-  filter(label.type != 'NoSidewalk' | granularity == 'street.binary')
-
-
+  filter(label.type != 'NoSidewalk' | (granularity == 'street' & binary == TRUE))
 ```
 
 TODO percentage of turkers who completed the HIT (maybe?) <br>
@@ -647,7 +635,8 @@ TODO anything else?
 ```{r turk.high.level.results, echo=FALSE, include=FALSE}
 unique.turkers <-
   data.with.raw.accuracy %>%
-  filter(n.workers == 5, worker.thresh == 3, !binary, !remove.low.severity, granularity == 'street', label.type == 'CurbRamp') %>%
+  filter(n.workers == 5, worker.thresh == 3, !binary,
+         !remove.low.severity, granularity == 'street', label.type == 'CurbRamp') %>%
   select(worker1, worker2, worker3, worker4, worker5) %>%
   gather(worker.index, turker.id) %>%
   select(turker.id)
@@ -715,6 +704,8 @@ kable(
 
 For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, individual turkers, and 5 turkers with majority vote).
 
+Note: The red dots on the graphs are means.
+
 *Takeaways*:
 
 * Analyzing at the 5 meter level shows higher raw accuracy and specificity, both because of the large number of true negatives that we get from splitting into 5 meter segments; there are very few street segments with no labels at all.
@@ -738,22 +729,65 @@ For simplicity, the graphs below count only one true/false positie/negative per 
 granularity.analysis.data <-
   data.with.raw.accuracy %>%
   filter(remove.low.severity == FALSE) %>%
+  filter(binary == TRUE) %>%
   filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3)) %>%
   filter(label.type != 'NoSidewalk') %>%
-  filter(granularity %in% c('5_meter.binary', 'street.binary')) %>%
-  mutate(granularity = droplevels(granularity),
-         granularity = factor(granularity,
-                              levels = c('5_meter.binary', 'street.binary'),
-                              labels = c('5_meter', 'street'))) %>%
   select(-specificity) %>%
   gather(accuracy.type, accuracy.value,
          recall, precision, f.measure, raw.accuracy,
          na.rm = TRUE, factor_key = TRUE)
 
-
 # Create the trellis boxplot.
 ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value)) +
   geom_boxplot() +
-  facet_grid(accuracy.type ~ label.type) +#, labeller = labeller(label.type = label.count.labeller)) +
+  stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  facet_grid(accuracy.type ~ label.type) +
+  ggtitle('Street vs. 5 Meter level Granularity') +
   my.theme.discrete.x
 ```
+
+
+### Possible Story 2: Single vs. any number of issues per segment
+
+For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, individual turkers, and 5 turkers with majority vote).
+
+Note: The red dots on the graphs are means.
+
+*Takeaways*:
+
+* 5 meter level (first graph): Considering multiple issues per segment results in _very slightly_ lower accuracy for pretty much every type of label and type of accuracy (except precision). I suspect that this comes mostly from our method of clustering, which makes it unlikely that users end up with multiple labels per 5 meter segment. We do not have this restriction in the ground truth, so those few cases where we have more than one label per 5 meter segment in the GT usually results in an additional false negative when moving to ordinal analysis. However, the difference here is very small, so our clustering method seems fine to me.
+
+* Street level (second graph) recall: If we do this analysis at the street level, the decreases in accuracy are more pronounced. At this level, the clustering shouldn't have much effect. The decrease in recall suggests that users are finding _some_ of the problems, but not _all_ of them (meaning an increase in false negatives when we move to ordinal analysis).
+
+* Street level (second graph) recall: I suspect that the reason for the decrease in precision when moving to ordinal analysis at the street level is the same reason as why 5 meter level has lower precision than street level (seen in the previous section). That is, users' misunderstandings of how to label certain common things (driveways as curb ramps, etc.); since these mistakes are common, they may happen many times on a single street edge, which means that you start racking up the false positives when you move to ordinal analysis.
+
+
+```{r turk.issues.per.seg.analysis, echo=FALSE, fig.width=8, fig.height=6}
+issues.per.seg.analysis.data <-
+  data.with.raw.accuracy %>%
+  filter(remove.low.severity == FALSE) %>%
+  filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3)) %>%
+  filter(label.type != 'NoSidewalk') %>%
+  select(-specificity) %>%
+  mutate(issues.per.segment = factor(if_else(binary, 'binary', 'ordinal'))) %>%
+  gather(accuracy.type, accuracy.value,
+         recall, precision, f.measure, raw.accuracy,
+         na.rm = TRUE, factor_key = TRUE)
+
+# Create the trellis boxplots.
+ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == '5_meter'),
+       aes(x = issues.per.segment, y = accuracy.value)) +
+  geom_boxplot() +
+  stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  facet_grid(accuracy.type ~ label.type) +
+  ggtitle('5 Meter-Level Analysis of Issues per Segment') +
+  my.theme.discrete.x
+ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == 'street'),
+       aes(x = issues.per.segment, y = accuracy.value)) +
+  geom_boxplot() +
+  stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  facet_grid(accuracy.type ~ label.type) +
+  ggtitle('Street-Level Analysis of Issues per Segment') +
+  my.theme.discrete.x
+```
+
