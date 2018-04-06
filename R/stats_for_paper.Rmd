@@ -471,7 +471,7 @@ filtered.speeds <-
 
 ## Public Deployment
 
-NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This incldues all data through the most recent deployment on mturk.
+NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk.
 
 ### Top-line numbers (no filtering)
 
@@ -579,7 +579,7 @@ Also for the turkers' stats, this data is only looking at the first turker who c
 zoning.data %>% filter(exclude) %>% distinct(condition_id)
 
 classes <- c('numeric', replicate(5, 'character'), 'numeric', 'numeric', 'logical', 'logical',
-             'numeric', 'factor', 'factor', replicate(8, 'numeric'))
+             'numeric', 'factor', 'character', replicate(8, 'numeric'))
 volunteer.data <- read.csv('../data/accuracies-volunteer.csv',
                            colClasses = classes,
                            na.strings = c('null')) %>%
@@ -592,19 +592,51 @@ turker.data <- read.csv('../data/accuracies-turker.csv',
 # Combine datasets
 accuracy.data <- rbind(volunteer.data, turker.data)
 
-# Remove occlusion and other label types
-accuracy.data <- subset(accuracy.data, !(label.type %in% c('Other', 'Occlusion')))
-accuracy.data$label.type <- droplevels(accuracy.data$label.type)
+# Create data for summing true/false pos/neg over all label types, and all problem label types.
+# First summing over curb ramp, missing curb ramp, obstacle, and surface problem...
+all.types.data <-
+  accuracy.data %>%
+  filter(label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+  group_by(condition.id, worker1, worker2, worker3, worker4, worker5, n.workers, worker.thresh,
+           binary, remove.low.severity, low.severity.thresh, granularity, is.turker) %>%
+  dplyr::summarize(label.type = 'All',
+                   true.pos = sum(true.pos),
+                   false.pos = sum(false.pos),
+                   true.neg = sum(true.neg),
+                   false.neg = sum(false.neg)) %>%
+  ungroup()
 
-# Rename SurfaceProblem label type as SurfaceProb for easier visualization
-# possibly redo using https://stackoverflow.com/questions/28190435/changing-factor-levels-with-dplyr-mutate
-label.type.levs <- levels(accuracy.data$label.type)
-label.type.levs[6] <- c('SurfaceProb')
-levels(accuracy.data$label.type) <- label.type.levs
+# Then summing over just missing curb ramp, obstacle, and surface problem...
+problem.types.data <-
+  accuracy.data %>%
+  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+  group_by(condition.id, worker1, worker2, worker3, worker4, worker5, n.workers, worker.thresh,
+           binary, remove.low.severity, low.severity.thresh, granularity, is.turker) %>%
+  dplyr::summarize(label.type = 'AllProb',
+                   true.pos = sum(true.pos),
+                   false.pos = sum(false.pos),
+                   true.neg = sum(true.neg),
+                   false.neg = sum(false.neg)) %>%
+  ungroup()
 
-# Reorder label type levels.
-label.type.levs <- c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb', 'NoSidewalk','Problem')
-accuracy.data$label.type <- factor(accuracy.data$label.type, label.type.levs)
+# Now we combine them and compute the accuracy metrics for each row, and attach to main dataset.
+data.with.agg.types <-
+  all.types.data %>%
+  bind_rows(problem.types.data) %>%
+  mutate(precision = true.pos / (true.pos + false.pos),
+         recall = true.pos / (true.pos + false.neg),
+         specificity = true.neg / (true.neg + false.pos),
+         f.measure = 2 * (precision * recall) / (precision + recall)) %>%
+  bind_rows(accuracy.data)
+
+# Remove occlusion and other label types, rename SurfaceProblem label type as SurfaceProb for
+# easier visualization and set order of factor levels.
+label.types <- c('All', 'AllProb', 'CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb', 'NoSidewalk', 'Problem')
+data.filtered.label.type <-
+  data.with.agg.types %>%
+  mutate(label.type = if_else(label.type == 'SurfaceProblem', 'SurfaceProb', label.type)) %>%
+  filter(label.type %in% label.types) %>%
+  mutate(label.type = factor(label.type, levels = label.types, labels = label.types))
 
 # More setup: remove binary analysis (except street level), add is.anon.route column, add
 #             raw.accuracy column, add worker.type column, give granularity an ordering.
@@ -626,8 +658,9 @@ fix.anon.names <- Vectorize(
     rev(strsplit(user.id, '---', fixed = TRUE)[[1]])[1]
   }
 )
+  
 data.with.raw.accuracy <-
-  accuracy.data %>%
+  data.filtered.label.type %>%
   filter(granularity != '10_meter') %>%
   mutate(is.anon.route = condition.id > 121) %>%
   mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
@@ -653,15 +686,29 @@ n.turkers <- nrow(unique.turkers)
 n.reg <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, !is.anon.route) %>% select(worker1))
 n.anon <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, is.anon.route) %>% select(worker1))
 
+all.type.accuracy.data <-
+  data.with.raw.accuracy %>%
+  filter(n.workers == 1, binary, !remove.low.severity, granularity == '5_meter') %>%
+  filter(label.type %in% c('All', 'AllProb')) %>%
+  select(label.type, precision, recall, specificity, f.measure, raw.accuracy) %>%
+  group_by(label.type) %>%
+  summarize_at(vars(precision:raw.accuracy), median, na.rm = TRUE)
+
 # NOTE Multiply turker set by 5 if you want to count each turker who did each set of routes separately
 turk.study.summary.stats <-
   data.with.raw.accuracy %>%
-  filter(n.workers == 1, !binary, !remove.low.severity, granularity == 'street', label.type == 'CurbRamp') %>%
+  filter(n.workers == 1, !binary, !remove.low.severity, granularity == 'street') %>%
+  filter(label.type %in% c('All', 'AllProb')) %>%
+  group_by(condition.id, worker1, is.anon.route, worker.type) %>%
+  mutate(total.recall = if_else(label.type == 'All', recall, NaN),
+         total.precision = if_else(label.type == 'All', precision, NaN),
+         problem.recall = if_else(label.type == 'AllProb', recall, NaN),
+         problem.precision = if_else(label.type == 'AllProb', precision, NaN)) %>%
+  dplyr::summarize_at(vars(total.recall:problem.precision), sum, na.rm = TRUE) %>%
+  ungroup() %>%
   left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
-  group_by(worker1) %>%
-  dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE),
-                   is.anon.route = first(is.anon.route),
-                   worker.type = first(worker.type)) %>%
+  group_by_at(vars(worker1:problem.precision)) %>%
+  dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
   left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
          distance.feet = if_else(is.anon.route, 2000, 4000),
@@ -676,15 +723,27 @@ n.reg.users.removed <- zoning.data %>% filter(exclude) %>% distinct(condition.id
 
 A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users were part of this study.
 
-Next we have average (median) stats, followed by aggregate (sum) stats.
+First is a table showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
+
+Then we show user group stats: first average (median) stats, followed by aggregate (sum) stats.
 
 
 ```{r turk.showing.stats, echo=FALSE}
+kable(
+  all.type.accuracy.data,
+  digits = 3,
+  align = 'l'
+  )
+
 kable(
   turk.study.summary.stats %>%
     group_by(worker.type) %>%
     dplyr::summarize(
       labels.per.100m = median(labels.per.100m, na.rm = TRUE),
+      total.recall = median(total.recall, na.rm = TRUE),
+      total.precision = median(total.precision, na.rm = TRUE),
+      problem.recall = median(problem.recall, na.rm = TRUE),
+      problem.precision = median(problem.precision, na.rm = TRUE),
       feet.per.min = median(feet.per.min, na.rm = TRUE),
       minutes.per.1k.ft = median(minutes.per.1k.ft, na.rm = TRUE),
       minutes_audited = median(minutes_audited, na.rm = TRUE)

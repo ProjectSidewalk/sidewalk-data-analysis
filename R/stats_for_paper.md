@@ -6,7 +6,7 @@ April 3, 2018
 Public Deployment
 -----------------
 
-NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This incldues all data through the most recent deployment on mturk.
+NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk.
 
 ### Top-line numbers (no filtering)
 
@@ -61,23 +61,30 @@ Also for the turkers' stats, this data is only looking at the first turker who c
 
 TODO percentage of turkers who completed the HIT (maybe?) <br> TODO anything else?
 
-A total of 320 turkers, 49 registered users, and 15 anonymous users were part of this study.
+A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
-Next we have average (median) stats, followed by aggregate (sum) stats.
+First is a table showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
 
-| worker.type | labels.per.100m | feet.per.min | minutes.per.1k.ft | minutes\_audited |
-|:------------|:----------------|:-------------|:------------------|:-----------------|
-| anon        | 5.413           | 150.830      | 6.630             | 13.260           |
-| reg         | 5.988           | 163.800      | 6.105             | 24.420           |
-| turk        | 7.423           | 628.456      | 1.591             | 6.365            |
+Then we show user group stats: first average (median) stats, followed by aggregate (sum) stats.
+
+| label.type | precision | recall | specificity | f.measure | raw.accuracy |
+|:-----------|:----------|:-------|:------------|:----------|:-------------|
+| All        | 0.486     | 0.702  | 0.969       | 0.553     | 0.955        |
+| AllProb    | 0.077     | 0.250  | 0.978       | 0.222     | 0.972        |
+
+| worker.type | labels.per.100m | total.recall | total.precision | problem.recall | problem.precision | feet.per.min | minutes.per.1k.ft | minutes\_audited |
+|:------------|:----------------|:-------------|:----------------|:---------------|:------------------|:-------------|:------------------|:-----------------|
+| anon        | 4.921           | 0.569        | 0.719           | 0.225          | 0.292             | 150.830      | 6.630             | 13.260           |
+| reg         | 5.988           | 0.921        | 0.488           | 0.600          | 0.183             | 163.800      | 6.105             | 24.420           |
+| turk        | 6.808           | 0.768        | 0.672           | 0.477          | 0.150             | 628.456      | 1.591             | 6.365            |
 
 | worker.type | n.missions | distance.miles | n.labels | hours.audited |
 |:------------|:-----------|:---------------|:---------|:--------------|
-| anon        | 30         | 5.682          | 481      | 3.547         |
-| reg         | 147        | 37.121         | 3626     | 21.518        |
-| turk        | 177        | 42.803         | 5559     | 9.037         |
+| anon        | 32         | 6.061          | 481      | 3.547         |
+| reg         | 150        | 37.879         | 3626     | 21.518        |
+| turk        | 182        | 43.939         | 5559     | 9.037         |
 
-Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison between the user groups. This removes 13 of the 49 sets of routes from registered users. There is still 15 sets of routes from anonymous users.
+Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison between the user groups. This removes 13 of the 50 sets of routes from registered users. There is still 16 sets of routes from anonymous users.
 
 ![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.distribution-1.png)![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.distribution-2.png)
 
