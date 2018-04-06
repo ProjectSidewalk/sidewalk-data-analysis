@@ -23,7 +23,6 @@ my.theme.discrete.x <- theme_bw() + theme(panel.grid.major.x = element_blank())
 ```{r reading.cleaning, echo=FALSE}
 agreement.classes <- c('numeric', 'factor', 'factor', 'factor', 'numeric', 'numeric')
 agreement.data <- read.csv('../data/irr_results-not_for_humans.csv', colClasses = agreement.classes)
-# attach(agreement.data)
 
 label.type.levels.in.order <- c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','Problem')
 clean.agreement.data <-
