@@ -132,7 +132,11 @@ Note: The red dots on the graphs are means.
 
 ### Possible Story 3: Zone type (land use) effect on accuracy
 
+The first graph shows all label types aggregated, the second shows only problem label types aggregated.
+
 *Takeaways*:
+
+![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.analysis-2.png)
 
 ### Possible Story 4: Registered volunteer vs. anon volunteer vs. turker
 
