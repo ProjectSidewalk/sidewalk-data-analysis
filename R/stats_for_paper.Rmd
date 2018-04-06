@@ -15,6 +15,7 @@ library(RPostgreSQL)
 library(ggplot2)
 library(tidyr)
 library(dplyr)
+library(forcats)
 
 # Run the following in console when you want to generate github flavored markdown as well.
 # library(rmarkdown)
@@ -389,6 +390,10 @@ if (REFRESH_TURK_STUDY_DATA) {
   # sessions.turk.study <- read.csv('../data/stats_for_paper_sessions-turk_study.csv',
   #                                 colClasses = session.classes.turk.study)
 }
+
+zoning.classes <- c('numeric', 'numeric', 'numeric', 'factor', 'factor', 'logical')
+zoning.data <- read.csv('../data/street_zoning_info.csv', colClasses = zoning.classes) %>%
+  dplyr::rename(condition.id = condition_id)
 ```
 
 ```{r transforming.data, echo=FALSE, warning=FALSE}
@@ -422,7 +427,7 @@ label.counts <-
   # filter(label_type_id != 7) %>%
   group_by(user_id) %>%
   summarize_at(vars(label_id), n_distinct) %>%
-  rename(label_count = label_id)
+  dplyr::rename(label_count = label_id)
 
 # Selects distinct on audit_task_id, then sums dist audited.
 audit.length <-
@@ -431,7 +436,7 @@ audit.length <-
          role = recode(role, User = 'Registered', .default = levels(role))) %>%
   group_by(user_id, role) %>%
   distinct(audit_task_id, .keep_all = TRUE) %>%
-  summarise(feet_audited = sum(feet_audited), audit_count = n()) %>%
+  dplyr::summarise(feet_audited = sum(feet_audited), audit_count = n()) %>%
   ungroup() %>%
   mutate(miles_audited = feet_audited / 5280) %>%
   left_join(label.counts, by = 'user_id') %>%
@@ -521,7 +526,7 @@ Below are the medians for a few metrics (followed by sums), split by user group.
 kable(
   filtered.speeds %>%
     group_by(role) %>%
-    summarise(
+    dplyr::summarise(
       n_users = n(),
       miles = median(miles_audited, na.rm = TRUE),
       missions = median(mission_count, na.rm = TRUE),
@@ -540,7 +545,7 @@ kable(
 kable(
   filtered.speeds %>%
     group_by(role) %>%
-    summarise(
+    dplyr::summarise(
       n_users = n(),
       miles = sum(miles_audited, na.rm = TRUE),
       coverage = paste0(format(100 * sum(miles_audited, na.rm = TRUE) / TOTAL_STREET_DIST_MILES,
@@ -570,6 +575,9 @@ Also for the turkers' stats, this data is only looking at the first turker who c
 ### High level results
 
 ```{r turk.reading.cleaning.data, echo=FALSE, include=FALSE}
+# Get conditions to exclude
+zoning.data %>% filter(exclude) %>% distinct(condition_id)
+
 classes <- c('numeric', replicate(5, 'character'), 'numeric', 'numeric', 'logical', 'logical',
              'numeric', 'factor', 'factor', replicate(8, 'numeric'))
 volunteer.data <- read.csv('../data/accuracies-volunteer.csv',
@@ -651,9 +659,9 @@ turk.study.summary.stats <-
   filter(n.workers == 1, !binary, !remove.low.severity, granularity == 'street', label.type == 'CurbRamp') %>%
   left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
   group_by(worker1) %>%
-  summarise(n.labels = n_distinct(label_id, na.rm = TRUE),
-            is.anon.route = first(is.anon.route),
-            worker.type = first(worker.type)) %>%
+  dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE),
+                   is.anon.route = first(is.anon.route),
+                   worker.type = first(worker.type)) %>%
   left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
          distance.feet = if_else(is.anon.route, 2000, 4000),
@@ -662,6 +670,8 @@ turk.study.summary.stats <-
          minutes.per.1k.ft = 1000 * minutes_audited / distance.feet,
          hours.audited = minutes_audited / 60)
          # minutes_per_session = minutes_audited / n_sessions)
+
+n.reg.users.removed <- zoning.data %>% filter(exclude) %>% distinct(condition.id) %>% nrow()
 ```
 
 A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users were part of this study.
@@ -673,7 +683,7 @@ Next we have average (median) stats, followed by aggregate (sum) stats.
 kable(
   turk.study.summary.stats %>%
     group_by(worker.type) %>%
-    summarize(
+    dplyr::summarize(
       labels.per.100m = median(labels.per.100m, na.rm = TRUE),
       feet.per.min = median(feet.per.min, na.rm = TRUE),
       minutes.per.1k.ft = median(minutes.per.1k.ft, na.rm = TRUE),
@@ -686,7 +696,7 @@ kable(
 kable(
   turk.study.summary.stats %>%
     group_by(worker.type) %>%
-    summarize(
+    dplyr::summarize(
       n.missions = sum(n.missions, na.rm = TRUE),
       distance.feet = sum(distance.feet, na.rm = TRUE),
       n.labels = sum(n.labels, na.rm = TRUE),
@@ -697,6 +707,76 @@ kable(
   digits = 3,
   align = 'l'
   )
+```
+
+
+Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison between the user groups. This removes `r n.reg.users.removed` of the `r n.reg` sets of routes from registered users. There is still `r n.anon` sets of routes from anonymous users.
+
+```{r turk.zone.type.distribution, echo=FALSE, fig.width=4.5, fig.height=4}
+zoning.with.volunteer.type <-
+  data.with.raw.accuracy %>%
+  select(condition.id, is.anon.route) %>%
+  distinct() %>%
+  inner_join(zoning.data, by = 'condition.id') %>%
+  mutate(volunteer.type = factor(is.anon.route,
+                                 levels = c(FALSE, TRUE),
+                                 labels = c('Registered', 'Anonymous'))) %>%
+  mutate(zone.type = fct_recode(zone_type,
+                                'Downtown'           = 'Downtown Zone',
+                                'Mixed-Use'          = 'Mixed-Use Zone',
+                                'Nbhd Mixed-Use'     = 'Neighborhood Mixed-Use Zone',
+                                'Prod,Distro,Repair' = 'Production, Distribution, and Repair Zone',
+                                'Residential Apt'    = 'Residential Apartment Zone',
+                                'Residential Flat'   = 'Residential Flat Zone',
+                                'Residential'        = 'Residential Zone',
+                                'Special Purpose'    = 'Special Purpose Zone'))
+
+all.dc.zoning.data <- data_frame(
+  volunteer.type = c('All Streets'),
+  zone.type = c('Downtown',
+                'Mixed-Use',
+                'Nbhd Mixed-Use',
+                'Prod,Distro,Repair',
+                'Residential Apt',
+                'Residential Flat',
+                'Residential',
+                'Special Purpose',
+                'Unzoned'),
+  percent.of.streets = c(5.74, 11.73, 1.02, 2.47, 14.82, 15.01, 42.89, 1.30, 5.03)
+)
+
+land.use.by.volunteer.type <-
+  zoning.with.volunteer.type %>%
+  group_by(volunteer.type, zone.type) %>%
+  dplyr::summarize(n.streets = n()) %>%
+  complete(zone.type, fill = list(n.streets = 0)) %>%
+  mutate(percent.of.streets = 100 * n.streets / sum(n.streets)) %>%
+  ungroup() %>%
+  select(volunteer.type, zone.type, percent.of.streets) %>%
+  rbind(all.dc.zoning.data)
+
+land.use.by.volunteer.type.filtered <-
+  zoning.with.volunteer.type %>%
+  filter(!exclude) %>%
+  group_by(volunteer.type, zone.type) %>%
+  dplyr::summarize(n.streets = n()) %>%
+  mutate(percent.of.streets = 100 * n.streets / sum(n.streets)) %>%
+  ungroup() %>%
+  select(volunteer.type, zone.type, percent.of.streets) %>%
+  rbind(all.dc.zoning.data) %>%
+  filter(!(zone.type %in% c('Nbhd Mixed-Use', 'Special Purpose', 'Unzoned')))
+
+ggplot(data = land.use.by.volunteer.type, aes(x = zone.type, y = percent.of.streets, fill = volunteer.type)) +
+  geom_col(position = 'dodge') +
+  my.theme.discrete.x +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+
+ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percent.of.streets, fill = volunteer.type)) +
+  geom_col(position = 'dodge') +
+  my.theme.discrete.x +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 ```
 
 
@@ -791,3 +871,19 @@ ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == 'street'),
   my.theme.discrete.x
 ```
 
+
+### Possible Story 3: Zone type (land use) effect on accuracy
+
+*Takeaways*:
+
+```{r turk.zone.type.analysis, echo=FALSE, fig.width=6, fig.height=4}
+```
+
+
+### Possible Story 4: Registered volunteer vs. anon volunteer vs. turker
+
+*Takeaways*:
+
+
+```{r turk.user.group.analysis, echo=FALSE, fig.width=8, fig.height=6}
+```

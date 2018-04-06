@@ -77,6 +77,10 @@ Next we have average (median) stats, followed by aggregate (sum) stats.
 | reg         | 147        | 37.121         | 3626     | 21.518        |
 | turk        | 177        | 42.803         | 5559     | 9.037         |
 
+Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison between the user groups. This removes 13 of the 49 sets of routes from registered users. There is still 15 sets of routes from anonymous users.
+
+![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.distribution-1.png)![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.distribution-2.png)
+
 ### Possible Story 1: Street-level vs. 5 meter-level
 
 For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, individual turkers, and 5 turkers with majority vote).
@@ -118,3 +122,11 @@ Note: The red dots on the graphs are means.
 -   Street level (second graph) recall: I suspect that the reason for the decrease in precision when moving to ordinal analysis at the street level is the same reason as why 5 meter level has lower precision than street level (seen in the previous section). That is, users' misunderstandings of how to label certain common things (driveways as curb ramps, etc.); since these mistakes are common, they may happen many times on a single street edge, which means that you start racking up the false positives when you move to ordinal analysis.
 
 ![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.issues.per.seg.analysis-1.png)![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.issues.per.seg.analysis-2.png)
+
+### Possible Story 3: Zone type (land use) effect on accuracy
+
+*Takeaways*:
+
+### Possible Story 4: Registered volunteer vs. anon volunteer vs. turker
+
+*Takeaways*:
