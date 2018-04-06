@@ -1,7 +1,7 @@
 ---
 title: "Statistics for Paper"
 author: "Mikey Saugstad"
-date: "April 3, 2018"
+date: "April 6, 2018"
 output:
   html_document:
     toc: yes
@@ -477,8 +477,6 @@ NOTE: Public deployment data includes all data up through March 31st (and part o
 
 ### Top-line numbers (no filtering)
 
-TODO: anything else?
-
 ```{r public.deployment.how.much.data, echo=FALSE, warning=FALSE}
 kable(
   labels %>%
@@ -495,8 +493,6 @@ kable(
 ### Data characteristics
 
 This is the start of filtering out users with low labeling frequency (also filtering out researchers).
-
-TODO: anything else?
 
 ```{r public.deployment.data.characteristics, echo=FALSE, warning=FALSE}
 filtered.labels <- filter(labels, user_id %in% filtered.speeds$user_id)
@@ -520,7 +516,7 @@ There have been a total of `r n.audits` audits by our users across `r n.streets`
 
 ### User stats and tool usage
 
-TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)
+TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
@@ -570,9 +566,9 @@ Amongst all the data collected in DC, how much of DC is labeled by multiple user
 
 ## Turk Study
 
-This is most of the data... I think there are just a couple "conditions" (i.e., "sets of routes") that were missing some amount of data in my local dump, so I need to investigate. I also think I may have failed to remove the conditions for anonymous users who didn't place any labels. So most of these numbers are trustworthy (though they aren't the *final* numbers), I would just be wary about drawing conclusions from the anonymous user data.
+Update: This is now all of the data. There used to be 19 anonymous user routes, but three of them actually had no labels placed by the anonymous user (we had forgotten to check beforehand), thus we have only 16.
 
-Also for the turkers' stats, this data is only looking at the first turker who completed each set of routes. I will be adding in the rest of the turkers at some point soon.
+Even though 5 turkers did each route, the high level results for individual turkers looks only at the first turker to complete each set of routes. This makes aggregate stats more even, and a fairer comparison across user groups. (but maybe we should actually use all turkers when not aggregating, actually...)
 
 ### High level results
 
@@ -672,8 +668,13 @@ data.with.raw.accuracy <-
   filter(label.type != 'NoSidewalk' | (granularity == 'street' & binary == TRUE))
 ```
 
-TODO percentage of turkers who completed the HIT (maybe?) <br>
-TODO anything else?
+TODO: Add turk3 and turk5 to the user groups (3 and 5 turkers with majority vote, respectively). <br>
+TODO: Put accuracy numbers in a separate table, and include f-measure. <br>
+TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br>
+TODO: Add average IRR across all rounds (but separated by label type). <br>
+TODO: Add street level high level results (maybe?). <br>
+TODO: Add "n" to a bunch of graphs. <br>
+TODO: Percentage of turkers who completed the HIT (maybe?).
 
 ```{r turk.high.level.results, echo=FALSE, include=FALSE}
 unique.turkers <-
@@ -728,7 +729,6 @@ A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` ano
 First is a table showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
 
 Then we show user group stats: first average (median) stats, followed by aggregate (sum) stats.
-
 
 ```{r turk.showing.stats, echo=FALSE}
 kable(
@@ -843,7 +843,7 @@ ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percen
 
 ### Possible Story 1: Street-level vs. 5 meter-level
 
-For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, individual turkers, and 5 turkers with majority vote).
+For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment (i.e., binary instead of ordinal). All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
 Note: The red dots on the graphs are means.
 
@@ -871,7 +871,7 @@ granularity.analysis.data <-
   data.with.raw.accuracy %>%
   filter(remove.low.severity == FALSE) %>%
   filter(binary == TRUE) %>%
-  filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3)) %>%
+  filter(n.workers == 1) %>%
   filter(label.type != 'NoSidewalk') %>%
   select(-specificity) %>%
   gather(accuracy.type, accuracy.value,
@@ -888,9 +888,9 @@ ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value
 ```
 
 
-### Possible Story 2: Single vs. any number of issues per segment
+### Possible Story 2: Binary vs. ordinal issues per segment
 
-For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, individual turkers, and 5 turkers with majority vote).
+For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
 Note: The red dots on the graphs are means.
 
@@ -907,7 +907,7 @@ Note: The red dots on the graphs are means.
 issues.per.seg.analysis.data <-
   data.with.raw.accuracy %>%
   filter(remove.low.severity == FALSE) %>%
-  filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3)) %>%
+  filter(n.workers == 1) %>%
   filter(label.type != 'NoSidewalk') %>%
   select(-specificity) %>%
   mutate(issues.per.segment = factor(if_else(binary, 'binary', 'ordinal'))) %>%
@@ -936,6 +936,8 @@ ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == 'street'),
 ### Possible Story 3: Zone type (land use) effect on accuracy
 
 The first graph shows all label types aggregated, the second shows only problem label types aggregated.
+
+Note: The red dots on the graphs are means.
 
 *Takeaways*:
 
@@ -983,10 +985,23 @@ ggplot(data = zone.type.analysis.data %>% filter(label.type == 'AllProb'),
 ```
 
 
-### Possible Story 4: Registered volunteer vs. anon volunteer vs. turker
+### Possible Story 4: Reg vs. anon vs. turker vs. turk3 vs. turk5
+
+TODO: Make some graphs.
 
 *Takeaways*:
 
 
 ```{r turk.user.group.analysis, echo=FALSE, fig.width=8, fig.height=6}
+```
+
+
+### Possible Story 5: Does removing low severity => higher recall
+
+TODO: Make some graphs.
+
+*Takeaways*:
+
+
+```{r turk.high.severity.analysis, echo=FALSE, fig.width=8, fig.height=6}
 ```

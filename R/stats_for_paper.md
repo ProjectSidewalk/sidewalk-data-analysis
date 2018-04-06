@@ -1,7 +1,7 @@
 Statistics for Paper
 ================
 Mikey Saugstad
-April 3, 2018
+April 6, 2018
 
 -   [Public Deployment](#public-deployment)
     -   [Top-line numbers (no filtering)](#top-line-numbers-no-filtering)
@@ -11,9 +11,10 @@ April 3, 2018
 -   [Turk Study](#turk-study)
     -   [High level results](#high-level-results)
     -   [Possible Story 1: Street-level vs. 5 meter-level](#possible-story-1-street-level-vs.-5-meter-level)
-    -   [Possible Story 2: Single vs. any number of issues per segment](#possible-story-2-single-vs.-any-number-of-issues-per-segment)
+    -   [Possible Story 2: Binary vs. ordinal issues per segment](#possible-story-2-binary-vs.-ordinal-issues-per-segment)
     -   [Possible Story 3: Zone type (land use) effect on accuracy](#possible-story-3-zone-type-land-use-effect-on-accuracy)
-    -   [Possible Story 4: Registered volunteer vs. anon volunteer vs. turker](#possible-story-4-registered-volunteer-vs.-anon-volunteer-vs.-turker)
+    -   [Possible Story 4: Reg vs. anon vs. turker vs. turk3 vs. turk5](#possible-story-4-reg-vs.-anon-vs.-turker-vs.-turk3-vs.-turk5)
+    -   [Possible Story 5: Does removing low severity =&gt; higher recall](#possible-story-5-does-removing-low-severity-higher-recall)
 
 Public Deployment
 -----------------
@@ -21,8 +22,6 @@ Public Deployment
 NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk.
 
 ### Top-line numbers (no filtering)
-
-TODO: anything else?
 
 | CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
 |:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
@@ -32,8 +31,6 @@ TODO: anything else?
 
 This is the start of filtering out users with low labeling frequency (also filtering out researchers).
 
-TODO: anything else?
-
 | CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
 |:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
 | 89293    | 9256       | 32560      | 18174    | 685       | 1074  | 4722           | 155764 |
@@ -42,7 +39,7 @@ There have been a total of 19768 audits by our users across 13045 streets, avera
 
 ### User stats and tool usage
 
-TODO: missions started vs missions completed (not sure we can do this; I expect that it would be difficult, without much benefit)
+TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
@@ -65,13 +62,13 @@ Amongst all the data collected in DC, how much of DC is labeled by multiple user
 Turk Study
 ----------
 
-This is most of the data... I think there are just a couple "conditions" (i.e., "sets of routes") that were missing some amount of data in my local dump, so I need to investigate. I also think I may have failed to remove the conditions for anonymous users who didn't place any labels. So most of these numbers are trustworthy (though they aren't the *final* numbers), I would just be wary about drawing conclusions from the anonymous user data.
+Update: This is now all of the data. There used to be 19 anonymous user routes, but three of them actually had no labels placed by the anonymous user (we had forgotten to check beforehand), thus we have only 16.
 
-Also for the turkers' stats, this data is only looking at the first turker who completed each set of routes. I will be adding in the rest of the turkers at some point soon.
+Even though 5 turkers did each route, the high level results for individual turkers looks only at the first turker to complete each set of routes. This makes aggregate stats more even, and a fairer comparison across user groups. (but maybe we should actually use all turkers when not aggregating, actually...)
 
 ### High level results
 
-TODO percentage of turkers who completed the HIT (maybe?) <br> TODO anything else?
+TODO: Add turk3 and turk5 to the user groups (3 and 5 turkers with majority vote, respectively). <br> TODO: Put accuracy numbers in a separate table, and include f-measure. <br> TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add average IRR across all rounds (but separated by label type). <br> TODO: Add street level high level results (maybe?). <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
 
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
@@ -102,7 +99,7 @@ Here is the zone type distribution for the mturk study. This shows the distribut
 
 ### Possible Story 1: Street-level vs. 5 meter-level
 
-For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, individual turkers, and 5 turkers with majority vote).
+For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment (i.e., binary instead of ordinal). All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
 Note: The red dots on the graphs are means.
 
@@ -126,9 +123,9 @@ Note: The red dots on the graphs are means.
 
 ![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.granularity.analysis-1.png)
 
-### Possible Story 2: Single vs. any number of issues per segment
+### Possible Story 2: Binary vs. ordinal issues per segment
 
-For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, individual turkers, and 5 turkers with majority vote).
+For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
 Note: The red dots on the graphs are means.
 
@@ -146,10 +143,20 @@ Note: The red dots on the graphs are means.
 
 The first graph shows all label types aggregated, the second shows only problem label types aggregated.
 
+Note: The red dots on the graphs are means.
+
 *Takeaways*:
 
 ![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.analysis-2.png)
 
-### Possible Story 4: Registered volunteer vs. anon volunteer vs. turker
+### Possible Story 4: Reg vs. anon vs. turker vs. turk3 vs. turk5
+
+TODO: Make some graphs.
+
+*Takeaways*:
+
+### Possible Story 5: Does removing low severity =&gt; higher recall
+
+TODO: Make some graphs.
 
 *Takeaways*:
