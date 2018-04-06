@@ -3,6 +3,18 @@ Statistics for Paper
 Mikey Saugstad
 April 3, 2018
 
+-   [Public Deployment](#public-deployment)
+    -   [Top-line numbers (no filtering)](#top-line-numbers-no-filtering)
+    -   [Data characteristics](#data-characteristics)
+    -   [User stats and tool usage](#user-stats-and-tool-usage)
+    -   [Possible Story 1: Data overlap and agreement between users](#possible-story-1-data-overlap-and-agreement-between-users)
+-   [Turk Study](#turk-study)
+    -   [High level results](#high-level-results)
+    -   [Possible Story 1: Street-level vs. 5 meter-level](#possible-story-1-street-level-vs.-5-meter-level)
+    -   [Possible Story 2: Single vs. any number of issues per segment](#possible-story-2-single-vs.-any-number-of-issues-per-segment)
+    -   [Possible Story 3: Zone type (land use) effect on accuracy](#possible-story-3-zone-type-land-use-effect-on-accuracy)
+    -   [Possible Story 4: Registered volunteer vs. anon volunteer vs. turker](#possible-story-4-registered-volunteer-vs.-anon-volunteer-vs.-turker)
+
 Public Deployment
 -----------------
 

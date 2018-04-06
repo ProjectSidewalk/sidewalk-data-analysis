@@ -5,6 +5,8 @@ date: "April 3, 2018"
 output:
   html_document:
     toc: yes
+  github_document:
+    toc: yes
   
 ---
 
