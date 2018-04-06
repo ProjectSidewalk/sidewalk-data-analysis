@@ -576,6 +576,30 @@ Even though 5 turkers did each route, the high level results for individual turk
 # Get conditions to exclude
 zoning.data %>% filter(exclude) %>% distinct(condition_id)
 
+# Get IRR data
+agreement.classes <- c('numeric', 'factor', 'factor', 'factor', 'numeric', 'numeric')
+agreement.data <- read.csv('../data/irr_results-not_for_humans.csv', colClasses = agreement.classes)
+
+label.type.levels.in.order <- c('CurbRamp','NoCurbRamp','Obstacle','SurfaceProb','Problem')
+clean.agreement.data <-
+  agreement.data %>%
+  mutate(label.type = case_when(
+            data.type %in% c('prob.binary', 'prob.ordinal') ~ 'Problem',
+            label.type == 'SurfaceProblem'                  ~ 'SurfaceProb',
+            TRUE                                            ~ as.character(label.type)
+          ),
+         data.type = if_else(data.type %in% c('prob.binary', 'binary'),
+                             'binary',
+                             'ordinal')) %>%
+  filter(level == '5m',
+         data.type == 'binary',
+         label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb', 'Problem')) %>%
+  mutate(data.type = factor(data.type),
+         level = factor(level),
+         label.type = factor(label.type, label.type.levels.in.order))
+
+
+# Get accuracy data
 classes <- c('numeric', replicate(5, 'character'), 'numeric', 'numeric', 'logical', 'logical',
              'numeric', 'factor', 'character', replicate(8, 'numeric'))
 volunteer.data <- read.csv('../data/accuracies-volunteer.csv',
@@ -765,6 +789,20 @@ kable(
     ) %>%
     mutate(distance.miles = distance.feet / 5280) %>%
     select(worker.type, n.missions, distance.miles, n.labels, hours.audited),
+  digits = 3,
+  align = 'l'
+  )
+```
+
+
+Our average IRR over the 7 rounds, by label type, is in the table below:
+
+```{r turk.irr.stats, echo=FALSE}
+kable(
+  clean.agreement.data %>%
+    group_by(label.type) %>%
+    dplyr::summarize(mean.kripp.alpha = mean(kripp.alpha),
+                     median.kripp.alpha = median(kripp.alpha)),
   digits = 3,
   align = 'l'
   )
