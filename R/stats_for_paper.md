@@ -74,8 +74,8 @@ Below is table showing number of ground truth labels by user group and by label 
 
 | worker.type | All  | AllProb | CurbRamp | NoCurbRamp | Obstacle | SurfaceProb | Problem |
 |:------------|:-----|:--------|:---------|:-----------|:---------|:------------|:--------|
-| anon        | 556  | 78      | 478      | 19         | 59       | 219         | 297     |
-| reg         | 3038 | 304     | 2734     | 68         | 236      | 804         | 1108    |
+| anon        | 775  | 297     | 478      | 19         | 59       | 219         | 297     |
+| reg         | 3842 | 1108    | 2734     | 68         | 236      | 804         | 1108    |
 
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
@@ -85,15 +85,15 @@ Median accuracy across all users - street level:
 
 | label.type | precision | recall | specificity | f.measure | raw.accuracy |
 |:-----------|:----------|:-------|:------------|:----------|:-------------|
-| All        | 0.667     | 0.857  | 0.725       | 0.733     | 0.745        |
-| AllProb    | 0.286     | 0.500  | 0.732       | 0.500     | 0.703        |
+| All        | 0.674     | 0.714  | 0.750       | 0.667     | 0.711        |
+| AllProb    | 0.400     | 0.400  | 0.768       | 0.364     | 0.667        |
 
 Median accuracy across all users - 5 meter level:
 
 | label.type | precision | recall | specificity | f.measure | raw.accuracy |
 |:-----------|:----------|:-------|:------------|:----------|:-------------|
-| All        | 0.486     | 0.702  | 0.969       | 0.553     | 0.955        |
-| AllProb    | 0.077     | 0.250  | 0.978       | 0.222     | 0.972        |
+| All        | 0.472     | 0.543  | 0.974       | 0.468     | 0.949        |
+| AllProb    | 0.155     | 0.143  | 0.983       | 0.160     | 0.959        |
 
 Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. Also, I threw in issues/features (by that I just mean post-clustering) per 100m, because this is the only table right now that has all five user groups.
 
@@ -101,21 +101,21 @@ Median accuracy by user group - street level:
 
 | user.type | all.recall | all.prec | all.f.meas | all.n | prob.recall | prob.prec | prob.f.meas | prob.n |
 |:----------|:-----------|:---------|:-----------|:------|:------------|:----------|:------------|:-------|
-| anon      | 0.569      | 0.719    | 0.667      | 24.5  | 0.225       | 0.292     | 0.286       | 3.5    |
-| reg       | 0.921      | 0.488    | 0.590      | 119.0 | 0.600       | 0.183     | 0.251       | 21.0   |
-| turk1     | 0.768      | 0.672    | 0.690      | 54.5  | 0.477       | 0.150     | 0.203       | 11.5   |
-| turk3     | 0.760      | 0.810    | 0.770      | 50.0  | 0.200       | 0.250     | 0.229       | 5.0    |
-| turk5     | 0.753      | 0.885    | 0.796      | 46.0  | 0.118       | 0.200     | 0.171       | 2.0    |
+| anon      | 0.466      | 0.665    | 0.611      | 25.0  | 0.156       | 0.417     | 0.197       | 4.0    |
+| reg       | 0.796      | 0.492    | 0.553      | 125.5 | 0.350       | 0.235     | 0.247       | 23.0   |
+| turk1     | 0.615      | 0.674    | 0.610      | 59.5  | 0.223       | 0.279     | 0.203       | 13.0   |
+| turk3     | 0.579      | 0.809    | 0.676      | 51.5  | 0.106       | 0.333     | 0.154       | 5.5    |
+| turk5     | 0.598      | 0.889    | 0.702      | 47.0  | 0.051       | 0.464     | 0.091       | 2.0    |
 
 Median accuracy by user group - 5 meter level:
 
 | user.type | all.recall | all.prec | all.f.meas | all.n | prob.recall | prob.prec | prob.f.meas | prob.n |
 |:----------|:-----------|:---------|:-----------|:------|:------------|:----------|:------------|:-------|
-| anon      | 0.458      | 0.648    | 0.538      | 24.5  | 0.045       | 0.042     | 0.062       | 3.5    |
-| reg       | 0.750      | 0.367    | 0.497      | 119.0 | 0.225       | 0.067     | 0.103       | 21.0   |
-| turk1     | 0.646      | 0.514    | 0.563      | 54.5  | 0.143       | 0.045     | 0.079       | 11.5   |
-| turk3     | 0.661      | 0.701    | 0.671      | 50.0  | 0.000       | 0.000     | 0.000       | 5.0    |
-| turk5     | 0.667      | 0.750    | 0.687      | 46.0  | 0.000       | 0.000     | 0.000       | 2.0    |
+| anon      | 0.356      | 0.574    | 0.474      | 25.0  | 0.063       | 0.196     | 0.092       | 4.0    |
+| reg       | 0.620      | 0.378    | 0.434      | 125.5 | 0.200       | 0.122     | 0.143       | 23.0   |
+| turk1     | 0.498      | 0.508    | 0.495      | 59.5  | 0.129       | 0.143     | 0.107       | 13.0   |
+| turk3     | 0.496      | 0.698    | 0.585      | 51.5  | 0.056       | 0.195     | 0.087       | 5.5    |
+| turk5     | 0.514      | 0.754    | 0.597      | 47.0  | 0.027       | 0.207     | 0.048       | 2.0    |
 
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
 

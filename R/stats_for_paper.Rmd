@@ -618,7 +618,7 @@ accuracy.data <- rbind(volunteer.data, turker.data)
 # First summing over curb ramp, missing curb ramp, obstacle, and surface problem...
 all.types.data <-
   accuracy.data %>%
-  filter(label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+  filter(label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem')) %>%
   group_by(condition.id, worker1, worker2, worker3, worker4, worker5, n.workers, worker.thresh,
            binary, remove.low.severity, low.severity.thresh, granularity, is.turker) %>%
   dplyr::summarize(label.type = 'All',
@@ -631,7 +631,7 @@ all.types.data <-
 # Then summing over just missing curb ramp, obstacle, and surface problem...
 problem.types.data <-
   accuracy.data %>%
-  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProblem')) %>%
   group_by(condition.id, worker1, worker2, worker3, worker4, worker5, n.workers, worker.thresh,
            binary, remove.low.severity, low.severity.thresh, granularity, is.turker) %>%
   dplyr::summarize(label.type = 'AllProb',
@@ -713,8 +713,6 @@ unique.turkers <-
 n.turkers <- nrow(unique.turkers)
 n.reg <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, !is.anon.route) %>% select(worker1))
 n.anon <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, is.anon.route) %>% select(worker1))
-
-n.gt.reg <- 
 
 all.type.accuracy.data <-
   data.with.raw.accuracy %>%
