@@ -234,9 +234,39 @@ April 6, 2018</p>
 <p>Update: This is now all of the data. There used to be 19 anonymous user routes, but three of them actually had no labels placed by the anonymous user (we had forgotten to check beforehand), thus we have only 16.</p>
 <p>Even though 5 turkers did each route, the high level results for individual turkers looks only at the first turker to complete each set of routes. This makes aggregate stats more even, and a fairer comparison across user groups. (but maybe we should actually use all turkers when not aggregating, actually...)</p>
 <h3 id="high-level-results">High level results</h3>
-<p>TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add street level high level results (maybe?). <br> TODO: Add &quot;n&quot; to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).</p>
+<p>TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add &quot;n&quot; to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).</p>
 <p>A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.</p>
 <p>First is a table showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">label.type</th>
+<th align="left">precision</th>
+<th align="left">recall</th>
+<th align="left">specificity</th>
+<th align="left">f.measure</th>
+<th align="left">raw.accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">All</td>
+<td align="left">0.667</td>
+<td align="left">0.857</td>
+<td align="left">0.725</td>
+<td align="left">0.733</td>
+<td align="left">0.745</td>
+</tr>
+<tr class="even">
+<td align="left">AllProb</td>
+<td align="left">0.286</td>
+<td align="left">0.500</td>
+<td align="left">0.732</td>
+<td align="left">0.500</td>
+<td align="left">0.703</td>
+</tr>
+</tbody>
+</table>
 <table>
 <thead>
 <tr class="header">
@@ -351,6 +381,89 @@ April 6, 2018</p>
 </tr>
 </tbody>
 </table>
+<table style="width:100%;">
+<colgroup>
+<col width="11%"></col>
+<col width="12%"></col>
+<col width="10%"></col>
+<col width="12%"></col>
+<col width="7%"></col>
+<col width="13%"></col>
+<col width="11%"></col>
+<col width="13%"></col>
+<col width="8%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">user.type</th>
+<th align="left">all.recall</th>
+<th align="left">all.prec</th>
+<th align="left">all.f.meas</th>
+<th align="left">all.n</th>
+<th align="left">prob.recall</th>
+<th align="left">prob.prec</th>
+<th align="left">prob.f.meas</th>
+<th align="left">prob.n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">anon</td>
+<td align="left">0.458</td>
+<td align="left">0.648</td>
+<td align="left">0.538</td>
+<td align="left">24.5</td>
+<td align="left">0.045</td>
+<td align="left">0.042</td>
+<td align="left">0.062</td>
+<td align="left">3.5</td>
+</tr>
+<tr class="even">
+<td align="left">reg</td>
+<td align="left">0.750</td>
+<td align="left">0.367</td>
+<td align="left">0.497</td>
+<td align="left">119.0</td>
+<td align="left">0.225</td>
+<td align="left">0.067</td>
+<td align="left">0.103</td>
+<td align="left">21.0</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1</td>
+<td align="left">0.646</td>
+<td align="left">0.514</td>
+<td align="left">0.563</td>
+<td align="left">54.5</td>
+<td align="left">0.143</td>
+<td align="left">0.045</td>
+<td align="left">0.079</td>
+<td align="left">11.5</td>
+</tr>
+<tr class="even">
+<td align="left">turk3</td>
+<td align="left">0.661</td>
+<td align="left">0.701</td>
+<td align="left">0.671</td>
+<td align="left">50.0</td>
+<td align="left">0.000</td>
+<td align="left">0.000</td>
+<td align="left">0.000</td>
+<td align="left">5.0</td>
+</tr>
+<tr class="odd">
+<td align="left">turk5</td>
+<td align="left">0.667</td>
+<td align="left">0.750</td>
+<td align="left">0.687</td>
+<td align="left">46.0</td>
+<td align="left">0.000</td>
+<td align="left">0.000</td>
+<td align="left">0.000</td>
+<td align="left">2.0</td>
+</tr>
+</tbody>
+</table>
 <p>Next we have some descriptive statistics of users, by user group. These are average (median) stats.</p>
 <table>
 <thead>
@@ -400,24 +513,24 @@ April 6, 2018</p>
 <tbody>
 <tr class="odd">
 <td align="left">anon</td>
-<td align="left">32</td>
-<td align="left">6.061</td>
-<td align="left">481</td>
-<td align="left">3.547</td>
+<td align="left">64</td>
+<td align="left">12.121</td>
+<td align="left">962</td>
+<td align="left">7.095</td>
 </tr>
 <tr class="even">
 <td align="left">reg</td>
-<td align="left">150</td>
-<td align="left">37.879</td>
-<td align="left">3626</td>
-<td align="left">21.518</td>
+<td align="left">300</td>
+<td align="left">75.758</td>
+<td align="left">7252</td>
+<td align="left">43.036</td>
 </tr>
 <tr class="odd">
 <td align="left">turk1</td>
-<td align="left">182</td>
-<td align="left">43.939</td>
-<td align="left">5559</td>
-<td align="left">9.037</td>
+<td align="left">364</td>
+<td align="left">87.879</td>
+<td align="left">11118</td>
+<td align="left">18.073</td>
 </tr>
 </tbody>
 </table>

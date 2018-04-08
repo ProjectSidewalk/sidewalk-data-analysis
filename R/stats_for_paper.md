@@ -68,11 +68,16 @@ Even though 5 turkers did each route, the high level results for individual turk
 
 ### High level results
 
-TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add street level high level results (maybe?). <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
+TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
 
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
 First is a table showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
+
+| label.type | precision | recall | specificity | f.measure | raw.accuracy |
+|:-----------|:----------|:-------|:------------|:----------|:-------------|
+| All        | 0.667     | 0.857  | 0.725       | 0.733     | 0.745        |
+| AllProb    | 0.286     | 0.500  | 0.732       | 0.500     | 0.703        |
 
 | label.type | precision | recall | specificity | f.measure | raw.accuracy |
 |:-----------|:----------|:-------|:------------|:----------|:-------------|
@@ -89,6 +94,14 @@ Then we show the above accuracy measures (but for only precision, recall, and f-
 | turk3     | 0.760      | 0.810    | 0.770      | 50.0  | 0.200       | 0.250     | 0.229       | 5.0    |
 | turk5     | 0.753      | 0.885    | 0.796      | 46.0  | 0.118       | 0.200     | 0.171       | 2.0    |
 
+| user.type | all.recall | all.prec | all.f.meas | all.n | prob.recall | prob.prec | prob.f.meas | prob.n |
+|:----------|:-----------|:---------|:-----------|:------|:------------|:----------|:------------|:-------|
+| anon      | 0.458      | 0.648    | 0.538      | 24.5  | 0.045       | 0.042     | 0.062       | 3.5    |
+| reg       | 0.750      | 0.367    | 0.497      | 119.0 | 0.225       | 0.067     | 0.103       | 21.0   |
+| turk1     | 0.646      | 0.514    | 0.563      | 54.5  | 0.143       | 0.045     | 0.079       | 11.5   |
+| turk3     | 0.661      | 0.701    | 0.671      | 50.0  | 0.000       | 0.000     | 0.000       | 5.0    |
+| turk5     | 0.667      | 0.750    | 0.687      | 46.0  | 0.000       | 0.000     | 0.000       | 2.0    |
+
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
 
 | worker.type | labels.per.100m | feet.per.min | minutes.per.1k.ft | minutes\_audited |
@@ -101,9 +114,9 @@ Below, we have a table of aggregate (sum) stats by user group.
 
 | worker.type | n.missions | distance.miles | n.labels | hours.audited |
 |:------------|:-----------|:---------------|:---------|:--------------|
-| anon        | 32         | 6.061          | 481      | 3.547         |
-| reg         | 150        | 37.879         | 3626     | 21.518        |
-| turk1       | 182        | 43.939         | 5559     | 9.037         |
+| anon        | 64         | 12.121         | 962      | 7.095         |
+| reg         | 300        | 75.758         | 7252     | 43.036        |
+| turk1       | 364        | 87.879         | 11118    | 18.073        |
 
 Our average (mean and median) IRR over the 7 rounds, by label type, is in the table below:
 

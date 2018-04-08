@@ -695,7 +695,6 @@ data.with.raw.accuracy <-
 ```
 
 TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br>
-TODO: Add street level high level results (maybe?). <br>
 TODO: Add "n" to a bunch of graphs. <br>
 TODO: Percentage of turkers who completed the HIT (maybe?).
 
@@ -717,18 +716,19 @@ n.anon <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, is.anon.route
 
 all.type.accuracy.data <-
   data.with.raw.accuracy %>%
-  filter(n.workers == 1, binary, !remove.low.severity, granularity == '5_meter') %>%
+  filter(n.workers == 1, binary, !remove.low.severity) %>%
   filter(label.type %in% c('All', 'AllProb')) %>%
-  select(label.type, precision, recall, specificity, f.measure, raw.accuracy) %>%
-  group_by(label.type) %>%
-  summarize_at(vars(precision:raw.accuracy), median, na.rm = TRUE)
+  select_at(vars(label.type, granularity, precision:f.measure, raw.accuracy)) %>%
+  group_by(label.type, granularity) %>%
+  summarize_at(vars(precision:raw.accuracy), median, na.rm = TRUE) %>%
+  ungroup()
 
 # NOTE Multiply turker set by 5 if you want to count each turker who did each set of routes separately
 turk.study.summary.stats <-
   data.with.raw.accuracy %>%
-  filter(worker.type != 'turk0', !binary, !remove.low.severity, granularity == 'street') %>%
+  filter(worker.type != 'turk0', !binary, !remove.low.severity) %>%
   filter(label.type %in% c('All', 'AllProb')) %>%
-  group_by(condition.id, worker1, is.anon.route, worker.type) %>%
+  group_by(condition.id, worker1, is.anon.route, worker.type, granularity) %>%
   mutate(all.recall = if_else(label.type == 'All', recall, NaN),
          all.precision = if_else(label.type == 'All', precision, NaN),
          all.f.measure = if_else(label.type == 'All', f.measure, NaN),
@@ -765,9 +765,20 @@ First is a table showing average (median) accuracy across all users when aggrega
 
 ```{r turk.showing.stats.1, echo=FALSE}
 kable(
-  all.type.accuracy.data,
+  all.type.accuracy.data %>%
+    filter(granularity == 'street') %>%
+    select(-granularity),
   digits = 3,
-  align = 'l'
+  align = 'l',
+  caption = 'Median accuracy across all users - street level'
+  )
+kable(
+  all.type.accuracy.data %>%
+    filter(granularity == '5_meter') %>%
+    select(-granularity),
+  digits = 3,
+  align = 'l',
+  caption = 'Median accuracy across all users - 5 meter level'
   )
 ```
 
@@ -775,9 +786,9 @@ kable(
 Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. Also, I threw in issues/features (by that I just mean post-clustering) per 100m, because this is the only table right now that has all five user groups.
 
 ```{r turk.showing.stats.2, echo=FALSE}
-kable(
+turk.showing.stats.2 <- 
   turk.study.summary.stats %>%
-    group_by(worker.type) %>%
+    group_by(worker.type, granularity) %>%
     dplyr::summarize(
       all.recall = median(all.recall, na.rm = TRUE),
       all.prec = median(all.precision, na.rm = TRUE),
@@ -788,9 +799,23 @@ kable(
       prob.f.meas = median(prob.f.measure, na.rm = TRUE),
       prob.n = median(prob.n, na.rm = TRUE)
     ) %>%
-    dplyr::rename(user.type = worker.type),
+    dplyr::rename(user.type = worker.type)
+
+kable(
+  turk.showing.stats.2 %>%
+    filter(granularity == 'street') %>%
+    select(-granularity),
   digits = 3,
-  align = 'l'
+  align = 'l',
+  caption = 'Median accuracy by user group - street level'
+  )
+kable(
+  turk.showing.stats.2 %>%
+    filter(granularity == '5_meter') %>%
+    select(-granularity),
+  digits = 3,
+  align = 'l',
+  caption = 'Median accuracy by user group - 5 meter level'
   )
 ```
 
@@ -800,6 +825,7 @@ Next we have some descriptive statistics of users, by user group. These are aver
 ```{r turk.showing.stats.3, echo=FALSE}
 kable(
   turk.study.summary.stats.with.labels %>%
+    filter(granularity == 'street') %>%  # granularity doesn't affect these stats
     group_by(worker.type) %>%
     dplyr::summarize(
       labels.per.100m = median(labels.per.100m, na.rm = TRUE),
