@@ -780,14 +780,15 @@ kable(
     group_by(worker.type) %>%
     dplyr::summarize(
       all.recall = median(all.recall, na.rm = TRUE),
-      all.precision = median(all.precision, na.rm = TRUE),
-      all.f.measure = median(all.f.measure, na.rm = TRUE),
+      all.prec = median(all.precision, na.rm = TRUE),
+      all.f.meas = median(all.f.measure, na.rm = TRUE),
       all.n = median(all.n, na.rm = TRUE),
       prob.recall = median(prob.recall, na.rm = TRUE),
-      prob.precision = median(prob.precision, na.rm = TRUE),
-      prob.f.measure = median(prob.f.measure, na.rm = TRUE),
+      prob.prec = median(prob.precision, na.rm = TRUE),
+      prob.f.meas = median(prob.f.measure, na.rm = TRUE),
       prob.n = median(prob.n, na.rm = TRUE)
-    ),
+    ) %>%
+    dplyr::rename(user.type = worker.type),
   digits = 3,
   align = 'l'
   )
