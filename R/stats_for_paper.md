@@ -68,7 +68,7 @@ Even though 5 turkers did each route, the high level results for individual turk
 
 ### High level results
 
-TODO: Add turk3 and turk5 to the user groups (3 and 5 turkers with majority vote, respectively). <br> TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add street level high level results (maybe?). <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
+TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add street level high level results (maybe?). <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
 
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
@@ -79,13 +79,15 @@ First is a table showing average (median) accuracy across all users when aggrega
 | All        | 0.486     | 0.702  | 0.969       | 0.553     | 0.955        |
 | AllProb    | 0.077     | 0.250  | 0.978       | 0.222     | 0.972        |
 
-Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group.
+Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. Also, I threw in issues/features (by that I just mean post-clustering) per 100m, because this is the only table right now that has all five user groups.
 
-| worker.type | total.recall | total.precision | total.f.measure | problem.recall | problem.precision | problem.f.measure |
-|:------------|:-------------|:----------------|:----------------|:---------------|:------------------|:------------------|
-| anon        | 0.569        | 0.719           | 0.667           | 0.225          | 0.292             | 0.286             |
-| reg         | 0.921        | 0.488           | 0.590           | 0.600          | 0.183             | 0.251             |
-| turk        | 0.768        | 0.672           | 0.690           | 0.477          | 0.150             | 0.203             |
+| worker.type | total.recall | total.precision | total.f.measure | total.n | problem.recall | problem.precision | problem.f.measure | problem.n |
+|:------------|:-------------|:----------------|:----------------|:--------|:---------------|:------------------|:------------------|:----------|
+| anon        | 0.569        | 0.719           | 0.667           | 24.5    | 0.225          | 0.292             | 0.286             | 3.5       |
+| reg         | 0.921        | 0.488           | 0.590           | 119.0   | 0.600          | 0.183             | 0.251             | 21.0      |
+| turk1       | 0.768        | 0.672           | 0.690           | 54.5    | 0.477          | 0.150             | 0.203             | 11.5      |
+| turk3       | 0.760        | 0.810           | 0.770           | 50.0    | 0.200          | 0.250             | 0.229             | 5.0       |
+| turk5       | 0.753        | 0.885           | 0.796           | 46.0    | 0.118          | 0.200             | 0.171             | 2.0       |
 
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
 
@@ -93,7 +95,7 @@ Next we have some descriptive statistics of users, by user group. These are aver
 |:------------|:----------------|:-------------|:------------------|:-----------------|
 | anon        | 4.921           | 150.830      | 6.630             | 13.260           |
 | reg         | 5.988           | 163.800      | 6.105             | 24.420           |
-| turk        | 6.808           | 628.456      | 1.591             | 6.365            |
+| turk1       | 6.808           | 628.456      | 1.591             | 6.365            |
 
 Below, we have a table of aggregate (sum) stats by user group.
 
@@ -101,7 +103,7 @@ Below, we have a table of aggregate (sum) stats by user group.
 |:------------|:-----------|:---------------|:---------|:--------------|
 | anon        | 32         | 6.061          | 481      | 3.547         |
 | reg         | 150        | 37.879         | 3626     | 21.518        |
-| turk        | 182        | 43.939         | 5559     | 9.037         |
+| turk1       | 182        | 43.939         | 5559     | 9.037         |
 
 Our average (mean and median) IRR over the 7 rounds, by label type, is in the table below:
 

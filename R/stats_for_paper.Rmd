@@ -664,8 +664,10 @@ data.filtered.label.type <-
 #             raw.accuracy column, add worker.type column, give granularity an ordering.
 get.worker.type <- Vectorize(
   function(n.workers, worker.thresh, is.turker, is.anon.route) {
-    if (n.workers == 5 & worker.thresh == 3) 'maj'
-    else if (is.turker == TRUE) 'turk'
+    if (n.workers == 5 & worker.thresh == 3) 'turk5'
+    else if (n.workers == 3 & worker.thresh == 2) 'turk3'
+    else if (n.workers == 1 & is.turker == TRUE) 'turk1'
+    else if (is.turker == TRUE) 'turk0' # probably aren't analyzing any other turkers
     else if (is.anon.route == TRUE) 'anon'
     else 'reg'
   }
@@ -686,13 +688,12 @@ data.with.raw.accuracy <-
   filter(granularity != '10_meter') %>%
   mutate(is.anon.route = condition.id > 121) %>%
   mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
-                              levels = c('anon', 'reg', 'turk', 'maj'))) %>%
+                              levels = c('anon', 'reg', 'turk1', 'turk3', 'turk5', 'turk0'))) %>%
   mutate(worker1 = fix.anon.names(worker1)) %>%
   mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg)) %>%
   filter(label.type != 'NoSidewalk' | (granularity == 'street' & binary == TRUE))
 ```
 
-TODO: Add turk3 and turk5 to the user groups (3 and 5 turkers with majority vote, respectively). <br>
 TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br>
 TODO: Add street level high level results (maybe?). <br>
 TODO: Add "n" to a bunch of graphs. <br>
@@ -701,8 +702,11 @@ TODO: Percentage of turkers who completed the HIT (maybe?).
 ```{r turk.high.level.results, echo=FALSE, include=FALSE}
 unique.turkers <-
   data.with.raw.accuracy %>%
-  filter(n.workers == 5, worker.thresh == 3, !binary,
-         !remove.low.severity, granularity == 'street', label.type == 'CurbRamp') %>%
+  filter(worker.type == 'turk5',
+         binary == FALSE,
+         remove.low.severity == FALSE,
+         granularity == 'street',
+         label.type == 'CurbRamp') %>%
   select(worker1, worker2, worker3, worker4, worker5) %>%
   gather(worker.index, turker.id) %>%
   select(turker.id)
@@ -722,19 +726,25 @@ all.type.accuracy.data <-
 # NOTE Multiply turker set by 5 if you want to count each turker who did each set of routes separately
 turk.study.summary.stats <-
   data.with.raw.accuracy %>%
-  filter(n.workers == 1, !binary, !remove.low.severity, granularity == 'street') %>%
+  filter(worker.type != 'turk0', !binary, !remove.low.severity, granularity == 'street') %>%
   filter(label.type %in% c('All', 'AllProb')) %>%
   group_by(condition.id, worker1, is.anon.route, worker.type) %>%
   mutate(total.recall = if_else(label.type == 'All', recall, NaN),
          total.precision = if_else(label.type == 'All', precision, NaN),
          total.f.measure = if_else(label.type == 'All', f.measure, NaN),
+         total.n = if_else(label.type == 'All', true.pos + false.pos, NaN),
          problem.recall = if_else(label.type == 'AllProb', recall, NaN),
          problem.precision = if_else(label.type == 'AllProb', precision, NaN),
-         problem.f.measure = if_else(label.type == 'AllProb', f.measure, NaN)) %>%
-  dplyr::summarize_at(vars(total.recall:problem.f.measure), sum, na.rm = TRUE) %>%
-  ungroup() %>%
+         problem.f.measure = if_else(label.type == 'AllProb', f.measure, NaN),
+         problem.n = if_else(label.type == 'AllProb', true.pos + false.pos, NaN)) %>%
+  dplyr::summarize_at(vars(total.recall:problem.n), sum, na.rm = TRUE) %>%
+  ungroup()
+
+turk.study.summary.stats.with.labels <-
+  turk.study.summary.stats %>%
+  filter(worker.type %in% c('anon', 'reg', 'turk1')) %>%
   left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
-  group_by_at(vars(worker1:problem.f.measure)) %>%
+  group_by_at(vars(worker1:problem.n)) %>%
   dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
   left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
@@ -762,7 +772,7 @@ kable(
 ```
 
 
-Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group.
+Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. Also, I threw in issues/features (by that I just mean post-clustering) per 100m, because this is the only table right now that has all five user groups.
 
 ```{r turk.showing.stats.2, echo=FALSE}
 kable(
@@ -772,9 +782,11 @@ kable(
       total.recall = median(total.recall, na.rm = TRUE),
       total.precision = median(total.precision, na.rm = TRUE),
       total.f.measure = median(total.f.measure, na.rm = TRUE),
+      total.n = median(total.n, na.rm = TRUE),
       problem.recall = median(problem.recall, na.rm = TRUE),
       problem.precision = median(problem.precision, na.rm = TRUE),
-      problem.f.measure = median(problem.f.measure, na.rm = TRUE)
+      problem.f.measure = median(problem.f.measure, na.rm = TRUE),
+      problem.n = median(problem.n, na.rm = TRUE)
     ),
   digits = 3,
   align = 'l'
@@ -786,7 +798,7 @@ Next we have some descriptive statistics of users, by user group. These are aver
 
 ```{r turk.showing.stats.3, echo=FALSE}
 kable(
-  turk.study.summary.stats %>%
+  turk.study.summary.stats.with.labels %>%
     group_by(worker.type) %>%
     dplyr::summarize(
       labels.per.100m = median(labels.per.100m, na.rm = TRUE),
@@ -805,7 +817,7 @@ Below, we have a table of aggregate (sum) stats by user group.
 ```{r turk.showing.stats.4, echo=FALSE}
 
 kable(
-  turk.study.summary.stats %>%
+  turk.study.summary.stats.with.labels %>%
     group_by(worker.type) %>%
     dplyr::summarize(
       n.missions = sum(n.missions, na.rm = TRUE),
