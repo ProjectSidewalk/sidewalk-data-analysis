@@ -68,24 +68,34 @@ Even though 5 turkers did each route, the high level results for individual turk
 
 ### High level results
 
-TODO: Add turk3 and turk5 to the user groups (3 and 5 turkers with majority vote, respectively). <br> TODO: Put accuracy numbers in a separate table, and include f-measure. <br> TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add average IRR across all rounds (but separated by label type). <br> TODO: Add street level high level results (maybe?). <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
+TODO: Add turk3 and turk5 to the user groups (3 and 5 turkers with majority vote, respectively). <br> TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add street level high level results (maybe?). <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
 
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
 First is a table showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
-
-Then we show user group stats: first average (median) stats, followed by aggregate (sum) stats.
 
 | label.type | precision | recall | specificity | f.measure | raw.accuracy |
 |:-----------|:----------|:-------|:------------|:----------|:-------------|
 | All        | 0.486     | 0.702  | 0.969       | 0.553     | 0.955        |
 | AllProb    | 0.077     | 0.250  | 0.978       | 0.222     | 0.972        |
 
-| worker.type | labels.per.100m | total.recall | total.precision | problem.recall | problem.precision | feet.per.min | minutes.per.1k.ft | minutes\_audited |
-|:------------|:----------------|:-------------|:----------------|:---------------|:------------------|:-------------|:------------------|:-----------------|
-| anon        | 4.921           | 0.569        | 0.719           | 0.225          | 0.292             | 150.830      | 6.630             | 13.260           |
-| reg         | 5.988           | 0.921        | 0.488           | 0.600          | 0.183             | 163.800      | 6.105             | 24.420           |
-| turk        | 6.808           | 0.768        | 0.672           | 0.477          | 0.150             | 628.456      | 1.591             | 6.365            |
+Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group.
+
+| worker.type | total.recall | total.precision | total.f.measure | problem.recall | problem.precision | problem.f.measure |
+|:------------|:-------------|:----------------|:----------------|:---------------|:------------------|:------------------|
+| anon        | 0.569        | 0.719           | 0.667           | 0.225          | 0.292             | 0.286             |
+| reg         | 0.921        | 0.488           | 0.590           | 0.600          | 0.183             | 0.251             |
+| turk        | 0.768        | 0.672           | 0.690           | 0.477          | 0.150             | 0.203             |
+
+Next we have some descriptive statistics of users, by user group. These are average (median) stats.
+
+| worker.type | labels.per.100m | feet.per.min | minutes.per.1k.ft | minutes\_audited |
+|:------------|:----------------|:-------------|:------------------|:-----------------|
+| anon        | 4.921           | 150.830      | 6.630             | 13.260           |
+| reg         | 5.988           | 163.800      | 6.105             | 24.420           |
+| turk        | 6.808           | 628.456      | 1.591             | 6.365            |
+
+Below, we have a table of aggregate (sum) stats by user group.
 
 | worker.type | n.missions | distance.miles | n.labels | hours.audited |
 |:------------|:-----------|:---------------|:---------|:--------------|
@@ -93,7 +103,7 @@ Then we show user group stats: first average (median) stats, followed by aggrega
 | reg         | 150        | 37.879         | 3626     | 21.518        |
 | turk        | 182        | 43.939         | 5559     | 9.037         |
 
-Our average IRR over the 7 rounds, by label type, is in the table below:
+Our average (mean and median) IRR over the 7 rounds, by label type, is in the table below:
 
 | label.type  | mean.kripp.alpha | median.kripp.alpha |
 |:------------|:-----------------|:-------------------|

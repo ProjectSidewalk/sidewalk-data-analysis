@@ -693,9 +693,7 @@ data.with.raw.accuracy <-
 ```
 
 TODO: Add turk3 and turk5 to the user groups (3 and 5 turkers with majority vote, respectively). <br>
-TODO: Put accuracy numbers in a separate table, and include f-measure. <br>
 TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br>
-TODO: Add average IRR across all rounds (but separated by label type). <br>
 TODO: Add street level high level results (maybe?). <br>
 TODO: Add "n" to a bunch of graphs. <br>
 TODO: Percentage of turkers who completed the HIT (maybe?).
@@ -729,12 +727,14 @@ turk.study.summary.stats <-
   group_by(condition.id, worker1, is.anon.route, worker.type) %>%
   mutate(total.recall = if_else(label.type == 'All', recall, NaN),
          total.precision = if_else(label.type == 'All', precision, NaN),
+         total.f.measure = if_else(label.type == 'All', f.measure, NaN),
          problem.recall = if_else(label.type == 'AllProb', recall, NaN),
-         problem.precision = if_else(label.type == 'AllProb', precision, NaN)) %>%
-  dplyr::summarize_at(vars(total.recall:problem.precision), sum, na.rm = TRUE) %>%
+         problem.precision = if_else(label.type == 'AllProb', precision, NaN),
+         problem.f.measure = if_else(label.type == 'AllProb', f.measure, NaN)) %>%
+  dplyr::summarize_at(vars(total.recall:problem.f.measure), sum, na.rm = TRUE) %>%
   ungroup() %>%
   left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
-  group_by_at(vars(worker1:problem.precision)) %>%
+  group_by_at(vars(worker1:problem.f.measure)) %>%
   dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
   left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
@@ -748,28 +748,48 @@ turk.study.summary.stats <-
 n.reg.users.removed <- zoning.data %>% filter(exclude) %>% distinct(condition.id) %>% nrow()
 ```
 
+
 A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users were part of this study.
 
 First is a table showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
 
-Then we show user group stats: first average (median) stats, followed by aggregate (sum) stats.
-
-```{r turk.showing.stats, echo=FALSE}
+```{r turk.showing.stats.1, echo=FALSE}
 kable(
   all.type.accuracy.data,
   digits = 3,
   align = 'l'
   )
+```
 
+
+Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group.
+
+```{r turk.showing.stats.2, echo=FALSE}
+kable(
+  turk.study.summary.stats %>%
+    group_by(worker.type) %>%
+    dplyr::summarize(
+      total.recall = median(total.recall, na.rm = TRUE),
+      total.precision = median(total.precision, na.rm = TRUE),
+      total.f.measure = median(total.f.measure, na.rm = TRUE),
+      problem.recall = median(problem.recall, na.rm = TRUE),
+      problem.precision = median(problem.precision, na.rm = TRUE),
+      problem.f.measure = median(problem.f.measure, na.rm = TRUE)
+    ),
+  digits = 3,
+  align = 'l'
+  )
+```
+
+
+Next we have some descriptive statistics of users, by user group. These are average (median) stats.
+
+```{r turk.showing.stats.3, echo=FALSE}
 kable(
   turk.study.summary.stats %>%
     group_by(worker.type) %>%
     dplyr::summarize(
       labels.per.100m = median(labels.per.100m, na.rm = TRUE),
-      total.recall = median(total.recall, na.rm = TRUE),
-      total.precision = median(total.precision, na.rm = TRUE),
-      problem.recall = median(problem.recall, na.rm = TRUE),
-      problem.precision = median(problem.precision, na.rm = TRUE),
       feet.per.min = median(feet.per.min, na.rm = TRUE),
       minutes.per.1k.ft = median(minutes.per.1k.ft, na.rm = TRUE),
       minutes_audited = median(minutes_audited, na.rm = TRUE)
@@ -777,6 +797,12 @@ kable(
   digits = 3,
   align = 'l'
   )
+```
+
+
+Below, we have a table of aggregate (sum) stats by user group.
+
+```{r turk.showing.stats.4, echo=FALSE}
 
 kable(
   turk.study.summary.stats %>%
@@ -795,7 +821,7 @@ kable(
 ```
 
 
-Our average IRR over the 7 rounds, by label type, is in the table below:
+Our average (mean and median) IRR over the 7 rounds, by label type, is in the table below:
 
 ```{r turk.irr.stats, echo=FALSE}
 kable(

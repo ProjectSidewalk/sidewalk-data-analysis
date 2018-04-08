@@ -234,10 +234,9 @@ April 6, 2018</p>
 <p>Update: This is now all of the data. There used to be 19 anonymous user routes, but three of them actually had no labels placed by the anonymous user (we had forgotten to check beforehand), thus we have only 16.</p>
 <p>Even though 5 turkers did each route, the high level results for individual turkers looks only at the first turker to complete each set of routes. This makes aggregate stats more even, and a fairer comparison across user groups. (but maybe we should actually use all turkers when not aggregating, actually...)</p>
 <h3 id="high-level-results">High level results</h3>
-<p>TODO: Add turk3 and turk5 to the user groups (3 and 5 turkers with majority vote, respectively). <br> TODO: Put accuracy numbers in a separate table, and include f-measure. <br> TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add average IRR across all rounds (but separated by label type). <br> TODO: Add street level high level results (maybe?). <br> TODO: Add &quot;n&quot; to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).</p>
+<p>TODO: Add turk3 and turk5 to the user groups (3 and 5 turkers with majority vote, respectively). <br> TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add street level high level results (maybe?). <br> TODO: Add &quot;n&quot; to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).</p>
 <p>A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.</p>
 <p>First is a table showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.</p>
-<p>Then we show user group stats: first average (median) stats, followed by aggregate (sum) stats.</p>
 <table>
 <thead>
 <tr class="header">
@@ -268,26 +267,64 @@ April 6, 2018</p>
 </tr>
 </tbody>
 </table>
-<table>
+<p>Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group.</p>
+<table style="width:100%;">
 <colgroup>
-<col width="8%"></col>
 <col width="11%"></col>
-<col width="9%"></col>
-<col width="11%"></col>
-<col width="10%"></col>
 <col width="12%"></col>
-<col width="9%"></col>
-<col width="12%"></col>
-<col width="12%"></col>
+<col width="14%"></col>
+<col width="14%"></col>
+<col width="13%"></col>
+<col width="16%"></col>
+<col width="16%"></col>
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">worker.type</th>
-<th align="left">labels.per.100m</th>
 <th align="left">total.recall</th>
 <th align="left">total.precision</th>
+<th align="left">total.f.measure</th>
 <th align="left">problem.recall</th>
 <th align="left">problem.precision</th>
+<th align="left">problem.f.measure</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">anon</td>
+<td align="left">0.569</td>
+<td align="left">0.719</td>
+<td align="left">0.667</td>
+<td align="left">0.225</td>
+<td align="left">0.292</td>
+<td align="left">0.286</td>
+</tr>
+<tr class="even">
+<td align="left">reg</td>
+<td align="left">0.921</td>
+<td align="left">0.488</td>
+<td align="left">0.590</td>
+<td align="left">0.600</td>
+<td align="left">0.183</td>
+<td align="left">0.251</td>
+</tr>
+<tr class="odd">
+<td align="left">turk</td>
+<td align="left">0.768</td>
+<td align="left">0.672</td>
+<td align="left">0.690</td>
+<td align="left">0.477</td>
+<td align="left">0.150</td>
+<td align="left">0.203</td>
+</tr>
+</tbody>
+</table>
+<p>Next we have some descriptive statistics of users, by user group. These are average (median) stats.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">worker.type</th>
+<th align="left">labels.per.100m</th>
 <th align="left">feet.per.min</th>
 <th align="left">minutes.per.1k.ft</th>
 <th align="left">minutes_audited</th>
@@ -297,10 +334,6 @@ April 6, 2018</p>
 <tr class="odd">
 <td align="left">anon</td>
 <td align="left">4.921</td>
-<td align="left">0.569</td>
-<td align="left">0.719</td>
-<td align="left">0.225</td>
-<td align="left">0.292</td>
 <td align="left">150.830</td>
 <td align="left">6.630</td>
 <td align="left">13.260</td>
@@ -308,10 +341,6 @@ April 6, 2018</p>
 <tr class="even">
 <td align="left">reg</td>
 <td align="left">5.988</td>
-<td align="left">0.921</td>
-<td align="left">0.488</td>
-<td align="left">0.600</td>
-<td align="left">0.183</td>
 <td align="left">163.800</td>
 <td align="left">6.105</td>
 <td align="left">24.420</td>
@@ -319,16 +348,13 @@ April 6, 2018</p>
 <tr class="odd">
 <td align="left">turk</td>
 <td align="left">6.808</td>
-<td align="left">0.768</td>
-<td align="left">0.672</td>
-<td align="left">0.477</td>
-<td align="left">0.150</td>
 <td align="left">628.456</td>
 <td align="left">1.591</td>
 <td align="left">6.365</td>
 </tr>
 </tbody>
 </table>
+<p>Below, we have a table of aggregate (sum) stats by user group.</p>
 <table>
 <thead>
 <tr class="header">
@@ -363,7 +389,7 @@ April 6, 2018</p>
 </tr>
 </tbody>
 </table>
-<p>Our average IRR over the 7 rounds, by label type, is in the table below:</p>
+<p>Our average (mean and median) IRR over the 7 rounds, by label type, is in the table below:</p>
 <table>
 <thead>
 <tr class="header">
