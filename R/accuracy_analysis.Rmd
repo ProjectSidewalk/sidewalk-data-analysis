@@ -3,6 +3,8 @@ title: 'Accuracy Summary'
 author: 'Mikey Saugstad'
 date: 'October 10, 2017'
 output:
+  github_document:
+    toc: yes
   html_document:
     toc: yes
 ---

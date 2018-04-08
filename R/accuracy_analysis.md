@@ -3,6 +3,30 @@ Accuracy Summary
 Mikey Saugstad
 October 10, 2017
 
+-   [Preliminary Notes](#preliminary-notes)
+-   [Comparing Anon vs. Registered Volunteers vs. Turkers](#comparing-anon-vs.-registered-volunteers-vs.-turkers)
+    -   [Raw Accuracy](#raw-accuracy)
+    -   [Recall](#recall)
+    -   [Precision](#precision)
+    -   [F-measure](#f-measure)
+    -   [Specificity](#specificity)
+-   [Volunteer Data](#volunteer-data)
+    -   [Raw accuracy](#raw-accuracy-1)
+    -   [Recall](#recall-1)
+    -   [Precision](#precision-1)
+    -   [F-measure](#f-measure-1)
+    -   [Specificity](#specificity-1)
+-   [Turker Data](#turker-data)
+    -   [Comparing effects of number of turkers and vote type on accuracy](#comparing-effects-of-number-of-turkers-and-vote-type-on-accuracy)
+-   [Removing Low Severity](#removing-low-severity)
+    -   [How many low severity problems are there?](#how-many-low-severity-problems-are-there)
+-   [Incorporating single-user clustering](#incorporating-single-user-clustering)
+    -   [Label counts](#label-counts)
+    -   [Recall](#recall-4)
+    -   [Precision](#precision-4)
+    -   [Specificity](#specificity-4)
+    -   [Variance in accuracy](#variance-in-accuracy)
+
 Preliminary Notes
 -----------------
 
