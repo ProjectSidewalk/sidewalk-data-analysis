@@ -70,9 +70,16 @@ Even though 5 turkers did each route, the high level results for individual turk
 
 TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
 
+Below is table showing number of ground truth labels by user group and by label type.
+
+| worker.type | All  | AllProb | CurbRamp | NoCurbRamp | Obstacle | SurfaceProb | Problem |
+|:------------|:-----|:--------|:---------|:-----------|:---------|:------------|:--------|
+| anon        | 556  | 78      | 478      | 19         | 59       | 219         | 297     |
+| reg         | 3038 | 304     | 2734     | 68         | 236      | 804         | 1108    |
+
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
-First there are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
+Below are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
 
 Median accuracy across all users - street level:
 
@@ -122,9 +129,9 @@ Below, we have a table of aggregate (sum) stats by user group.
 
 | worker.type | n.missions | distance.miles | n.labels | hours.audited |
 |:------------|:-----------|:---------------|:---------|:--------------|
-| anon        | 64         | 12.121         | 962      | 7.095         |
-| reg         | 300        | 75.758         | 7252     | 43.036        |
-| turk1       | 364        | 87.879         | 11118    | 18.073        |
+| anon        | 32         | 6.061          | 481      | 3.547         |
+| reg         | 150        | 37.879         | 3626     | 21.518        |
+| turk1       | 182        | 43.939         | 5559     | 9.037         |
 
 Our average (mean and median) IRR over the 7 rounds, by label type, is in the table below:
 

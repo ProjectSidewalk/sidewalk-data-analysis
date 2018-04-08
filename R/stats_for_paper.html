@@ -235,8 +235,45 @@ April 6, 2018</p>
 <p>Even though 5 turkers did each route, the high level results for individual turkers looks only at the first turker to complete each set of routes. This makes aggregate stats more even, and a fairer comparison across user groups. (but maybe we should actually use all turkers when not aggregating, actually...)</p>
 <h3 id="high-level-results">High level results</h3>
 <p>TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add &quot;n&quot; to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).</p>
+<p>Below is table showing number of ground truth labels by user group and by label type.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">worker.type</th>
+<th align="left">All</th>
+<th align="left">AllProb</th>
+<th align="left">CurbRamp</th>
+<th align="left">NoCurbRamp</th>
+<th align="left">Obstacle</th>
+<th align="left">SurfaceProb</th>
+<th align="left">Problem</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">anon</td>
+<td align="left">556</td>
+<td align="left">78</td>
+<td align="left">478</td>
+<td align="left">19</td>
+<td align="left">59</td>
+<td align="left">219</td>
+<td align="left">297</td>
+</tr>
+<tr class="even">
+<td align="left">reg</td>
+<td align="left">3038</td>
+<td align="left">304</td>
+<td align="left">2734</td>
+<td align="left">68</td>
+<td align="left">236</td>
+<td align="left">804</td>
+<td align="left">1108</td>
+</tr>
+</tbody>
+</table>
 <p>A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.</p>
-<p>First there are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.</p>
+<p>Below are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.</p>
 <p>Median accuracy across all users - street level:</p>
 <table>
 <thead>
@@ -517,24 +554,24 @@ April 6, 2018</p>
 <tbody>
 <tr class="odd">
 <td align="left">anon</td>
-<td align="left">64</td>
-<td align="left">12.121</td>
-<td align="left">962</td>
-<td align="left">7.095</td>
+<td align="left">32</td>
+<td align="left">6.061</td>
+<td align="left">481</td>
+<td align="left">3.547</td>
 </tr>
 <tr class="even">
 <td align="left">reg</td>
-<td align="left">300</td>
-<td align="left">75.758</td>
-<td align="left">7252</td>
-<td align="left">43.036</td>
+<td align="left">150</td>
+<td align="left">37.879</td>
+<td align="left">3626</td>
+<td align="left">21.518</td>
 </tr>
 <tr class="odd">
 <td align="left">turk1</td>
-<td align="left">364</td>
-<td align="left">87.879</td>
-<td align="left">11118</td>
-<td align="left">18.073</td>
+<td align="left">182</td>
+<td align="left">43.939</td>
+<td align="left">5559</td>
+<td align="left">9.037</td>
 </tr>
 </tbody>
 </table>
