@@ -761,32 +761,40 @@ n.reg.users.removed <- zoning.data %>% filter(exclude) %>% distinct(condition.id
 
 A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users were part of this study.
 
-First is a table showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
+First there are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
+
+Median accuracy across all users - street level:
 
 ```{r turk.showing.stats.1, echo=FALSE}
 kable(
   all.type.accuracy.data %>%
     filter(granularity == 'street') %>%
     select(-granularity),
+  format = 'markdown',
   digits = 3,
-  align = 'l',
-  caption = 'Median accuracy across all users - street level'
+  align = 'l'
   )
+```
+
+Median accuracy across all users - 5 meter level:
+
+```{r turk.showing.stats.2, echo=FALSE}
 kable(
   all.type.accuracy.data %>%
     filter(granularity == '5_meter') %>%
     select(-granularity),
   digits = 3,
-  align = 'l',
-  caption = 'Median accuracy across all users - 5 meter level'
+  align = 'l'
   )
 ```
 
 
 Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. Also, I threw in issues/features (by that I just mean post-clustering) per 100m, because this is the only table right now that has all five user groups.
 
-```{r turk.showing.stats.2, echo=FALSE}
-turk.showing.stats.2 <- 
+Median accuracy by user group - street level:
+
+```{r turk.showing.stats.3, echo=FALSE}
+turk.showing.stats.3.and.4 <- 
   turk.study.summary.stats %>%
     group_by(worker.type, granularity) %>%
     dplyr::summarize(
@@ -802,27 +810,30 @@ turk.showing.stats.2 <-
     dplyr::rename(user.type = worker.type)
 
 kable(
-  turk.showing.stats.2 %>%
+  turk.showing.stats.3.and.4 %>%
     filter(granularity == 'street') %>%
     select(-granularity),
   digits = 3,
-  align = 'l',
-  caption = 'Median accuracy by user group - street level'
+  align = 'l'
   )
+```
+
+Median accuracy by user group - 5 meter level:
+
+```{r turk.showing.stats.4, echo=FALSE}
 kable(
-  turk.showing.stats.2 %>%
+  turk.showing.stats.3.and.4 %>%
     filter(granularity == '5_meter') %>%
     select(-granularity),
   digits = 3,
-  align = 'l',
-  caption = 'Median accuracy by user group - 5 meter level'
+  align = 'l'
   )
 ```
 
 
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
 
-```{r turk.showing.stats.3, echo=FALSE}
+```{r turk.showing.stats.5, echo=FALSE}
 kable(
   turk.study.summary.stats.with.labels %>%
     filter(granularity == 'street') %>%  # granularity doesn't affect these stats
@@ -841,7 +852,7 @@ kable(
 
 Below, we have a table of aggregate (sum) stats by user group.
 
-```{r turk.showing.stats.4, echo=FALSE}
+```{r turk.showing.stats.6, echo=FALSE}
 
 kable(
   turk.study.summary.stats.with.labels %>%

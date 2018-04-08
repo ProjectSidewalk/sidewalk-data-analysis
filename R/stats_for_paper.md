@@ -72,12 +72,16 @@ TODO: Come up with our own zone type descriptions, possibly aggregating as well.
 
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
-First is a table showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
+First there are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
+
+Median accuracy across all users - street level:
 
 | label.type | precision | recall | specificity | f.measure | raw.accuracy |
 |:-----------|:----------|:-------|:------------|:----------|:-------------|
 | All        | 0.667     | 0.857  | 0.725       | 0.733     | 0.745        |
 | AllProb    | 0.286     | 0.500  | 0.732       | 0.500     | 0.703        |
+
+Median accuracy across all users - 5 meter level:
 
 | label.type | precision | recall | specificity | f.measure | raw.accuracy |
 |:-----------|:----------|:-------|:------------|:----------|:-------------|
@@ -86,6 +90,8 @@ First is a table showing average (median) accuracy across all users when aggrega
 
 Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. Also, I threw in issues/features (by that I just mean post-clustering) per 100m, because this is the only table right now that has all five user groups.
 
+Median accuracy by user group - street level:
+
 | user.type | all.recall | all.prec | all.f.meas | all.n | prob.recall | prob.prec | prob.f.meas | prob.n |
 |:----------|:-----------|:---------|:-----------|:------|:------------|:----------|:------------|:-------|
 | anon      | 0.569      | 0.719    | 0.667      | 24.5  | 0.225       | 0.292     | 0.286       | 3.5    |
@@ -93,6 +99,8 @@ Then we show the above accuracy measures (but for only precision, recall, and f-
 | turk1     | 0.768      | 0.672    | 0.690      | 54.5  | 0.477       | 0.150     | 0.203       | 11.5   |
 | turk3     | 0.760      | 0.810    | 0.770      | 50.0  | 0.200       | 0.250     | 0.229       | 5.0    |
 | turk5     | 0.753      | 0.885    | 0.796      | 46.0  | 0.118       | 0.200     | 0.171       | 2.0    |
+
+Median accuracy by user group - 5 meter level:
 
 | user.type | all.recall | all.prec | all.f.meas | all.n | prob.recall | prob.prec | prob.f.meas | prob.n |
 |:----------|:-----------|:---------|:-----------|:------|:------------|:----------|:------------|:-------|
