@@ -81,13 +81,13 @@ First is a table showing average (median) accuracy across all users when aggrega
 
 Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. Also, I threw in issues/features (by that I just mean post-clustering) per 100m, because this is the only table right now that has all five user groups.
 
-| worker.type | total.recall | total.precision | total.f.measure | total.n | problem.recall | problem.precision | problem.f.measure | problem.n |
-|:------------|:-------------|:----------------|:----------------|:--------|:---------------|:------------------|:------------------|:----------|
-| anon        | 0.569        | 0.719           | 0.667           | 24.5    | 0.225          | 0.292             | 0.286             | 3.5       |
-| reg         | 0.921        | 0.488           | 0.590           | 119.0   | 0.600          | 0.183             | 0.251             | 21.0      |
-| turk1       | 0.768        | 0.672           | 0.690           | 54.5    | 0.477          | 0.150             | 0.203             | 11.5      |
-| turk3       | 0.760        | 0.810           | 0.770           | 50.0    | 0.200          | 0.250             | 0.229             | 5.0       |
-| turk5       | 0.753        | 0.885           | 0.796           | 46.0    | 0.118          | 0.200             | 0.171             | 2.0       |
+| worker.type | all.recall | all.precision | all.f.measure | all.n | prob.recall | prob.precision | prob.f.measure | prob.n |
+|:------------|:-----------|:--------------|:--------------|:------|:------------|:---------------|:---------------|:-------|
+| anon        | 0.569      | 0.719         | 0.667         | 24.5  | 0.225       | 0.292          | 0.286          | 3.5    |
+| reg         | 0.921      | 0.488         | 0.590         | 119.0 | 0.600       | 0.183          | 0.251          | 21.0   |
+| turk1       | 0.768      | 0.672         | 0.690         | 54.5  | 0.477       | 0.150          | 0.203          | 11.5   |
+| turk3       | 0.760      | 0.810         | 0.770         | 50.0  | 0.200       | 0.250          | 0.229          | 5.0    |
+| turk5       | 0.753      | 0.885         | 0.796         | 46.0  | 0.118       | 0.200          | 0.171          | 2.0    |
 
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
 

@@ -729,22 +729,22 @@ turk.study.summary.stats <-
   filter(worker.type != 'turk0', !binary, !remove.low.severity, granularity == 'street') %>%
   filter(label.type %in% c('All', 'AllProb')) %>%
   group_by(condition.id, worker1, is.anon.route, worker.type) %>%
-  mutate(total.recall = if_else(label.type == 'All', recall, NaN),
-         total.precision = if_else(label.type == 'All', precision, NaN),
-         total.f.measure = if_else(label.type == 'All', f.measure, NaN),
-         total.n = if_else(label.type == 'All', true.pos + false.pos, NaN),
-         problem.recall = if_else(label.type == 'AllProb', recall, NaN),
-         problem.precision = if_else(label.type == 'AllProb', precision, NaN),
-         problem.f.measure = if_else(label.type == 'AllProb', f.measure, NaN),
-         problem.n = if_else(label.type == 'AllProb', true.pos + false.pos, NaN)) %>%
-  dplyr::summarize_at(vars(total.recall:problem.n), sum, na.rm = TRUE) %>%
+  mutate(all.recall = if_else(label.type == 'All', recall, NaN),
+         all.precision = if_else(label.type == 'All', precision, NaN),
+         all.f.measure = if_else(label.type == 'All', f.measure, NaN),
+         all.n = if_else(label.type == 'All', true.pos + false.pos, NaN),
+         prob.recall = if_else(label.type == 'AllProb', recall, NaN),
+         prob.precision = if_else(label.type == 'AllProb', precision, NaN),
+         prob.f.measure = if_else(label.type == 'AllProb', f.measure, NaN),
+         prob.n = if_else(label.type == 'AllProb', true.pos + false.pos, NaN)) %>%
+  dplyr::summarize_at(vars(all.recall:prob.n), sum, na.rm = TRUE) %>%
   ungroup()
 
 turk.study.summary.stats.with.labels <-
   turk.study.summary.stats %>%
   filter(worker.type %in% c('anon', 'reg', 'turk1')) %>%
   left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
-  group_by_at(vars(worker1:problem.n)) %>%
+  group_by_at(vars(worker1:prob.n)) %>%
   dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
   left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
@@ -779,14 +779,14 @@ kable(
   turk.study.summary.stats %>%
     group_by(worker.type) %>%
     dplyr::summarize(
-      total.recall = median(total.recall, na.rm = TRUE),
-      total.precision = median(total.precision, na.rm = TRUE),
-      total.f.measure = median(total.f.measure, na.rm = TRUE),
-      total.n = median(total.n, na.rm = TRUE),
-      problem.recall = median(problem.recall, na.rm = TRUE),
-      problem.precision = median(problem.precision, na.rm = TRUE),
-      problem.f.measure = median(problem.f.measure, na.rm = TRUE),
-      problem.n = median(problem.n, na.rm = TRUE)
+      all.recall = median(all.recall, na.rm = TRUE),
+      all.precision = median(all.precision, na.rm = TRUE),
+      all.f.measure = median(all.f.measure, na.rm = TRUE),
+      all.n = median(all.n, na.rm = TRUE),
+      prob.recall = median(prob.recall, na.rm = TRUE),
+      prob.precision = median(prob.precision, na.rm = TRUE),
+      prob.f.measure = median(prob.f.measure, na.rm = TRUE),
+      prob.n = median(prob.n, na.rm = TRUE)
     ),
   digits = 3,
   align = 'l'
