@@ -18,6 +18,7 @@ library(ggplot2)
 library(tidyr)
 library(dplyr)
 library(forcats)
+library(janitor)
 
 # Run the following in console when you want to generate github flavored markdown as well.
 # library(rmarkdown)
@@ -66,22 +67,26 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   reg.labels <-
     dbGetQuery(
       db.connection.public.deployment,
-      'SELECT label_id, user_id, label_type_id, audit_task.audit_task_id
-      FROM audit_task
-      INNER JOIN label
-      ON audit_task.audit_task_id = label.audit_task_id
+      'SELECT label_id, user_role.user_id, role.role, label_type_id, audit_task.audit_task_id
+      FROM role
+      INNER JOIN user_role ON role.role_id = user_role.role_id
+      INNER JOIN audit_task ON user_role.user_id = audit_task.user_id
+      INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
       WHERE label.deleted = FALSE
-      AND user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\''
+      AND user_role.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
   anon.labels <-
     dbGetQuery(
       db.connection.public.deployment,
-      'SELECT DISTINCT label_id, ip_address AS user_id, label_type_id, audit_task.audit_task_id
+      'SELECT DISTINCT label_id,
+                       ip_address AS user_id,
+                       \'Anonymous\' AS role,
+                       label_type_id,
+                       audit_task.audit_task_id
       FROM audit_task
-      INNER JOIN label
-      ON audit_task.audit_task_id = label.audit_task_id
+      INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
       INNER JOIN audit_task_environment
-      ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+          ON audit_task.audit_task_id = audit_task_environment.audit_task_id
       WHERE label.deleted = FALSE
       AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
@@ -252,7 +257,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   audits <- read.csv('../data/stats_for_paper_audits.csv', colClasses = audit.classes)
   time.classes <- c('character', 'numeric')
   times <- read.csv('../data/stats_for_paper_times.csv', colClasses = time.classes)
-  label.classes <- c('numeric', 'character', 'numeric', 'numeric')
+  label.classes <- c('numeric', 'character', 'character', 'numeric', 'numeric')
   labels <- read.csv('../data/stats_for_paper_labels.csv', colClasses = label.classes)
   session.classes <- c('character', 'numeric')
   sessions <- read.csv('../data/stats_for_paper_sessions.csv', colClasses = session.classes)
@@ -428,22 +433,21 @@ label.counts <-
   labels %>%
   # filter(label_type_id != 7) %>%
   group_by(user_id) %>%
-  summarize_at(vars(label_id), n_distinct) %>%
-  dplyr::rename(label_count = label_id)
+  dplyr::summarize(label_count = n_distinct(label_id), role = first(role))
 
 # Selects distinct on audit_task_id, then sums dist audited.
 audit.length <-
   audits %>%
-  mutate(role = factor(role),
-         role = recode(role, User = 'Registered', .default = levels(role))) %>%
   group_by(user_id, role) %>%
   distinct(audit_task_id, .keep_all = TRUE) %>%
   dplyr::summarise(feet_audited = sum(feet_audited), audit_count = n()) %>%
   ungroup() %>%
   mutate(miles_audited = feet_audited / 5280) %>%
-  left_join(label.counts, by = 'user_id') %>%
+  left_join(label.counts, by = c('user_id', 'role')) %>%
   replace_na(list(label_count = 0)) %>%
   left_join(sessions, by = 'user_id') %>%
+  mutate(role = factor(role)) %>%
+  mutate(role = recode(role, User = 'Registered', .default = levels(role))) %>%
   mutate(labels_per_100m = 328.084 * label_count / feet_audited)
 
 # Computes approximate missions completed for anon users.
@@ -475,17 +479,33 @@ filtered.speeds <-
 
 NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk.
 
+
 ### Top-line numbers (no filtering)
 
+TODO: Decide how to cluster production labels
+
+The following are the label counts (not issue counts) by user group and label type.
+
 ```{r public.deployment.how.much.data, echo=FALSE, warning=FALSE}
+ordered.label.type.levs <- c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem', 'NoSidewalk',
+                             'Occlusion', 'Other')
 kable(
   labels %>%
     distinct(label_id, .keep_all = TRUE) %>%
-    count(label_type_id) %>%
     mutate(label_type = LABEL_TYPE_MAPPING[label_type_id]) %>%
-    select(label_type, n) %>%
-    bind_rows(list(label_type = 'Total', n = n_distinct(labels$label_id))) %>%
-    spread(label_type, n),
+    mutate(label_type = factor(label_type, ordered.label.type.levs)) %>%
+    mutate(role = recode_factor(role,
+                                `Anonymous` = 'Anon',
+                                `User` = 'Registered',
+                                `Turker` = 'Turker',
+                                `Administrator` = 'Researcher',
+                                `Owner` = 'Researcher')) %>%
+    select(label_type, role) %>%
+    tabyl(label_type, role) %>%
+    adorn_totals(where = c('row', 'col')) %>%
+    adorn_percentages(denominator = 'all') %>%
+    adorn_pct_formatting() %>%
+    adorn_ns(position = 'front'),
   align = 'l'
 )
 ```

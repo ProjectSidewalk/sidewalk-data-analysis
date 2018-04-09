@@ -23,9 +23,20 @@ NOTE: Public deployment data includes all data up through March 31st (and part o
 
 ### Top-line numbers (no filtering)
 
-| CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
-|:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
-| 153094   | 20664      | 45166      | 21639    | 1294      | 1417  | 8521           | 251795 |
+TODO: Decide how to cluster production labels
+
+The following are the label counts (not issue counts) by user group and label type.
+
+| label\_type    | Anon         | Registered    | Turker         | Researcher    | Total           |
+|:---------------|:-------------|:--------------|:---------------|:--------------|:----------------|
+| CurbRamp       | 16557 (6.6%) | 28085 (11.2%) | 89766 (35.7%)  | 18686 (7.4%)  | 153094 (60.8%)  |
+| NoCurbRamp     | 2510 (1.0%)  | 3447 (1.4%)   | 13509 (5.4%)   | 1198 (0.5%)   | 20664 (8.2%)    |
+| Obstacle       | 1139 (0.5%)  | 2829 (1.1%)   | 16154 (6.4%)   | 1517 (0.6%)   | 21639 (8.6%)    |
+| SurfaceProblem | 804 (0.3%)   | 1898 (0.8%)   | 3216 (1.3%)    | 2603 (1.0%)   | 8521 (3.4%)     |
+| NoSidewalk     | 2370 (0.9%)  | 6357 (2.5%)   | 28408 (11.3%)  | 8031 (3.2%)   | 45166 (17.9%)   |
+| Occlusion      | 69 (0.0%)    | 310 (0.1%)    | 462 (0.2%)     | 453 (0.2%)    | 1294 (0.5%)     |
+| Other          | 93 (0.0%)    | 148 (0.1%)    | 1137 (0.5%)    | 39 (0.0%)     | 1417 (0.6%)     |
+| Total          | 23542 (9.3%) | 43074 (17.1%) | 152652 (60.6%) | 32527 (12.9%) | 251795 (100.0%) |
 
 ### Data characteristics
 
