@@ -207,6 +207,20 @@ TODO: Make some graphs.
 
 ### Possible Story 5: Does removing low severity =&gt; higher recall
 
-TODO: Make some graphs.
+Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
 
 *Takeaways*:
+
+-   Only 17% of surface problems and 35% of obstacles had severity of 3 or higher. Most missing curb ramps are high severity (not surprising).
+
+-   The general trend is a decent improvement in recall when we remove high severity labels from the ground truth.
+
+-   Note that it *is* possible for the recall to get worse when removing high severity labels. This is because certain users may have found more of the low severity problems than the high severity ones.
+
+| low.severity.thresh | AllProb | NoCurbRamp | Obstacle | SurfaceProb | Problem |
+|:--------------------|:--------|:-----------|:---------|:------------|:--------|
+| baseline            | 1405    | 87         | 295      | 1023        | 1405    |
+| &gt;=3              | 352     | 74         | 106      | 172         | 352     |
+| &gt;=4              | 158     | 42         | 54       | 62          | 158     |
+
+![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.high.severity.analysis-1.png)

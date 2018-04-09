@@ -1130,10 +1130,61 @@ TODO: Make some graphs.
 
 ### Possible Story 5: Does removing low severity => higher recall
 
-TODO: Make some graphs.
+Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
 
 *Takeaways*:
 
+* Only 17% of surface problems and 35% of obstacles had severity of 3 or higher. Most missing curb ramps are high severity (not surprising).
+
+* The general trend is a decent improvement in recall when we remove high severity labels from the ground truth.
+
+* Note that it _is_ possible for the recall to get worse when removing high severity labels. This is because certain users may have found more of the low severity problems than the high severity ones.
+
 
 ```{r turk.high.severity.analysis, echo=FALSE, fig.width=8, fig.height=6}
+# Gives a more informative name to low.severity.thresh factor, also fills NAs
+name.thresh <- Vectorize(
+  function(thresh) {
+  if (is.na(thresh)) 'baseline'
+  else paste0('>=', as.character(thresh))
+  }
+)
+
+# Removes label types that don't have severity (plus CurbRamp).
+low.severity.check.data <-
+  data.with.raw.accuracy %>%
+  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb', 'Problem', 'AllProb')) %>%
+  filter(worker.type != 'turk0') %>%
+  droplevels %>%
+  mutate(low.severity.thresh = ordered(name.thresh(low.severity.thresh),
+                                       levels = c('baseline', '>=3', '>=4')))
+
+grouped.low.severity.data <-
+  low.severity.check.data %>%
+  group_by(label.type, worker.type, low.severity.thresh, granularity) %>%
+  dplyr::summarize(recall = mean(recall, na.rm = TRUE))
+
+
+kable(
+  low.severity.check.data %>%
+    filter(worker.type == 'turk1',
+           binary == FALSE,
+           granularity == 'street') %>%
+    group_by(worker.type, label.type, low.severity.thresh) %>%
+    summarize(gt.labels = sum(true.pos, false.neg)) %>%
+    ungroup() %>%
+    spread(label.type, gt.labels) %>%
+    select(-worker.type),
+  format = 'markdown',
+  digits = 3,
+  align = 'l'
+  )
+
+ggplot(data = grouped.low.severity.data, aes(low.severity.thresh)) +
+  geom_line(aes(y = recall, colour = granularity, group = granularity)) +
+  geom_point(aes(y = recall, colour = granularity), size = 1) +
+  facet_grid(worker.type ~ label.type) +
+  ylim(0, 1) +
+  my.theme.discrete.x +
+  theme(legend.position = 'top')
 ```
