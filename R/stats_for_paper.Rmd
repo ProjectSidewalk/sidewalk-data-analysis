@@ -517,6 +517,7 @@ There have been a total of `r n.audits` audits by our users across `r n.streets`
 ### User stats and tool usage
 
 TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
+TODO: Add table of label counts, split by label type for rows and by user group for columns. Include totals and percentages.
 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
@@ -761,15 +762,36 @@ n.reg.users.removed <- zoning.data %>% filter(exclude) %>% distinct(condition.id
 Below is table showing number of ground truth labels by user group and by label type.
 
 ```{r turk.showing.stats.1, echo=FALSE}
-kable(
+gt.count.data <-
   data.with.raw.accuracy %>%
-    filter(worker.type %in% c('anon', 'reg'),
-           binary == FALSE,
-           remove.low.severity == FALSE,
-           granularity == 'street') %>%
-    group_by(worker.type, label.type) %>%
-    summarize(gt.labels = sum(true.pos, false.neg)) %>%
-    spread(label.type, gt.labels),
+  filter(worker.type %in% c('anon', 'reg'),
+         binary == FALSE,
+         remove.low.severity == FALSE,
+         granularity == 'street') %>%
+  group_by(worker.type, label.type) %>%
+  summarize(gt.labels = sum(true.pos, false.neg)) %>%
+  ungroup() %>%
+  mutate(worker.type = as.character(worker.type))
+
+gt.count.totals <-
+  gt.count.data %>%
+  group_by(label.type) %>%
+  summarize(gt.labels = sum(gt.labels)) %>%
+  mutate(worker.type = 'total')
+
+n.gt <- gt.count.totals %>% filter(label.type == 'All') %>% select(gt.labels) %>% as.numeric()
+
+gt.count.percentages <-
+  gt.count.totals %>%
+  mutate(gt.labels = paste0(format(100 * gt.labels / n.gt, digits = 2), '%'),
+         worker.type = '% of total')
+  
+table.levels <- c('anon', 'reg', 'total', '% of total')
+kable(bind_rows(gt.count.data %>% mutate(gt.labels = as.character(gt.labels)),
+                gt.count.totals %>% mutate(gt.labels = as.character(gt.labels)),
+                gt.count.percentages) %>%
+        mutate(worker.type = factor(worker.type, levels = table.levels, labels = table.levels)) %>%
+        spread(label.type, gt.labels),
   format = 'markdown',
   digits = 3,
   align = 'l'

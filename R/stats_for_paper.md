@@ -39,7 +39,7 @@ There have been a total of 19768 audits by our users across 13045 streets, avera
 
 ### User stats and tool usage
 
-TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
+TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit). TODO: Add table of label counts, split by label type for rows and by user group for columns. Include totals and percentages.
 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
@@ -72,10 +72,12 @@ TODO: Come up with our own zone type descriptions, possibly aggregating as well.
 
 Below is table showing number of ground truth labels by user group and by label type.
 
-| worker.type | All  | AllProb | CurbRamp | NoCurbRamp | Obstacle | SurfaceProb | Problem |
-|:------------|:-----|:--------|:---------|:-----------|:---------|:------------|:--------|
-| anon        | 775  | 297     | 478      | 19         | 59       | 219         | 297     |
-| reg         | 3842 | 1108    | 2734     | 68         | 236      | 804         | 1108    |
+| worker.type | All    | AllProb | CurbRamp | NoCurbRamp | Obstacle | SurfaceProb | Problem |
+|:------------|:-------|:--------|:---------|:-----------|:---------|:------------|:--------|
+| anon        | 775    | 297     | 478      | 19         | 59       | 219         | 297     |
+| reg         | 3842   | 1108    | 2734     | 68         | 236      | 804         | 1108    |
+| total       | 4617   | 1405    | 3212     | 87         | 295      | 1023        | 1405    |
+| % of total  | 100.0% | 30.4%   | 69.6%    | 1.9%       | 6.4%     | 22.2%       | 30.4%   |
 
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
