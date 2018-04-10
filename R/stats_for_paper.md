@@ -164,7 +164,9 @@ Here is the zone type distribution for the mturk study. This shows the distribut
 
 For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment (i.e., binary instead of ordinal). All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
-Note: The red dots on the graphs are means.
+NOTE: The red dots on the graphs are means.
+
+NOTE: The "n" labels in this graph mark the number of *users* (since one user = one observation in this graph).
 
 *Takeaways*:
 

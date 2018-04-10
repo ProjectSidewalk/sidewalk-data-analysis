@@ -1019,7 +1019,9 @@ ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percen
 
 For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment (i.e., binary instead of ordinal). All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
-Note: The red dots on the graphs are means.
+NOTE: The red dots on the graphs are means.
+
+NOTE: The "n" labels in this graph mark the number of _users_ (since one user = one observation in this graph).
 
 *Takeaways*:
 
@@ -1052,10 +1054,25 @@ granularity.analysis.data <-
          recall, precision, f.measure, raw.accuracy,
          na.rm = TRUE, factor_key = TRUE)
 
+# Make the set of labels that give the number of observations for each sub-graph.
+granularity.analysis.labels <-
+  granularity.analysis.data %>%
+  group_by(label.type, accuracy.type, granularity) %>%
+  dplyr::summarize(n = sum(!is.na(accuracy.value))) %>%
+  dplyr::summarize(n_label = paste0('n = (',
+                                    first(n[granularity == '5_meter']), ',',
+                                    first(n[granularity == 'street']),
+                                    ')')) %>%
+  ungroup()
+
 # Create the trellis boxplot.
 ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
+  geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
+  geom_text(data = granularity.analysis.labels,
+             mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
   facet_grid(accuracy.type ~ label.type) +
   ggtitle('Street vs. 5 Meter level Granularity') +
   my.theme.discrete.x
@@ -1089,18 +1106,38 @@ issues.per.seg.analysis.data <-
          recall, precision, f.measure, raw.accuracy,
          na.rm = TRUE, factor_key = TRUE)
 
+# Make the set of labels that give the number of observations for each sub-graph.
+issues.per.seg.analysis.labels <-
+  issues.per.seg.analysis.data %>%
+  group_by(label.type, accuracy.type, granularity, issues.per.segment) %>%
+  dplyr::summarize(n = sum(!is.na(accuracy.value))) %>%
+  dplyr::summarize(n_label = paste0('n = (',
+                                    first(n[issues.per.segment == 'binary']), ',',
+                                    first(n[issues.per.segment == 'ordinal']),
+                                    ')')) %>%
+  ungroup()
+
 # Create the trellis boxplots.
 ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == '5_meter'),
        aes(x = issues.per.segment, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
+  geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
+  geom_text(data = issues.per.seg.analysis.labels %>% filter(granularity == '5_meter'),
+             mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
   facet_grid(accuracy.type ~ label.type) +
   ggtitle('5 Meter-Level Analysis of Issues per Segment') +
   my.theme.discrete.x
+
 ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == 'street'),
        aes(x = issues.per.segment, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
+  geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
+  geom_text(data = issues.per.seg.analysis.labels %>% filter(granularity == 'street'),
+             mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
   facet_grid(accuracy.type ~ label.type) +
   ggtitle('Street-Level Analysis of Issues per Segment') +
   my.theme.discrete.x
