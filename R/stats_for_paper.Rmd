@@ -688,7 +688,7 @@ data.with.agg.types <-
 
 # Remove occlusion and other label types, rename SurfaceProblem label type as SurfaceProb for
 # easier visualization and set order of factor levels.
-label.types <- c('All', 'AllProb', 'CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb', 'NoSidewalk', 'Problem')
+label.types <- c('All', 'Problem', 'CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb', 'NoSidewalk', 'AllProb')
 data.filtered.label.type <-
   data.with.agg.types %>%
   mutate(label.type = if_else(label.type == 'SurfaceProblem', 'SurfaceProb', label.type)) %>%
@@ -766,14 +766,14 @@ turk.study.summary.stats <-
   filter(worker.type != 'turk0',
          binary == FALSE,
          remove.low.severity == FALSE,
-         label.type %in% c('All', 'AllProb')) %>%
+         label.type %in% c('All', 'Problem')) %>%
   group_by(condition.id, worker1, is.anon.route, worker.type, granularity) %>%
   mutate(all.recall = if_else(label.type == 'All', recall, NaN),
          all.precision = if_else(label.type == 'All', precision, NaN),
          all.f.measure = if_else(label.type == 'All', f.measure, NaN),
-         prob.recall = if_else(label.type == 'AllProb', recall, NaN),
-         prob.precision = if_else(label.type == 'AllProb', precision, NaN),
-         prob.f.measure = if_else(label.type == 'AllProb', f.measure, NaN)) %>%
+         prob.recall = if_else(label.type == 'Problem', recall, NaN),
+         prob.precision = if_else(label.type == 'Problem', precision, NaN),
+         prob.f.measure = if_else(label.type == 'Problem', f.measure, NaN)) %>%
   dplyr::summarize_at(vars(all.recall:prob.f.measure), sum, na.rm = TRUE) %>%
   ungroup()
 
@@ -1092,7 +1092,7 @@ ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value
 
 ### Zone type (land use) effect on accuracy
 
-The first graph shows all label types aggregated, the second shows only problem label types aggregated.
+The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
 
 Note: The red dots on the graphs are means.
 
@@ -1105,7 +1105,6 @@ condition.land.use <-
   count(zone.type) %>%
   slice(which.max(n))
 
-
 zone.type.analysis.data <-
   data.with.raw.accuracy %>%
   inner_join(condition.land.use, by = 'condition.id') %>%
@@ -1113,7 +1112,7 @@ zone.type.analysis.data <-
          granularity == 'street',
          remove.low.severity == FALSE,
          n.workers == 1,
-         label.type %in% c('All', 'AllProb')) %>%
+         label.type %in% c('All', 'Problem')) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
 # Create the trellis boxplots.
@@ -1127,12 +1126,12 @@ ggplot(data = zone.type.analysis.data %>% filter(label.type == 'All'),
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 
-ggplot(data = zone.type.analysis.data %>% filter(label.type == 'AllProb'),
+ggplot(data = zone.type.analysis.data %>% filter(label.type == 'Problem'),
        aes(x = zone.type, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
   facet_grid(accuracy.type ~ .) +
-  ggtitle('Zone Type Accuracy Across Problem Label Types') +
+  ggtitle('Zone Type Accuracy for Problem vs. NoProblem') +
   my.theme.discrete.x +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot

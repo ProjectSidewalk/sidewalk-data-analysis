@@ -98,12 +98,12 @@ TODO: Come up with our own zone type descriptions, possibly aggregating as well.
 
 Below is a table showing number of ground truth labels by user group and by label type.
 
-| worker.type | All    | CurbRamp | NoCurbRamp | Obstacle | SurfaceProb | Problem |
-|:------------|:-------|:---------|:-----------|:---------|:------------|:--------|
-| anon        | 775    | 478      | 19         | 59       | 219         | 297     |
-| reg         | 3842   | 2734     | 68         | 236      | 804         | 1108    |
-| total       | 4617   | 3212     | 87         | 295      | 1023        | 1405    |
-| % of total  | 100.0% | 69.6%    | 1.9%       | 6.4%     | 22.2%       | 30.4%   |
+| worker.type | All    | Problem | CurbRamp | NoCurbRamp | Obstacle | SurfaceProb |
+|:------------|:-------|:--------|:---------|:-----------|:---------|:------------|
+| anon        | 775    | 297     | 478      | 19         | 59       | 219         |
+| reg         | 3842   | 1108    | 2734     | 68         | 236      | 804         |
+| total       | 4617   | 1405    | 3212     | 87         | 295      | 1023        |
+| % of total  | 100.0% | 30.4%   | 69.6%    | 1.9%       | 6.4%     | 22.2%       |
 
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
@@ -129,21 +129,21 @@ Median accuracy by user group - street level:
 
 | user.type | all.recall | all.prec | all.f.meas | prob.recall | prob.prec | prob.f.meas |
 |:----------|:-----------|:---------|:-----------|:------------|:----------|:------------|
-| anon      | 0.466      | 0.665    | 0.611      | 0.156       | 0.417     | 0.197       |
-| reg       | 0.796      | 0.492    | 0.553      | 0.350       | 0.235     | 0.247       |
-| turk1     | 0.615      | 0.674    | 0.610      | 0.223       | 0.279     | 0.203       |
-| turk3     | 0.585      | 0.809    | 0.676      | 0.106       | 0.333     | 0.154       |
-| turk5     | 0.599      | 0.885    | 0.703      | 0.051       | 0.464     | 0.091       |
+| anon      | 0.466      | 0.665    | 0.611      | 0.182       | 0.755     | 0.267       |
+| reg       | 0.796      | 0.492    | 0.553      | 0.512       | 0.474     | 0.463       |
+| turk1     | 0.615      | 0.674    | 0.610      | 0.396       | 0.500     | 0.392       |
+| turk3     | 0.585      | 0.809    | 0.676      | 0.265       | 0.667     | 0.344       |
+| turk5     | 0.599      | 0.885    | 0.703      | 0.138       | 0.750     | 0.235       |
 
 Median accuracy by user group - 5 meter level:
 
 | user.type | all.recall | all.prec | all.f.meas | prob.recall | prob.prec | prob.f.meas |
 |:----------|:-----------|:---------|:-----------|:------------|:----------|:------------|
-| anon      | 0.356      | 0.574    | 0.474      | 0.063       | 0.196     | 0.092       |
-| reg       | 0.620      | 0.378    | 0.434      | 0.200       | 0.122     | 0.143       |
-| turk1     | 0.498      | 0.508    | 0.495      | 0.129       | 0.143     | 0.107       |
-| turk3     | 0.502      | 0.694    | 0.575      | 0.053       | 0.191     | 0.088       |
-| turk5     | 0.510      | 0.761    | 0.582      | 0.027       | 0.216     | 0.048       |
+| anon      | 0.356      | 0.574    | 0.474      | 0.056       | 0.148     | 0.090       |
+| reg       | 0.620      | 0.378    | 0.434      | 0.230       | 0.195     | 0.198       |
+| turk1     | 0.498      | 0.508    | 0.495      | 0.198       | 0.244     | 0.175       |
+| turk3     | 0.502      | 0.694    | 0.575      | 0.111       | 0.250     | 0.154       |
+| turk5     | 0.510      | 0.761    | 0.582      | 0.057       | 0.314     | 0.103       |
 
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
 
@@ -208,7 +208,7 @@ NOTE: The "n" labels in this graph mark the number of *users* (since one user = 
 
 ### Zone type (land use) effect on accuracy
 
-The first graph shows all label types aggregated, the second shows only problem label types aggregated.
+The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
 
 Note: The red dots on the graphs are means.
 
@@ -234,11 +234,11 @@ Below is a table with counts of ground truth labels in the dataset at different 
 
 -   Note that it *is* possible for the recall to get worse when removing high severity labels. This is because certain users may have found more of the low severity problems than the high severity ones.
 
-| low.severity.thresh | NoCurbRamp | Obstacle | SurfaceProb | Problem |
-|:--------------------|:-----------|:---------|:------------|:--------|
-| baseline            | 87         | 295      | 1023        | 1405    |
-| &gt;=3              | 74         | 106      | 172         | 352     |
-| &gt;=4              | 42         | 54       | 62          | 158     |
+| low.severity.thresh | Problem | NoCurbRamp | Obstacle | SurfaceProb |
+|:--------------------|:--------|:-----------|:---------|:------------|
+| baseline            | 1405    | 87         | 295      | 1023        |
+| &gt;=3              | 352     | 74         | 106      | 172         |
+| &gt;=4              | 158     | 42         | 54       | 62          |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)
 
