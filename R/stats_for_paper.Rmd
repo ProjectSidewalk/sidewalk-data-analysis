@@ -726,6 +726,9 @@ data.with.raw.accuracy <-
                               levels = c('anon', 'reg', 'turk1', 'turk3', 'turk5', 'turk0'))) %>%
   mutate(worker1 = fix.anon.names(worker1)) %>%
   mutate(raw.accuracy = (true.pos + true.neg) / (true.pos + true.neg + false.pos + false.neg)) %>%
+  mutate(granularity = factor(granularity,
+                              levels = c('street', '5_meter'),
+                              labels = c('street', '5_meter'))) %>%
   filter(label.type != 'NoSidewalk' | (granularity == 'street' & binary == TRUE))
 ```
 
