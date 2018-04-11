@@ -622,7 +622,7 @@ clean.agreement.data <-
          data.type = if_else(data.type %in% c('prob.binary', 'binary'),
                              'binary',
                              'ordinal')) %>%
-  filter(level == '5m',
+  filter(level == 'street',
          data.type == 'binary',
          label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb', 'Problem')) %>%
   mutate(data.type = factor(data.type),
@@ -747,8 +747,10 @@ n.anon <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, is.anon.route
 
 all.type.accuracy.data <-
   data.with.raw.accuracy %>%
-  filter(n.workers == 1, binary, !remove.low.severity) %>%
-  filter(label.type %in% c('All', 'AllProb')) %>%
+  filter(n.workers == 1,
+         binary == TRUE,
+         remove.low.severity == FALSE,
+         label.type %in% c('All', 'AllProb')) %>%
   select_at(vars(label.type, granularity, precision:f.measure, raw.accuracy)) %>%
   group_by(label.type, granularity) %>%
   summarize_at(vars(precision:raw.accuracy), median, na.rm = TRUE) %>%

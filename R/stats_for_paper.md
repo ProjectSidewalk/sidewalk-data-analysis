@@ -165,11 +165,11 @@ Our average (mean and median) IRR over the 7 rounds, by label type, is in the ta
 
 | label.type  | mean.kripp.alpha | median.kripp.alpha |
 |:------------|:-----------------|:-------------------|
-| CurbRamp    | 0.958            | 0.962              |
-| NoCurbRamp  | 0.763            | 0.844              |
-| Obstacle    | 0.397            | 0.398              |
-| SurfaceProb | 0.438            | 0.454              |
-| Problem     | 0.535            | 0.547              |
+| CurbRamp    | 0.907            | 1.000              |
+| NoCurbRamp  | 0.787            | 1.000              |
+| Obstacle    | 0.342            | 0.304              |
+| SurfaceProb | 0.477            | 0.470              |
+| Problem     | 0.475            | 0.525              |
 
 Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison between the user groups. This removes 13 of the 50 sets of routes from registered users. There is still 16 sets of routes from anonymous users.
 
