@@ -757,25 +757,25 @@ all.type.accuracy.data <-
 # NOTE Multiply turker set by 5 if you want to count each turker who did each set of routes separately
 turk.study.summary.stats <-
   data.with.raw.accuracy %>%
-  filter(worker.type != 'turk0', !binary, !remove.low.severity) %>%
-  filter(label.type %in% c('All', 'AllProb')) %>%
+  filter(worker.type != 'turk0',
+         binary == FALSE,
+         remove.low.severity == FALSE,
+         label.type %in% c('All', 'AllProb')) %>%
   group_by(condition.id, worker1, is.anon.route, worker.type, granularity) %>%
   mutate(all.recall = if_else(label.type == 'All', recall, NaN),
          all.precision = if_else(label.type == 'All', precision, NaN),
          all.f.measure = if_else(label.type == 'All', f.measure, NaN),
-         all.n = if_else(label.type == 'All', true.pos + false.pos, NaN),
          prob.recall = if_else(label.type == 'AllProb', recall, NaN),
          prob.precision = if_else(label.type == 'AllProb', precision, NaN),
-         prob.f.measure = if_else(label.type == 'AllProb', f.measure, NaN),
-         prob.n = if_else(label.type == 'AllProb', true.pos + false.pos, NaN)) %>%
-  dplyr::summarize_at(vars(all.recall:prob.n), sum, na.rm = TRUE) %>%
+         prob.f.measure = if_else(label.type == 'AllProb', f.measure, NaN)) %>%
+  dplyr::summarize_at(vars(all.recall:prob.f.measure), sum, na.rm = TRUE) %>%
   ungroup()
 
 turk.study.summary.stats.with.labels <-
   turk.study.summary.stats %>%
   filter(worker.type %in% c('anon', 'reg', 'turk1')) %>%
   left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
-  group_by_at(vars(worker1:prob.n)) %>%
+  group_by_at(vars(worker1:prob.f.measure)) %>%
   dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
   left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
@@ -784,7 +784,6 @@ turk.study.summary.stats.with.labels <-
          feet.per.min = distance.feet / minutes_audited,
          minutes.per.1k.ft = 1000 * minutes_audited / distance.feet,
          hours.audited = minutes_audited / 60)
-         # minutes_per_session = minutes_audited / n_sessions)
 
 n.reg.users.removed <- zoning.data %>% filter(exclude) %>% distinct(condition.id) %>% nrow()
 ```
@@ -870,11 +869,9 @@ turk.showing.stats.4.and.5 <-
       all.recall = median(all.recall, na.rm = TRUE),
       all.prec = median(all.precision, na.rm = TRUE),
       all.f.meas = median(all.f.measure, na.rm = TRUE),
-      all.n = median(all.n, na.rm = TRUE),
       prob.recall = median(prob.recall, na.rm = TRUE),
       prob.prec = median(prob.precision, na.rm = TRUE),
-      prob.f.meas = median(prob.f.measure, na.rm = TRUE),
-      prob.n = median(prob.n, na.rm = TRUE)
+      prob.f.meas = median(prob.f.measure, na.rm = TRUE)
     ) %>%
     dplyr::rename(user.type = worker.type)
 
