@@ -752,15 +752,15 @@ n.turkers <- nrow(unique.turkers)
 n.reg <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, !is.anon.route) %>% select(worker1))
 n.anon <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, is.anon.route) %>% select(worker1))
 
-all.type.accuracy.data <-
+aggregate.accuracy.data <-
   data.with.raw.accuracy %>%
   filter(n.workers == 1,
          binary == TRUE,
          remove.low.severity == FALSE,
-         label.type %in% c('All', 'AllProb')) %>%
-  select_at(vars(label.type, granularity, precision:f.measure, raw.accuracy)) %>%
+         label.type %in% c('All', 'Problem')) %>%
+  select_at(vars(label.type, granularity, recall, precision, f.measure)) %>%
   group_by(label.type, granularity) %>%
-  summarize_at(vars(precision:raw.accuracy), median, na.rm = TRUE) %>%
+  summarize_at(vars(recall:f.measure), median, na.rm = TRUE) %>%
   ungroup()
 
 # NOTE Multiply turker set by 5 if you want to count each turker who did each set of routes separately
@@ -845,9 +845,9 @@ Median accuracy across all users - street level:
 
 ```{r turk.showing.stats.2, echo=FALSE}
 kable(
-  all.type.accuracy.data %>%
+  aggregate.accuracy.data %>%
     filter(granularity == 'street') %>%
-    select(label.type, recall, precision, f.measure),
+    select(-granularity),
   format = 'markdown',
   digits = 3,
   align = 'l'
@@ -858,9 +858,9 @@ Median accuracy across all users - 5 meter level:
 
 ```{r turk.showing.stats.3, echo=FALSE}
 kable(
-  all.type.accuracy.data %>%
+  aggregate.accuracy.data %>%
     filter(granularity == '5_meter') %>%
-    select(label.type, recall, precision, f.measure),
+    select(-granularity),
   digits = 3,
   align = 'l'
   )
