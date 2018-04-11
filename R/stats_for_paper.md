@@ -13,6 +13,11 @@ April 6, 2018
         -   [Stickyness of tool: user dropoffs](#stickyness-of-tool-user-dropoffs)
 -   [Turk Study](#turk-study)
     -   [High level results](#high-level-results-1)
+        -   [Ground truth label counts](#ground-truth-label-counts)
+        -   [Aggregate accuracy](#aggregate-accuracy)
+        -   [Accuracy by user group](#accuracy-by-user-group)
+        -   [Descriptive stats for users](#descriptive-stats-for-users)
+        -   [IRR](#irr)
     -   [Possible Stories](#possible-stories-1)
         -   [Street-level vs 5 meter-level](#street-level-vs-5-meter-level)
         -   [Zone type (land use) effect on accuracy](#zone-type-land-use-effect-on-accuracy)
@@ -96,6 +101,8 @@ High level results
 
 TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
 
+### Ground truth label counts
+
 Below is a table showing number of ground truth labels by user group and by label type.
 
 | worker.type | All    | Problem | CurbRamp | NoCurbRamp | Obstacle | SurfaceProb |
@@ -107,7 +114,11 @@ Below is a table showing number of ground truth labels by user group and by labe
 
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
-Below are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
+### Aggregate accuracy
+
+Below are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and for problem vs no problem. We see that the accuracies are comparable at the street level, but accuracy is much higher for curb ramps than problems at the 5 meter level.
+
+NOTE: In these two tables, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 Median accuracy across all users - street level:
 
@@ -123,7 +134,11 @@ Median accuracy across all users - 5 meter level:
 | All        | 0.543  | 0.472     | 0.468     |
 | Problem    | 0.200  | 0.250     | 0.222     |
 
-Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. Also, I threw in issues/features (by that I just mean post-clustering) per 100m, because this is the only table right now that has all five user groups.
+### Accuracy by user group
+
+Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. These are again as an aggregate across all label types (all.\*) and for the problem vs no problem type (prob.\*).
+
+NOTE: In these two tables, the data is binary (not ordinal).
 
 Median accuracy by user group - street level:
 
@@ -145,7 +160,11 @@ Median accuracy by user group - 5 meter level:
 | turk3     | 0.502      | 0.694    | 0.575      | 0.111       | 0.250     | 0.154       |
 | turk5     | 0.510      | 0.761    | 0.582      | 0.057       | 0.314     | 0.103       |
 
+### Descriptive stats for users
+
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
+
+NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 | worker.type | labels.per.100m | feet.per.min | minutes.per.1k.ft | minutes\_audited |
 |:------------|:----------------|:-------------|:------------------|:-----------------|
@@ -155,13 +174,19 @@ Next we have some descriptive statistics of users, by user group. These are aver
 
 Below, we have a table of aggregate (sum) stats by user group.
 
+NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
 | worker.type | n.missions | distance.miles | n.labels | hours.audited |
 |:------------|:-----------|:---------------|:---------|:--------------|
 | anon        | 32         | 6.061          | 481      | 3.547         |
 | reg         | 150        | 37.879         | 3626     | 21.518        |
 | turk1       | 182        | 43.939         | 5559     | 9.037         |
 
+### IRR
+
 Our average (mean) IRR over the 7 rounds, by label type, is in the table below:
+
+NOTE: In this table, the data is binary (not ordinal), and is at the street level (not 5 meter level).
 
 | label.type  | mean.kripp.alpha |
 |:------------|:-----------------|
@@ -180,7 +205,7 @@ Possible Stories
 
 ### Street-level vs 5 meter-level
 
-For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment (i.e., binary instead of ordinal). All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
+NOTE: In this section, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 NOTE: The red dots on the graphs are means.
 
@@ -210,7 +235,9 @@ NOTE: The "n" labels in this graph mark the number of *users* (since one user = 
 
 The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
 
-Note: The red dots on the graphs are means.
+NOTE: In this section, the data is binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+NOTE: The red dots on the graphs are means.
 
 *Takeaways*:
 
@@ -225,6 +252,8 @@ TODO: Make some graphs.
 ### Does removing low severity brings higher recall
 
 Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
+
+NOTE: In this section, the data is binary (not ordinal), and is at the street level (not 5 meter level).
 
 *Takeaways*:
 
@@ -246,7 +275,9 @@ Below is a table with counts of ground truth labels in the dataset at different 
 
 For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
-Note: The red dots on the graphs are means.
+NOTE: In this section, the data is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+NOTE: The red dots on the graphs are means.
 
 *Takeaways*:
 

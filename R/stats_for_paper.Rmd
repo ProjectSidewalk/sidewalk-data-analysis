@@ -736,6 +736,8 @@ TODO: Come up with our own zone type descriptions, possibly aggregating as well.
 TODO: Add "n" to a bunch of graphs. <br>
 TODO: Percentage of turkers who completed the HIT (maybe?).
 
+### Ground truth label counts
+
 ```{r turk.high.level.results, echo=FALSE, include=FALSE}
 unique.turkers <-
   data.with.raw.accuracy %>%
@@ -760,7 +762,7 @@ aggregate.accuracy.data <-
          label.type %in% c('All', 'Problem')) %>%
   select_at(vars(label.type, granularity, recall, precision, f.measure)) %>%
   group_by(label.type, granularity) %>%
-  summarize_at(vars(recall:f.measure), median, na.rm = TRUE) %>%
+  summarize_at(vars(recall, precision, f.measure), median, na.rm = TRUE) %>%
   ungroup()
 
 # NOTE Multiply turker set by 5 if you want to count each turker who did each set of routes separately
@@ -839,7 +841,12 @@ kable(bind_rows(gt.count.data %>% mutate(gt.labels = as.character(gt.labels)),
 
 A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` anonymous users were part of this study.
 
-Below are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and when aggregating over just the problem label types (missing curb ramp, surface problem, and obstacle). We show all the different accuracy types. We see that the first set of numbers is much higher, because curb ramp accuracy is very high in general. When we remove curb ramps in the second set of numbers, they become very low.
+
+### Aggregate accuracy
+
+Below are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and for problem vs no problem. We see that the accuracies are comparable at the street level, but accuracy is much higher for curb ramps than problems at the 5 meter level.
+
+NOTE: In these two tables, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 Median accuracy across all users - street level:
 
@@ -867,7 +874,11 @@ kable(
 ```
 
 
-Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. Also, I threw in issues/features (by that I just mean post-clustering) per 100m, because this is the only table right now that has all five user groups.
+### Accuracy by user group
+
+Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. These are again as an aggregate across all label types (all.\*) and for the problem vs no problem type (prob.\*).
+
+NOTE: In these two tables, the data is binary (not ordinal).
 
 Median accuracy by user group - street level:
 
@@ -907,7 +918,11 @@ kable(
 ```
 
 
+### Descriptive stats for users
+
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
+
+NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 ```{r turk.showing.stats.6, echo=FALSE}
 kable(
@@ -927,6 +942,8 @@ kable(
 
 
 Below, we have a table of aggregate (sum) stats by user group.
+
+NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 ```{r turk.showing.stats.7, echo=FALSE}
 
@@ -948,7 +965,11 @@ kable(
 ```
 
 
+### IRR
+
 Our average (mean) IRR over the 7 rounds, by label type, is in the table below:
+
+NOTE: In this table, the data is binary (not ordinal), and is at the street level (not 5 meter level).
 
 ```{r turk.irr.stats, echo=FALSE}
 kable(
@@ -1034,7 +1055,7 @@ ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percen
 
 ### Street-level vs 5 meter-level
 
-For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment (i.e., binary instead of ordinal). All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
+NOTE: In this section, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 NOTE: The red dots on the graphs are means.
 
@@ -1097,7 +1118,9 @@ ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value
 
 The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
 
-Note: The red dots on the graphs are means.
+NOTE: In this section, the data is binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+NOTE: The red dots on the graphs are means.
 
 *Takeaways*:
 
@@ -1155,6 +1178,8 @@ TODO: Make some graphs.
 ### Does removing low severity brings higher recall
 
 Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
+
+NOTE: In this section, the data is binary (not ordinal), and is at the street level (not 5 meter level).
 
 *Takeaways*:
 
@@ -1218,7 +1243,9 @@ ggplot(data = grouped.low.severity.data, aes(low.severity.thresh)) +
 
 For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
-Note: The red dots on the graphs are means.
+NOTE: In this section, the data is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+NOTE: The red dots on the graphs are means.
 
 *Takeaways*:
 
