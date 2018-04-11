@@ -15,10 +15,10 @@ April 6, 2018
     -   [High level results](#high-level-results-1)
     -   [Possible Stories](#possible-stories-1)
         -   [Street-level vs 5 meter-level](#street-level-vs-5-meter-level)
-        -   [Binary vs ordinal issues per segment](#binary-vs-ordinal-issues-per-segment)
         -   [Zone type (land use) effect on accuracy](#zone-type-land-use-effect-on-accuracy)
         -   [Reg vs anon vs turker vs turk3 vs turk5](#reg-vs-anon-vs-turker-vs-turk3-vs-turk5)
         -   [Does removing low severity brings higher recall](#does-removing-low-severity-brings-higher-recall)
+        -   [Binary vs ordinal issues per segment](#binary-vs-ordinal-issues-per-segment)
 
 Public Deployment
 =================
@@ -206,22 +206,6 @@ NOTE: The "n" labels in this graph mark the number of *users* (since one user = 
 
 ![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
 
-### Binary vs ordinal issues per segment
-
-For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
-
-Note: The red dots on the graphs are means.
-
-*Takeaways*:
-
--   5 meter level (first graph): Considering multiple issues per segment results in *very slightly* lower accuracy for pretty much every type of label and type of accuracy (except precision). I suspect that this comes mostly from our method of clustering, which makes it unlikely that users end up with multiple labels per 5 meter segment. We do not have this restriction in the ground truth, so those few cases where we have more than one label per 5 meter segment in the GT usually results in an additional false negative when moving to ordinal analysis. However, the difference here is very small, so our clustering method seems fine to me.
-
--   Street level (second graph) recall: If we do this analysis at the street level, the decreases in accuracy are more pronounced. At this level, the clustering shouldn't have much effect. The decrease in recall suggests that users are finding *some* of the problems, but not *all* of them (meaning an increase in false negatives when we move to ordinal analysis).
-
--   Street level (second graph) recall: I suspect that the reason for the decrease in precision when moving to ordinal analysis at the street level is the same reason as why 5 meter level has lower precision than street level (seen in the previous section). That is, users' misunderstandings of how to label certain common things (driveways as curb ramps, etc.); since these mistakes are common, they may happen many times on a single street edge, which means that you start racking up the false positives when you move to ordinal analysis.
-
-![](stats_for_paper_files/figure-markdown_github/turk.issues.per.seg.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.issues.per.seg.analysis-2.png)
-
 ### Zone type (land use) effect on accuracy
 
 The first graph shows all label types aggregated, the second shows only problem label types aggregated.
@@ -257,3 +241,19 @@ Below is a table with counts of ground truth labels in the dataset at different 
 | &gt;=4              | 158     | 42         | 54       | 62          | 158     |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)
+
+### Binary vs ordinal issues per segment
+
+For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
+
+Note: The red dots on the graphs are means.
+
+*Takeaways*:
+
+-   5 meter level (first graph): Considering multiple issues per segment results in *very slightly* lower accuracy for pretty much every type of label and type of accuracy (except precision). I suspect that this comes mostly from our method of clustering, which makes it unlikely that users end up with multiple labels per 5 meter segment. We do not have this restriction in the ground truth, so those few cases where we have more than one label per 5 meter segment in the GT usually results in an additional false negative when moving to ordinal analysis. However, the difference here is very small, so our clustering method seems fine to me.
+
+-   Street level (second graph) recall: If we do this analysis at the street level, the decreases in accuracy are more pronounced. At this level, the clustering shouldn't have much effect. The decrease in recall suggests that users are finding *some* of the problems, but not *all* of them (meaning an increase in false negatives when we move to ordinal analysis).
+
+-   Street level (second graph) recall: I suspect that the reason for the decrease in precision when moving to ordinal analysis at the street level is the same reason as why 5 meter level has lower precision than street level (seen in the previous section). That is, users' misunderstandings of how to label certain common things (driveways as curb ramps, etc.); since these mistakes are common, they may happen many times on a single street edge, which means that you start racking up the false positives when you move to ordinal analysis.
+
+![](stats_for_paper_files/figure-markdown_github/turk.issues.per.seg.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.issues.per.seg.analysis-2.png)

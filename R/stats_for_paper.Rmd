@@ -1090,71 +1090,6 @@ ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value
 ```
 
 
-### Binary vs ordinal issues per segment
-
-For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
-
-Note: The red dots on the graphs are means.
-
-*Takeaways*:
-
-* 5 meter level (first graph): Considering multiple issues per segment results in _very slightly_ lower accuracy for pretty much every type of label and type of accuracy (except precision). I suspect that this comes mostly from our method of clustering, which makes it unlikely that users end up with multiple labels per 5 meter segment. We do not have this restriction in the ground truth, so those few cases where we have more than one label per 5 meter segment in the GT usually results in an additional false negative when moving to ordinal analysis. However, the difference here is very small, so our clustering method seems fine to me.
-
-* Street level (second graph) recall: If we do this analysis at the street level, the decreases in accuracy are more pronounced. At this level, the clustering shouldn't have much effect. The decrease in recall suggests that users are finding _some_ of the problems, but not _all_ of them (meaning an increase in false negatives when we move to ordinal analysis).
-
-* Street level (second graph) recall: I suspect that the reason for the decrease in precision when moving to ordinal analysis at the street level is the same reason as why 5 meter level has lower precision than street level (seen in the previous section). That is, users' misunderstandings of how to label certain common things (driveways as curb ramps, etc.); since these mistakes are common, they may happen many times on a single street edge, which means that you start racking up the false positives when you move to ordinal analysis.
-
-
-```{r turk.issues.per.seg.analysis, echo=FALSE, fig.width=8, fig.height=6}
-issues.per.seg.analysis.data <-
-  data.with.raw.accuracy %>%
-  filter(remove.low.severity == FALSE) %>%
-  filter(n.workers == 1) %>%
-  filter(label.type != 'NoSidewalk') %>%
-  select(-specificity) %>%
-  mutate(issues.per.segment = factor(if_else(binary, 'binary', 'ordinal'))) %>%
-  gather(accuracy.type, accuracy.value,
-         recall, precision, f.measure, raw.accuracy,
-         na.rm = TRUE, factor_key = TRUE)
-
-# Make the set of labels that give the number of observations for each sub-graph.
-issues.per.seg.analysis.labels <-
-  issues.per.seg.analysis.data %>%
-  group_by(label.type, accuracy.type, granularity, issues.per.segment) %>%
-  dplyr::summarize(n = sum(!is.na(accuracy.value))) %>%
-  dplyr::summarize(n_label = paste0('n = (',
-                                    first(n[issues.per.segment == 'binary']), ',',
-                                    first(n[issues.per.segment == 'ordinal']),
-                                    ')')) %>%
-  ungroup()
-
-# Create the trellis boxplots.
-ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == '5_meter'),
-       aes(x = issues.per.segment, y = accuracy.value)) +
-  geom_boxplot() +
-  stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
-  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
-  geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
-  geom_text(data = issues.per.seg.analysis.labels %>% filter(granularity == '5_meter'),
-             mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
-  facet_grid(accuracy.type ~ label.type) +
-  ggtitle('5 Meter-Level Analysis of Issues per Segment') +
-  my.theme.discrete.x
-
-ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == 'street'),
-       aes(x = issues.per.segment, y = accuracy.value)) +
-  geom_boxplot() +
-  stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
-  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
-  geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
-  geom_text(data = issues.per.seg.analysis.labels %>% filter(granularity == 'street'),
-             mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
-  facet_grid(accuracy.type ~ label.type) +
-  ggtitle('Street-Level Analysis of Issues per Segment') +
-  my.theme.discrete.x
-```
-
-
 ### Zone type (land use) effect on accuracy
 
 The first graph shows all label types aggregated, the second shows only problem label types aggregated.
@@ -1277,4 +1212,69 @@ ggplot(data = grouped.low.severity.data, aes(low.severity.thresh)) +
   ylim(0, 1) +
   my.theme.discrete.x +
   theme(legend.position = 'top')
+```
+
+
+### Binary vs ordinal issues per segment
+
+For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
+
+Note: The red dots on the graphs are means.
+
+*Takeaways*:
+
+* 5 meter level (first graph): Considering multiple issues per segment results in _very slightly_ lower accuracy for pretty much every type of label and type of accuracy (except precision). I suspect that this comes mostly from our method of clustering, which makes it unlikely that users end up with multiple labels per 5 meter segment. We do not have this restriction in the ground truth, so those few cases where we have more than one label per 5 meter segment in the GT usually results in an additional false negative when moving to ordinal analysis. However, the difference here is very small, so our clustering method seems fine to me.
+
+* Street level (second graph) recall: If we do this analysis at the street level, the decreases in accuracy are more pronounced. At this level, the clustering shouldn't have much effect. The decrease in recall suggests that users are finding _some_ of the problems, but not _all_ of them (meaning an increase in false negatives when we move to ordinal analysis).
+
+* Street level (second graph) recall: I suspect that the reason for the decrease in precision when moving to ordinal analysis at the street level is the same reason as why 5 meter level has lower precision than street level (seen in the previous section). That is, users' misunderstandings of how to label certain common things (driveways as curb ramps, etc.); since these mistakes are common, they may happen many times on a single street edge, which means that you start racking up the false positives when you move to ordinal analysis.
+
+
+```{r turk.issues.per.seg.analysis, echo=FALSE, fig.width=8, fig.height=6}
+issues.per.seg.analysis.data <-
+  data.with.raw.accuracy %>%
+  filter(remove.low.severity == FALSE) %>%
+  filter(n.workers == 1) %>%
+  filter(label.type != 'NoSidewalk') %>%
+  select(-specificity) %>%
+  mutate(issues.per.segment = factor(if_else(binary, 'binary', 'ordinal'))) %>%
+  gather(accuracy.type, accuracy.value,
+         recall, precision, f.measure, raw.accuracy,
+         na.rm = TRUE, factor_key = TRUE)
+
+# Make the set of labels that give the number of observations for each sub-graph.
+issues.per.seg.analysis.labels <-
+  issues.per.seg.analysis.data %>%
+  group_by(label.type, accuracy.type, granularity, issues.per.segment) %>%
+  dplyr::summarize(n = sum(!is.na(accuracy.value))) %>%
+  dplyr::summarize(n_label = paste0('n = (',
+                                    first(n[issues.per.segment == 'binary']), ',',
+                                    first(n[issues.per.segment == 'ordinal']),
+                                    ')')) %>%
+  ungroup()
+
+# Create the trellis boxplots.
+ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == '5_meter'),
+       aes(x = issues.per.segment, y = accuracy.value)) +
+  geom_boxplot() +
+  stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
+  geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
+  geom_text(data = issues.per.seg.analysis.labels %>% filter(granularity == '5_meter'),
+             mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
+  facet_grid(accuracy.type ~ label.type) +
+  ggtitle('5 Meter-Level Analysis of Issues per Segment') +
+  my.theme.discrete.x
+
+ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == 'street'),
+       aes(x = issues.per.segment, y = accuracy.value)) +
+  geom_boxplot() +
+  stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
+  geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
+  geom_text(data = issues.per.seg.analysis.labels %>% filter(granularity == 'street'),
+             mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
+  facet_grid(accuracy.type ~ label.type) +
+  ggtitle('Street-Level Analysis of Issues per Segment') +
+  my.theme.discrete.x
 ```
