@@ -10,11 +10,11 @@ April 6, 2018
     -   [Possible Story 1: Data overlap and agreement between users](#possible-story-1-data-overlap-and-agreement-between-users)
 -   [Turk Study](#turk-study)
     -   [High level results](#high-level-results)
-    -   [Possible Story 1: Street-level vs. 5 meter-level](#possible-story-1-street-level-vs.-5-meter-level)
-    -   [Possible Story 2: Binary vs. ordinal issues per segment](#possible-story-2-binary-vs.-ordinal-issues-per-segment)
+    -   [Possible Story 1: Street-level vs 5 meter-level](#possible-story-1-street-level-vs-5-meter-level)
+    -   [Possible Story 2: Binary vs ordinal issues per segment](#possible-story-2-binary-vs-ordinal-issues-per-segment)
     -   [Possible Story 3: Zone type (land use) effect on accuracy](#possible-story-3-zone-type-land-use-effect-on-accuracy)
-    -   [Possible Story 4: Reg vs. anon vs. turker vs. turk3 vs. turk5](#possible-story-4-reg-vs.-anon-vs.-turker-vs.-turk3-vs.-turk5)
-    -   [Possible Story 5: Does removing low severity =&gt; higher recall](#possible-story-5-does-removing-low-severity-higher-recall)
+    -   [Possible Story 4: Reg vs anon vs turker vs turk3 vs turk5](#possible-story-4-reg-vs-anon-vs-turker-vs-turk3-vs-turk5)
+    -   [Possible Story 5: Does removing low severity brings higher recall](#possible-story-5-does-removing-low-severity-brings-higher-recall)
 
 Public Deployment
 -----------------
@@ -158,9 +158,9 @@ Our average (mean and median) IRR over the 7 rounds, by label type, is in the ta
 
 Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison between the user groups. This removes 13 of the 50 sets of routes from registered users. There is still 16 sets of routes from anonymous users.
 
-![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.distribution-1.png)![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.distribution-2.png)
+![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-2.png)
 
-### Possible Story 1: Street-level vs. 5 meter-level
+### Possible Story 1: Street-level vs 5 meter-level
 
 For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment (i.e., binary instead of ordinal). All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
@@ -186,9 +186,9 @@ NOTE: The "n" labels in this graph mark the number of *users* (since one user = 
 
 -   NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
 
-![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.granularity.analysis-1.png)
+![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
 
-### Possible Story 2: Binary vs. ordinal issues per segment
+### Possible Story 2: Binary vs ordinal issues per segment
 
 For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
@@ -202,7 +202,7 @@ Note: The red dots on the graphs are means.
 
 -   Street level (second graph) recall: I suspect that the reason for the decrease in precision when moving to ordinal analysis at the street level is the same reason as why 5 meter level has lower precision than street level (seen in the previous section). That is, users' misunderstandings of how to label certain common things (driveways as curb ramps, etc.); since these mistakes are common, they may happen many times on a single street edge, which means that you start racking up the false positives when you move to ordinal analysis.
 
-![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.issues.per.seg.analysis-1.png)![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.issues.per.seg.analysis-2.png)
+![](stats_for_paper_files/figure-markdown_github/turk.issues.per.seg.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.issues.per.seg.analysis-2.png)
 
 ### Possible Story 3: Zone type (land use) effect on accuracy
 
@@ -212,15 +212,15 @@ Note: The red dots on the graphs are means.
 
 *Takeaways*:
 
-![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.zone.type.analysis-2.png)
+![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-2.png)
 
-### Possible Story 4: Reg vs. anon vs. turker vs. turk3 vs. turk5
+### Possible Story 4: Reg vs anon vs turker vs turk3 vs turk5
 
 TODO: Make some graphs.
 
 *Takeaways*:
 
-### Possible Story 5: Does removing low severity =&gt; higher recall
+### Possible Story 5: Does removing low severity brings higher recall
 
 Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
 
@@ -238,4 +238,4 @@ Below is a table with counts of ground truth labels in the dataset at different 
 | &gt;=3              | 352     | 74         | 106      | 172         | 352     |
 | &gt;=4              | 158     | 42         | 54       | 62          | 158     |
 
-![](stats_for_paper_files/figure-markdown_github-ascii_identifiers/turk.high.severity.analysis-1.png)
+![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)

@@ -1015,7 +1015,7 @@ ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percen
 ```
 
 
-### Possible Story 1: Street-level vs. 5 meter-level
+### Possible Story 1: Street-level vs 5 meter-level
 
 For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment (i.e., binary instead of ordinal). All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
@@ -1079,7 +1079,7 @@ ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value
 ```
 
 
-### Possible Story 2: Binary vs. ordinal issues per segment
+### Possible Story 2: Binary vs ordinal issues per segment
 
 For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
@@ -1196,7 +1196,7 @@ ggplot(data = zone.type.analysis.data %>% filter(label.type == 'AllProb'),
 ```
 
 
-### Possible Story 4: Reg vs. anon vs. turker vs. turk3 vs. turk5
+### Possible Story 4: Reg vs anon vs turker vs turk3 vs turk5
 
 TODO: Make some graphs.
 
@@ -1207,7 +1207,7 @@ TODO: Make some graphs.
 ```
 
 
-### Possible Story 5: Does removing low severity => higher recall
+### Possible Story 5: Does removing low severity brings higher recall
 
 Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
 
