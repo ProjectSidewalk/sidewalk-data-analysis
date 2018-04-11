@@ -940,14 +940,13 @@ kable(
 ```
 
 
-Our average (mean and median) IRR over the 7 rounds, by label type, is in the table below:
+Our average (mean) IRR over the 7 rounds, by label type, is in the table below:
 
 ```{r turk.irr.stats, echo=FALSE}
 kable(
   clean.agreement.data %>%
     group_by(label.type) %>%
-    dplyr::summarize(mean.kripp.alpha = mean(kripp.alpha),
-                     median.kripp.alpha = median(kripp.alpha)),
+    dplyr::summarize(mean.kripp.alpha = mean(kripp.alpha)),
   digits = 3,
   align = 'l'
   )
