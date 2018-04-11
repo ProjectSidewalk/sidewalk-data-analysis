@@ -475,10 +475,11 @@ filtered.speeds <-
          labels_per_100m >= 3.75)
 ```
 
-## Public Deployment
+# Public Deployment
 
 NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk.
 
+## High-level results
 
 ### Top-line numbers (no filtering)
 
@@ -581,17 +582,26 @@ kable(
   )
 ```
 
-### Possible Story 1: Data overlap and agreement between users
+
+## Possible Stories
+
+### Data overlap and agreement between users
 
 Amongst all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement amongst them? (see comment in Outline document for details on implementation)
 
-## Turk Study
+
+### Stickyness of tool: user dropoffs
+
+We want a bar chart here showing, after a user clicks start mapping, what percentage finish the tutorial, what percentage finish a mission, etc.
+
+
+# Turk Study
 
 Update: This is now all of the data. There used to be 19 anonymous user routes, but three of them actually had no labels placed by the anonymous user (we had forgotten to check beforehand), thus we have only 16.
 
 Even though 5 turkers did each route, the high level results for individual turkers looks only at the first turker to complete each set of routes. This makes aggregate stats more even, and a fairer comparison across user groups. (but maybe we should actually use all turkers when not aggregating, actually...)
 
-### High level results
+## High level results
 
 ```{r turk.reading.cleaning.data, echo=FALSE, include=FALSE}
 # Get conditions to exclude
@@ -1014,8 +1024,9 @@ ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percen
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 ```
 
+## Possible Stories
 
-### Possible Story 1: Street-level vs 5 meter-level
+### Street-level vs 5 meter-level
 
 For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment (i.e., binary instead of ordinal). All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
@@ -1079,7 +1090,7 @@ ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value
 ```
 
 
-### Possible Story 2: Binary vs ordinal issues per segment
+### Binary vs ordinal issues per segment
 
 For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
@@ -1144,7 +1155,7 @@ ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == 'street'),
 ```
 
 
-### Possible Story 3: Zone type (land use) effect on accuracy
+### Zone type (land use) effect on accuracy
 
 The first graph shows all label types aggregated, the second shows only problem label types aggregated.
 
@@ -1196,7 +1207,7 @@ ggplot(data = zone.type.analysis.data %>% filter(label.type == 'AllProb'),
 ```
 
 
-### Possible Story 4: Reg vs anon vs turker vs turk3 vs turk5
+### Reg vs anon vs turker vs turk3 vs turk5
 
 TODO: Make some graphs.
 
@@ -1207,7 +1218,7 @@ TODO: Make some graphs.
 ```
 
 
-### Possible Story 5: Does removing low severity brings higher recall
+### Does removing low severity brings higher recall
 
 Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
 

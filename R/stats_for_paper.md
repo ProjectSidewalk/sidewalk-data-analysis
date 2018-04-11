@@ -4,22 +4,29 @@ Mikey Saugstad
 April 6, 2018
 
 -   [Public Deployment](#public-deployment)
-    -   [Top-line numbers (no filtering)](#top-line-numbers-no-filtering)
-    -   [Data characteristics](#data-characteristics)
-    -   [User stats and tool usage](#user-stats-and-tool-usage)
-    -   [Possible Story 1: Data overlap and agreement between users](#possible-story-1-data-overlap-and-agreement-between-users)
+    -   [High-level results](#high-level-results)
+        -   [Top-line numbers (no filtering)](#top-line-numbers-no-filtering)
+        -   [Data characteristics](#data-characteristics)
+        -   [User stats and tool usage](#user-stats-and-tool-usage)
+    -   [Possible Stories](#possible-stories)
+        -   [Data overlap and agreement between users](#data-overlap-and-agreement-between-users)
+        -   [Stickyness of tool: user dropoffs](#stickyness-of-tool-user-dropoffs)
 -   [Turk Study](#turk-study)
-    -   [High level results](#high-level-results)
-    -   [Possible Story 1: Street-level vs 5 meter-level](#possible-story-1-street-level-vs-5-meter-level)
-    -   [Possible Story 2: Binary vs ordinal issues per segment](#possible-story-2-binary-vs-ordinal-issues-per-segment)
-    -   [Possible Story 3: Zone type (land use) effect on accuracy](#possible-story-3-zone-type-land-use-effect-on-accuracy)
-    -   [Possible Story 4: Reg vs anon vs turker vs turk3 vs turk5](#possible-story-4-reg-vs-anon-vs-turker-vs-turk3-vs-turk5)
-    -   [Possible Story 5: Does removing low severity brings higher recall](#possible-story-5-does-removing-low-severity-brings-higher-recall)
+    -   [High level results](#high-level-results-1)
+    -   [Possible Stories](#possible-stories-1)
+        -   [Street-level vs 5 meter-level](#street-level-vs-5-meter-level)
+        -   [Binary vs ordinal issues per segment](#binary-vs-ordinal-issues-per-segment)
+        -   [Zone type (land use) effect on accuracy](#zone-type-land-use-effect-on-accuracy)
+        -   [Reg vs anon vs turker vs turk3 vs turk5](#reg-vs-anon-vs-turker-vs-turk3-vs-turk5)
+        -   [Does removing low severity brings higher recall](#does-removing-low-severity-brings-higher-recall)
 
 Public Deployment
------------------
+=================
 
 NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk.
+
+High-level results
+------------------
 
 ### Top-line numbers (no filtering)
 
@@ -66,18 +73,26 @@ Below are the medians for a few metrics (followed by sums), split by user group.
 | Turker     | 130      | 1018.386 | 95%      | 3097     | 13234  | 445.934        | 104907 | 22%        |
 | Registered | 190      | 394.097  | 37%      | 1226     | 5201   | 158.970        | 36939  | 37%        |
 
-### Possible Story 1: Data overlap and agreement between users
+Possible Stories
+----------------
+
+### Data overlap and agreement between users
 
 Amongst all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement amongst them? (see comment in Outline document for details on implementation)
 
+### Stickyness of tool: user dropoffs
+
+We want a bar chart here showing, after a user clicks start mapping, what percentage finish the tutorial, what percentage finish a mission, etc.
+
 Turk Study
-----------
+==========
 
 Update: This is now all of the data. There used to be 19 anonymous user routes, but three of them actually had no labels placed by the anonymous user (we had forgotten to check beforehand), thus we have only 16.
 
 Even though 5 turkers did each route, the high level results for individual turkers looks only at the first turker to complete each set of routes. This makes aggregate stats more even, and a fairer comparison across user groups. (but maybe we should actually use all turkers when not aggregating, actually...)
 
-### High level results
+High level results
+------------------
 
 TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
 
@@ -160,7 +175,10 @@ Here is the zone type distribution for the mturk study. This shows the distribut
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-2.png)
 
-### Possible Story 1: Street-level vs 5 meter-level
+Possible Stories
+----------------
+
+### Street-level vs 5 meter-level
 
 For simplicity, the graphs below count only one true/false positie/negative per segment, instead of counting the number of labels in that segment (i.e., binary instead of ordinal). All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
@@ -188,7 +206,7 @@ NOTE: The "n" labels in this graph mark the number of *users* (since one user = 
 
 ![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
 
-### Possible Story 2: Binary vs ordinal issues per segment
+### Binary vs ordinal issues per segment
 
 For simplicity, the first graph looks at the 5 meter level, and the second looks at street level. All user groups are also combined (the groups being: registered volunteers, anonymous volunteers, and individual turkers).
 
@@ -204,7 +222,7 @@ Note: The red dots on the graphs are means.
 
 ![](stats_for_paper_files/figure-markdown_github/turk.issues.per.seg.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.issues.per.seg.analysis-2.png)
 
-### Possible Story 3: Zone type (land use) effect on accuracy
+### Zone type (land use) effect on accuracy
 
 The first graph shows all label types aggregated, the second shows only problem label types aggregated.
 
@@ -214,13 +232,13 @@ Note: The red dots on the graphs are means.
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-2.png)
 
-### Possible Story 4: Reg vs anon vs turker vs turk3 vs turk5
+### Reg vs anon vs turker vs turk3 vs turk5
 
 TODO: Make some graphs.
 
 *Takeaways*:
 
-### Possible Story 5: Does removing low severity brings higher recall
+### Does removing low severity brings higher recall
 
 Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
 
