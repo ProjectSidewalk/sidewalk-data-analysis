@@ -111,17 +111,17 @@ Below are two tables (street level, then 5 meter level) showing average (median)
 
 Median accuracy across all users - street level:
 
-| label.type | precision | recall | specificity | f.measure | raw.accuracy |
-|:-----------|:----------|:-------|:------------|:----------|:-------------|
-| All        | 0.674     | 0.714  | 0.750       | 0.667     | 0.711        |
-| AllProb    | 0.400     | 0.400  | 0.768       | 0.364     | 0.667        |
+| label.type | recall | precision | f.measure |
+|:-----------|:-------|:----------|:----------|
+| All        | 0.714  | 0.674     | 0.667     |
+| AllProb    | 0.400  | 0.400     | 0.364     |
 
 Median accuracy across all users - 5 meter level:
 
-| label.type | precision | recall | specificity | f.measure | raw.accuracy |
-|:-----------|:----------|:-------|:------------|:----------|:-------------|
-| All        | 0.472     | 0.543  | 0.974       | 0.468     | 0.949        |
-| AllProb    | 0.155     | 0.143  | 0.983       | 0.160     | 0.959        |
+| label.type | recall | precision | f.measure |
+|:-----------|:-------|:----------|:----------|
+| All        | 0.543  | 0.472     | 0.468     |
+| AllProb    | 0.143  | 0.155     | 0.160     |
 
 Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. Also, I threw in issues/features (by that I just mean post-clustering) per 100m, because this is the only table right now that has all five user groups.
 

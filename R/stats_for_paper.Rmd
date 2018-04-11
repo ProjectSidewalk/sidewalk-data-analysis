@@ -847,7 +847,7 @@ Median accuracy across all users - street level:
 kable(
   all.type.accuracy.data %>%
     filter(granularity == 'street') %>%
-    select(-granularity),
+    select(label.type, recall, precision, f.measure),
   format = 'markdown',
   digits = 3,
   align = 'l'
@@ -860,7 +860,7 @@ Median accuracy across all users - 5 meter level:
 kable(
   all.type.accuracy.data %>%
     filter(granularity == '5_meter') %>%
-    select(-granularity),
+    select(label.type, recall, precision, f.measure),
   digits = 3,
   align = 'l'
   )
