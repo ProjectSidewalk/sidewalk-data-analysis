@@ -96,14 +96,14 @@ High level results
 
 TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
 
-Below is table showing number of ground truth labels by user group and by label type.
+Below is a table showing number of ground truth labels by user group and by label type.
 
-| worker.type | All    | AllProb | CurbRamp | NoCurbRamp | Obstacle | SurfaceProb | Problem |
-|:------------|:-------|:--------|:---------|:-----------|:---------|:------------|:--------|
-| anon        | 775    | 297     | 478      | 19         | 59       | 219         | 297     |
-| reg         | 3842   | 1108    | 2734     | 68         | 236      | 804         | 1108    |
-| total       | 4617   | 1405    | 3212     | 87         | 295      | 1023        | 1405    |
-| % of total  | 100.0% | 30.4%   | 69.6%    | 1.9%       | 6.4%     | 22.2%       | 30.4%   |
+| worker.type | All    | CurbRamp | NoCurbRamp | Obstacle | SurfaceProb | Problem |
+|:------------|:-------|:---------|:-----------|:---------|:------------|:--------|
+| anon        | 775    | 478      | 19         | 59       | 219         | 297     |
+| reg         | 3842   | 2734     | 68         | 236      | 804         | 1108    |
+| total       | 4617   | 3212     | 87         | 295      | 1023        | 1405    |
+| % of total  | 100.0% | 69.6%    | 1.9%       | 6.4%     | 22.2%       | 30.4%   |
 
 A total of 330 turkers, 50 registered users, and 16 anonymous users were part of this study.
 
@@ -234,11 +234,11 @@ Below is a table with counts of ground truth labels in the dataset at different 
 
 -   Note that it *is* possible for the recall to get worse when removing high severity labels. This is because certain users may have found more of the low severity problems than the high severity ones.
 
-| low.severity.thresh | AllProb | NoCurbRamp | Obstacle | SurfaceProb | Problem |
-|:--------------------|:--------|:-----------|:---------|:------------|:--------|
-| baseline            | 1405    | 87         | 295      | 1023        | 1405    |
-| &gt;=3              | 352     | 74         | 106      | 172         | 352     |
-| &gt;=4              | 158     | 42         | 54       | 62          | 158     |
+| low.severity.thresh | NoCurbRamp | Obstacle | SurfaceProb | Problem |
+|:--------------------|:-----------|:---------|:------------|:--------|
+| baseline            | 87         | 295      | 1023        | 1405    |
+| &gt;=3              | 74         | 106      | 172         | 352     |
+| &gt;=4              | 42         | 54       | 62          | 158     |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)
 

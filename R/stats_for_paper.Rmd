@@ -41,7 +41,11 @@ LABEL_TYPE_MAPPING <- c(
 TOTAL_STREET_DIST_METERS <- 1730179
 TOTAL_STREET_DIST_MILES <- TOTAL_STREET_DIST_METERS / 1609.34
 
+LABEL_TYPES_TO_ANALYZE = c('All', 'Problem', 'CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')
+
+# Variables commonly used in plotting
 my.theme.discrete.x <- theme_bw() + theme(panel.grid.major.x = element_blank())
+ACCURACY_BREAKS <- c(0, 0.25, 0.5, 0.75, 1.0)
 ```
 
 ```{r connect, echo=FALSE}
@@ -790,7 +794,7 @@ turk.study.summary.stats.with.labels <-
 n.reg.users.removed <- zoning.data %>% filter(exclude) %>% distinct(condition.id) %>% nrow()
 ```
 
-Below is table showing number of ground truth labels by user group and by label type.
+Below is a table showing number of ground truth labels by user group and by label type.
 
 ```{r turk.showing.stats.1, echo=FALSE}
 gt.count.data <-
@@ -798,7 +802,8 @@ gt.count.data <-
   filter(worker.type %in% c('anon', 'reg'),
          binary == FALSE,
          remove.low.severity == FALSE,
-         granularity == 'street') %>%
+         granularity == 'street',
+         label.type != 'AllProb') %>%
   group_by(worker.type, label.type) %>%
   summarize(gt.labels = sum(true.pos, false.neg)) %>%
   ungroup() %>%
@@ -1051,17 +1056,14 @@ NOTE: The "n" labels in this graph mark the number of _users_ (since one user = 
 * NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
 
 
-```{r turk.granularity.analysis, echo=FALSE, fig.width=8, fig.height=6}
+```{r turk.granularity.analysis, echo=FALSE, fig.width=8, fig.height=4}
 granularity.analysis.data <-
   data.with.raw.accuracy %>%
-  filter(remove.low.severity == FALSE) %>%
-  filter(binary == TRUE) %>%
-  filter(n.workers == 1) %>%
-  filter(label.type != 'NoSidewalk') %>%
-  select(-specificity) %>%
-  gather(accuracy.type, accuracy.value,
-         recall, precision, f.measure, raw.accuracy,
-         na.rm = TRUE, factor_key = TRUE)
+  filter(remove.low.severity == FALSE,
+         binary == TRUE,
+         n.workers == 1,
+         label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
+  gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
 # Make the set of labels that give the number of observations for each sub-graph.
 granularity.analysis.labels <-
@@ -1078,7 +1080,7 @@ granularity.analysis.labels <-
 ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
-  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
+  scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.15)) +
   geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
   geom_text(data = granularity.analysis.labels,
              mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
@@ -1096,7 +1098,7 @@ Note: The red dots on the graphs are means.
 
 *Takeaways*:
 
-```{r turk.zone.type.analysis, echo=FALSE, fig.width=4.5, fig.height=6}
+```{r turk.zone.type.analysis, echo=FALSE, fig.width=4.5, fig.height=4}
 condition.land.use <-
   zoning.with.volunteer.type %>%
   group_by(condition.id) %>%
@@ -1107,15 +1109,12 @@ condition.land.use <-
 zone.type.analysis.data <-
   data.with.raw.accuracy %>%
   inner_join(condition.land.use, by = 'condition.id') %>%
-  filter(binary) %>%
-  filter(granularity == 'street') %>%
-  filter(remove.low.severity == FALSE) %>%
-  filter(n.workers == 1 | (n.workers == 5 & worker.thresh == 3)) %>%
-  filter(label.type %in% c('All', 'AllProb')) %>%
-  select(-specificity) %>%
-  gather(accuracy.type, accuracy.value,
-         recall, precision, f.measure, raw.accuracy,
-         na.rm = TRUE, factor_key = TRUE)
+  filter(binary == TRUE,
+         granularity == 'street',
+         remove.low.severity == FALSE,
+         n.workers == 1,
+         label.type %in% c('All', 'AllProb')) %>%
+  gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
 # Create the trellis boxplots.
 ggplot(data = zone.type.analysis.data %>% filter(label.type == 'All'),
@@ -1176,7 +1175,7 @@ name.thresh <- Vectorize(
 # Removes label types that don't have severity (plus CurbRamp).
 low.severity.check.data <-
   data.with.raw.accuracy %>%
-  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb', 'Problem', 'AllProb')) %>%
+  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb', 'Problem')) %>%
   filter(worker.type != 'turk0') %>%
   droplevels %>%
   mutate(low.severity.thresh = ordered(name.thresh(low.severity.thresh),
@@ -1228,17 +1227,14 @@ Note: The red dots on the graphs are means.
 * Street level (second graph) recall: I suspect that the reason for the decrease in precision when moving to ordinal analysis at the street level is the same reason as why 5 meter level has lower precision than street level (seen in the previous section). That is, users' misunderstandings of how to label certain common things (driveways as curb ramps, etc.); since these mistakes are common, they may happen many times on a single street edge, which means that you start racking up the false positives when you move to ordinal analysis.
 
 
-```{r turk.issues.per.seg.analysis, echo=FALSE, fig.width=8, fig.height=6}
+```{r turk.issues.per.seg.analysis, echo=FALSE, fig.width=8, fig.height=4}
 issues.per.seg.analysis.data <-
   data.with.raw.accuracy %>%
-  filter(remove.low.severity == FALSE) %>%
-  filter(n.workers == 1) %>%
-  filter(label.type != 'NoSidewalk') %>%
-  select(-specificity) %>%
+  filter(remove.low.severity == FALSE,
+         n.workers == 1,
+         label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
   mutate(issues.per.segment = factor(if_else(binary, 'binary', 'ordinal'))) %>%
-  gather(accuracy.type, accuracy.value,
-         recall, precision, f.measure, raw.accuracy,
-         na.rm = TRUE, factor_key = TRUE)
+  gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
 # Make the set of labels that give the number of observations for each sub-graph.
 issues.per.seg.analysis.labels <-
@@ -1256,7 +1252,7 @@ ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == '5_meter'),
        aes(x = issues.per.segment, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
-  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
+  scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.15)) +
   geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
   geom_text(data = issues.per.seg.analysis.labels %>% filter(granularity == '5_meter'),
              mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
@@ -1268,7 +1264,7 @@ ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == 'street'),
        aes(x = issues.per.segment, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
-  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1.0), limits = c(0, 1.15)) +
+  scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.15)) +
   geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
   geom_text(data = issues.per.seg.analysis.labels %>% filter(granularity == 'street'),
              mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
