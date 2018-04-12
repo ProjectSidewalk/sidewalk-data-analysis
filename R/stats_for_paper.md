@@ -18,6 +18,7 @@ April 6, 2018
         -   [Accuracy by user group](#accuracy-by-user-group)
         -   [Descriptive stats for users](#descriptive-stats-for-users)
         -   [IRR](#irr)
+        -   [Zone types](#zone-types)
     -   [Possible Stories](#possible-stories-1)
         -   [Street-level vs 5 meter-level](#street-level-vs-5-meter-level)
         -   [Zone type (land use) effect on accuracy](#zone-type-land-use-effect-on-accuracy)
@@ -199,6 +200,8 @@ NOTE: In this table, the data is binary (not ordinal), and is at the street leve
 | SurfaceProb | 0.477            |
 | Problem     | 0.475            |
 
+### Zone types
+
 Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison between the user groups. This removes 13 of the 50 sets of routes from registered users. There is still 16 sets of routes from anonymous users.
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-2.png)
@@ -208,11 +211,11 @@ Possible Stories
 
 ### Street-level vs 5 meter-level
 
+Below we compare street vs 5 meter level recall and precision by label type.
+
 NOTE: In this section, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-NOTE: The red dots on the graphs are means.
-
-NOTE: The "n" labels in this graph mark the number of *users* (since one user = one observation in this graph).
+NOTE: The median precision for NoCurbRamp is actually 0 in those cases where it looks like it is missing in the graph below.
 
 *Takeaways*:
 

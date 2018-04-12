@@ -991,6 +991,9 @@ kable(
 ```
 
 
+### Zone types
+
+
 Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison between the user groups. This removes `r n.reg.users.removed` of the `r n.reg` sets of routes from registered users. There is still `r n.anon` sets of routes from anonymous users.
 
 ```{r turk.zone.type.distribution, echo=FALSE, fig.width=4.5, fig.height=4}
@@ -1064,11 +1067,11 @@ ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percen
 
 ### Street-level vs 5 meter-level
 
+Below we compare street vs 5 meter level recall and precision by label type.
+
 NOTE: In this section, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-NOTE: The red dots on the graphs are means.
-
-NOTE: The "n" labels in this graph mark the number of _users_ (since one user = one observation in this graph).
+NOTE: The median precision for NoCurbRamp is actually 0 in those cases where it looks like it is missing in the graph below.
 
 *Takeaways*:
 
@@ -1089,7 +1092,7 @@ NOTE: The "n" labels in this graph mark the number of _users_ (since one user = 
 * NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
 
 
-```{r turk.granularity.analysis, echo=FALSE, fig.width=8, fig.height=4}
+```{r turk.granularity.analysis, echo=FALSE, fig.width=7, fig.height=4}
 granularity.analysis.data <-
   data.with.raw.accuracy %>%
   filter(remove.low.severity == FALSE,
@@ -1109,17 +1112,18 @@ granularity.analysis.labels <-
                                     ')')) %>%
   ungroup()
 
-# Create the trellis boxplot.
-ggplot(data = granularity.analysis.data, aes(x = granularity, y = accuracy.value)) +
-  geom_boxplot() +
-  stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
-  scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.15)) +
-  geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
-  geom_text(data = granularity.analysis.labels,
-             mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
-  facet_grid(accuracy.type ~ label.type) +
+granularity.analysis.summary <-
+  granularity.analysis.data %>%
+  group_by(label.type, accuracy.type, granularity) %>%
+  dplyr::summarize_at(vars(accuracy.value), median, na.rm = TRUE)
+
+ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.value)) +
+  geom_col(aes(fill = granularity), position = 'dodge') +
+  scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.0), expand = c(0.01, 0)) +
+  facet_grid(accuracy.type ~ .) +
   ggtitle('Street vs. 5 Meter level Granularity') +
   my.theme.discrete.x
+  # theme(axis.text.x = element_text(angle = 40, hjust = 1, vjust = 1))
 ```
 
 
