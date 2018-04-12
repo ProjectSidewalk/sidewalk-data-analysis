@@ -16,7 +16,6 @@ April 6, 2018
         -   [Ground truth label counts](#ground-truth-label-counts)
         -   [Aggregate accuracy](#aggregate-accuracy)
         -   [Accuracy by user group](#accuracy-by-user-group)
-            -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Descriptive stats for users](#descriptive-stats-for-users)
         -   [IRR](#irr)
         -   [Zone types](#zone-types)
@@ -24,7 +23,8 @@ April 6, 2018
         -   [Granularity: Street-level vs 5 meter-level](#granularity-street-level-vs-5-meter-level)
         -   [Zone type: Land use effect on accuracy](#zone-type-land-use-effect-on-accuracy)
         -   [User group: Reg vs anon vs turk1 vs turk3 vs turk5](#user-group-reg-vs-anon-vs-turk1-vs-turk3-vs-turk5)
-        -   [Low severity: Removing low severity effect on recall](#low-severity-removing-low-severity-effect-on-recall)     
+        -   [Low severity: Removing low severity effect on recall](#low-severity-removing-low-severity-effect-on-recall)
+        -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Binary vs ordinal issues per segment](#binary-vs-ordinal-issues-per-segment)
 
 Public Deployment
@@ -164,25 +164,6 @@ Median accuracy by user group - 5 meter level:
 | turk3     | 0.509      | 0.667    | 0.559      | 0.125       | 0.286     | 0.205       |
 | turk5     | 0.504      | 0.750    | 0.584      | 0.071       | 0.333     | 0.167       |
 
-#### Voting: Improved recall when at least one turker marks
-
-Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
-
-For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.8 and their precision was 0.67.
-
-NOTE: In this section we are looking at *problem vs no problem*, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
-
-*Takeaways*:
-
--   The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
-
--   It would be interesting to see what this looks like at the 5 meter level as well.
-
-| voting.method | recall | precision |
-|:--------------|:-------|:----------|
-| majority.vote | 0.333  | 1.000     |
-| at.least.one  | 1.000  | 0.667     |
-
 ### Descriptive stats for users
 
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
@@ -236,8 +217,6 @@ NOTE: In this section, the data is binary (not ordinal), we are only considering
 
 NOTE: This is a rare case where we are using the mean, since we are also showing standard error at the same time.
 
-![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
-
 *Takeaways*:
 
 -   Analyzing at the 5 meter level shows higher raw accuracy and specificity, both because of the large number of true negatives that we get from splitting into 5 meter segments; there are very few street segments with no labels at all.
@@ -255,6 +234,8 @@ NOTE: This is a rare case where we are using the mean, since we are also showing
 -   The Problem type seems to perform better than the surface problem and obstacle label types (except for surface problem precision, mentioned in the previous bullet).
 
 -   NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
+
+![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
 
 ### Zone type: Land use effect on accuracy
 
@@ -295,6 +276,25 @@ NOTE: In this section, the data is binary (not ordinal), and is at the street le
 | &gt;=4              | 158     | 42         | 54       | 62          |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)
+
+### Voting: Improved recall when at least one turker marks
+
+Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
+
+For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.8 and their precision was 0.67.
+
+NOTE: In this section we are looking at *problem vs no problem*, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
+
+*Takeaways*:
+
+-   The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
+
+-   It would be interesting to see what this looks like at the 5 meter level as well.
+
+| voting.method | recall | precision |
+|:--------------|:-------|:----------|
+| majority.vote | 0.333  | 1.000     |
+| at.least.one  | 1.000  | 0.667     |
 
 ### Binary vs ordinal issues per segment
 
