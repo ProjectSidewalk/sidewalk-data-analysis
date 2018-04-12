@@ -63,9 +63,11 @@ There have been a total of 19768 audits by our users across 13045 streets, avera
 
 ### User stats and tool usage
 
-TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit). TODO: Add table of label counts, split by label type for rows and by user group for columns. Include totals and percentages.
+TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
 
 Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
+
+NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
 
 | role       | n\_users | miles | missions | audits | minutes\_audited | minutes\_per\_1k\_ft | labels | labels\_per\_100m | sessions | mins\_per\_sess |
 |:-----------|:---------|:------|:---------|:-------|:-----------------|:---------------------|:-------|:------------------|:---------|:----------------|
