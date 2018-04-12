@@ -184,26 +184,32 @@ April 6, 2018</p>
 <p>NOTE: A &quot;session&quot; below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.</p>
 <table>
 <colgroup>
-<col width="8%"></col>
-<col width="7%"></col>
+<col width="6%"></col>
 <col width="5%"></col>
-<col width="7%"></col>
+<col width="4%"></col>
+<col width="4%"></col>
 <col width="5%"></col>
+<col width="4%"></col>
+<col width="10%"></col>
+<col width="7%"></col>
+<col width="7%"></col>
 <col width="12%"></col>
-<col width="15%"></col>
+<col width="4%"></col>
+<col width="10%"></col>
 <col width="5%"></col>
-<col width="13%"></col>
-<col width="7%"></col>
-<col width="11%"></col>
+<col width="9%"></col>
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">role</th>
 <th align="left">n_users</th>
 <th align="left">miles</th>
+<th align="left">km</th>
 <th align="left">missions</th>
 <th align="left">audits</th>
 <th align="left">minutes_audited</th>
+<th align="left">km_per_hr</th>
+<th align="left">m_per_min</th>
 <th align="left">minutes_per_1k_ft</th>
 <th align="left">labels</th>
 <th align="left">labels_per_100m</th>
@@ -216,9 +222,12 @@ April 6, 2018</p>
 <td align="left">Anonymous</td>
 <td align="left">371</td>
 <td align="left">0.081</td>
+<td align="left">0.130</td>
 <td align="left">0</td>
 <td align="left">1.0</td>
 <td align="left">8.80</td>
+<td align="left">0.967</td>
+<td align="left">16.120</td>
 <td align="left">18.908</td>
 <td align="left">21</td>
 <td align="left">14.868</td>
@@ -229,9 +238,12 @@ April 6, 2018</p>
 <td align="left">Turker</td>
 <td align="left">130</td>
 <td align="left">0.348</td>
+<td align="left">0.560</td>
 <td align="left">4</td>
 <td align="left">4.5</td>
 <td align="left">24.09</td>
+<td align="left">1.428</td>
+<td align="left">23.808</td>
 <td align="left">12.803</td>
 <td align="left">57</td>
 <td align="left">10.476</td>
@@ -242,9 +254,12 @@ April 6, 2018</p>
 <td align="left">Registered</td>
 <td align="left">190</td>
 <td align="left">0.544</td>
+<td align="left">0.875</td>
 <td align="left">4</td>
 <td align="left">8.0</td>
 <td align="left">28.65</td>
+<td align="left">2.387</td>
+<td align="left">39.788</td>
 <td align="left">7.661</td>
 <td align="left">73</td>
 <td align="left">7.278</td>
@@ -259,6 +274,7 @@ April 6, 2018</p>
 <th align="left">role</th>
 <th align="left">n_users</th>
 <th align="left">miles</th>
+<th align="left">km</th>
 <th align="left">coverage</th>
 <th align="left">missions</th>
 <th align="left">audits</th>
@@ -271,33 +287,36 @@ April 6, 2018</p>
 <tr class="odd">
 <td align="left">Anonymous</td>
 <td align="left">371</td>
-<td align="left">88.834</td>
+<td align="left">89</td>
+<td align="left">143</td>
 <td align="left">8.3%</td>
 <td align="left">370</td>
 <td align="left">1333</td>
-<td align="left">85.369</td>
+<td align="left">85</td>
 <td align="left">14159</td>
 <td align="left">73%</td>
 </tr>
 <tr class="even">
 <td align="left">Turker</td>
 <td align="left">130</td>
-<td align="left">1018.386</td>
+<td align="left">1018</td>
+<td align="left">1639</td>
 <td align="left">95%</td>
 <td align="left">3097</td>
 <td align="left">13234</td>
-<td align="left">445.934</td>
+<td align="left">446</td>
 <td align="left">104907</td>
 <td align="left">22%</td>
 </tr>
 <tr class="odd">
 <td align="left">Registered</td>
 <td align="left">190</td>
-<td align="left">394.097</td>
+<td align="left">394</td>
+<td align="left">634</td>
 <td align="left">37%</td>
 <td align="left">1226</td>
 <td align="left">5201</td>
-<td align="left">158.970</td>
+<td align="left">159</td>
 <td align="left">36939</td>
 <td align="left">37%</td>
 </tr>
@@ -579,11 +598,20 @@ April 6, 2018</p>
 <p>Next we have some descriptive statistics of users, by user group. These are average (median) stats.</p>
 <p>NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.</p>
 <table>
+<colgroup>
+<col width="14%"></col>
+<col width="18%"></col>
+<col width="12%"></col>
+<col width="12%"></col>
+<col width="21%"></col>
+<col width="20%"></col>
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">worker.type</th>
 <th align="left">labels.per.100m</th>
-<th align="left">feet.per.min</th>
+<th align="left">km.per.hr</th>
+<th align="left">m.per.min</th>
 <th align="left">minutes.per.1k.ft</th>
 <th align="left">minutes_audited</th>
 </tr>
@@ -592,21 +620,24 @@ April 6, 2018</p>
 <tr class="odd">
 <td align="left">anon</td>
 <td align="left">4.921</td>
-<td align="left">150.830</td>
+<td align="left">2.758</td>
+<td align="left">45.973</td>
 <td align="left">6.630</td>
 <td align="left">13.260</td>
 </tr>
 <tr class="even">
 <td align="left">reg</td>
 <td align="left">5.988</td>
-<td align="left">163.800</td>
+<td align="left">2.996</td>
+<td align="left">49.926</td>
 <td align="left">6.105</td>
 <td align="left">24.420</td>
 </tr>
 <tr class="odd">
 <td align="left">turk1</td>
 <td align="left">6.808</td>
-<td align="left">628.456</td>
+<td align="left">11.493</td>
+<td align="left">191.553</td>
 <td align="left">1.591</td>
 <td align="left">6.365</td>
 </tr>
@@ -620,6 +651,7 @@ April 6, 2018</p>
 <th align="left">worker.type</th>
 <th align="left">n.missions</th>
 <th align="left">distance.miles</th>
+<th align="left">distance.km</th>
 <th align="left">n.labels</th>
 <th align="left">hours.audited</th>
 </tr>
@@ -629,6 +661,7 @@ April 6, 2018</p>
 <td align="left">anon</td>
 <td align="left">32</td>
 <td align="left">6.061</td>
+<td align="left">9.754</td>
 <td align="left">481</td>
 <td align="left">3.547</td>
 </tr>
@@ -636,6 +669,7 @@ April 6, 2018</p>
 <td align="left">reg</td>
 <td align="left">150</td>
 <td align="left">37.879</td>
+<td align="left">60.960</td>
 <td align="left">3626</td>
 <td align="left">21.518</td>
 </tr>
@@ -643,6 +677,7 @@ April 6, 2018</p>
 <td align="left">turk1</td>
 <td align="left">182</td>
 <td align="left">43.939</td>
+<td align="left">70.714</td>
 <td align="left">5559</td>
 <td align="left">9.037</td>
 </tr>
