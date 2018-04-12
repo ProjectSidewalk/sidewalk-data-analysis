@@ -1271,12 +1271,14 @@ reg.recall <-
   voting.method.data %>%
   filter(worker.type == 'reg') %>%
   select(recall) %>%
-  as.numeric()
+  as.numeric() %>%
+  format(digits = 2)
 reg.precision <-
   voting.method.data %>%
   filter(worker.type == 'reg') %>%
   select(precision) %>%
-  as.numeric()
+  as.numeric() %>%
+  format(digits = 2)
 ```
 
 
