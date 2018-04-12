@@ -59,7 +59,7 @@ if (REFRESH_TURK_STUDY_DATA) {
   db.connection.turk.study <- dbConnect(drv, dbname = "sidewalkturk",
                    host = "localhost", port = 5432,
                    user = "sidewalk", password = 'sidewalk')
-  db.connection.turk.study.production <- dbConnect(drv, dbname = "sidewalk-volunteer-gt",
+  db.connection.turk.study.production <- dbConnect(drv, dbname = "production-gt",
                    host = "localhost", port = 5432,
                    user = "sidewalk", password = 'sidewalk')
 }
@@ -149,13 +149,16 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
     dbGetQuery(
       db.connection.public.deployment,
       'SELECT user_audit_times.ip_address AS user_id,
-             CAST(extract( second from SUM(diff) ) /60 +
+             CAST(extract( second from SUM(diff) ) / 60 +
                   extract( minute from SUM(diff) ) +
                   extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS minutes_audited
       FROM
       (
-          SELECT user_id, ip_address,
-                 (timestamp - Lag(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+          SELECT  user_id, ip_address,
+                  (
+                      timestamp - Lag(timestamp, 1)
+                      OVER(PARTITION BY ip_address ORDER BY timestamp)
+                  ) AS diff
           FROM audit_task_interaction
           INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
           INNER JOIN audit_task_environment
@@ -166,7 +169,8 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           (
               SELECT ip_address
               FROM audit_task_environment
-              INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+              INNER JOIN audit_task
+                  ON audit_task.audit_task_id = audit_task_environment.audit_task_id
               WHERE completed = true
           )
       ) user_audit_times
@@ -182,10 +186,14 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           SELECT user_audit_times.user_id, COUNT(diff) AS n_sessions_minus_one
           FROM
           (
-              SELECT audit_task.user_id,
-                     (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+              SELECT  audit_task.user_id,
+                      (
+                          timestamp - LAG(timestamp, 1)
+                          OVER(PARTITION BY user_id ORDER BY timestamp)
+                      ) AS diff
               FROM audit_task_interaction
-              INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+              INNER JOIN audit_task
+                  ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
               WHERE action = \'ViewControl_MouseDown\'
                   AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
           ) user_audit_times
@@ -207,11 +215,15 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           SELECT user_audit_times.ip_address, COUNT(diff) AS n_sessions_minus_one
           FROM
           (
-              SELECT user_id,
-                     ip_address,
-                     (timestamp - Lag(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+              SELECT  user_id,
+                      ip_address,
+                      (
+                      timestamp - Lag(timestamp, 1)
+                      OVER(PARTITION BY user_id ORDER BY timestamp)
+                      ) AS diff
               FROM audit_task_interaction
-              INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+              INNER JOIN audit_task
+                  ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
               INNER JOIN audit_task_environment
                   ON audit_task.audit_task_id = audit_task_environment.audit_task_id
               WHERE action = \'ViewControl_MouseDown\'
@@ -220,7 +232,8 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
               (
                   SELECT ip_address
                   FROM audit_task_environment
-                  INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+                  INNER JOIN audit_task
+                      ON audit_task.audit_task_id = audit_task_environment.audit_task_id
                   WHERE completed = true
               )
           ) user_audit_times
@@ -281,7 +294,7 @@ if (REFRESH_TURK_STUDY_DATA) {
       INNER JOIN audit_task ON  route_street.current_street_edge_id = audit_task.street_edge_id
                             AND amt_volunteer_route.volunteer_id = audit_task.user_id
       INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
-      WHERE amt_condition.amt_condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
+      WHERE amt_condition.amt_condition_id NOT IN (71, 104, 123, 124, 138)
       AND label.deleted <> TRUE'
       )
   anon.labels.turk.study <-
@@ -290,13 +303,16 @@ if (REFRESH_TURK_STUDY_DATA) {
       'SELECT DISTINCT label_id, audit_task_environment.ip_address AS user_id, label_type_id,
                        audit_task.audit_task_id, amt_condition_id AS condition_id
       FROM amt_condition
-      INNER JOIN amt_volunteer_route ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
+      INNER JOIN amt_volunteer_route
+          ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
       INNER JOIN route_street ON amt_volunteer_route.route_id = route_street.route_id
-      INNER JOIN audit_task ON  route_street.current_street_edge_id = audit_task.street_edge_id
-      INNER JOIN audit_task_environment ON  audit_task.audit_task_id = audit_task_environment.audit_task_id
-                                        AND amt_volunteer_route.ip_address = audit_task_environment.ip_address
+      INNER JOIN audit_task
+          ON  route_street.current_street_edge_id = audit_task.street_edge_id
+      INNER JOIN audit_task_environment
+          ON  audit_task.audit_task_id = audit_task_environment.audit_task_id
+          AND amt_volunteer_route.ip_address = audit_task_environment.ip_address
       INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
-      WHERE amt_condition.amt_condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
+      WHERE amt_condition.amt_condition_id NOT IN (71, 104, 123, 124, 138)
       AND label.deleted <> TRUE'
       )
   turk.labels.turk.study <-
@@ -306,7 +322,7 @@ if (REFRESH_TURK_STUDY_DATA) {
       FROM amt_assignment
       INNER JOIN audit_task ON amt_assignment.amt_assignment_id = audit_task.amt_assignment_id
       INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
-      WHERE amt_assignment.condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
+      WHERE amt_assignment.condition_id NOT IN (71, 104, 123, 124, 138)
       AND label.deleted <> TRUE'
       )
   reg.times.turk.study <-
@@ -319,15 +335,21 @@ if (REFRESH_TURK_STUDY_DATA) {
       FROM
       (
           SELECT audit_task.user_id,
-                 (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+                 (
+                     timestamp - LAG(timestamp, 1)
+                     OVER(PARTITION BY user_id ORDER BY timestamp)
+                 ) AS diff
           FROM amt_condition
-          INNER JOIN amt_volunteer_route ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
+          INNER JOIN amt_volunteer_route
+              ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
           INNER JOIN route_street ON amt_volunteer_route.route_id = route_street.route_id
-          INNER JOIN audit_task ON route_street.current_street_edge_id = audit_task.street_edge_id
+          INNER JOIN audit_task
+              ON route_street.current_street_edge_id = audit_task.street_edge_id
               AND amt_volunteer_route.volunteer_id = audit_task.user_id
-          INNER JOIN audit_task_interaction ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+          INNER JOIN audit_task_interaction
+              ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
           WHERE action = \'ViewControl_MouseDown\'
-              AND amt_condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
+              AND amt_condition_id NOT IN (71, 104, 123, 124, 138)
           ) user_audit_times
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
       GROUP BY user_audit_times.user_id;'
@@ -342,16 +364,22 @@ if (REFRESH_TURK_STUDY_DATA) {
       FROM
       (
           SELECT amt_volunteer_route.ip_address AS user_id,
-                 (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+                 (
+                     timestamp - LAG(timestamp, 1)
+                     OVER(PARTITION BY amt_volunteer_route.ip_address ORDER BY timestamp)
+                 ) AS diff
           FROM amt_condition
-          INNER JOIN amt_volunteer_route ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
+          INNER JOIN amt_volunteer_route
+              ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
           INNER JOIN route_street ON amt_volunteer_route.route_id = route_street.route_id
           INNER JOIN audit_task ON route_street.current_street_edge_id = audit_task.street_edge_id
-          INNER JOIN audit_task_environment ON  audit_task.audit_task_id = audit_task_environment.audit_task_id
-                                            AND amt_volunteer_route.ip_address = audit_task_environment.ip_address
-          INNER JOIN audit_task_interaction ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+          INNER JOIN audit_task_environment
+              ON  audit_task.audit_task_id = audit_task_environment.audit_task_id
+              AND amt_volunteer_route.ip_address = audit_task_environment.ip_address
+          INNER JOIN audit_task_interaction
+              ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
           WHERE action = \'ViewControl_MouseDown\'
-              AND amt_condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
+              AND amt_condition_id NOT IN (71, 104, 123, 124, 138)
           ) user_audit_times
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
       GROUP BY user_audit_times.user_id;'
@@ -366,12 +394,12 @@ if (REFRESH_TURK_STUDY_DATA) {
       FROM
       (
           SELECT turker_id AS user_id,
-                 (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+                 (timestamp - LAG(timestamp, 1) OVER(PARTITION BY turker_id ORDER BY timestamp)) AS diff
           FROM amt_assignment
           INNER JOIN audit_task ON amt_assignment.amt_assignment_id = audit_task.amt_assignment_id
           INNER JOIN audit_task_interaction ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
           WHERE action = \'ViewControl_MouseDown\'
-              AND condition_id NOT IN (71, 104, 105, 123, 124, 130, 138)
+              AND condition_id NOT IN (71, 104, 123, 124, 138)
           ) user_audit_times
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
       GROUP BY user_audit_times.user_id;'
