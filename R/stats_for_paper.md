@@ -16,6 +16,7 @@ April 6, 2018
         -   [Ground truth label counts](#ground-truth-label-counts)
         -   [Aggregate accuracy](#aggregate-accuracy)
         -   [Accuracy by user group](#accuracy-by-user-group)
+        -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Descriptive stats for users](#descriptive-stats-for-users)
         -   [IRR](#irr)
         -   [Zone types](#zone-types)
@@ -24,7 +25,6 @@ April 6, 2018
         -   [Zone type: Land use effect on accuracy](#zone-type-land-use-effect-on-accuracy)
         -   [User group: Reg vs anon vs turk1 vs turk3 vs turk5](#user-group-reg-vs-anon-vs-turk1-vs-turk3-vs-turk5)
         -   [Low severity: Removing low severity effect on recall](#low-severity-removing-low-severity-effect-on-recall)
-        -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Binary vs ordinal issues per segment](#binary-vs-ordinal-issues-per-segment)
 
 Public Deployment
@@ -70,17 +70,17 @@ Below are the medians for a few metrics (followed by sums), split by user group.
 
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
 
-| role       | n\_users | miles | missions | audits | minutes\_audited | minutes\_per\_1k\_ft | labels | labels\_per\_100m | sessions | mins\_per\_sess |
-|:-----------|:---------|:------|:---------|:-------|:-----------------|:---------------------|:-------|:------------------|:---------|:----------------|
-| Anonymous  | 371      | 0.081 | 0        | 1.0    | 8.80             | 18.908               | 21     | 14.868            | 2        | 4.590           |
-| Turker     | 130      | 0.348 | 4        | 4.5    | 24.09            | 12.803               | 57     | 10.476            | 1        | 22.685          |
-| Registered | 190      | 0.544 | 4        | 8.0    | 28.65            | 7.661                | 73     | 7.278             | 1        | 19.818          |
+| role       | n\_users | miles | km    | missions | audits | minutes\_audited | km\_per\_hr | m\_per\_min | minutes\_per\_1k\_ft | labels | labels\_per\_100m | sessions | mins\_per\_sess |
+|:-----------|:---------|:------|:------|:---------|:-------|:-----------------|:------------|:------------|:---------------------|:-------|:------------------|:---------|:----------------|
+| Anonymous  | 371      | 0.081 | 0.130 | 0        | 1.0    | 8.80             | 0.967       | 16.120      | 18.908               | 21     | 14.868            | 2        | 4.590           |
+| Turker     | 130      | 0.348 | 0.560 | 4        | 4.5    | 24.09            | 1.428       | 23.808      | 12.803               | 57     | 10.476            | 1        | 22.685          |
+| Registered | 190      | 0.544 | 0.875 | 4        | 8.0    | 28.65            | 2.387       | 39.788      | 7.661                | 73     | 7.278             | 1        | 19.818          |
 
-| role       | n\_users | miles    | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
-|:-----------|:---------|:---------|:---------|:---------|:-------|:---------------|:-------|:-----------|
-| Anonymous  | 371      | 88.834   | 8.3%     | 370      | 1333   | 85.369         | 14159  | 73%        |
-| Turker     | 130      | 1018.386 | 95%      | 3097     | 13234  | 445.934        | 104907 | 22%        |
-| Registered | 190      | 394.097  | 37%      | 1226     | 5201   | 158.970        | 36939  | 37%        |
+| role       | n\_users | miles | km   | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
+|:-----------|:---------|:------|:-----|:---------|:---------|:-------|:---------------|:-------|:-----------|
+| Anonymous  | 371      | 89    | 143  | 8.3%     | 370      | 1333   | 85             | 14159  | 73%        |
+| Turker     | 130      | 1018  | 1639 | 95%      | 3097     | 13234  | 446            | 104907 | 22%        |
+| Registered | 190      | 394   | 634  | 37%      | 1226     | 5201   | 159            | 36939  | 37%        |
 
 Possible Stories
 ----------------
@@ -164,27 +164,46 @@ Median accuracy by user group - 5 meter level:
 | turk3     | 0.509      | 0.667    | 0.559      | 0.125       | 0.286     | 0.205       |
 | turk5     | 0.504      | 0.750    | 0.584      | 0.071       | 0.333     | 0.167       |
 
+### Voting: Improved recall when at least one turker marks
+
+Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
+
+For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.8 and their precision was 0.67.
+
+NOTE: In this section we are looking at *problem vs no problem*, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
+
+*Takeaways*:
+
+-   The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
+
+-   It would be interesting to see what this looks like at the 5 meter level as well.
+
+| voting.method | recall | precision |
+|:--------------|:-------|:----------|
+| majority.vote | 0.333  | 1.000     |
+| at.least.one  | 1.000  | 0.667     |
+
 ### Descriptive stats for users
 
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
 
 NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-| worker.type | labels.per.100m | feet.per.min | minutes.per.1k.ft | minutes\_audited |
-|:------------|:----------------|:-------------|:------------------|:-----------------|
-| anon        | 4.921           | 150.830      | 6.630             | 13.260           |
-| reg         | 5.988           | 163.800      | 6.105             | 24.420           |
-| turk1       | 6.808           | 628.456      | 1.591             | 6.365            |
+| worker.type | labels.per.100m | km.per.hr | m.per.min | minutes.per.1k.ft | minutes\_audited |
+|:------------|:----------------|:----------|:----------|:------------------|:-----------------|
+| anon        | 4.921           | 2.758     | 45.973    | 6.630             | 13.260           |
+| reg         | 5.988           | 2.996     | 49.926    | 6.105             | 24.420           |
+| turk1       | 6.808           | 11.493    | 191.553   | 1.591             | 6.365            |
 
 Below, we have a table of aggregate (sum) stats by user group.
 
 NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-| worker.type | n.missions | distance.miles | n.labels | hours.audited |
-|:------------|:-----------|:---------------|:---------|:--------------|
-| anon        | 32         | 6.061          | 481      | 3.547         |
-| reg         | 150        | 37.879         | 3626     | 21.518        |
-| turk1       | 182        | 43.939         | 5559     | 9.037         |
+| worker.type | n.missions | distance.miles | distance.km | n.labels | hours.audited |
+|:------------|:-----------|:---------------|:------------|:---------|:--------------|
+| anon        | 32         | 6.061          | 9.754       | 481      | 3.547         |
+| reg         | 150        | 37.879         | 60.960      | 3626     | 21.518        |
+| turk1       | 182        | 43.939         | 70.714      | 5559     | 9.037         |
 
 ### IRR
 
@@ -276,25 +295,6 @@ NOTE: In this section, the data is binary (not ordinal), and is at the street le
 | &gt;=4              | 158     | 42         | 54       | 62          |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)
-
-### Voting: Improved recall when at least one turker marks
-
-Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
-
-For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.8 and their precision was 0.67.
-
-NOTE: In this section we are looking at *problem vs no problem*, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
-
-*Takeaways*:
-
--   The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
-
--   It would be interesting to see what this looks like at the 5 meter level as well.
-
-| voting.method | recall | precision |
-|:--------------|:-------|:----------|
-| majority.vote | 0.333  | 1.000     |
-| at.least.one  | 1.000  | 0.667     |
 
 ### Binary vs ordinal issues per segment
 
