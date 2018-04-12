@@ -23,6 +23,7 @@ April 6, 2018
         -   [Zone type (land use) effect on accuracy](#zone-type-land-use-effect-on-accuracy)
         -   [Reg vs anon vs turker vs turk3 vs turk5](#reg-vs-anon-vs-turker-vs-turk3-vs-turk5)
         -   [Does removing low severity brings higher recall](#does-removing-low-severity-brings-higher-recall)
+        -   [Turker recall without majority vote](#turker-recall-without-majority-vote)
         -   [Binary vs ordinal issues per segment](#binary-vs-ordinal-issues-per-segment)
 
 Public Deployment
@@ -144,21 +145,21 @@ Median accuracy by user group - street level:
 
 | user.type | all.recall | all.prec | all.f.meas | prob.recall | prob.prec | prob.f.meas |
 |:----------|:-----------|:---------|:-----------|:------------|:----------|:------------|
-| anon      | 0.466      | 0.665    | 0.611      | 0.182       | 0.755     | 0.267       |
-| reg       | 0.796      | 0.492    | 0.553      | 0.512       | 0.474     | 0.463       |
-| turk1     | 0.615      | 0.674    | 0.610      | 0.396       | 0.500     | 0.392       |
-| turk3     | 0.585      | 0.809    | 0.676      | 0.265       | 0.667     | 0.344       |
-| turk5     | 0.599      | 0.885    | 0.703      | 0.138       | 0.750     | 0.235       |
+| anon      | 0.523      | 0.780    | 0.667      | 0.292       | 1.000     | 0.500       |
+| reg       | 0.771      | 0.636    | 0.667      | 0.800       | 0.667     | 0.727       |
+| turk1     | 0.707      | 0.700    | 0.648      | 0.667       | 0.750     | 0.667       |
+| turk3     | 0.620      | 0.815    | 0.700      | 0.571       | 0.800     | 0.667       |
+| turk5     | 0.571      | 0.917    | 0.698      | 0.333       | 1.000     | 0.500       |
 
 Median accuracy by user group - 5 meter level:
 
 | user.type | all.recall | all.prec | all.f.meas | prob.recall | prob.prec | prob.f.meas |
 |:----------|:-----------|:---------|:-----------|:------------|:----------|:------------|
-| anon      | 0.356      | 0.574    | 0.474      | 0.056       | 0.148     | 0.090       |
-| reg       | 0.620      | 0.378    | 0.434      | 0.230       | 0.195     | 0.198       |
-| turk1     | 0.498      | 0.508    | 0.495      | 0.198       | 0.244     | 0.175       |
-| turk3     | 0.502      | 0.694    | 0.575      | 0.111       | 0.250     | 0.154       |
-| turk5     | 0.510      | 0.761    | 0.582      | 0.057       | 0.314     | 0.103       |
+| anon      | 0.415      | 0.664    | 0.552      | 0.066       | 0.417     | 0.154       |
+| reg       | 0.589      | 0.420    | 0.460      | 0.250       | 0.229     | 0.231       |
+| turk1     | 0.490      | 0.489    | 0.471      | 0.200       | 0.267     | 0.211       |
+| turk3     | 0.509      | 0.667    | 0.559      | 0.125       | 0.286     | 0.205       |
+| turk5     | 0.504      | 0.750    | 0.584      | 0.071       | 0.333     | 0.167       |
 
 ### Descriptive stats for users
 
@@ -270,6 +271,25 @@ NOTE: In this section, the data is binary (not ordinal), and is at the street le
 | &gt;=4              | 158     | 42         | 54       | 62          |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)
+
+### Turker recall without majority vote
+
+Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
+
+For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.8 and their precision was 0.6666667.
+
+NOTE: In this section we are looking at *problem vs no problem*, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
+
+*Takeaways*:
+
+-   The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
+
+-   It would be interesting to see what this looks like at the 5 meter level as well.
+
+| voting.method | recall | precision |
+|:--------------|:-------|:----------|
+| majority.vote | 0.333  | 1.000     |
+| at.least.one  | 1.000  | 0.667     |
 
 ### Binary vs ordinal issues per segment
 

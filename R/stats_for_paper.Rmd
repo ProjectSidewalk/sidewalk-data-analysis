@@ -765,11 +765,18 @@ aggregate.accuracy.data <-
   summarize_at(vars(recall, precision, f.measure), median, na.rm = TRUE) %>%
   ungroup()
 
-# NOTE Multiply turker set by 5 if you want to count each turker who did each set of routes separately
+# We filter down to the data we care about, then in the group_by we get down to 2 entries per group;
+# one entry for the All type and one entry for the Problem type. We want to combine those into one
+# row with columns all.recall, all.precision, prob.recall, prob.precision, etc. So while they are
+# grouped, we create each of those new columns. We fill in the all.* columns in correctly in the
+# "All" label type rows, putting NaN in the "Problem" rows. Vice versa for the prob.* columns. Then
+# to actually combine these two rows we take the sum (where NA is treated as 0 in the sum). But b/c
+# NA is treated as 0, this doesn't work when the value that was _supposed_ to be there is NA also!
+# So we use an if_else to set to NA if both are NA, and take the some o/w.
 turk.study.summary.stats <-
   data.with.raw.accuracy %>%
   filter(worker.type != 'turk0',
-         binary == FALSE,
+         binary == TRUE,
          remove.low.severity == FALSE,
          label.type %in% c('All', 'Problem')) %>%
   group_by(condition.id, worker1, is.anon.route, worker.type, granularity) %>%
@@ -779,7 +786,8 @@ turk.study.summary.stats <-
          prob.recall = if_else(label.type == 'Problem', recall, NaN),
          prob.precision = if_else(label.type == 'Problem', precision, NaN),
          prob.f.measure = if_else(label.type == 'Problem', f.measure, NaN)) %>%
-  dplyr::summarize_at(vars(all.recall:prob.f.measure), sum, na.rm = TRUE) %>%
+  summarize_at(vars(all.recall:prob.f.measure),
+               function(x) { if_else(length(na.omit(x)) > 0, sum(x, na.rm = TRUE), NaN) }) %>%
   ungroup()
 
 turk.study.summary.stats.with.labels <-
@@ -1236,6 +1244,62 @@ ggplot(data = grouped.low.severity.data, aes(low.severity.thresh)) +
   ylim(0, 1) +
   my.theme.discrete.x +
   theme(legend.position = 'top')
+```
+
+
+### Turker recall without majority vote
+
+```{r turk.voting.method.setup, echo=FALSE}
+voting.method.data <-
+  data.with.raw.accuracy %>%
+  filter(label.type %in% c('All', 'Problem'),
+         n.workers == 5 | worker.type == 'reg',
+         binary == TRUE,
+         granularity == 'street',
+         label.type == 'Problem',
+         remove.low.severity == FALSE,
+         worker.thresh %in% c(1,3)) %>%
+  mutate(voting.method = factor(if_else(worker.thresh == 1,
+                                        'at.least.one',
+                                        'majority.vote'))) %>%
+  group_by(worker.type, voting.method, label.type, granularity) %>%
+  dplyr::summarize_at(vars(recall, precision), median, na.rm = TRUE) %>%
+  ungroup()
+
+# Get registered user recall to compare to
+reg.recall <-
+  voting.method.data %>%
+  filter(worker.type == 'reg') %>%
+  select(recall) %>%
+  as.numeric()
+reg.precision <-
+  voting.method.data %>%
+  filter(worker.type == 'reg') %>%
+  select(precision) %>%
+  as.numeric()
+```
+
+
+Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
+
+For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was `r reg.recall` and their precision was `r reg.precision`.
+
+NOTE: In this section we are looking at _problem vs no problem_, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
+
+*Takeaways*:
+
+* The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
+
+* It would be interesting to see what this looks like at the 5 meter level as well.
+
+```{r turk.voting.method.analysis, echo=FALSE}
+kable(
+  voting.method.data %>%
+    filter(worker.type != 'reg') %>%
+    select(voting.method, recall, precision),
+  digits = 3,
+  align = 'l'
+)
 ```
 
 
