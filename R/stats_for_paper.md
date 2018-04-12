@@ -20,11 +20,11 @@ April 6, 2018
         -   [IRR](#irr)
         -   [Zone types](#zone-types)
     -   [Possible Stories](#possible-stories-1)
-        -   [Street-level vs 5 meter-level](#street-level-vs-5-meter-level)
-        -   [Zone type (land use) effect on accuracy](#zone-type-land-use-effect-on-accuracy)
-        -   [Reg vs anon vs turker vs turk3 vs turk5](#reg-vs-anon-vs-turker-vs-turk3-vs-turk5)
-        -   [Does removing low severity brings higher recall](#does-removing-low-severity-brings-higher-recall)
-        -   [Turker recall without majority vote](#turker-recall-without-majority-vote)
+        -   [Granularity: Street-level vs 5 meter-level](#granularity-street-level-vs-5-meter-level)
+        -   [Zone type: Land use effect on accuracy](#zone-type-land-use-effect-on-accuracy)
+        -   [User group: Reg vs anon vs turk1 vs turk3 vs turk5](#user-group-reg-vs-anon-vs-turk1-vs-turk3-vs-turk5)
+        -   [Low severity: Removing low severity effect on recall](#low-severity-removing-low-severity-effect-on-recall)
+        -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Binary vs ordinal issues per segment](#binary-vs-ordinal-issues-per-segment)
 
 Public Deployment
@@ -209,13 +209,13 @@ Here is the zone type distribution for the mturk study. This shows the distribut
 Possible Stories
 ----------------
 
-### Street-level vs 5 meter-level
+### Granularity: Street-level vs 5 meter-level
 
 Below we compare street vs 5 meter level recall and precision by label type.
 
 NOTE: In this section, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-NOTE: The median precision for NoCurbRamp is actually 0 in those cases where it looks like it is missing in the graph below.
+NOTE: This is a rare case where we are using the mean, since we are also showing standard error at the same time.
 
 *Takeaways*:
 
@@ -237,7 +237,7 @@ NOTE: The median precision for NoCurbRamp is actually 0 in those cases where it 
 
 ![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
 
-### Zone type (land use) effect on accuracy
+### Zone type: Land use effect on accuracy
 
 The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
 
@@ -249,13 +249,13 @@ NOTE: The red dots on the graphs are means.
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-2.png)
 
-### Reg vs anon vs turker vs turk3 vs turk5
+### User group: Reg vs anon vs turk1 vs turk3 vs turk5
 
 TODO: Make some graphs.
 
 *Takeaways*:
 
-### Does removing low severity brings higher recall
+### Low severity: Removing low severity effect on recall
 
 Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
 
@@ -277,7 +277,7 @@ NOTE: In this section, the data is binary (not ordinal), and is at the street le
 
 ![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)
 
-### Turker recall without majority vote
+### Voting: Improved recall when at least one turker marks
 
 Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
 

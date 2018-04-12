@@ -1065,13 +1065,13 @@ ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percen
 
 ## Possible Stories
 
-### Street-level vs 5 meter-level
+### Granularity: Street-level vs 5 meter-level
 
 Below we compare street vs 5 meter level recall and precision by label type.
 
 NOTE: In this section, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-NOTE: The median precision for NoCurbRamp is actually 0 in those cases where it looks like it is missing in the graph below.
+NOTE: This is a rare case where we are using the mean, since we are also showing standard error at the same time.
 
 *Takeaways*:
 
@@ -1115,10 +1115,15 @@ granularity.analysis.labels <-
 granularity.analysis.summary <-
   granularity.analysis.data %>%
   group_by(label.type, accuracy.type, granularity) %>%
-  dplyr::summarize_at(vars(accuracy.value), median, na.rm = TRUE)
+  dplyr::summarize(se = sd(accuracy.value, na.rm = TRUE) / sqrt(n()),
+                   accuracy.value = mean(accuracy.value, na.rm = TRUE),
+                   error.bar.min = max(0, accuracy.value - se),
+                   error.bar.max = min(1, accuracy.value + se))
 
 ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.value)) +
-  geom_col(aes(fill = granularity), position = 'dodge') +
+  geom_col(aes(fill = granularity), position = position_dodge()) +
+  geom_errorbar(aes(ymin = error.bar.min, ymax = error.bar.max, group = granularity),
+                width = 0.25, position = position_dodge(0.9)) +
   scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.0), expand = c(0.01, 0)) +
   facet_grid(accuracy.type ~ .) +
   ggtitle('Street vs. 5 Meter level Granularity') +
@@ -1127,7 +1132,7 @@ ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.val
 ```
 
 
-### Zone type (land use) effect on accuracy
+### Zone type: Land use effect on accuracy
 
 The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
 
@@ -1177,7 +1182,7 @@ ggplot(data = zone.type.analysis.data %>% filter(label.type == 'Problem'),
 ```
 
 
-### Reg vs anon vs turker vs turk3 vs turk5
+### User group: Reg vs anon vs turk1 vs turk3 vs turk5
 
 TODO: Make some graphs.
 
@@ -1188,7 +1193,7 @@ TODO: Make some graphs.
 ```
 
 
-### Does removing low severity brings higher recall
+### Low severity: Removing low severity effect on recall
 
 Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
 
@@ -1253,7 +1258,7 @@ ggplot(data = grouped.low.severity.data, aes(low.severity.thresh)) +
 ```
 
 
-### Turker recall without majority vote
+### Voting: Improved recall when at least one turker marks
 
 ```{r turk.voting.method.setup, echo=FALSE}
 voting.method.data <-
