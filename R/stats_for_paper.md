@@ -23,7 +23,7 @@ April 6, 2018
     -   [Possible Stories](#possible-stories-1)
         -   [Granularity: Street-level vs 5 meter-level](#granularity-street-level-vs-5-meter-level)
         -   [Zone type: Land use effect on accuracy](#zone-type-land-use-effect-on-accuracy)
-        -   [User behavior: Does auditing speed, etc. influence accuracy](#user-behavior-does-auditing-speed-etc.-influence-accuracy)
+        -   [User behavior: Does auditing speed, etc influence accuracy](#user-behavior-does-auditing-speed-etc-influence-accuracy)
         -   [User group: Reg vs anon vs turk1 vs turk3 vs turk5](#user-group-reg-vs-anon-vs-turk1-vs-turk3-vs-turk5)
         -   [Low severity: Removing low severity effect on recall](#low-severity-removing-low-severity-effect-on-recall)
         -   [Binary vs ordinal issues per segment](#binary-vs-ordinal-issues-per-segment)
@@ -269,7 +269,7 @@ NOTE: The red dots on the graphs are means.
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-2.png)
 
-### User behavior: Does auditing speed, etc. influence accuracy
+### User behavior: Does auditing speed, etc influence accuracy
 
 Below we investigate how user behavior is associated with performance in our turk study. The graphs below are more exploratory. I am not sure that we can be guaranteed any statistical significance by simply looking at the graphs below. We can always formulate hypothesis tests once we narrow down what we want to look at.
 
