@@ -16,6 +16,7 @@ April 6, 2018
         -   [Ground truth label counts](#ground-truth-label-counts)
         -   [Aggregate accuracy](#aggregate-accuracy)
         -   [Accuracy by user group](#accuracy-by-user-group)
+        -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Descriptive stats for users](#descriptive-stats-for-users)
         -   [IRR](#irr)
         -   [Zone types](#zone-types)
@@ -24,7 +25,6 @@ April 6, 2018
         -   [Zone type: Land use effect on accuracy](#zone-type-land-use-effect-on-accuracy)
         -   [User group: Reg vs anon vs turk1 vs turk3 vs turk5](#user-group-reg-vs-anon-vs-turk1-vs-turk3-vs-turk5)
         -   [Low severity: Removing low severity effect on recall](#low-severity-removing-low-severity-effect-on-recall)
-        -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Binary vs ordinal issues per segment](#binary-vs-ordinal-issues-per-segment)
 
 Public Deployment
@@ -164,6 +164,25 @@ Median accuracy by user group - 5 meter level:
 | turk3     | 0.509      | 0.667    | 0.559      | 0.125       | 0.286     | 0.205       |
 | turk5     | 0.504      | 0.750    | 0.584      | 0.071       | 0.333     | 0.167       |
 
+### Voting: Improved recall when at least one turker marks
+
+Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
+
+For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.8 and their precision was 0.67.
+
+NOTE: In this section we are looking at *problem vs no problem*, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
+
+*Takeaways*:
+
+-   The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
+
+-   It would be interesting to see what this looks like at the 5 meter level as well.
+
+| voting.method | recall | precision |
+|:--------------|:-------|:----------|
+| majority.vote | 0.333  | 1.000     |
+| at.least.one  | 1.000  | 0.667     |
+
 ### Descriptive stats for users
 
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
@@ -276,25 +295,6 @@ NOTE: In this section, the data is binary (not ordinal), and is at the street le
 | &gt;=4              | 158     | 42         | 54       | 62          |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)
-
-### Voting: Improved recall when at least one turker marks
-
-Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
-
-For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.8 and their precision was 0.67.
-
-NOTE: In this section we are looking at *problem vs no problem*, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
-
-*Takeaways*:
-
--   The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
-
--   It would be interesting to see what this looks like at the 5 meter level as well.
-
-| voting.method | recall | precision |
-|:--------------|:-------|:----------|
-| majority.vote | 0.333  | 1.000     |
-| at.least.one  | 1.000  | 0.667     |
 
 ### Binary vs ordinal issues per segment
 

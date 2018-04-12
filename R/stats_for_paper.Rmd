@@ -927,6 +927,64 @@ kable(
 ```
 
 
+### Voting: Improved recall when at least one turker marks
+
+```{r turk.voting.method.setup, echo=FALSE}
+voting.method.data <-
+  data.with.raw.accuracy %>%
+  filter(label.type %in% c('All', 'Problem'),
+         n.workers == 5 | worker.type == 'reg',
+         binary == TRUE,
+         granularity == 'street',
+         label.type == 'Problem',
+         remove.low.severity == FALSE,
+         worker.thresh %in% c(1,3)) %>%
+  mutate(voting.method = factor(if_else(worker.thresh == 1,
+                                        'at.least.one',
+                                        'majority.vote'))) %>%
+  group_by(worker.type, voting.method, label.type, granularity) %>%
+  dplyr::summarize_at(vars(recall, precision), median, na.rm = TRUE) %>%
+  ungroup()
+
+# Get registered user recall to compare to
+reg.recall <-
+  voting.method.data %>%
+  filter(worker.type == 'reg') %>%
+  select(recall) %>%
+  as.numeric() %>%
+  format(digits = 2)
+reg.precision <-
+  voting.method.data %>%
+  filter(worker.type == 'reg') %>%
+  select(precision) %>%
+  as.numeric() %>%
+  format(digits = 2)
+```
+
+
+Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
+
+For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was `r reg.recall` and their precision was `r reg.precision`.
+
+NOTE: In this section we are looking at _problem vs no problem_, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
+
+*Takeaways*:
+
+* The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
+
+* It would be interesting to see what this looks like at the 5 meter level as well.
+
+```{r turk.voting.method.analysis, echo=FALSE}
+kable(
+  voting.method.data %>%
+    filter(worker.type != 'reg') %>%
+    select(voting.method, recall, precision),
+  digits = 3,
+  align = 'l'
+)
+```
+
+
 ### Descriptive stats for users
 
 Next we have some descriptive statistics of users, by user group. These are average (median) stats.
@@ -1255,64 +1313,6 @@ ggplot(data = grouped.low.severity.data, aes(low.severity.thresh)) +
   ylim(0, 1) +
   my.theme.discrete.x +
   theme(legend.position = 'top')
-```
-
-
-### Voting: Improved recall when at least one turker marks
-
-```{r turk.voting.method.setup, echo=FALSE}
-voting.method.data <-
-  data.with.raw.accuracy %>%
-  filter(label.type %in% c('All', 'Problem'),
-         n.workers == 5 | worker.type == 'reg',
-         binary == TRUE,
-         granularity == 'street',
-         label.type == 'Problem',
-         remove.low.severity == FALSE,
-         worker.thresh %in% c(1,3)) %>%
-  mutate(voting.method = factor(if_else(worker.thresh == 1,
-                                        'at.least.one',
-                                        'majority.vote'))) %>%
-  group_by(worker.type, voting.method, label.type, granularity) %>%
-  dplyr::summarize_at(vars(recall, precision), median, na.rm = TRUE) %>%
-  ungroup()
-
-# Get registered user recall to compare to
-reg.recall <-
-  voting.method.data %>%
-  filter(worker.type == 'reg') %>%
-  select(recall) %>%
-  as.numeric() %>%
-  format(digits = 2)
-reg.precision <-
-  voting.method.data %>%
-  filter(worker.type == 'reg') %>%
-  select(precision) %>%
-  as.numeric() %>%
-  format(digits = 2)
-```
-
-
-Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
-
-For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was `r reg.recall` and their precision was `r reg.precision`.
-
-NOTE: In this section we are looking at _problem vs no problem_, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
-
-*Takeaways*:
-
-* The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
-
-* It would be interesting to see what this looks like at the 5 meter level as well.
-
-```{r turk.voting.method.analysis, echo=FALSE}
-kable(
-  voting.method.data %>%
-    filter(worker.type != 'reg') %>%
-    select(voting.method, recall, precision),
-  digits = 3,
-  align = 'l'
-)
 ```
 
 
