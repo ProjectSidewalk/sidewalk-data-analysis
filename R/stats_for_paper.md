@@ -236,6 +236,8 @@ NOTE: In this section, the data is binary (not ordinal), we are only considering
 
 NOTE: This is a rare case where we are using the mean, since we are also showing standard error at the same time.
 
+![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
+
 *Takeaways*:
 
 -   Analyzing at the 5 meter level shows higher raw accuracy and specificity, both because of the large number of true negatives that we get from splitting into 5 meter segments; there are very few street segments with no labels at all.
@@ -253,8 +255,6 @@ NOTE: This is a rare case where we are using the mean, since we are also showing
 -   The Problem type seems to perform better than the surface problem and obstacle label types (except for surface problem precision, mentioned in the previous bullet).
 
 -   NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
-
-![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
 
 ### Zone type: Land use effect on accuracy
 
