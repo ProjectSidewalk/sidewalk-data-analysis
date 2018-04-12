@@ -1277,7 +1277,7 @@ ggplot(data = zone.type.analysis.data %>% filter(label.type == 'Problem'),
 ```
 
 
-### User behavior: Does auditing speed, etc. influence accuracy?
+### User behavior: Does auditing speed, etc. influence accuracy
 
 ```{r turk.user.behavior.setup, echo=FALSE}
 turk.behavior.data <-
