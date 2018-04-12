@@ -23,6 +23,7 @@ April 6, 2018
     -   [Possible Stories](#possible-stories-1)
         -   [Granularity: Street-level vs 5 meter-level](#granularity-street-level-vs-5-meter-level)
         -   [Zone type: Land use effect on accuracy](#zone-type-land-use-effect-on-accuracy)
+        -   [User behavior: Does auditing speed, etc. influence accuracy?](#user-behavior-does-auditing-speed-etc.-influence-accuracy)
         -   [User group: Reg vs anon vs turk1 vs turk3 vs turk5](#user-group-reg-vs-anon-vs-turk1-vs-turk3-vs-turk5)
         -   [Low severity: Removing low severity effect on recall](#low-severity-removing-low-severity-effect-on-recall)
         -   [Binary vs ordinal issues per segment](#binary-vs-ordinal-issues-per-segment)
@@ -267,6 +268,24 @@ NOTE: The red dots on the graphs are means.
 *Takeaways*:
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-2.png)
+
+### User behavior: Does auditing speed, etc. influence accuracy?
+
+Below we investigate how user behavior is associated with performance in our turk study. The graphs below are more exploratory. I am not sure that we can be guaranteed any statistical significance by simply looking at the graphs below. We can always formulate hypothesis tests once we narrow down what we want to look at.
+
+NOTE: In this section, the data are binary (not ordinal), at the street level granularity (not 5 meter level) we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+For the second graph, we are only looking at users with a speed of less than 100 meters per minute, because only 5 users (3.8%) had speeds higher than that. The max speed was 181 meters per minute.
+
+![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis-2.png)
+
+*Takeaways*:
+
+-   Labeling frequency seems to have a positive relationship with recall, which is what we would have expected.
+
+-   Labeling frequency seems to have a more positive relationship with the Problem (vs no problem) type than for the all label types combined (at least for the highest labeling frequencies, greater than 15 labels per 100m). I would think that, for the highest labeling frequencies, this comes from users who are labeling driveways as curb ramps. This would hurt their curb ramp precision, but not Problem type precision.
+
+-   Auditing speed did not seem to have a big impact on performance by itself.
 
 ### User group: Reg vs anon vs turk1 vs turk3 vs turk5
 

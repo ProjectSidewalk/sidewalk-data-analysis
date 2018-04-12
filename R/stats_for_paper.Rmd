@@ -1051,7 +1051,6 @@ Below, we have a table of aggregate (sum) stats by user group.
 NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 ```{r turk.showing.stats.7, echo=FALSE}
-
 kable(
   turk.study.summary.stats.with.labels %>%
     filter(granularity == 'street') %>%  # granularity doesn't affect these stats
@@ -1277,6 +1276,81 @@ ggplot(data = zone.type.analysis.data %>% filter(label.type == 'Problem'),
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 ```
 
+
+### User behavior: Does auditing speed, etc. influence accuracy?
+
+```{r turk.user.behavior.setup, echo=FALSE}
+turk.behavior.data <-
+  data.with.raw.accuracy %>%
+  filter(worker.type %in% c('anon', 'reg', 'turk1'),
+         binary == TRUE,
+         remove.low.severity == FALSE,
+         granularity == 'street') %>%
+  left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
+  group_by_at(vars(condition.id:raw.accuracy)) %>%
+  dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
+  ungroup() %>%
+  left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
+  mutate(n.missions = if_else(is.anon.route, 2, 3),
+         distance.feet = if_else(is.anon.route, 2000, 4000),
+         distance.meters = distance.feet / 3.28084,
+         labels.per.100m = 100 * n.labels / distance.meters,
+         meters.per.min = distance.meters / minutes_audited,
+         km.per.hr = 60 * meters.per.min / 1000,
+         minutes.per.1k.ft = 1000 * minutes_audited / distance.feet,
+         hours.audited = minutes_audited / 60) %>%
+  gather(key = accuracy.type, value = accuracy.value, recall, precision, f.measure) %>%
+  mutate(accuracy.type = factor(accuracy.type, levels = c('recall', 'precision', 'f.measure'))) %>%
+  filter(label.type %in% c('All', 'Problem'))
+
+meters.per.min.threshold <- 100
+test1 <-
+  turk.behavior.data %>%
+    filter(accuracy.type == 'recall', label.type == 'All') %>%
+    dplyr::summarise(n.above.threshold = sum(meters.per.min >= meters.per.min.threshold),
+                     n = n())
+n.above.thresh <- as.numeric(test1$n.above.threshold)
+n.total <- as.numeric(test1$n)
+percent.above.thresh <- format(100 * n.above.thresh / n.total, digits = 2)
+max.speed <- format(max(turk.behavior.data$meters.per.min), digits = 2)
+```
+
+
+Below we investigate how user behavior is associated with performance in our turk study. The graphs below are more exploratory. I am not sure that we can be guaranteed any statistical significance by simply looking at the graphs below. We can always formulate hypothesis tests once we narrow down what we want to look at.
+
+NOTE: In this section, the data are binary (not ordinal), at the street level granularity (not 5 meter level) we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+For the second graph, we are only looking at users with a speed of less than `r meters.per.min.threshold` meters per minute, because only `r n.above.thresh` users (`r percent.above.thresh`%) had speeds higher than that. The max speed was `r max.speed` meters per minute.
+
+```{r turk.user.behavior.analysis, echo=FALSE, fig.width=4.5, fig.height=5}
+ggplot(data = turk.behavior.data, aes(x = labels.per.100m, y = accuracy.value)) +
+  geom_point(na.rm = TRUE) +
+  geom_smooth(method = 'loess', na.rm = TRUE, fullrange = TRUE) +
+  facet_grid(accuracy.type ~ label.type, switch = 'x') +
+  scale_x_continuous(expand = c(0.01, 0)) +
+  scale_y_continuous(limits = c(-0.5, 1.5), breaks = ACCURACY_BREAKS, expand = c(0.025, 0)) +
+  coord_cartesian(ylim = c(0, 1)) +
+  theme_bw()
+
+ggplot(data = turk.behavior.data %>% filter(meters.per.min < meters.per.min.threshold),
+       mapping = aes(x = meters.per.min, y = accuracy.value)) +
+  geom_point(na.rm = TRUE) +
+  geom_smooth(method = 'loess', na.rm = TRUE, fullrange = TRUE) +
+  facet_grid(accuracy.type ~ label.type, switch = 'x') +
+  scale_x_continuous(expand = c(0.01, 0)) +
+  scale_y_continuous(limits = c(-0.5, 1.5), breaks = ACCURACY_BREAKS, expand = c(0.025, 0)) +
+  coord_cartesian(ylim = c(0, 1)) +
+  theme_bw()
+```
+
+
+*Takeaways*:
+
+* Labeling frequency seems to have a positive relationship with recall, which is what we would have expected.
+
+* Labeling frequency seems to have a more positive relationship with the Problem (vs no problem) type than for the all label types combined (at least for the highest labeling frequencies, greater than 15 labels per 100m). I would think that, for the highest labeling frequencies, this comes from users who are labeling driveways as curb ramps. This would hurt their curb ramp precision, but not Problem type precision.
+
+* Auditing speed did not seem to have a big impact on performance by itself.
 
 ### User group: Reg vs anon vs turk1 vs turk3 vs turk5
 
