@@ -1219,6 +1219,7 @@ low.severity.check.data <-
 
 grouped.low.severity.data <-
   low.severity.check.data %>%
+  filter(binary == TRUE) %>%
   group_by(label.type, worker.type, low.severity.thresh, granularity) %>%
   dplyr::summarize(recall = mean(recall, na.rm = TRUE))
 
