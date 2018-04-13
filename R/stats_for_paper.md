@@ -16,6 +16,7 @@ April 6, 2018
         -   [Ground truth label counts](#ground-truth-label-counts)
         -   [Aggregate accuracy](#aggregate-accuracy)
         -   [Accuracy by user group](#accuracy-by-user-group)
+        -   [Accuracy by label type](#accuracy-by-label-type)
         -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Descriptive stats for users](#descriptive-stats-for-users)
         -   [IRR](#irr)
@@ -164,6 +165,22 @@ Median accuracy by user group - 5 meter level:
 | turk1     | 0.490      | 0.489    | 0.471      | 0.200       | 0.267     | 0.211       |
 | turk3     | 0.509      | 0.667    | 0.559      | 0.125       | 0.286     | 0.205       |
 | turk5     | 0.504      | 0.750    | 0.584      | 0.081       | 0.333     | 0.182       |
+
+### Accuracy by label type
+
+Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type.
+
+NOTE: In this table, the data are binary (not ordinal), at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+| label.type  | recall | precision | f.measure |
+|:------------|:-------|:----------|:----------|
+| All         | 0.714  | 0.674     | 0.667     |
+| Problem     | 0.714  | 0.714     | 0.667     |
+| CurbRamp    | 1.000  | 1.000     | 0.958     |
+| NoCurbRamp  | 1.000  | 0.000     | 0.500     |
+| Obstacle    | 0.500  | 0.500     | 0.545     |
+| SurfaceProb | 0.333  | 0.817     | 0.500     |
+| NoSidewalk  | 0.600  | 0.958     | 0.667     |
 
 ### Voting: Improved recall when at least one turker marks
 

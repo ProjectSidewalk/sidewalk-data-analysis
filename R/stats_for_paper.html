@@ -50,6 +50,7 @@ April 6, 2018</p>
 <li><a href="#ground-truth-label-counts">Ground truth label counts</a></li>
 <li><a href="#aggregate-accuracy">Aggregate accuracy</a></li>
 <li><a href="#accuracy-by-user-group">Accuracy by user group</a></li>
+<li><a href="#accuracy-by-label-type">Accuracy by label type</a></li>
 <li><a href="#voting-improved-recall-when-at-least-one-turker-marks">Voting: Improved recall when at least one turker marks</a></li>
 <li><a href="#descriptive-stats-for-users">Descriptive stats for users</a></li>
 <li><a href="#irr">IRR</a></li>
@@ -562,6 +563,63 @@ April 6, 2018</p>
 <td align="left">0.081</td>
 <td align="left">0.333</td>
 <td align="left">0.182</td>
+</tr>
+</tbody>
+</table>
+<h3 id="accuracy-by-label-type">Accuracy by label type</h3>
+<p>Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type.</p>
+<p>NOTE: In this table, the data are binary (not ordinal), at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">label.type</th>
+<th align="left">recall</th>
+<th align="left">precision</th>
+<th align="left">f.measure</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">All</td>
+<td align="left">0.714</td>
+<td align="left">0.674</td>
+<td align="left">0.667</td>
+</tr>
+<tr class="even">
+<td align="left">Problem</td>
+<td align="left">0.714</td>
+<td align="left">0.714</td>
+<td align="left">0.667</td>
+</tr>
+<tr class="odd">
+<td align="left">CurbRamp</td>
+<td align="left">1.000</td>
+<td align="left">1.000</td>
+<td align="left">0.958</td>
+</tr>
+<tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">1.000</td>
+<td align="left">0.000</td>
+<td align="left">0.500</td>
+</tr>
+<tr class="odd">
+<td align="left">Obstacle</td>
+<td align="left">0.500</td>
+<td align="left">0.500</td>
+<td align="left">0.545</td>
+</tr>
+<tr class="even">
+<td align="left">SurfaceProb</td>
+<td align="left">0.333</td>
+<td align="left">0.817</td>
+<td align="left">0.500</td>
+</tr>
+<tr class="odd">
+<td align="left">NoSidewalk</td>
+<td align="left">0.600</td>
+<td align="left">0.958</td>
+<td align="left">0.667</td>
 </tr>
 </tbody>
 </table>

@@ -964,6 +964,31 @@ kable(
 ```
 
 
+### Accuracy by label type
+
+Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type.
+
+NOTE: In this table, the data are binary (not ordinal), at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+```{r turk.showing.stats.by.label.type, echo=FALSE}
+turk.showing.stats.by.label.type <-
+  data.with.raw.accuracy %>%
+  filter(binary == TRUE,
+         granularity == 'street',
+         n.workers == 1,
+         included.severity == 'all',
+         label.type != 'AllProb') %>%
+  group_by(label.type) %>%
+  summarize_at(vars(recall, precision, f.measure), median, na.rm = TRUE)
+
+kable(
+  turk.showing.stats.by.label.type,
+  digits = 3,
+  align = 'l'
+  )
+```
+
+
 ### Voting: Improved recall when at least one turker marks
 
 ```{r turk.voting.method.setup, echo=FALSE}
