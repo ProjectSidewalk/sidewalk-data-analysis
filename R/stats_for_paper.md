@@ -307,13 +307,11 @@ NOTE: In this section, the data is binary (not ordinal), and is at the street le
 
 -   Note that it *is* possible for the recall to get worse when removing high severity labels. This is because certain users may have found more of the low severity problems than the high severity ones.
 
-| included.severity | Problem | NoCurbRamp | Obstacle | SurfaceProb |
-|:------------------|:--------|:-----------|:---------|:------------|
-| all               | 1405    | 87         | 295      | 1023        |
-| &gt;=3            | 352     | 74         | 106      | 172         |
-| &gt;=4            | 158     | 42         | 54       | 62          |
-
-![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)
+| included.severity | gt.problem.labels | mean.recall | median.recall |
+|:------------------|:------------------|:------------|:--------------|
+| all               | 1405              | 0.639       | 0.714         |
+| &lt;=2            | 1053              | 0.637       | 0.707         |
+| &gt;=3            | 352               | 0.746       | 1.000         |
 
 ### Binary vs ordinal issues per segment
 

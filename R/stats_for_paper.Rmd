@@ -1379,46 +1379,37 @@ NOTE: In this section, the data is binary (not ordinal), and is at the street le
 
 
 ```{r turk.high.severity.analysis, echo=FALSE, fig.width=8, fig.height=6}
-# Removes label types that don't have severity (plus CurbRamp).
 low.severity.check.data <-
   data.with.raw.accuracy %>%
-  filter(included.severity %in% c('all', '>=3', '>=4'),
-         label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb', 'Problem'),
-         worker.type != 'turk0') %>%
+  filter(included.severity %in% c('all', '<=2', '>=3'),
+         label.type == 'Problem',
+         worker.type %in% c('reg', 'anon', 'turk1'),
+         granularity == 'street') %>%
   droplevels %>%
-  mutate(included.severity = ordered(included.severity,
-                                     labels = c('all', '>=3', '>=4'),
-                                     levels = c('all', '>=3', '>=4')))
+  mutate(included.severity = factor(included.severity,
+                                    labels = c('all', '<=2', '>=3'),
+                                    levels = c('all', '<=2', '>=3')))
 
-grouped.low.severity.data <-
+recall.by.severity <-
   low.severity.check.data %>%
   filter(binary == TRUE) %>%
-  group_by(label.type, worker.type, included.severity, granularity) %>%
-  dplyr::summarize(recall = mean(recall, na.rm = TRUE))
+  group_by(included.severity) %>%
+  summarize(mean.recall = mean(recall, na.rm = TRUE),
+            median.recall = median(recall, na.rm = TRUE))
 
+gt.counts.by.severity <-
+  low.severity.check.data %>%
+  filter(worker.type == 'turk1',
+         binary == FALSE) %>%
+  group_by(included.severity) %>%
+  summarize(gt.problem.labels = sum(true.pos, false.neg))
 
 kable(
-  low.severity.check.data %>%
-    filter(worker.type == 'turk1',
-           binary == FALSE,
-           granularity == 'street') %>%
-    group_by(worker.type, label.type, included.severity) %>%
-    summarize(gt.labels = sum(true.pos, false.neg)) %>%
-    ungroup() %>%
-    spread(label.type, gt.labels) %>%
-    select(-worker.type),
+  inner_join(gt.counts.by.severity, recall.by.severity, by = 'included.severity'),
   format = 'markdown',
   digits = 3,
   align = 'l'
   )
-
-ggplot(data = grouped.low.severity.data, aes(included.severity)) +
-  geom_line(aes(y = recall, colour = granularity, group = granularity)) +
-  geom_point(aes(y = recall, colour = granularity), size = 1) +
-  facet_grid(worker.type ~ label.type) +
-  ylim(0, 1) +
-  my.theme.discrete.x +
-  theme(legend.position = 'top')
 ```
 
 
