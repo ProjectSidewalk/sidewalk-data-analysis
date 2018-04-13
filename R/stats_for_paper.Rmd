@@ -627,7 +627,7 @@ kable(
 
 ### Data overlap and agreement between users
 
-Amongst all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement amongst them? (see comment in Outline document for details on implementation)
+Among all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement among them? (see comment in Outline document for details on implementation)
 
 
 ### Stickyness of tool: user dropoffs
@@ -671,8 +671,8 @@ clean.agreement.data <-
 
 
 # Get accuracy data
-classes <- c('numeric', replicate(5, 'character'), 'numeric', 'numeric', 'logical', 'logical',
-             'numeric', 'factor', 'character', replicate(8, 'numeric'))
+classes <- c('numeric', replicate(5, 'character'), 'numeric', 'numeric', 'logical', 'character',
+             'factor', 'character', replicate(8, 'numeric'))
 volunteer.data <- read.csv('../data/accuracies-volunteer.csv',
                            colClasses = classes,
                            na.strings = c('null')) %>%
@@ -691,7 +691,7 @@ all.types.data <-
   accuracy.data %>%
   filter(label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem')) %>%
   group_by(condition.id, worker1, worker2, worker3, worker4, worker5, n.workers, worker.thresh,
-           binary, remove.low.severity, low.severity.thresh, granularity, is.turker) %>%
+           binary, included.severity, granularity, is.turker) %>%
   dplyr::summarize(label.type = 'All',
                    true.pos = sum(true.pos),
                    false.pos = sum(false.pos),
@@ -704,7 +704,7 @@ problem.types.data <-
   accuracy.data %>%
   filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProblem')) %>%
   group_by(condition.id, worker1, worker2, worker3, worker4, worker5, n.workers, worker.thresh,
-           binary, remove.low.severity, low.severity.thresh, granularity, is.turker) %>%
+           binary, included.severity, granularity, is.turker) %>%
   dplyr::summarize(label.type = 'AllProb',
                    true.pos = sum(true.pos),
                    false.pos = sum(false.pos),
@@ -779,7 +779,7 @@ unique.turkers <-
   data.with.raw.accuracy %>%
   filter(worker.type == 'turk5',
          binary == FALSE,
-         remove.low.severity == FALSE,
+         included.severity == 'all',
          granularity == 'street',
          label.type == 'CurbRamp') %>%
   select(worker1, worker2, worker3, worker4, worker5) %>%
@@ -794,7 +794,7 @@ aggregate.accuracy.data <-
   data.with.raw.accuracy %>%
   filter(n.workers == 1,
          binary == TRUE,
-         remove.low.severity == FALSE,
+         included.severity == 'all',
          label.type %in% c('All', 'Problem')) %>%
   select_at(vars(label.type, granularity, recall, precision, f.measure)) %>%
   group_by(label.type, granularity) %>%
@@ -813,7 +813,7 @@ turk.study.summary.stats <-
   data.with.raw.accuracy %>%
   filter(worker.type != 'turk0',
          binary == TRUE,
-         remove.low.severity == FALSE,
+         included.severity == 'all',
          label.type %in% c('All', 'Problem')) %>%
   group_by(condition.id, worker1, is.anon.route, worker.type, granularity) %>%
   mutate(all.recall = if_else(label.type == 'All', recall, NaN),
@@ -852,7 +852,7 @@ gt.count.data <-
   data.with.raw.accuracy %>%
   filter(worker.type %in% c('anon', 'reg'),
          binary == FALSE,
-         remove.low.severity == FALSE,
+         included.severity == 'all',
          granularity == 'street',
          label.type != 'AllProb') %>%
   group_by(worker.type, label.type) %>%
@@ -974,7 +974,7 @@ voting.method.data <-
          binary == TRUE,
          granularity == 'street',
          label.type == 'Problem',
-         remove.low.severity == FALSE,
+         included.severity == 'all',
          worker.thresh %in% c(1,3)) %>%
   mutate(voting.method = factor(if_else(worker.thresh == 1,
                                         'at.least.one',
@@ -1172,7 +1172,7 @@ NOTE: This is a rare case where we are using the mean, since we are also showing
 ```{r turk.granularity.analysis, echo=FALSE, fig.width=7, fig.height=4}
 granularity.analysis.data <-
   data.with.raw.accuracy %>%
-  filter(remove.low.severity == FALSE,
+  filter(included.severity == 'all',
          binary == TRUE,
          n.workers == 1,
          label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
@@ -1218,9 +1218,9 @@ ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.val
 
 * Analyzing at the street level shows higher f-measure. This clearly comes from the higher recall and precision.
 
-* CurbRamp pretty much outperforms all other lable types across the board, regardless of accuracy type of 5 meter vs. street level. This is likely because curb ramps are the easiest label type to understand and find in GSV (both because they are large and easy to see, and because you know where to expect them -- at intersections).
+* CurbRamp pretty much outperforms all other label types across the board, regardless of accuracy type of 5 meter vs. street level. This is likely because curb ramps are the easiest label type to understand and find in GSV (both because they are large and easy to see, and because you know where to expect them -- at intersections).
 
-* The SurfaceProblem label type seems to have the highest precision and lowest recall among the different types of issues (I'm excluding CurbRamp here). I guess that, relative to the other types of issues, there are just fewer cases of mistaking something of a surface problem and more cases of not finding a surface problem that was vsisible in GSV (so maybe surface problems require increased diligence from users, and the other issues require better treatment in onboarding).
+* The SurfaceProblem label type seems to have the highest precision and lowest recall among the different types of issues (I'm excluding CurbRamp here). I guess that, relative to the other types of issues, there are just fewer cases of mistaking something of a surface problem and more cases of not finding a surface problem that was visible in GSV (so maybe surface problems require increased diligence from users, and the other issues require better treatment in onboarding).
 
 * The Problem type seems to perform better than the surface problem and obstacle label types (except for surface problem precision, mentioned in the previous bullet).
 
@@ -1249,7 +1249,7 @@ zone.type.analysis.data <-
   inner_join(condition.land.use, by = 'condition.id') %>%
   filter(binary == TRUE,
          granularity == 'street',
-         remove.low.severity == FALSE,
+         included.severity == 'all',
          n.workers == 1,
          label.type %in% c('All', 'Problem')) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
@@ -1284,7 +1284,7 @@ turk.behavior.data <-
   data.with.raw.accuracy %>%
   filter(worker.type %in% c('anon', 'reg', 'turk1'),
          binary == TRUE,
-         remove.low.severity == FALSE,
+         included.severity == 'all',
          granularity == 'street') %>%
   left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
   group_by_at(vars(condition.id:raw.accuracy)) %>%
@@ -1379,27 +1379,21 @@ NOTE: In this section, the data is binary (not ordinal), and is at the street le
 
 
 ```{r turk.high.severity.analysis, echo=FALSE, fig.width=8, fig.height=6}
-# Gives a more informative name to low.severity.thresh factor, also fills NAs
-name.thresh <- Vectorize(
-  function(thresh) {
-  if (is.na(thresh)) 'baseline'
-  else paste0('>=', as.character(thresh))
-  }
-)
-
 # Removes label types that don't have severity (plus CurbRamp).
 low.severity.check.data <-
   data.with.raw.accuracy %>%
-  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb', 'Problem')) %>%
-  filter(worker.type != 'turk0') %>%
+  filter(included.severity %in% c('all', '>=3', '>=4'),
+         label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb', 'Problem'),
+         worker.type != 'turk0') %>%
   droplevels %>%
-  mutate(low.severity.thresh = ordered(name.thresh(low.severity.thresh),
-                                       levels = c('baseline', '>=3', '>=4')))
+  mutate(included.severity = ordered(included.severity,
+                                     labels = c('all', '>=3', '>=4'),
+                                     levels = c('all', '>=3', '>=4')))
 
 grouped.low.severity.data <-
   low.severity.check.data %>%
   filter(binary == TRUE) %>%
-  group_by(label.type, worker.type, low.severity.thresh, granularity) %>%
+  group_by(label.type, worker.type, included.severity, granularity) %>%
   dplyr::summarize(recall = mean(recall, na.rm = TRUE))
 
 
@@ -1408,7 +1402,7 @@ kable(
     filter(worker.type == 'turk1',
            binary == FALSE,
            granularity == 'street') %>%
-    group_by(worker.type, label.type, low.severity.thresh) %>%
+    group_by(worker.type, label.type, included.severity) %>%
     summarize(gt.labels = sum(true.pos, false.neg)) %>%
     ungroup() %>%
     spread(label.type, gt.labels) %>%
@@ -1418,7 +1412,7 @@ kable(
   align = 'l'
   )
 
-ggplot(data = grouped.low.severity.data, aes(low.severity.thresh)) +
+ggplot(data = grouped.low.severity.data, aes(included.severity)) +
   geom_line(aes(y = recall, colour = granularity, group = granularity)) +
   geom_point(aes(y = recall, colour = granularity), size = 1) +
   facet_grid(worker.type ~ label.type) +
@@ -1448,7 +1442,7 @@ NOTE: The red dots on the graphs are means.
 ```{r turk.issues.per.seg.analysis, echo=FALSE, fig.width=8, fig.height=4}
 issues.per.seg.analysis.data <-
   data.with.raw.accuracy %>%
-  filter(remove.low.severity == FALSE,
+  filter(included.severity == 'all',
          n.workers == 1,
          label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
   mutate(issues.per.segment = factor(if_else(binary, 'binary', 'ordinal'))) %>%

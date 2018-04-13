@@ -88,7 +88,7 @@ Possible Stories
 
 ### Data overlap and agreement between users
 
-Amongst all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement amongst them? (see comment in Outline document for details on implementation)
+Among all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement among them? (see comment in Outline document for details on implementation)
 
 ### Stickyness of tool: user dropoffs
 
@@ -163,7 +163,7 @@ Median accuracy by user group - 5 meter level:
 | reg       | 0.589      | 0.420    | 0.460      | 0.250       | 0.229     | 0.231       |
 | turk1     | 0.490      | 0.489    | 0.471      | 0.200       | 0.267     | 0.211       |
 | turk3     | 0.509      | 0.667    | 0.559      | 0.125       | 0.286     | 0.205       |
-| turk5     | 0.504      | 0.750    | 0.584      | 0.071       | 0.333     | 0.167       |
+| turk5     | 0.504      | 0.750    | 0.584      | 0.081       | 0.333     | 0.182       |
 
 ### Voting: Improved recall when at least one turker marks
 
@@ -249,9 +249,9 @@ NOTE: This is a rare case where we are using the mean, since we are also showing
 
 -   Analyzing at the street level shows higher f-measure. This clearly comes from the higher recall and precision.
 
--   CurbRamp pretty much outperforms all other lable types across the board, regardless of accuracy type of 5 meter vs. street level. This is likely because curb ramps are the easiest label type to understand and find in GSV (both because they are large and easy to see, and because you know where to expect them -- at intersections).
+-   CurbRamp pretty much outperforms all other label types across the board, regardless of accuracy type of 5 meter vs. street level. This is likely because curb ramps are the easiest label type to understand and find in GSV (both because they are large and easy to see, and because you know where to expect them -- at intersections).
 
--   The SurfaceProblem label type seems to have the highest precision and lowest recall among the different types of issues (I'm excluding CurbRamp here). I guess that, relative to the other types of issues, there are just fewer cases of mistaking something of a surface problem and more cases of not finding a surface problem that was vsisible in GSV (so maybe surface problems require increased diligence from users, and the other issues require better treatment in onboarding).
+-   The SurfaceProblem label type seems to have the highest precision and lowest recall among the different types of issues (I'm excluding CurbRamp here). I guess that, relative to the other types of issues, there are just fewer cases of mistaking something of a surface problem and more cases of not finding a surface problem that was visible in GSV (so maybe surface problems require increased diligence from users, and the other issues require better treatment in onboarding).
 
 -   The Problem type seems to perform better than the surface problem and obstacle label types (except for surface problem precision, mentioned in the previous bullet).
 
@@ -307,11 +307,11 @@ NOTE: In this section, the data is binary (not ordinal), and is at the street le
 
 -   Note that it *is* possible for the recall to get worse when removing high severity labels. This is because certain users may have found more of the low severity problems than the high severity ones.
 
-| low.severity.thresh | Problem | NoCurbRamp | Obstacle | SurfaceProb |
-|:--------------------|:--------|:-----------|:---------|:------------|
-| baseline            | 1405    | 87         | 295      | 1023        |
-| &gt;=3              | 352     | 74         | 106      | 172         |
-| &gt;=4              | 158     | 42         | 54       | 62          |
+| included.severity | Problem | NoCurbRamp | Obstacle | SurfaceProb |
+|:------------------|:--------|:-----------|:---------|:------------|
+| all               | 1405    | 87         | 295      | 1023        |
+| &gt;=3            | 352     | 74         | 106      | 172         |
+| &gt;=4            | 158     | 42         | 54       | 62          |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.high.severity.analysis-1.png)
 
