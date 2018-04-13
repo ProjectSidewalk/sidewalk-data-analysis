@@ -567,8 +567,9 @@ April 6, 2018</p>
 </tbody>
 </table>
 <h3 id="accuracy-by-label-type">Accuracy by label type</h3>
-<p>Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type.</p>
-<p>NOTE: In this table, the data are binary (not ordinal), at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.</p>
+<p>Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type. This is done at the street level and 5 meter levels.</p>
+<p>NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.</p>
+<p>Median accuracy by label type - street level:</p>
 <table>
 <thead>
 <tr class="header">
@@ -620,6 +621,55 @@ April 6, 2018</p>
 <td align="left">0.600</td>
 <td align="left">0.958</td>
 <td align="left">0.667</td>
+</tr>
+</tbody>
+</table>
+<p>Median accuracy by label type - 5 meter level:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">label.type</th>
+<th align="left">recall</th>
+<th align="left">precision</th>
+<th align="left">f.measure</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">All</td>
+<td align="left">0.543</td>
+<td align="left">0.472</td>
+<td align="left">0.468</td>
+</tr>
+<tr class="even">
+<td align="left">Problem</td>
+<td align="left">0.200</td>
+<td align="left">0.250</td>
+<td align="left">0.222</td>
+</tr>
+<tr class="odd">
+<td align="left">CurbRamp</td>
+<td align="left">0.789</td>
+<td align="left">0.667</td>
+<td align="left">0.689</td>
+</tr>
+<tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">0.633</td>
+<td align="left">0.000</td>
+<td align="left">0.400</td>
+</tr>
+<tr class="odd">
+<td align="left">Obstacle</td>
+<td align="left">0.143</td>
+<td align="left">0.087</td>
+<td align="left">0.267</td>
+</tr>
+<tr class="even">
+<td align="left">SurfaceProb</td>
+<td align="left">0.034</td>
+<td align="left">0.268</td>
+<td align="left">0.214</td>
 </tr>
 </tbody>
 </table>

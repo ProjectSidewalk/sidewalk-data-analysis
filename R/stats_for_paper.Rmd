@@ -966,23 +966,35 @@ kable(
 
 ### Accuracy by label type
 
-Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type.
+Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type. This is done at the street level and 5 meter levels.
 
-NOTE: In this table, the data are binary (not ordinal), at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-```{r turk.showing.stats.by.label.type, echo=FALSE}
+Median accuracy by label type - street level:
+
+```{r turk.showing.stats.by.label.type.1, echo=FALSE}
 turk.showing.stats.by.label.type <-
   data.with.raw.accuracy %>%
-  filter(binary == TRUE,
-         granularity == 'street',
-         n.workers == 1,
-         included.severity == 'all',
-         label.type != 'AllProb') %>%
-  group_by(label.type) %>%
-  summarize_at(vars(recall, precision, f.measure), median, na.rm = TRUE)
+  filter(binary == TRUE, n.workers == 1, included.severity == 'all', label.type != 'AllProb')
 
 kable(
-  turk.showing.stats.by.label.type,
+  turk.showing.stats.by.label.type %>%
+    filter(granularity == 'street') %>%
+    group_by(label.type) %>%
+    summarize_at(vars(recall, precision, f.measure), median, na.rm = TRUE),
+  digits = 3,
+  align = 'l'
+  )
+```
+
+Median accuracy by label type - 5 meter level:
+
+```{r turk.showing.stats.by.label.type.2, echo=FALSE}
+kable(
+  turk.showing.stats.by.label.type %>%
+    filter(granularity == '5_meter') %>%
+    group_by(label.type) %>%
+    summarize_at(vars(recall, precision, f.measure), median, na.rm = TRUE),
   digits = 3,
   align = 'l'
   )

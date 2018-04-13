@@ -168,9 +168,11 @@ Median accuracy by user group - 5 meter level:
 
 ### Accuracy by label type
 
-Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type.
+Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type. This is done at the street level and 5 meter levels.
 
-NOTE: In this table, the data are binary (not ordinal), at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+Median accuracy by label type - street level:
 
 | label.type  | recall | precision | f.measure |
 |:------------|:-------|:----------|:----------|
@@ -181,6 +183,17 @@ NOTE: In this table, the data are binary (not ordinal), at the street level (not
 | Obstacle    | 0.500  | 0.500     | 0.545     |
 | SurfaceProb | 0.333  | 0.817     | 0.500     |
 | NoSidewalk  | 0.600  | 0.958     | 0.667     |
+
+Median accuracy by label type - 5 meter level:
+
+| label.type  | recall | precision | f.measure |
+|:------------|:-------|:----------|:----------|
+| All         | 0.543  | 0.472     | 0.468     |
+| Problem     | 0.200  | 0.250     | 0.222     |
+| CurbRamp    | 0.789  | 0.667     | 0.689     |
+| NoCurbRamp  | 0.633  | 0.000     | 0.400     |
+| Obstacle    | 0.143  | 0.087     | 0.267     |
+| SurfaceProb | 0.034  | 0.268     | 0.214     |
 
 ### Voting: Improved recall when at least one turker marks
 
