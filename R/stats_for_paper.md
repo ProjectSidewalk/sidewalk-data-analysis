@@ -291,7 +291,7 @@ NOTE: This is a rare case where we are using the mean, since we are also showing
 
 The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
 
-NOTE: In this section, the data is binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 NOTE: The red dots on the graphs are means.
 
@@ -325,17 +325,9 @@ TODO: Make some graphs.
 
 ### Low severity: Removing low severity effect on recall
 
-Below is a table with counts of ground truth labels in the dataset at different severity thresholds. This is followed by a trellis plot that shows how recall changes when we remove low severity problems from the ground truth dataset. This is shown by label type and user group.
+Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 236 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.014. Thus, with an alpha level of 0.05, we reject the null hypothesis, and conclude that the means are in fact different. And we can see that the high severity recall is higher than the low severity recall, which matches our intuition.
 
-NOTE: In this section, the data is binary (not ordinal), and is at the street level (not 5 meter level).
-
-*Takeaways*:
-
--   Only 17% of surface problems and 35% of obstacles had severity of 3 or higher. Most missing curb ramps are high severity (not surprising).
-
--   The general trend is a decent improvement in recall when we remove high severity labels from the ground truth.
-
--   Note that it *is* possible for the recall to get worse when removing high severity labels. This is because certain users may have found more of the low severity problems than the high severity ones.
+NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 | included.severity | gt.problem.labels | mean.recall | median.recall |
 |:------------------|:------------------|:------------|:--------------|
