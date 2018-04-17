@@ -186,14 +186,14 @@ Median accuracy by label type - street level:
 
 Median accuracy by label type - 5 meter level:
 
-| label.type  | recall | precision | f.measure |
-|:------------|:-------|:----------|:----------|
-| All         | 0.543  | 0.472     | 0.468     |
-| Problem     | 0.200  | 0.250     | 0.222     |
-| CurbRamp    | 0.789  | 0.667     | 0.689     |
-| NoCurbRamp  | 0.633  | 0.000     | 0.400     |
-| Obstacle    | 0.143  | 0.087     | 0.267     |
-| SurfaceProb | 0.034  | 0.268     | 0.214     |
+| label.type  | recall.md | recall.mn | recall.std | prec.md | prec.mn | prec.std | f.md  | f.mn  | f.std |
+|:------------|:----------|:----------|:-----------|:--------|:--------|:---------|:------|:------|:------|
+| All         | 0.543     | 0.502     | 0.224      | 0.472   | 0.465   | 0.181    | 0.468 | 0.455 | 0.165 |
+| Problem     | 0.200     | 0.228     | 0.195      | 0.250   | 0.273   | 0.221    | 0.222 | 0.229 | 0.116 |
+| CurbRamp    | 0.789     | 0.716     | 0.254      | 0.667   | 0.638   | 0.199    | 0.689 | 0.642 | 0.188 |
+| NoCurbRamp  | 0.633     | 0.548     | 0.450      | 0.000   | 0.108   | 0.223    | 0.400 | 0.401 | 0.244 |
+| Obstacle    | 0.143     | 0.210     | 0.256      | 0.087   | 0.174   | 0.220    | 0.267 | 0.279 | 0.134 |
+| SurfaceProb | 0.034     | 0.129     | 0.214      | 0.268   | 0.343   | 0.333    | 0.214 | 0.265 | 0.199 |
 
 ### Voting: Improved recall when at least one turker marks
 
