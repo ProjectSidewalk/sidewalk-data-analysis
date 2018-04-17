@@ -629,6 +629,17 @@ kable(
 
 Among all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement among them? (see comment in Outline document for details on implementation)
 
+```{r public.deployment.agreement.analysis, echo=FALSE, fig.width=7, fig.height=4}
+percent.streets.with.multiple.audits <-
+  filtered.audits %>%
+  group_by(street_edge_id) %>%
+  dplyr::summarise(n.audits = n()) %>%
+  filter(n.audits > 1) %>%
+  nrow() * 100 / n.streets
+```
+
+A total of `r format(percent.streets.with.multiple.audits, digits = 3)`% of streets were audited by multiple users. 
+
 
 ### Stickyness of tool: user dropoffs
 

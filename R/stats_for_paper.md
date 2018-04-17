@@ -91,6 +91,8 @@ Possible Stories
 
 Among all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement among them? (see comment in Outline document for details on implementation)
 
+A total of 39.6% of streets were audited by multiple users.
+
 ### Stickyness of tool: user dropoffs
 
 We want a bar chart here showing, after a user clicks start mapping, what percentage finish the tutorial, what percentage finish a mission, etc.
