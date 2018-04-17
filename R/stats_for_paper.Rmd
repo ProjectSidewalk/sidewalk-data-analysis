@@ -981,7 +981,12 @@ kable(
   turk.showing.stats.by.label.type %>%
     filter(granularity == 'street') %>%
     group_by(label.type) %>%
-    summarize_at(vars(recall, precision, f.measure), median, na.rm = TRUE),
+    dplyr::summarize(recall.med = median(recall, na.rm = TRUE),
+                     recall.std = sd(recall, na.rm = TRUE),
+                     precision.med = median(precision, na.rm = TRUE),
+                     precision.std = sd(precision, na.rm = TRUE),
+                     f.measure.med = median(f.measure, na.rm = TRUE),
+                     f.measure.std = sd(f.measure, na.rm = TRUE)),
   digits = 3,
   align = 'l'
   )

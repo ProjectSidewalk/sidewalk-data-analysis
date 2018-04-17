@@ -174,15 +174,15 @@ NOTE: In the two tables below, the data are binary (not ordinal), we are only co
 
 Median accuracy by label type - street level:
 
-| label.type  | recall | precision | f.measure |
-|:------------|:-------|:----------|:----------|
-| All         | 0.714  | 0.674     | 0.667     |
-| Problem     | 0.714  | 0.714     | 0.667     |
-| CurbRamp    | 1.000  | 1.000     | 0.958     |
-| NoCurbRamp  | 1.000  | 0.000     | 0.500     |
-| Obstacle    | 0.500  | 0.500     | 0.545     |
-| SurfaceProb | 0.333  | 0.817     | 0.500     |
-| NoSidewalk  | 0.600  | 0.958     | 0.667     |
+| label.type  | recall.med | recall.std | precision.med | precision.std | f.measure.med | f.measure.std |
+|:------------|:-----------|:-----------|:--------------|:--------------|:--------------|:--------------|
+| All         | 0.714      | 0.196      | 0.674         | 0.172         | 0.667         | 0.129         |
+| Problem     | 0.714      | 0.323      | 0.714         | 0.284         | 0.667         | 0.226         |
+| CurbRamp    | 1.000      | 0.210      | 1.000         | 0.074         | 0.958         | 0.132         |
+| NoCurbRamp  | 1.000      | 0.406      | 0.000         | 0.279         | 0.500         | 0.227         |
+| Obstacle    | 0.500      | 0.379      | 0.500         | 0.365         | 0.545         | 0.211         |
+| SurfaceProb | 0.333      | 0.329      | 0.817         | 0.339         | 0.500         | 0.214         |
+| NoSidewalk  | 0.600      | 0.420      | 0.958         | 0.355         | 0.667         | 0.201         |
 
 Median accuracy by label type - 5 meter level:
 
