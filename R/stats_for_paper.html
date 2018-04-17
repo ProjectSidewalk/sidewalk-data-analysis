@@ -27,7 +27,7 @@ body {
 
 <h1 id="statistics-for-paper">Statistics for Paper</h1>
 <p>Mikey Saugstad<br />
-April 6, 2018</p>
+April 17, 2018</p>
 <ul>
 <li><a href="#public-deployment">Public Deployment</a>
 <ul>
@@ -866,13 +866,15 @@ April 6, 2018</p>
 <p>TODO: Make some graphs.</p>
 <p><em>Takeaways</em>:</p>
 <h3 id="low-severity-removing-low-severity-effect-on-recall">Low severity: Removing low severity effect on recall</h3>
-<p>Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 236 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.014. Thus, with an alpha level of 0.05, we reject the null hypothesis, and conclude that the means are in fact different. And we can see that the high severity recall is higher than the low severity recall, which matches our intuition.</p>
+<p>NOTE: I did this analysis using both &gt;=3 and &gt;=4. We are probably doing analysis on &gt;=4, so I put that section first, but the section for &gt;=3 is right after table of label counts. The &gt;=4 analysis did not produce significant results, but the &gt;=3 analysis did.</p>
 <p>NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.</p>
+<p>Below is a table showing the average recall across all users for labels that had severity &lt;=3 (in the ground truth) and labels that had severity &gt;=4, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 153 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.13. Thus, with an alpha level of 0.05, we fail to reject the null hypothesis, and <em>cannot</em> conclude that the means are different.</p>
 <table>
 <thead>
 <tr class="header">
 <th align="left">included.severity</th>
 <th align="left">gt.problem.labels</th>
+<th align="left">n.users</th>
 <th align="left">mean.recall</th>
 <th align="left">median.recall</th>
 </tr>
@@ -881,18 +883,56 @@ April 6, 2018</p>
 <tr class="odd">
 <td align="left">all</td>
 <td align="left">1405</td>
+<td align="left">130</td>
+<td align="left">0.639</td>
+<td align="left">0.714</td>
+</tr>
+<tr class="even">
+<td align="left">&lt;=3</td>
+<td align="left">1247</td>
+<td align="left">130</td>
+<td align="left">0.639</td>
+<td align="left">0.714</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=4</td>
+<td align="left">158</td>
+<td align="left">84</td>
+<td align="left">0.720</td>
+<td align="left">1.000</td>
+</tr>
+</tbody>
+</table>
+<p>Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 236 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.014. Thus, with an alpha level of 0.05, we reject the null hypothesis, and conclude that the means are in fact different. And we can see that the high severity recall is higher than the low severity recall, which matches our intuition.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">included.severity</th>
+<th align="left">gt.problem.labels</th>
+<th align="left">n.users</th>
+<th align="left">mean.recall</th>
+<th align="left">median.recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">all</td>
+<td align="left">1405</td>
+<td align="left">130</td>
 <td align="left">0.639</td>
 <td align="left">0.714</td>
 </tr>
 <tr class="even">
 <td align="left">&lt;=2</td>
 <td align="left">1053</td>
+<td align="left">130</td>
 <td align="left">0.637</td>
 <td align="left">0.707</td>
 </tr>
 <tr class="odd">
 <td align="left">&gt;=3</td>
 <td align="left">352</td>
+<td align="left">116</td>
 <td align="left">0.746</td>
 <td align="left">1.000</td>
 </tr>

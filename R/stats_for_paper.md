@@ -1,7 +1,7 @@
 Statistics for Paper
 ================
 Mikey Saugstad
-April 6, 2018
+April 17, 2018
 
 -   [Public Deployment](#public-deployment)
     -   [High-level results](#high-level-results)
@@ -325,15 +325,25 @@ TODO: Make some graphs.
 
 ### Low severity: Removing low severity effect on recall
 
-Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 236 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.014. Thus, with an alpha level of 0.05, we reject the null hypothesis, and conclude that the means are in fact different. And we can see that the high severity recall is higher than the low severity recall, which matches our intuition.
+NOTE: I did this analysis using both &gt;=3 and &gt;=4. We are probably doing analysis on &gt;=4, so I put that section first, but the section for &gt;=3 is right after table of label counts. The &gt;=4 analysis did not produce significant results, but the &gt;=3 analysis did.
 
 NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-| included.severity | gt.problem.labels | mean.recall | median.recall |
-|:------------------|:------------------|:------------|:--------------|
-| all               | 1405              | 0.639       | 0.714         |
-| &lt;=2            | 1053              | 0.637       | 0.707         |
-| &gt;=3            | 352               | 0.746       | 1.000         |
+Below is a table showing the average recall across all users for labels that had severity &lt;=3 (in the ground truth) and labels that had severity &gt;=4, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 153 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.13. Thus, with an alpha level of 0.05, we fail to reject the null hypothesis, and *cannot* conclude that the means are different.
+
+| included.severity | gt.problem.labels | n.users | mean.recall | median.recall |
+|:------------------|:------------------|:--------|:------------|:--------------|
+| all               | 1405              | 130     | 0.639       | 0.714         |
+| &lt;=3            | 1247              | 130     | 0.639       | 0.714         |
+| &gt;=4            | 158               | 84      | 0.720       | 1.000         |
+
+Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 236 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.014. Thus, with an alpha level of 0.05, we reject the null hypothesis, and conclude that the means are in fact different. And we can see that the high severity recall is higher than the low severity recall, which matches our intuition.
+
+| included.severity | gt.problem.labels | n.users | mean.recall | median.recall |
+|:------------------|:------------------|:--------|:------------|:--------------|
+| all               | 1405              | 130     | 0.639       | 0.714         |
+| &lt;=2            | 1053              | 130     | 0.637       | 0.707         |
+| &gt;=3            | 352               | 116     | 0.746       | 1.000         |
 
 ### Binary vs ordinal issues per segment
 

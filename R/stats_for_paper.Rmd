@@ -1,7 +1,7 @@
 ---
 title: "Statistics for Paper"
 author: "Mikey Saugstad"
-date: "April 6, 2018"
+date: "April 17, 2018"
 output:
   github_document:
     toc: yes
@@ -1402,23 +1402,28 @@ TODO: Make some graphs.
 
 ### Low severity: Removing low severity effect on recall
 
-```{r turk.high.severity.setup, echo=FALSE}
+NOTE: I did this analysis using both >=3 and >=4. We are probably doing analysis on >=4, so I put that section first, but the section for >=3 is right after table of label counts. The >=4 analysis did not produce significant results, but the >=3 analysis did.
+
+NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+```{r turk.high.severity.setup.1, echo=FALSE}
 low.severity.check.data <-
   data.with.raw.accuracy %>%
-  filter(included.severity %in% c('all', '<=2', '>=3'),
+  filter(included.severity %in% c('all', '<=3', '>=4'),
          label.type == 'Problem',
          worker.type %in% c('reg', 'anon', 'turk1'),
          granularity == 'street') %>%
   droplevels %>%
   mutate(included.severity = factor(included.severity,
-                                    labels = c('all', '<=2', '>=3'),
-                                    levels = c('all', '<=2', '>=3')))
+                                    labels = c('all', '<=3', '>=4'),
+                                    levels = c('all', '<=3', '>=4')))
 
 recall.by.severity <-
   low.severity.check.data %>%
   filter(binary == TRUE) %>%
   group_by(included.severity) %>%
-  summarize(mean.recall = mean(recall, na.rm = TRUE),
+  summarize(n.users = sum(!is.na(recall)),
+            mean.recall = mean(recall, na.rm = TRUE),
             median.recall = median(recall, na.rm = TRUE))
 
 gt.counts.by.severity <-
@@ -1432,15 +1437,60 @@ severity.test <- t.test(recall ~ included.severity,
                         data = low.severity.check.data %>%
                           filter(binary == TRUE, included.severity != 'all') %>%
                           droplevels)
+
+```
+
+Below is a table showing the average recall across all users for labels that had severity <=3 (in the ground truth) and labels that had severity >=4, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with `r format(as.numeric(severity.test$parameter), digit = 2)` degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of `r format(severity.test$p.value, digits = 2)`. Thus, with an alpha level of 0.05, we fail to reject the null hypothesis, and _cannot_ conclude that the means are different.
+
+```{r turk.high.severity.analysis.1, echo=FALSE, fig.width=8, fig.height=6}
+kable(
+  inner_join(gt.counts.by.severity, recall.by.severity, by = 'included.severity'),
+  format = 'markdown',
+  digits = 3,
+  align = 'l'
+  )
+```
+
+
+```{r turk.high.severity.setup.2, echo=FALSE}
+low.severity.check.data.2 <-
+  data.with.raw.accuracy %>%
+  filter(included.severity %in% c('all', '<=2', '>=3'),
+         label.type == 'Problem',
+         worker.type %in% c('reg', 'anon', 'turk1'),
+         granularity == 'street') %>%
+  droplevels %>%
+  mutate(included.severity = factor(included.severity,
+                                    labels = c('all', '<=2', '>=3'),
+                                    levels = c('all', '<=2', '>=3')))
+
+recall.by.severity.2 <-
+  low.severity.check.data.2 %>%
+  filter(binary == TRUE) %>%
+  group_by(included.severity) %>%
+  summarize(n.users = sum(!is.na(recall)),
+            mean.recall = mean(recall, na.rm = TRUE),
+            median.recall = median(recall, na.rm = TRUE))
+
+gt.counts.by.severity.2 <-
+  low.severity.check.data.2 %>%
+  filter(worker.type == 'turk1',
+         binary == FALSE) %>%
+  group_by(included.severity) %>%
+  summarize(gt.problem.labels = sum(true.pos, false.neg))
+
+severity.test <- t.test(recall ~ included.severity,
+                        data = low.severity.check.data.2 %>%
+                          filter(binary == TRUE, included.severity != 'all') %>%
+                          droplevels)
+
 ```
 
 Below is a table showing the average recall across all users for labels that had severity <=2 (in the ground truth) and labels that had severity >=3, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with `r format(as.numeric(severity.test$parameter), digit = 2)` degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of `r format(severity.test$p.value, digits = 2)`. Thus, with an alpha level of 0.05, we reject the null hypothesis, and conclude that the means are in fact different. And we can see that the high severity recall is higher than the low severity recall, which matches our intuition.
 
-NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
-
-```{r turk.high.severity.analysis, echo=FALSE, fig.width=8, fig.height=6}
+```{r turk.high.severity.analysis.2, echo=FALSE, fig.width=8, fig.height=6}
 kable(
-  inner_join(gt.counts.by.severity, recall.by.severity, by = 'included.severity'),
+  inner_join(gt.counts.by.severity.2, recall.by.severity.2, by = 'included.severity'),
   format = 'markdown',
   digits = 3,
   align = 'l'
