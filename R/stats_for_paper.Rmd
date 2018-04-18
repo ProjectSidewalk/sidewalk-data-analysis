@@ -1451,7 +1451,8 @@ recall.by.severity <-
   group_by(included.severity) %>%
   summarize(n.users = sum(!is.na(recall)),
             mean.recall = mean(recall, na.rm = TRUE),
-            median.recall = median(recall, na.rm = TRUE))
+            median.recall = median(recall, na.rm = TRUE),
+            std.recall = sd(recall, na.rm = TRUE))
 
 gt.counts.by.severity <-
   low.severity.check.data %>%
@@ -1497,7 +1498,8 @@ recall.by.severity.2 <-
   group_by(included.severity) %>%
   summarize(n.users = sum(!is.na(recall)),
             mean.recall = mean(recall, na.rm = TRUE),
-            median.recall = median(recall, na.rm = TRUE))
+            median.recall = median(recall, na.rm = TRUE),
+            std.recall = sd(recall, na.rm = TRUE))
 
 gt.counts.by.severity.2 <-
   low.severity.check.data.2 %>%

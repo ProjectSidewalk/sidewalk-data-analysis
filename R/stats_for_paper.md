@@ -333,19 +333,101 @@ NOTE: In this section, the data are binary (not ordinal), and is at the street l
 
 Below is a table showing the average recall across all users for labels that had severity &lt;=3 (in the ground truth) and labels that had severity &gt;=4, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 153 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.13. Thus, with an alpha level of 0.05, we fail to reject the null hypothesis, and *cannot* conclude that the means are different.
 
-| included.severity | gt.problem.labels | n.users | mean.recall | median.recall |
-|:------------------|:------------------|:--------|:------------|:--------------|
-| all               | 1405              | 130     | 0.639       | 0.714         |
-| &lt;=3            | 1247              | 130     | 0.639       | 0.714         |
-| &gt;=4            | 158               | 84      | 0.720       | 1.000         |
+<table style="width:100%;">
+<colgroup>
+<col width="21%" />
+<col width="21%" />
+<col width="10%" />
+<col width="14%" />
+<col width="17%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">included.severity</th>
+<th align="left">gt.problem.labels</th>
+<th align="left">n.users</th>
+<th align="left">mean.recall</th>
+<th align="left">median.recall</th>
+<th align="left">std.recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">all</td>
+<td align="left">1405</td>
+<td align="left">130</td>
+<td align="left">0.639</td>
+<td align="left">0.714</td>
+<td align="left">0.323</td>
+</tr>
+<tr class="even">
+<td align="left">&lt;=3</td>
+<td align="left">1247</td>
+<td align="left">130</td>
+<td align="left">0.639</td>
+<td align="left">0.714</td>
+<td align="left">0.329</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=4</td>
+<td align="left">158</td>
+<td align="left">84</td>
+<td align="left">0.720</td>
+<td align="left">1.000</td>
+<td align="left">0.398</td>
+</tr>
+</tbody>
+</table>
 
 Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 236 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.014. Thus, with an alpha level of 0.05, we reject the null hypothesis, and conclude that the means are in fact different. And we can see that the high severity recall is higher than the low severity recall, which matches our intuition.
 
-| included.severity | gt.problem.labels | n.users | mean.recall | median.recall |
-|:------------------|:------------------|:--------|:------------|:--------------|
-| all               | 1405              | 130     | 0.639       | 0.714         |
-| &lt;=2            | 1053              | 130     | 0.637       | 0.707         |
-| &gt;=3            | 352               | 116     | 0.746       | 1.000         |
+<table style="width:100%;">
+<colgroup>
+<col width="21%" />
+<col width="21%" />
+<col width="10%" />
+<col width="14%" />
+<col width="17%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">included.severity</th>
+<th align="left">gt.problem.labels</th>
+<th align="left">n.users</th>
+<th align="left">mean.recall</th>
+<th align="left">median.recall</th>
+<th align="left">std.recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">all</td>
+<td align="left">1405</td>
+<td align="left">130</td>
+<td align="left">0.639</td>
+<td align="left">0.714</td>
+<td align="left">0.323</td>
+</tr>
+<tr class="even">
+<td align="left">&lt;=2</td>
+<td align="left">1053</td>
+<td align="left">130</td>
+<td align="left">0.637</td>
+<td align="left">0.707</td>
+<td align="left">0.330</td>
+</tr>
+<tr class="odd">
+<td align="left">&gt;=3</td>
+<td align="left">352</td>
+<td align="left">116</td>
+<td align="left">0.746</td>
+<td align="left">1.000</td>
+<td align="left">0.353</td>
+</tr>
+</tbody>
+</table>
 
 ### Binary vs ordinal issues per segment
 
