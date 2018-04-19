@@ -308,17 +308,17 @@ NOTE: The red dots on the graphs are means.
 
 ### User behavior: Does auditing speed, etc influence accuracy
 
-Labels being investigated: labeling frequency, auditing speed, recall, and precision.
+Variables being investigated: labeling frequency, auditing speed, recall, and precision.
 
 NOTE: In this section, the data are binary (not ordinal), at the street level granularity (not 5 meter level) we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-Let's try doing some correlation tests. The first thing we would try to do is compute a Pearson correlation coefficient for each pair of variables that we want to compare. There are a few assumptions we should check before testing using this statistic: there should not be outliers in either variable being compared, the variables being compared should both be normally distributed, the relationship between the variables should be linear, and homoscedasticity of the fit (the standard deviations of the error terms do not depend on either variable).
+Let's try doing some correlation tests. The first thing we would try to do is compute a Pearson correlation coefficient for each pair of variables that we want to compare. There are a few assumptions we should check before testing using this statistic: there should not be outliers in either variable being compared, the variables being compared should both be normally distributed, the relationship between the variables should be linear, and the fit should be homoscedastic (the standard deviations of the error terms do not depend on either variable).
 
-We do have outliers (defined as more than 3.29 standard deviations from the mean) in the labeling frequency and auditing speed variables (shown in the two histograms on the left, below). Also, the accuracy metrics do not fit a normal distribution (shown in the two histograms on the right, below). I also ran the Shapiro-Wilk normality test, which failed for all the variables; this test definitely isn't perfect, but it is another way to look at normality. Thus, we are not using the Pearson correlation coefficient.
+We do have outliers (defined as more than 3.29 standard deviations from the mean) in the labeling frequency and auditing speed variables (shown in the two histograms on the left, below). Also, the accuracy metrics do not fit a normal distribution (shown in the two histograms on the right, below). I also ran the Shapiro-Wilk normality test, which failed for all the variables; this test definitely isn't perfect, but it is another way to look at normality. Because we do not meet multiple assumptions, we are not using the Pearson correlation coefficient.
 
 ![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.1-1.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.1-2.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.1-3.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.1-4.png)
 
-Since we are not using the Pearson correlation coefficient, we compute a rank correlation. We choose Kendall's tau-b coefficient over Spearman's rho coefficient because Kendall's tau-b makes adjustments for tied ranks, and there are many ties in our accuracy data (e.g., we have many users with recall = 1; so the rank is tied for all of those). Below is a table with the tau correlation coefficient (on a scale from -1 to 1, where further from 0 means larger correlation) and p-value, where the null hypothesis is that the correlation is 0.
+Since we are not using the Pearson correlation coefficient, we compute a non-parametric rank correlation. We choose Kendall's tau-b coefficient over Spearman's rho coefficient because Kendall's tau-b makes adjustments for tied ranks, and there are many ties in our accuracy data (e.g., we have many users with recall = 1; so the rank is tied for all of those). Note that there are variants on Spearman's rho that account for ties, but I believe it is more common to use Kendall's tau-b. Below is a table with the tau correlation coefficient (on a scale from -1 to 1, where further from 0 means larger correlation) and p-value, where the null hypothesis is that the correlation is 0.
 
 | first.var | second.var | tau    | p.value |
 |:----------|:-----------|:-------|:--------|
@@ -328,7 +328,7 @@ Since we are not using the Pearson correlation coefficient, we compute a rank co
 | speed     | precision  | 0.000  | 0.99235 |
 | frequency | speed      | -0.372 | 0.00000 |
 
-We found the correlation between labeling frequency and recall (tau = 0.207) to be statistically significant (p = 0.000001). We also found the correlation between labeling frequency and auditing speed (tau = -0.372) to be statistically significant (p = 0.0000000000000000004). There was not a significant correlation between either of those variables and precision, or betwee auditing speed at recall.
+We found the correlation between labeling frequency and recall (tau = 0.207) to be statistically significant (p = 0.000001). We also found the correlation between labeling frequency and auditing speed (tau = -0.372) to be statistically significant (p = 0.0000000000000000004). There was not a significant correlation between either of those variables and precision, or between auditing speed and recall.
 
 This matches our intuition. Placing more labels is associated with higher recall (makes sense), and placing more labels is associated with slower auditing speeds (also makes sense).
 
