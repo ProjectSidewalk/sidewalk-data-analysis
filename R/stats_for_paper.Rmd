@@ -574,13 +574,43 @@ There have been a total of `r n.audits` audits by our users across `r n.streets`
 ### Data lost due to filtering
 
 ```{r public.deployment.data.lost, echo=FALSE, warning=FALSE}
+researcher.ids <-
+  speeds %>%
+  filter(role %in% c('Researcher', 'Administrator', 'Owner')) %>%
+  distinct(user_id) %>%
+  pull()
+
+bad.non.researchers.ids <-
+  speeds %>%
+  filter(role %in% c('Registered', 'Anonymous', 'Turker'),
+         labels_per_100m < 3.75) %>%
+  distinct(user_id) %>%
+  pull()
+
+n.users.pre.filter <- n_distinct(speeds$user_id)
+n.researchers <- length(researcher.ids)
+n.bad.non.researchers <- length(bad.non.researchers.ids)
+n.filtered.users <- n.researchers + n.bad.non.researchers
+n.users.remaining <- n_distinct(filtered.speeds$user_id)
+
+percent.researchers <- format(100 * n.researchers / n.users.pre.filter, digits = 3)
+percent.bad.non.researchers <- format(100 * n.bad.non.researchers / n.users.pre.filter, digits = 3)
+percent.filtered.users <- format(100 * n.filtered.users / n.users.pre.filter, digits = 3)
+percent.users.remaining <- format(100 * n.users.remaining / n.users.pre.filter, digits = 3)
+
 n.labels.pre.filter <- n_distinct(labels$label_id)
-n.labels.post.filter <- n_distinct(filtered.labels$label_id)
-n.users.pre.filter <- n_distinct(audits$user_id)
-n.users.post.filter <- n_distinct(filtered.audits$user_id)
+n.labels.researcher <- n_distinct(labels[labels$user_id %in% researcher.ids,'label_id'])
+n.labels.bad.non.researcher <- n_distinct(labels[labels$user_id %in% bad.non.researchers.ids,'label_id'])
+n.filtered.labels <- n.labels.researcher + n.labels.bad.non.researcher
+n.labels.remaining <- n_distinct(filtered.labels$label_id)
+
+percent.labels.researcher <- format(100 * n.labels.researcher / n.labels.pre.filter, digits = 3)
+percent.labels.bad.non.researcher <- format(100 * n.labels.bad.non.researcher / n.labels.pre.filter, digits = 3)
+percent.filtered.labels <- format(100 * n.filtered.labels / n.labels.pre.filter, digits = 3)
+percent.labels.remaining <- format(100 * n.labels.remaining / n.labels.pre.filter, digits = 3)
 ```
 
-There were `r n.users.pre.filter` users who placed `r n.labels.pre.filter` labels pre-filtering. After filtering, we are left with `r n.users.post.filter` users (`r format(100 * n.users.post.filter / n.users.pre.filter, digits = 3)`%) who placed `r n.labels.post.filter` labels (`r format(100 * n.labels.post.filter / n.labels.pre.filter, digits = 3)`%).
+There were `r n.users.pre.filter` users who placed `r n.labels.pre.filter` labels pre-filtering. Researchers accounted for `r n.researchers` of the users (`r percent.researchers`%) and `r n.labels.researcher` of the labels (`r percent.labels.researcher`%). Non-researchers with low labeling frequency accounted for `r n.bad.non.researchers` of the users (`r percent.bad.non.researchers`%) and `r n.labels.bad.non.researcher` of the labels (`r percent.labels.bad.non.researcher`%). This means that we filtered out a total of `r n.filtered.users` of the users (`r percent.filtered.users`%) and `r n.filtered.labels` of the labels (`r percent.filtered.labels`%), and are left with `r n.users.remaining` of the users (`r percent.users.remaining`%) and `r n.labels.remaining` of the labels (`r percent.labels.remaining`%).
 
 
 ### User stats and tool usage

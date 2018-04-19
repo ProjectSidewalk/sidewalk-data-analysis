@@ -67,7 +67,7 @@ There have been a total of 19768 audits by our users across 13045 streets, avera
 
 ### Data lost due to filtering
 
-There were 958 users who placed 251795 labels pre-filtering. After filtering, we are left with 691 users (72.1%) who placed 155764 labels (61.9%).
+There were 958 users who placed 251795 labels pre-filtering. Researchers accounted for 28 of the users (2.92%) and 32499 of the labels (12.9%). Non-researchers with low labeling frequency accounted for 239 of the users (24.9%) and 55153 of the labels (21.9%). This means that we filtered out a total of 267 of the users (27.9%) and 87652 of the labels (34.8%), and are left with 691 of the users (72.1%) and 155764 of the labels (61.9%).
 
 ### User stats and tool usage
 
