@@ -7,6 +7,7 @@ April 17, 2018
     -   [High-level results](#high-level-results)
         -   [Top-line numbers (no filtering)](#top-line-numbers-no-filtering)
         -   [Data characteristics](#data-characteristics)
+        -   [Data lost due to filtering](#data-lost-due-to-filtering)
         -   [User stats and tool usage](#user-stats-and-tool-usage)
     -   [Possible Stories](#possible-stories)
         -   [Data overlap and agreement between users](#data-overlap-and-agreement-between-users)
@@ -63,6 +64,10 @@ This is the start of filtering out users with low labeling frequency (also filte
 | 89293    | 9256       | 32560      | 18174    | 685       | 1074  | 4722           | 155764 |
 
 There have been a total of 19768 audits by our users across 13045 streets, averaging 1.52 audits per street.
+
+### Data lost due to filtering
+
+There were 958 users who placed 251795 labels pre-filtering. After filtering, we are left with 691 users (72.1%) who placed 155764 labels (61.9%).
 
 ### User stats and tool usage
 

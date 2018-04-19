@@ -570,6 +570,19 @@ n.streets <- n_distinct(filtered.audits$street_edge_id)
 
 There have been a total of `r n.audits` audits by our users across `r n.streets` streets, averaging `r format(n.audits/n.streets, digits = 3)` audits per street.
 
+
+### Data lost due to filtering
+
+```{r public.deployment.data.lost, echo=FALSE, warning=FALSE}
+n.labels.pre.filter <- n_distinct(labels$label_id)
+n.labels.post.filter <- n_distinct(filtered.labels$label_id)
+n.users.pre.filter <- n_distinct(audits$user_id)
+n.users.post.filter <- n_distinct(filtered.audits$user_id)
+```
+
+There were `r n.users.pre.filter` users who placed `r n.labels.pre.filter` labels pre-filtering. After filtering, we are left with `r n.users.post.filter` users (`r format(100 * n.users.post.filter / n.users.pre.filter, digits = 3)`%) who placed `r n.labels.post.filter` labels (`r format(100 * n.labels.post.filter / n.labels.pre.filter, digits = 3)`%).
+
+
 ### User stats and tool usage
 
 TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
