@@ -626,19 +626,24 @@ kable(
   filtered.speeds %>%
     group_by(role) %>%
     dplyr::summarise(
-      n_users = n(),
+      n.users = n(),
       miles = median(miles_audited, na.rm = TRUE),
       km = median(meters_audited / 1000, na.rm = TRUE),
       missions = median(mission_count, na.rm = TRUE),
       audits = median(audit_count, na.rm = TRUE),
-      minutes_audited = median(minutes_audited, na.rm = TRUE),
-      km_per_hr = median(km_per_hr, na.rm = TRUE),
-      m_per_min = median(m_per_min, na.rm = TRUE),
-      minutes_per_1k_ft = median(minutes_per_1k_ft, na.rm = TRUE),
+      minutes.audited = median(minutes_audited, na.rm = TRUE),
+      minutes.audited.std = sd(minutes_audited, na.rm = TRUE),
+      km.per.hr = median(km_per_hr, na.rm = TRUE),
+      km.per.hr.std = sd(km_per_hr[km_per_hr != Inf], na.rm = TRUE),
+      m.per.min = median(m_per_min, na.rm = TRUE),
+      m.per.min.std = sd(m_per_min[m_per_min = Inf], na.rm = TRUE),
+      minutes.per.1k.ft = median(minutes_per_1k_ft, na.rm = TRUE),
+      minutes.per.1k.ft.std = sd(minutes_per_1k_ft, na.rm = TRUE),
       labels = median(label_count, na.rm = TRUE),
-      labels_per_100m = median(labels_per_100m, na.rm = TRUE),
+      label.per.100m = median(labels_per_100m, na.rm = TRUE),
+      labels.per.100m.std = sd(labels_per_100m, na.rm = TRUE),
       sessions = median(n_sessions, na.rm = TRUE),
-      mins_per_sess = median(minutes_per_session, na.rm = TRUE)
+      mins.per.sess = median(minutes_per_session, na.rm = TRUE)
       ),
   digits = 3,
   align = 'l'
@@ -1141,11 +1146,16 @@ kable(
     filter(granularity == 'street') %>%  # granularity doesn't affect these stats
     group_by(worker.type) %>%
     dplyr::summarize(
-      labels.per.100m = median(labels.per.100m, na.rm = TRUE),
-      km.per.hr = median(km.per.hr, na.rm = TRUE),
-      m.per.min = median(meters.per.min, na.rm = TRUE),
-      minutes.per.1k.ft = median(minutes.per.1k.ft, na.rm = TRUE),
-      minutes_audited = median(minutes_audited, na.rm = TRUE)
+      labs.p.100m = median(labels.per.100m, na.rm = TRUE),
+      labs.p.100m = sd(labels.per.100m, na.rm = TRUE),
+      km.p.hr = median(km.per.hr, na.rm = TRUE),
+      km.p.hr.std = sd(km.per.hr, na.rm = TRUE),
+      m.p.min = median(meters.per.min, na.rm = TRUE),
+      m.p.min.std = sd(meters.per.min, na.rm = TRUE),
+      mins.p.1k.ft = median(minutes.per.1k.ft, na.rm = TRUE),
+      mins.p.1k.ft.std = sd(minutes.per.1k.ft, na.rm = TRUE),
+      mins.audited = median(minutes_audited, na.rm = TRUE),
+      mins.audited.std = sd(minutes_audited, na.rm = TRUE)
     ),
   digits = 3,
   align = 'l'

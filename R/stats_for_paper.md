@@ -77,11 +77,11 @@ Below are the medians for a few metrics (followed by sums), split by user group.
 
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
 
-| role       | n\_users | miles | km    | missions | audits | minutes\_audited | km\_per\_hr | m\_per\_min | minutes\_per\_1k\_ft | labels | labels\_per\_100m | sessions | mins\_per\_sess |
-|:-----------|:---------|:------|:------|:---------|:-------|:-----------------|:------------|:------------|:---------------------|:-------|:------------------|:---------|:----------------|
-| Anonymous  | 371      | 0.081 | 0.130 | 0        | 1.0    | 9.24             | 0.868       | 14.462      | 21.077               | 21     | 14.868            | 2        | 5.295           |
-| Turker     | 130      | 0.348 | 0.560 | 4        | 4.5    | 24.09            | 1.428       | 23.808      | 12.803               | 57     | 10.476            | 1        | 22.685          |
-| Registered | 190      | 0.544 | 0.875 | 4        | 8.0    | 28.65            | 2.387       | 39.788      | 7.661                | 73     | 7.278             | 1        | 19.818          |
+| role       | n.users | miles | km    | missions | audits | minutes.audited | minutes.audited.std | km.per.hr | km.per.hr.std | m.per.min | m.per.min.std | minutes.per.1k.ft | minutes.per.1k.ft.std | labels | label.per.100m | labels.per.100m.std | sessions | mins.per.sess |
+|:-----------|:--------|:------|:------|:---------|:-------|:----------------|:--------------------|:----------|:--------------|:----------|:--------------|:------------------|:----------------------|:-------|:---------------|:--------------------|:---------|:--------------|
+| Anonymous  | 371     | 0.081 | 0.130 | 0        | 1.0    | 9.24            | 20.178              | 0.868     | 1.392         | 14.462    | NA            | 21.077            | 66.639                | 21     | 14.868         | 49.941              | 2        | 5.295         |
+| Turker     | 130     | 0.348 | 0.560 | 4        | 4.5    | 24.09           | 731.728             | 1.428     | 2.024         | 23.808    | NA            | 12.803            | 66.360                | 57     | 10.476         | 21.799              | 1        | 22.685        |
+| Registered | 190     | 0.544 | 0.875 | 4        | 8.0    | 28.65           | 71.651              | 2.387     | 2.574         | 39.788    | NA            | 7.661             | 45.355                | 73     | 7.278          | 26.227              | 1        | 19.818        |
 
 | role       | n\_users | miles | km   | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
 |:-----------|:---------|:------|:-----|:---------|:---------|:-------|:---------------|:-------|:-----------|
@@ -227,11 +227,11 @@ Next we have some descriptive statistics of users, by user group. These are aver
 
 NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-| worker.type | labels.per.100m | km.per.hr | m.per.min | minutes.per.1k.ft | minutes\_audited |
-|:------------|:----------------|:----------|:----------|:------------------|:-----------------|
-| anon        | 4.921           | 2.853     | 47.547    | 6.418             | 12.835           |
-| reg         | 5.988           | 3.108     | 51.794    | 5.893             | 23.570           |
-| turk1       | 7.669           | 1.864     | 31.067    | 9.818             | 33.350           |
+| worker.type | labs.p.100m | km.p.hr | km.p.hr.std | m.p.min | m.p.min.std | mins.p.1k.ft | mins.p.1k.ft.std | mins.audited | mins.audited.std |
+|:------------|:------------|:--------|:------------|:--------|:------------|:-------------|:-----------------|:-------------|:-----------------|
+| anon        | 3.382       | 2.853   | 2.290       | 47.547  | 38.164      | 6.418        | 3.151            | 12.835       | 6.302            |
+| reg         | 3.457       | 3.108   | 1.826       | 51.794  | 30.429      | 5.893        | 3.236            | 23.570       | 12.945           |
+| turk1       | 4.109       | 1.864   | 0.674       | 31.067  | 11.234      | 9.818        | 4.191            | 33.350       | 16.038           |
 
 Below, we have a table of aggregate (sum) stats by user group.
 
