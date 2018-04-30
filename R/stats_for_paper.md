@@ -312,23 +312,33 @@ Variables being investigated: labeling frequency, auditing speed, recall, and pr
 
 NOTE: In this section, the data are binary (not ordinal), at the street level granularity (not 5 meter level) we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-Let's try doing some correlation tests. The first thing we would try to do is compute a Pearson correlation coefficient for each pair of variables that we want to compare. There are a few assumptions we should check before testing using this statistic: there should not be outliers in either variable being compared, the variables being compared should both be normally distributed, the relationship between the variables should be linear, and the fit should be homoscedastic (the standard deviations of the error terms do not depend on either variable).
+First, let's take a look at the relationships between the variables.
 
-We do have outliers (defined as more than 3.29 standard deviations from the mean) in the labeling frequency and auditing speed variables (shown in the two histograms on the left, below). Also, the accuracy metrics do not fit a normal distribution (shown in the two histograms on the right, below). I also ran the Shapiro-Wilk normality test, which failed for all the variables; this test definitely isn't perfect, but it is another way to look at normality. Because we do not meet multiple assumptions, we are not using the Pearson correlation coefficient.
+![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.fits-1.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.fits-2.png)
 
-![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.1-1.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.1-2.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.1-3.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.1-4.png)
+The only variable that seem to have a relationship are recall and labeling frequency.
 
-Since we are not using the Pearson correlation coefficient, we compute a non-parametric rank correlation. We choose Kendall's tau-b coefficient over Spearman's rho coefficient because Kendall's tau-b makes adjustments for tied ranks, and there are many ties in our accuracy data (e.g., we have many users with recall = 1; so the rank is tied for all of those). Note that there are variants on Spearman's rho that account for ties, but I believe it is more common to use Kendall's tau-b. Below is a table with the tau correlation coefficient (on a scale from -1 to 1, where further from 0 means larger correlation) and p-value, where the null hypothesis is that the correlation is 0.
+Let's try doing a correlation test. Ideally, we would like to do a correlation test based on the Pearson's correlation coefficient (denoted 'r'). This comes with some normality assumptions, however. The main assumptions are that each of our variables are distributed normally, and that the relationship between them is linear. In the graph above, we see that the relationship between labeling frequency and recall is arguably linear. Now let's see if each variable is normally distributed.
 
-| first.var | second.var | tau    | p.value |
-|:----------|:-----------|:-------|:--------|
-| frequency | recall     | 0.207  | 0.00000 |
-| speed     | recall     | -0.044 | 0.29613 |
-| frequency | precision  | -0.013 | 0.76235 |
-| speed     | precision  | 0.000  | 0.99235 |
-| frequency | speed      | -0.372 | 0.00000 |
+![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.1-1.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.1-2.png)
 
-We found the correlation between labeling frequency and recall (tau = 0.207) to be statistically significant (p = 0.000001). We also found the correlation between labeling frequency and auditing speed (tau = -0.372) to be statistically significant (p = 0.0000000000000000004). There was not a significant correlation between either of those variables and precision, or between auditing speed and recall.
+These are fairly close to normally distributed, so we will move ahead with the Pearson correlation test.
+
+NOTE: I feel like we don't *really* meet these assumptions fully. But we are sort of close-ish, and choosing an alternative test complicates how we talk about the analysis a bit (and we end up getting a similar result anyway). Being trained in statistics, I lean towards the nonparametric test that is more complicated. However, I don't know how lenient people generally are with the Pearson correlation test; I don't have a great sense of how robust it is to breaking of assumptions. I report both numbers below, and if y'all would rather go for more complicated, I am more than happy to do that (I already have the text written up, just need to add it here in that case).
+
+Below is a table with the Pearson's r coefficients (on a scale from -1 to 1, where further from 0 means larger correlation) and p-value, where the null hypothesis is that the correlation is 0. I did this for every pairing of variables, just so you get to see them. I also added the nonparametric test (Kendall's Tau-b) we could do if we wanted to go more complex (and more precise).
+
+NOTE: I also added a test to compare labeling frequency and auditing speed, which turned out to be significant. It met the same assumptions as for the test between recall and labeling frequency, I just didn't show the plots (because clutter). If it becomes important and we want to talk about it in the paper, then I can add the plots. Though I think it may be a bit too obvious for the paper.
+
+| first.var | second.var | r      | p.value.r | tau    | p.value.tau |
+|:----------|:-----------|:-------|:----------|:-------|:------------|
+| frequency | recall     | 0.354  | 0.00003   | 0.278  | 0.00000     |
+| speed     | recall     | -0.069 | 0.43219   | -0.025 | 0.67644     |
+| frequency | precision  | -0.086 | 0.32958   | -0.046 | 0.44151     |
+| speed     | precision  | 0.002  | 0.97802   | 0.003  | 0.96076     |
+| frequency | speed      | -0.447 | 0.00000   | -0.372 | 0.00000     |
+
+We found the correlation between labeling frequency and recall (r = 0.354) to be statistically significant (p = 0.00003). We also found the correlation between labeling frequency and auditing speed (r = -0.447) to be statistically significant (p = 0). There was not a significant correlation between either of those variables and precision, or between auditing speed and recall.
 
 This matches our intuition. Placing more labels is associated with higher recall (makes sense), and placing more labels is associated with slower auditing speeds (also makes sense).
 
