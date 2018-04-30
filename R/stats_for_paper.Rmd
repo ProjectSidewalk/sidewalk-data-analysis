@@ -1316,7 +1316,7 @@ granularity.analysis.summary <-
                    error.bar.max = min(1, accuracy.value + se))
 
 ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.value)) +
-  geom_col(aes(fill = granularity), position = position_dodge()) +
+  geom_col(aes(group = granularity, fill = granularity), position = position_dodge()) +
   geom_errorbar(aes(ymin = error.bar.min, ymax = error.bar.max, group = granularity),
                 width = 0.25, position = position_dodge(0.9)) +
   scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.0), expand = c(0.01, 0)) +
