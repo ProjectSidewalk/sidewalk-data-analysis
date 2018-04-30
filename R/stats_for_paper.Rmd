@@ -14,7 +14,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
 library(RPostgreSQL)
-library(ggplot2)
+library(ggplot2) # may need to use devtools::install_github('tidyverse/ggplot2') if version < 2.2.2
 library(tidyr)
 library(dplyr)
 library(forcats)
@@ -1439,11 +1439,15 @@ max.speed <- format(max(turk.behavior.data$meters.per.min), digits = 2)
 
 First, let's take a look at the relationships between the variables.
 
-```{r turk.user.behavior.analysis.correlation.tests.fits, echo=FALSE, fig.width=2.5, fig.height=4}
+```{r turk.user.behavior.analysis.correlation.tests.fits, echo=FALSE, fig.width=3, fig.height=4.5}
+# Subset the data appropriately.
 turk.behavior.corr.test.data <-
   turk.behavior.data %>%
   filter(label.type == 'All', accuracy.type != 'f.measure')
+turk.behavior.rec <- turk.behavior.corr.test.data %>% filter(accuracy.type == 'recall')
+turk.behavior.prec <- turk.behavior.corr.test.data %>% filter(accuracy.type == 'precision')
 
+# Plot relationships between variables.
 ggplot(turk.behavior.corr.test.data, aes(x = labels.per.100m, y = accuracy.value)) +
   geom_point() +
   stat_smooth(method = 'lm') +
@@ -1456,57 +1460,38 @@ ggplot(turk.behavior.corr.test.data, aes(x = meters.per.min, y = accuracy.value)
   facet_grid(accuracy.type ~ .)
 ```
 
-The only variable that seem to have a relationship are recall and labeling frequency.
+The only variables that seem to have a relationship are recall and labeling frequency, so let's try doing a correlation test between them.
 
-Let's try doing a correlation test. Ideally, we would like to do a correlation test based on the Pearson's correlation coefficient (denoted 'r'). This comes with some normality assumptions, however. The main assumptions are that each of our variables are distributed normally, and that the relationship between them is linear. In the graph above, we see that the relationship between labeling frequency and recall is arguably linear. Now let's see if each variable is normally distributed.
+Ideally, we would like to do a correlation test based on the Pearson's correlation coefficient (denoted 'r'). However, this comes with quite a few assumptions. Assumptions include normality of both variables, a linear relationship between the variables, and homoscedasticity of the residuals. One of the most important assumptions is the absence of outliers, as Pearson's r is very sensitive to outliers. You can see in the graph above that there are some major outliers in our data, so we aren't going to use the Pearson's r correlation coefficient (I am adding some small graphs that look at the other assumptions below the results, if you're curious).
 
-```{r turk.user.behavior.analysis.correlation.tests.1, echo=FALSE, fig.width=2.5, fig.height=2.5}
-ggplot(data = turk.behavior.corr.test.data %>% filter(accuracy.type == 'recall'),
-       aes(x = labels.per.100m)) +
-  geom_histogram(binwidth = 1,na.rm = TRUE) +
-  theme_bw()
+Since we are not using the Pearson correlation coefficient, we compute a non-parametric rank correlation. We choose Kendall's tau-b coefficient over Spearman's rho coefficient because Kendall's tau-b makes adjustments for tied ranks, and there are many ties in our accuracy data (e.g., we have many users with recall = 1; so the rank is tied for all of those). Note that there are variants on Spearman's rho that account for ties, but I believe it is more common to use Kendall's tau-b.
 
-ggplot(data = turk.behavior.corr.test.data %>% filter(accuracy.type == 'recall'),
-       aes(x = accuracy.value)) +
-  geom_histogram(binwidth = 0.1, na.rm = TRUE) +
-  xlab('Recall') +
-  theme_bw()
-```
+Below is a table with the tau correlation coefficient (on a scale from -1 to 1, where further from 0 means larger correlation) and p-value, where the null hypothesis is that the correlation is 0. I also added the tests for the other combinations of variables for the sake of completeness. I also added a test of the relationship between labeling frequency and auditing speed, which was (not surprisingly) statistically significant.
 
-These are fairly close to normally distributed, so we will move ahead with the Pearson correlation test.
+```{r turk.user.behavior.analysis.correlation.tests, echo=FALSE, fig.width=2.5, fig.height=5}
+# Kendall rank correlation coefficients.
+freq.rec.k <- Kendall(turk.behavior.rec$labels.per.100m, turk.behavior.rec$accuracy.value)
+speed.rec.k <- Kendall(turk.behavior.rec$meters.per.min, turk.behavior.rec$accuracy.value)
+freq.prec.k <- Kendall(turk.behavior.prec$labels.per.100m, turk.behavior.prec$accuracy.value)
+speed.prec.k <- Kendall(turk.behavior.prec$meters.per.min, turk.behavior.prec$accuracy.value)
+freq.speed.k <- Kendall(turk.behavior.rec$labels.per.100m, turk.behavior.rec$meters.per.min)
 
-NOTE: I feel like we don't _really_ meet these assumptions fully. But we are sort of close-ish, and choosing an alternative test complicates how we talk about the analysis a bit (and we end up getting a similar result anyway). Being trained in statistics, I lean towards the nonparametric test that is more complicated. However, I don't know how lenient people generally are with the Pearson correlation test; I don't have a great sense of how robust it is to breaking of assumptions. I report both numbers below, and if y'all would rather go for more complicated, I am more than happy to do that (I already have the text written up, just need to add it here in that case).
+# Note: cor.test defaults to Pearson coefficient.
+freq.rec.p <- cor.test(turk.behavior.rec$labels.per.100m, turk.behavior.rec$accuracy.value)
+speed.rec.p <- cor.test(turk.behavior.rec$meters.per.min, turk.behavior.rec$accuracy.value)
+freq.prec.p <- cor.test(turk.behavior.prec$labels.per.100m, turk.behavior.prec$accuracy.value)
+speed.prec.p <- cor.test(turk.behavior.prec$meters.per.min, turk.behavior.prec$accuracy.value)
+freq.speed.p <- cor.test(turk.behavior.rec$labels.per.100m, turk.behavior.rec$meters.per.min)
 
-Below is a table with the Pearson's r coefficients (on a scale from -1 to 1, where further from 0 means larger correlation) and p-value, where the null hypothesis is that the correlation is 0. I did this for every pairing of variables, just so you get to see them. I also added the nonparametric test (Kendall's Tau-b) we could do if we wanted to go more complex (and more precise).
-
-NOTE: I also added a test to compare labeling frequency and auditing speed, which turned out to be significant. It met the same assumptions as for the test between recall and labeling frequency, I just didn't show the plots (because clutter). If it becomes important and we want to talk about it in the paper, then I can add the plots. Though I think it may be a bit too obvious for the paper.
-
-```{r turk.user.behavior.analysis.correlation.tests.spearman, echo=FALSE, fig.width=2.5, fig.height=5}
-turk.behavior.rec <- turk.behavior.corr.test.data %>% filter(accuracy.type == 'recall')
-turk.behavior.prec <- turk.behavior.corr.test.data %>% filter(accuracy.type == 'precision')
-
-freq.rec.test.p <- cor.test(turk.behavior.rec$labels.per.100m, turk.behavior.rec$accuracy.value, method = 'pearson')
-
-
-freq.rec.test.k <- Kendall(turk.behavior.rec$labels.per.100m, turk.behavior.rec$accuracy.value)
-speed.rec.test.k <- Kendall(turk.behavior.rec$meters.per.min, turk.behavior.rec$accuracy.value)
-freq.prec.test.k <- Kendall(turk.behavior.prec$labels.per.100m, turk.behavior.prec$accuracy.value)
-speed.prec.test.k <- Kendall(turk.behavior.prec$meters.per.min, turk.behavior.prec$accuracy.value)
-freq.speed.test.k <- Kendall(turk.behavior.rec$labels.per.100m, turk.behavior.rec$meters.per.min)
-
-# Note: cor.test defaults to Pearson coefficient
-freq.rec.test.p <- cor.test(turk.behavior.rec$labels.per.100m, turk.behavior.rec$accuracy.value)
-speed.rec.test.p <- cor.test(turk.behavior.rec$meters.per.min, turk.behavior.rec$accuracy.value)
-freq.prec.test.p <- cor.test(turk.behavior.prec$labels.per.100m, turk.behavior.prec$accuracy.value)
-speed.prec.test.p <- cor.test(turk.behavior.prec$meters.per.min, turk.behavior.prec$accuracy.value)
-freq.speed.test.p <- cor.test(turk.behavior.rec$labels.per.100m, turk.behavior.rec$meters.per.min)
+kendall.list <- list(freq.rec.k, speed.rec.k, freq.prec.k, speed.prec.k, freq.speed.k)
+pearson.list <- list(freq.rec.p, speed.rec.p, freq.prec.p, speed.prec.p, freq.speed.p)
 
 first.var <- c('frequency', 'speed', 'frequency', 'speed', 'frequency')
 second.var <- c('recall', 'recall', 'precision', 'precision', 'speed')
-r <- c(freq.rec.test.p$estimate, speed.rec.test.p$estimate, freq.prec.test.p$estimate, speed.prec.test.p$estimate, freq.speed.test.p$estimate)
-p.val.r <- c(freq.rec.test.p$p.value, speed.rec.test.p$p.value, freq.prec.test.p$p.value, speed.prec.test.p$p.value, freq.speed.test.p$p.value)
-tau <- c(freq.rec.test.k$tau, speed.rec.test.k$tau, freq.prec.test.k$tau, speed.prec.test.k$tau, freq.speed.test.k$tau)
-p.val.tau <- c(freq.rec.test.k$sl[1], speed.rec.test.k$sl[1], freq.prec.test.k$sl[1], speed.prec.test.k$sl[1], freq.speed.test.k$sl[1])
+r <- unlist(lapply(pearson.list, function(x) x$estimate))
+p.val.r <- unlist(lapply(pearson.list, function(x) x$p.value))
+tau <- unlist(lapply(kendall.list, function(x) x$tau))
+p.val.tau <- unlist(lapply(kendall.list, function(x) x$sl[1]))
 
 kable(
   data.frame(first.var,
@@ -1520,9 +1505,63 @@ kable(
 )
 ```
 
-We found the correlation between labeling frequency and recall (r = `r format(freq.rec.test.p$estimate, digits = 3)`) to be statistically significant (p = `r format(round(freq.rec.test.p$p.value, digits = 5), scientific = FALSE, digits = 5)`). We also found the correlation between labeling frequency and auditing speed (r = `r format(freq.speed.test.p$estimate, digits = 3)`) to be statistically significant (p = `r format(round(freq.speed.test.p$p.value, digits = 5), scientific = FALSE, digits = 5)`). There was not a significant correlation between either of those variables and precision, or between auditing speed and recall.
+We found the correlation between labeling frequency and recall (r = `r format(freq.rec.k$tau, digits = 3)`) to be statistically significant (p = `r format(round(freq.rec.k$sl[1], digits = 5), scientific = FALSE, digits = 5)`). We also found the correlation between labeling frequency and auditing speed (r = `r format(freq.speed.k$tau, digits = 3)`) to be statistically significant (p = `r format(round(freq.speed.k$sl[1], digits = 5), scientific = FALSE, digits = 5)`). There was not a significant correlation between either of those variables and precision, or between auditing speed and recall.
 
-This matches our intuition. Placing more labels is associated with higher recall (makes sense), and placing more labels is associated with slower auditing speeds (also makes sense).
+This matches our intuition. Placing more labels is associated with higher recall (makes sense), and placing more labels is associated with slower auditing speeds (also makes sense).<br>
+
+
+_For those interested_, here is a look at the normality of the relevant variables in the tests above. As mentioned above, we don't use the Pearson's r because these variables have outliers. They also (sort of) don't meet the normality assumption. It is sort of a toss up for these variables in terms of normality, honestly. Below are histograms for them, and qq plots (which compares quantiles in the sample to a theoretical normal distribution, so values that trail off the line on the ends indicate non-normality).
+
+```{r turk.user.behavior.analysis.correlation.normality, echo=FALSE, fig.width=2.5, fig.height=2.5}
+# Reference on checking normality: http://www.sthda.com/english/wiki/normality-test-in-r
+
+# Recall histogram.
+ggplot(data = turk.behavior.rec,
+       aes(x = accuracy.value)) +
+  geom_histogram(binwidth = 0.1, na.rm = TRUE) +
+  xlab('Recall') +
+  theme_bw()
+# Labeling frequency histogram.
+ggplot(data = turk.behavior.rec,
+       aes(x = labels.per.100m)) +
+  geom_histogram(binwidth = 1,na.rm = TRUE) +
+  theme_bw()
+# Auditing speed histogram.
+ggplot(data = turk.behavior.rec,
+       aes(x = meters.per.min)) +
+  geom_histogram(binwidth = 10,na.rm = TRUE) +
+  theme_bw()
+
+# Recall qq plot.
+ggplot(data = turk.behavior.rec,
+       aes(sample = accuracy.value)) +
+  stat_qq(na.rm = TRUE) +
+  geom_qq_line(na.rm = TRUE) +
+  xlab('Theoretical normal') +
+  ylab('Recall') +
+  theme_bw()
+# Labeling frequency qq plot.
+ggplot(data = turk.behavior.rec,
+       aes(sample = labels.per.100m)) +
+  stat_qq(na.rm = TRUE) +
+  geom_qq_line(na.rm = TRUE) +
+  xlab('Theoretical normal') +
+  ylab('Labels per 100m') +
+  theme_bw()
+# Auditing speed qq plot.
+ggplot(data = turk.behavior.rec,
+       aes(sample = meters.per.min)) +
+  stat_qq(na.rm = TRUE) +
+  geom_qq_line(na.rm = TRUE) +
+  xlab('Theoretical normal') +
+  ylab('Meters per minute') +
+  theme_bw()
+
+# Shapiro normality tests for labeling frequency and recall.
+normality.shapiro.recall <- shapiro.test(turk.behavior.rec %>% pull(accuracy.value))
+normality.shapiro.labeling.freq <- shapiro.test(turk.behavior.rec %>% pull(labels.per.100m))
+normality.shapiro.auditing.speed <- shapiro.test(turk.behavior.rec %>% pull(meters.per.min))
+```
 
 
 *Old graphs/text below for reference:*
