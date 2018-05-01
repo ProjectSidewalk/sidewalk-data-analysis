@@ -68,6 +68,11 @@ if (REFRESH_TURK_STUDY_DATA) {
 
 
 ```{r reading.data, echo=FALSE, include=FALSE}
+audits.path <- '../data/stats_for_paper_audits.csv'
+times.path <- '../data/stats_for_paper_times.csv'
+labels.path <- '../data/stats_for_paper_labels.csv'
+sessions.path <- '../data/stats_for_paper_sessions.csv'
+missions.path <- '../data/stats_for_paper_reg_missions.csv'
 if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   reg.labels <-
     dbGetQuery(
@@ -78,7 +83,8 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       INNER JOIN audit_task ON user_role.user_id = audit_task.user_id
       INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
       WHERE label.deleted = FALSE
-      AND user_role.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\''
+          AND user_role.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+          AND gsv_panorama_id NOT IN (SELECT gsv_panorama_id FROM gsv_onboarding_pano)'
       )
   anon.labels <-
     dbGetQuery(
@@ -89,11 +95,13 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
                        label_type_id,
                        audit_task.audit_task_id
       FROM audit_task
-      INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
+      INNER JOIN label
+          ON audit_task.audit_task_id = label.audit_task_id
       INNER JOIN audit_task_environment
           ON audit_task.audit_task_id = audit_task_environment.audit_task_id
       WHERE label.deleted = FALSE
-      AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\''
+          AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+          AND gsv_panorama_id NOT IN (SELECT gsv_panorama_id FROM gsv_onboarding_pano)'
       )
   reg.audits <-
     dbGetQuery(
@@ -103,14 +111,14 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
               ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS feet_audited
       FROM street_edge
       INNER JOIN audit_task
-      ON street_edge.street_edge_id = audit_task.street_edge_id
+          ON street_edge.street_edge_id = audit_task.street_edge_id
       INNER JOIN user_role
-      ON audit_task.user_id = user_role.user_id
+          ON audit_task.user_id = user_role.user_id
       INNER JOIN role
-      ON user_role.role_id = role.role_id
+          ON user_role.role_id = role.role_id
       WHERE street_edge.deleted = FALSE
-      AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-      AND completed = TRUE'
+          AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+          AND completed = TRUE'
       )
   anon.audits <-
     dbGetQuery(
@@ -219,8 +227,8 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
               SELECT  user_id,
                       ip_address,
                       (
-                      timestamp - Lag(timestamp, 1)
-                      OVER(PARTITION BY user_id ORDER BY timestamp)
+                          timestamp - Lag(timestamp, 1)
+                          OVER(PARTITION BY user_id ORDER BY timestamp)
                       ) AS diff
               FROM audit_task_interaction
               INNER JOIN audit_task
@@ -228,8 +236,8 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
               INNER JOIN audit_task_environment
                   ON audit_task.audit_task_id = audit_task_environment.audit_task_id
               WHERE action = \'ViewControl_MouseDown\'
-              AND audit_task.user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-              AND ip_address IN
+                  AND audit_task.user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+                  AND ip_address IN
               (
                   SELECT ip_address
                   FROM audit_task_environment
@@ -241,7 +249,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           WHERE diff > \'01:00:00.000\'
           GROUP BY ip_address
       ) sess_counts
-      ON ips.ip_address = sess_counts.ip_address;'
+          ON ips.ip_address = sess_counts.ip_address;'
       )
   reg.missions <-
     dbGetQuery(
@@ -250,40 +258,47 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       FROM "user"
       LEFT JOIN
       (
-        SELECT "user".user_id, COUNT(mission_user_id)
-        FROM "user"
-        INNER JOIN mission_user
-        ON "user".user_id = mission_user.user_id
-        GROUP BY "user".user_id
-      ) "nonzero_counts"
-      ON nonzero_counts.user_id = "user".user_id
+          SELECT "user".user_id, COUNT(mission_user_id)
+          FROM "user"
+          INNER JOIN mission_user ON "user".user_id = mission_user.user_id
+          GROUP BY "user".user_id
+      ) nonzero_counts
+          ON nonzero_counts.user_id = "user".user_id
       WHERE "user".user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
   dbDisconnect(db.connection.public.deployment)
   
+  # Combine registered and anonymous user results.
   audits <- bind_rows(reg.audits, anon.audits)
   times <- bind_rows(reg.times, anon.times)
   labels <- bind_rows(reg.labels, anon.labels)
   sessions <- bind_rows(reg.sessions, anon.sessions)
-  write.csv(audits, '../data/stats_for_paper_audits.csv', row.names = FALSE)
-  write.csv(times, '../data/stats_for_paper_times.csv', row.names = FALSE)
-  write.csv(labels, '../data/stats_for_paper_labels.csv', row.names = FALSE)
-  write.csv(sessions, '../data/stats_for_paper_sessions.csv', row.names = FALSE)
-  write.csv(reg.missions, '../data/stats_for_paper_reg_missions.csv', row.names = FALSE)
+
+  # Copy the old data files over with timestamp in case we want to look back at them.
+  now <- gsub(' ', '_', Sys.time())
+  file.copy(audits.path, paste('../data/old/stats_for_paper_audits', now, sep = '_'))
+  file.copy(times.path, paste('../data/old/stats_for_paper_times.csv', now, sep = '_'))
+  file.copy(labels.path, paste('../data/old/stats_for_paper_labels.csv', now, sep = '_'))
+  file.copy(sessions.path, paste('../data/old/stats_for_paper_sessions.csv', now, sep = '_'))
+  file.copy(missions.path, paste('../data/old/stats_for_paper_reg_missions.csv', now, sep = '_'))
+
+  # Overwrite old data files with new results of queries.
+  write.csv(audits, audits.path, row.names = FALSE)
+  write.csv(times, times.path, row.names = FALSE)
+  write.csv(labels, labels.path, row.names = FALSE)
+  write.csv(sessions, sessions.path, row.names = FALSE)
+  write.csv(reg.missions, missions.path, row.names = FALSE)
 } else {
-  audit.classes <- c('character', 'character', 'numeric', 'numeric', 'numeric')
-  audits <- read.csv('../data/stats_for_paper_audits.csv', colClasses = audit.classes)
-  time.classes <- c('character', 'numeric')
-  times <- read.csv('../data/stats_for_paper_times.csv', colClasses = time.classes)
-  label.classes <- c('numeric', 'character', 'character', 'numeric', 'numeric')
-  labels <- read.csv('../data/stats_for_paper_labels.csv', colClasses = label.classes)
-  session.classes <- c('character', 'numeric')
-  sessions <- read.csv('../data/stats_for_paper_sessions.csv', colClasses = session.classes)
-  mission.classes <- c('character', 'numeric')
-  reg.missions <- read.csv('../data/stats_for_paper_reg_missions.csv', colClasses = mission.classes)
+  audits <- read.csv(audits.path, colClasses = c('character', 'character', replicate(3, 'numeric')))
+  times <- read.csv(times.path, colClasses = c('character', 'numeric'))
+  labels <- read.csv(labels.path,
+                     colClasses = c('numeric', 'character', 'character', 'numeric', 'numeric'))
+  sessions <- read.csv(sessions.path, colClasses = c('character', 'numeric'))
+  reg.missions <- read.csv(missions.path, colClasses = c('character', 'numeric'))
 }
 
-
+turk.times.path <- '../data/stats_for_paper_times-turk.csv'
+turk.labels.path <- '../data/stats_for_paper_labels-turk.csv'
 if (REFRESH_TURK_STUDY_DATA) {
   reg.labels.turk.study <-
     dbGetQuery(
@@ -296,7 +311,7 @@ if (REFRESH_TURK_STUDY_DATA) {
                             AND amt_volunteer_route.volunteer_id = audit_task.user_id
       INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
       WHERE amt_condition.amt_condition_id NOT IN (71, 104, 123, 124, 138)
-      AND label.deleted <> TRUE'
+          AND label.deleted <> TRUE'
       )
   anon.labels.turk.study <-
     dbGetQuery(
@@ -314,7 +329,7 @@ if (REFRESH_TURK_STUDY_DATA) {
           AND amt_volunteer_route.ip_address = audit_task_environment.ip_address
       INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
       WHERE amt_condition.amt_condition_id NOT IN (71, 104, 123, 124, 138)
-      AND label.deleted <> TRUE'
+          AND label.deleted <> TRUE'
       )
   turk.labels.turk.study <-
     dbGetQuery(
@@ -324,7 +339,7 @@ if (REFRESH_TURK_STUDY_DATA) {
       INNER JOIN audit_task ON amt_assignment.amt_assignment_id = audit_task.amt_assignment_id
       INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
       WHERE amt_assignment.condition_id NOT IN (71, 104, 123, 124, 138)
-      AND label.deleted <> TRUE'
+          AND label.deleted <> TRUE'
       )
   reg.times.turk.study <-
     dbGetQuery(
@@ -408,27 +423,22 @@ if (REFRESH_TURK_STUDY_DATA) {
   dbDisconnect(db.connection.turk.study.production)
   dbDisconnect(db.connection.turk.study)
   
-  # audits.turk.study <- bind_rows(reg.audits.turk.study, anon.audits.turk.study, turk.audits.turk.study)
+  # Combine results of registerd volunteers, anon volunteers, and turkers.
   times.turk.study <- bind_rows(reg.times.turk.study, anon.times.turk.study, turk.times.turk.study)
   labels.turk.study <- bind_rows(reg.labels.turk.study, anon.labels.turk.study, turk.labels.turk.study)
-  # sessions.turk.study <- bind_rows(reg.sessions.turk.study, anon.sessions.turk.study, turk.sessions.turk.study)
-  # write.csv(audits.turk.study, '../data/stats_for_paper_audits-turk_study.csv', row.names = FALSE)
-  write.csv(times.turk.study, '../data/stats_for_paper_times-turk_study.csv', row.names = FALSE)
-  write.csv(labels.turk.study, '../data/stats_for_paper_labels-turk_study.csv', row.names = FALSE)
-  # write.csv(sessions.turk.study, '../data/stats_for_paper_sessions-turk_study.csv', row.names = FALSE)
+
+  # Copy the old data files over with timestamp in case we want to look back at them.
+  now <- gsub(' ', '_', Sys.time())
+  file.copy(turk.times.path, paste('../data/old/stats_for_paper_times-turk.csv', now, sep = '_'))
+  file.copy(turk.labels.path, paste('../data/old/stats_for_paper_labels-turk.csv', now, sep = '_'))
+
+  # Overwrite old data files with new results of queries.
+  write.csv(times.turk.study, turk.times.path, row.names = FALSE)
+  write.csv(labels.turk.study, turk.labels.path, row.names = FALSE)
 } else {
-  # audit.classes.turk.study <- c('character', 'character', 'numeric', 'numeric', 'numeric')
-  # audits.turk.study <- read.csv('../data/stats_for_paper_audits-turk_study.csv',
-  #                               colClasses = audit.classes.turk.study)
-  time.classes.turk.study <- c('character', 'numeric')
-  times.turk.study <- read.csv('../data/stats_for_paper_times-turk_study.csv',
-                               colClasses = time.classes.turk.study)
-  label.classes.turk.study <- c('numeric', 'character', 'numeric', 'numeric', 'numeric')
-  labels.turk.study <- read.csv('../data/stats_for_paper_labels-turk_study.csv',
-                                colClasses = label.classes.turk.study)
-  # session.classes.turk.study <- c('character', 'numeric')
-  # sessions.turk.study <- read.csv('../data/stats_for_paper_sessions-turk_study.csv',
-  #                                 colClasses = session.classes.turk.study)
+  times.turk.study <- read.csv(turk.times.path, colClasses = c('character', 'numeric'))
+  labels.turk.study <- read.csv(turk.labels.path,
+                                colClasses = c('numeric', 'character', replicate(3, 'numeric')))
 }
 
 zoning.classes <- c('numeric', 'numeric', 'numeric', 'factor', 'factor', 'logical')

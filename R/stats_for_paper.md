@@ -46,14 +46,14 @@ The following are the label counts (not issue counts) by user group and label ty
 
 | label\_type    | Anon         | Registered    | Turker         | Researcher    | Total           |
 |:---------------|:-------------|:--------------|:---------------|:--------------|:----------------|
-| CurbRamp       | 16557 (6.6%) | 28085 (11.2%) | 89766 (35.7%)  | 18686 (7.4%)  | 153094 (60.8%)  |
-| NoCurbRamp     | 2510 (1.0%)  | 3447 (1.4%)   | 13509 (5.4%)   | 1198 (0.5%)   | 20664 (8.2%)    |
-| Obstacle       | 1139 (0.5%)  | 2829 (1.1%)   | 16154 (6.4%)   | 1517 (0.6%)   | 21639 (8.6%)    |
-| SurfaceProblem | 804 (0.3%)   | 1898 (0.8%)   | 3216 (1.3%)    | 2603 (1.0%)   | 8521 (3.4%)     |
-| NoSidewalk     | 2370 (0.9%)  | 6357 (2.5%)   | 28408 (11.3%)  | 8031 (3.2%)   | 45166 (17.9%)   |
-| Occlusion      | 69 (0.0%)    | 310 (0.1%)    | 462 (0.2%)     | 453 (0.2%)    | 1294 (0.5%)     |
-| Other          | 93 (0.0%)    | 148 (0.1%)    | 1137 (0.5%)    | 39 (0.0%)     | 1417 (0.6%)     |
-| Total          | 23542 (9.3%) | 43074 (17.1%) | 152652 (60.6%) | 32527 (12.9%) | 251795 (100.0%) |
+| CurbRamp       | 10631 (4.4%) | 27168 (11.3%) | 88554 (36.8%)  | 18497 (7.7%)  | 144850 (60.2%)  |
+| NoCurbRamp     | 1310 (0.5%)  | 3256 (1.4%)   | 13262 (5.5%)   | 1160 (0.5%)   | 18988 (7.9%)    |
+| Obstacle       | 1105 (0.5%)  | 2829 (1.2%)   | 16154 (6.7%)   | 1517 (0.6%)   | 21605 (9.0%)    |
+| SurfaceProblem | 765 (0.3%)   | 1897 (0.8%)   | 3216 (1.3%)    | 2603 (1.1%)   | 8481 (3.5%)     |
+| NoSidewalk     | 1414 (0.6%)  | 6216 (2.6%)   | 28181 (11.7%)  | 7998 (3.3%)   | 43809 (18.2%)   |
+| Occlusion      | 68 (0.0%)    | 310 (0.1%)    | 462 (0.2%)     | 453 (0.2%)    | 1293 (0.5%)     |
+| Other          | 92 (0.0%)    | 148 (0.1%)    | 1137 (0.5%)    | 39 (0.0%)     | 1416 (0.6%)     |
+| Total          | 15385 (6.4%) | 41824 (17.4%) | 150966 (62.8%) | 32267 (13.4%) | 240442 (100.0%) |
 
 ### Data characteristics
 
@@ -61,13 +61,13 @@ This is the start of filtering out users with low labeling frequency (also filte
 
 | CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
 |:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
-| 89293    | 9256       | 32560      | 18174    | 685       | 1074  | 4722           | 155764 |
+| 85458    | 8512       | 31927      | 18058    | 685       | 1070  | 4694           | 150404 |
 
-There have been a total of 19768 audits by our users across 13045 streets, averaging 1.52 audits per street.
+There have been a total of 19559 audits by our users across 13020 streets, averaging 1.5 audits per street.
 
 ### Data lost due to filtering
 
-There were 958 users who placed 251795 labels pre-filtering. Researchers accounted for 28 of the users (2.92%) and 32499 of the labels (12.9%). Non-researchers with low labeling frequency accounted for 239 of the users (24.9%) and 55153 of the labels (21.9%). This means that we filtered out a total of 267 of the users (27.9%) and 87652 of the labels (34.8%), and are left with 691 of the users (72.1%) and 155764 of the labels (61.9%).
+There were 958 users who placed 240442 labels pre-filtering. Researchers accounted for 28 of the users (2.92%) and 32267 of the labels (13.4%). Non-researchers with low labeling frequency accounted for 327 of the users (34.1%) and 54887 of the labels (22.8%). This means that we filtered out a total of 355 of the users (37.1%) and 87154 of the labels (36.2%), and are left with 603 of the users (62.9%) and 150404 of the labels (62.6%).
 
 ### User stats and tool usage
 
@@ -79,15 +79,15 @@ NOTE: A "session" below is defined as a sequence of audit task interactions for 
 
 | role       | n.users | miles | km    | missions | audits | minutes.audited | minutes.audited.std | km.per.hr | km.per.hr.std | m.per.min | m.per.min.std | minutes.per.1k.ft | minutes.per.1k.ft.std | labels | label.per.100m | labels.per.100m.std | sessions | mins.per.sess |
 |:-----------|:--------|:------|:------|:---------|:-------|:----------------|:--------------------|:----------|:--------------|:----------|:--------------|:------------------|:----------------------|:-------|:---------------|:--------------------|:---------|:--------------|
-| Anonymous  | 371     | 0.081 | 0.130 | 0        | 1.0    | 9.24            | 20.178              | 0.868     | 1.392         | 14.462    | NA            | 21.077            | 66.639                | 21     | 14.868         | 49.941              | 2        | 5.295         |
-| Turker     | 130     | 0.348 | 0.560 | 4        | 4.5    | 24.09           | 731.728             | 1.428     | 2.024         | 23.808    | NA            | 12.803            | 66.360                | 57     | 10.476         | 21.799              | 1        | 22.685        |
-| Registered | 190     | 0.544 | 0.875 | 4        | 8.0    | 28.65           | 71.651              | 2.387     | 2.574         | 39.788    | NA            | 7.661             | 45.355                | 73     | 7.278          | 26.227              | 1        | 19.818        |
+| Anonymous  | 293     | 0.083 | 0.133 | 0.0      | 2      | 10.36           | 21.748              | 0.835     | 1.380         | 13.912    | NA            | 21.910            | 71.870                | 17.0   | 10.508         | 37.934              | 2        | 5.920         |
+| Turker     | 122     | 0.364 | 0.586 | 4.0      | 5      | 25.59           | 753.837             | 1.439     | 2.073         | 23.982    | NA            | 12.710            | 68.241                | 59.0   | 8.900          | 17.996              | 1        | 24.090        |
+| Registered | 188     | 0.540 | 0.869 | 3.5      | 8      | 28.65           | 71.989              | 2.305     | 2.572         | 38.419    | NA            | 7.939             | 45.570                | 70.5   | 6.800          | 20.334              | 1        | 19.752        |
 
 | role       | n\_users | miles | km   | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
 |:-----------|:---------|:------|:-----|:---------|:---------|:-------|:---------------|:-------|:-----------|
-| Anonymous  | 371      | 89    | 143  | 8.3%     | 370      | 1333   | 92             | 14159  | 73%        |
-| Turker     | 130      | 1018  | 1639 | 95%      | 3097     | 13234  | 446            | 104907 | 22%        |
-| Registered | 190      | 394   | 634  | 37%      | 1226     | 5201   | 159            | 36939  | 37%        |
+| Anonymous  | 293      | 80    | 129  | 7.4%     | 316      | 1181   | 81             | 10760  | 72%        |
+| Turker     | 122      | 1016  | 1636 | 95%      | 3077     | 13207  | 444            | 103820 | 23%        |
+| Registered | 188      | 392   | 630  | 36%      | 1218     | 5171   | 158            | 35949  | 38%        |
 
 Possible Stories
 ----------------
@@ -96,7 +96,7 @@ Possible Stories
 
 Among all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement among them? (see comment in Outline document for details on implementation)
 
-A total of 39.6% of streets were audited by multiple users.
+A total of 38.9% of streets were audited by multiple users.
 
 ### Stickyness of tool: user dropoffs
 
