@@ -34,6 +34,7 @@ April 17, 2018</p>
 <li><a href="#high-level-results">High-level results</a>
 <ul>
 <li><a href="#top-line-numbers-no-filtering">Top-line numbers (no filtering)</a></li>
+<li><a href="#attribute-counts-by-type">Attribute counts by type</a></li>
 <li><a href="#data-characteristics">Data characteristics</a></li>
 <li><a href="#data-lost-due-to-filtering">Data lost due to filtering</a></li>
 <li><a href="#user-stats-and-tool-usage">User stats and tool usage</a></li>
@@ -72,8 +73,7 @@ April 17, 2018</p>
 <p>NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk.</p>
 <h2 id="high-level-results">High-level results</h2>
 <h3 id="top-line-numbers-no-filtering">Top-line numbers (no filtering)</h3>
-<p>TODO: Decide how to cluster production labels</p>
-<p>The following are the label counts (not issue counts) by user group and label type.</p>
+<p>The following are the label counts (not attribute counts) by user group and label type. I removed the tutorial labels from here.</p>
 <table>
 <thead>
 <tr class="header">
@@ -149,6 +149,59 @@ April 17, 2018</p>
 <td align="left">150966 (62.8%)</td>
 <td align="left">32267 (13.4%)</td>
 <td align="left">240442 (100.0%)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="attribute-counts-by-type">Attribute counts by type</h3>
+<p>Here are the counts of attributes by attribute type after single and multi user clustering.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">attribute.type</th>
+<th align="left">count</th>
+<th align="left">percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">CurbRamp</td>
+<td align="left">50652</td>
+<td align="left">40.4%</td>
+</tr>
+<tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">7897</td>
+<td align="left">6.3%</td>
+</tr>
+<tr class="odd">
+<td align="left">Obstacle</td>
+<td align="left">12913</td>
+<td align="left">10.3%</td>
+</tr>
+<tr class="even">
+<td align="left">SurfaceProblem</td>
+<td align="left">5643</td>
+<td align="left">4.5%</td>
+</tr>
+<tr class="odd">
+<td align="left">NoSidewalk</td>
+<td align="left">23159</td>
+<td align="left">18.4%</td>
+</tr>
+<tr class="even">
+<td align="left">Occlusion</td>
+<td align="left">933</td>
+<td align="left">0.7%</td>
+</tr>
+<tr class="odd">
+<td align="left">Other</td>
+<td align="left">914</td>
+<td align="left">0.7%</td>
+</tr>
+<tr class="even">
+<td align="left">Problem</td>
+<td align="left">23419</td>
+<td align="left">18.7%</td>
 </tr>
 </tbody>
 </table>

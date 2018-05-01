@@ -6,6 +6,7 @@ April 17, 2018
 -   [Public Deployment](#public-deployment)
     -   [High-level results](#high-level-results)
         -   [Top-line numbers (no filtering)](#top-line-numbers-no-filtering)
+        -   [Attribute counts by type](#attribute-counts-by-type)
         -   [Data characteristics](#data-characteristics)
         -   [Data lost due to filtering](#data-lost-due-to-filtering)
         -   [User stats and tool usage](#user-stats-and-tool-usage)
@@ -40,9 +41,7 @@ High-level results
 
 ### Top-line numbers (no filtering)
 
-TODO: Decide how to cluster production labels
-
-The following are the label counts (not issue counts) by user group and label type.
+The following are the label counts (not attribute counts) by user group and label type. I removed the tutorial labels from here.
 
 | label\_type    | Anon         | Registered    | Turker         | Researcher    | Total           |
 |:---------------|:-------------|:--------------|:---------------|:--------------|:----------------|
@@ -54,6 +53,21 @@ The following are the label counts (not issue counts) by user group and label ty
 | Occlusion      | 68 (0.0%)    | 310 (0.1%)    | 462 (0.2%)     | 453 (0.2%)    | 1293 (0.5%)     |
 | Other          | 92 (0.0%)    | 148 (0.1%)    | 1137 (0.5%)    | 39 (0.0%)     | 1416 (0.6%)     |
 | Total          | 15385 (6.4%) | 41824 (17.4%) | 150966 (62.8%) | 32267 (13.4%) | 240442 (100.0%) |
+
+### Attribute counts by type
+
+Here are the counts of attributes by attribute type after single and multi user clustering.
+
+| attribute.type | count | percentage |
+|:---------------|:------|:-----------|
+| CurbRamp       | 50652 | 40.4%      |
+| NoCurbRamp     | 7897  | 6.3%       |
+| Obstacle       | 12913 | 10.3%      |
+| SurfaceProblem | 5643  | 4.5%       |
+| NoSidewalk     | 23159 | 18.4%      |
+| Occlusion      | 933   | 0.7%       |
+| Other          | 914   | 0.7%       |
+| Problem        | 23419 | 18.7%      |
 
 ### Data characteristics
 

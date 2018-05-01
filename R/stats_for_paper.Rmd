@@ -71,6 +71,7 @@ if (REFRESH_TURK_STUDY_DATA) {
 audits.path <- '../data/stats_for_paper_audits.csv'
 times.path <- '../data/stats_for_paper_times.csv'
 labels.path <- '../data/stats_for_paper_labels.csv'
+attributes.path <- '../data/stats_for_paper_attributes.csv'
 sessions.path <- '../data/stats_for_paper_sessions.csv'
 missions.path <- '../data/stats_for_paper_reg_missions.csv'
 if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
@@ -266,6 +267,14 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           ON nonzero_counts.user_id = "user".user_id
       WHERE "user".user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
+  attributes <-
+    dbGetQuery(
+      db.connection.public.deployment,
+      'SELECT label_type.label_type, COUNT(*) AS count
+      FROM global_attribute
+      INNER JOIN label_type ON global_attribute.label_type_id = label_type.label_type_id
+      GROUP BY label_type.label_type'
+      )
   dbDisconnect(db.connection.public.deployment)
   
   # Combine registered and anonymous user results.
@@ -279,6 +288,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   file.copy(audits.path, paste('../data/old/stats_for_paper_audits', now, sep = '_'))
   file.copy(times.path, paste('../data/old/stats_for_paper_times.csv', now, sep = '_'))
   file.copy(labels.path, paste('../data/old/stats_for_paper_labels.csv', now, sep = '_'))
+  file.copy(attributes.path, paste('../data/old/stats_for_paper_attributes.csv', now, sep = '_'))
   file.copy(sessions.path, paste('../data/old/stats_for_paper_sessions.csv', now, sep = '_'))
   file.copy(missions.path, paste('../data/old/stats_for_paper_reg_missions.csv', now, sep = '_'))
 
@@ -286,6 +296,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   write.csv(audits, audits.path, row.names = FALSE)
   write.csv(times, times.path, row.names = FALSE)
   write.csv(labels, labels.path, row.names = FALSE)
+  write.csv(attributes, attributes.path, row.names = FALSE)
   write.csv(sessions, sessions.path, row.names = FALSE)
   write.csv(reg.missions, missions.path, row.names = FALSE)
 } else {
@@ -293,6 +304,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   times <- read.csv(times.path, colClasses = c('character', 'numeric'))
   labels <- read.csv(labels.path,
                      colClasses = c('numeric', 'character', 'character', 'numeric', 'numeric'))
+  attributes <- read.csv(attributes.path, colClasses = c('character', 'numeric'))
   sessions <- read.csv(sessions.path, colClasses = c('character', 'numeric'))
   reg.missions <- read.csv(missions.path, colClasses = c('character', 'numeric'))
 }
@@ -529,9 +541,7 @@ NOTE: Public deployment data includes all data up through March 31st (and part o
 
 ### Top-line numbers (no filtering)
 
-TODO: Decide how to cluster production labels
-
-The following are the label counts (not issue counts) by user group and label type.
+The following are the label counts (not attribute counts) by user group and label type. I removed the tutorial labels from here.
 
 ```{r public.deployment.how.much.data, echo=FALSE, warning=FALSE}
 ordered.label.type.levs <- c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem', 'NoSidewalk',
@@ -555,6 +565,23 @@ kable(
     adorn_ns(position = 'front'),
   align = 'l'
 )
+```
+
+### Attribute counts by type
+
+Here are the counts of attributes by attribute type after single and multi user clustering.
+
+```{r public.deployment.attributes, echo=FALSE, warning=FALSE}
+ordered.attribute.type.levs <- c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem',
+                                 'NoSidewalk', 'Occlusion', 'Other', 'Problem')
+total.attributes <- sum(attributes$count)
+kable(
+  attributes %>%
+    mutate(attribute.type = factor(label_type, ordered.attribute.type.levs)) %>%
+    select(attribute.type, count) %>%
+    mutate(percentage = paste0(format(100 * count / total.attributes, digits = 1), '%')) %>%
+    arrange(attribute.type),
+  align = 'l')
 ```
 
 ### Data characteristics
