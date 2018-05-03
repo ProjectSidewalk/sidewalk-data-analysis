@@ -58,16 +58,17 @@ The following are the label counts (not attribute counts) by user group and labe
 
 Here are the counts of attributes by attribute type after single and multi user clustering.
 
-| attribute.type | count | percentage |
-|:---------------|:------|:-----------|
-| CurbRamp       | 50652 | 40.4%      |
-| NoCurbRamp     | 7897  | 6.3%       |
-| Obstacle       | 12913 | 10.3%      |
-| SurfaceProblem | 5643  | 4.5%       |
-| NoSidewalk     | 23159 | 18.4%      |
-| Occlusion      | 933   | 0.7%       |
-| Other          | 914   | 0.7%       |
-| Problem        | 23419 | 18.7%      |
+| attribute.type | count  | percentage |
+|:---------------|:-------|:-----------|
+| CurbRamp       | 50652  | 49.6%      |
+| NoCurbRamp     | 7897   | 7.7%       |
+| Obstacle       | 12913  | 12.6%      |
+| SurfaceProblem | 5643   | 5.5%       |
+| NoSidewalk     | 23159  | 22.7%      |
+| Occlusion      | 933    | 0.9%       |
+| Other          | 914    | 0.9%       |
+| Problem        | 23419  | -          |
+| Total          | 102111 | 100.0%     |
 
 ### Data characteristics
 

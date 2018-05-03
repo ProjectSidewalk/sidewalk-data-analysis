@@ -573,13 +573,16 @@ Here are the counts of attributes by attribute type after single and multi user 
 
 ```{r public.deployment.attributes, echo=FALSE, warning=FALSE}
 ordered.attribute.type.levs <- c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem',
-                                 'NoSidewalk', 'Occlusion', 'Other', 'Problem')
-total.attributes <- sum(attributes$count)
+                                 'NoSidewalk', 'Occlusion', 'Other', 'Problem', 'Total')
+total.attributes <- attributes %>% filter(label_type != 'Problem') %>% pull(count) %>% sum
 kable(
   attributes %>%
+    rbind(data.frame(label_type = c('Total'), count = c(total.attributes))) %>%
     mutate(attribute.type = factor(label_type, ordered.attribute.type.levs)) %>%
     select(attribute.type, count) %>%
-    mutate(percentage = paste0(format(100 * count / total.attributes, digits = 1), '%')) %>%
+    mutate(percentage = if_else(attribute.type != 'Problem',
+                                paste0(format(100 * count / total.attributes, digits = 1), '%'),
+                                '-')) %>%
     arrange(attribute.type),
   align = 'l')
 ```
