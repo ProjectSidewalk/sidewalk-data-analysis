@@ -1245,10 +1245,23 @@ kable(
 ```
 
 
+
 ### Zone types
 
+First, we have our definitions of the different zone types with shortened names that we use in parens (these can also be found in doc/zone_type_descriptions.txt):
 
-Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison between the user groups. This removes `r n.reg.users.removed` of the `r n.reg` sets of routes from registered users. There is still `r n.anon` sets of routes from anonymous users.
+* Downtown: High-density commercial and residential development
+* Mixed-Use: Moderate-density residential and non-residential buildings (e.g., retail, art use)
+* Neighborhood Mixed-Use (Nbhd Mixed-Use): Low-density mixed-use development with an emphasis on residential
+* Production, distribution, and repair (Industrial): Moderate-density commercial and production, distribution, and repair (with heavy machinery)
+* Residential: Predominantly residential with detached houses on medium-to-large lots
+* Residential Apartment/Flat (Residential Apt/Flat): Low-to-moderate density residential including detached dwellings, rowhouses, and apartments. NOTE: this is a combination of the Residential Apartment and Residential Flat zones, which have similar descriptions.
+* Special Purpose: Includes Fort McNair Naval Facility (and nearby high-density residential), some moderate-density residential, and some undeveloped land.
+* Unzoned: Predominantly wooded areas (e.g., large parks, golf courses, and cemeteries) and a military base.
+
+
+
+Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison of accuracy across zone type. This removes `r n.reg.users.removed` of the `r n.reg` sets of routes from registered users (i.e., `r n.reg - n.reg.users.removed` left). There is still `r n.anon` sets of routes from anonymous users.
 
 ```{r turk.zone.type.distribution, echo=FALSE, fig.width=4.5, fig.height=4}
 zoning.with.volunteer.type <-
@@ -1260,27 +1273,26 @@ zoning.with.volunteer.type <-
                                  levels = c(FALSE, TRUE),
                                  labels = c('Registered', 'Anonymous'))) %>%
   mutate(zone.type = fct_recode(zone_type,
-                                'Downtown'           = 'Downtown Zone',
-                                'Mixed-Use'          = 'Mixed-Use Zone',
-                                'Nbhd Mixed-Use'     = 'Neighborhood Mixed-Use Zone',
-                                'Prod,Distro,Repair' = 'Production, Distribution, and Repair Zone',
-                                'Residential Apt'    = 'Residential Apartment Zone',
-                                'Residential Flat'   = 'Residential Flat Zone',
-                                'Residential'        = 'Residential Zone',
-                                'Special Purpose'    = 'Special Purpose Zone'))
+                                'Downtown'             = 'Downtown Zone',
+                                'Mixed-Use'            = 'Mixed-Use Zone',
+                                'Nbhd Mixed-Use'       = 'Neighborhood Mixed-Use Zone',
+                                'Industrial'           = 'Production, Distribution, and Repair Zone',
+                                'Residential Apt/Flat' = 'Residential Apartment Zone',
+                                'Residential Apt/Flat' = 'Residential Flat Zone',
+                                'Residential'          = 'Residential Zone',
+                                'Special Purpose'      = 'Special Purpose Zone'))
 
 all.dc.zoning.data <- data_frame(
   volunteer.type = c('All Streets'),
   zone.type = c('Downtown',
                 'Mixed-Use',
                 'Nbhd Mixed-Use',
-                'Prod,Distro,Repair',
-                'Residential Apt',
-                'Residential Flat',
+                'Industrial',
+                'Residential Apt/Flat',
                 'Residential',
                 'Special Purpose',
                 'Unzoned'),
-  percent.of.streets = c(5.74, 11.73, 1.02, 2.47, 14.82, 15.01, 42.89, 1.30, 5.03)
+  percent.of.streets = c(5.74, 11.73, 1.02, 2.47, 29.83, 42.89, 1.30, 5.03)
 )
 
 land.use.by.volunteer.type <-
