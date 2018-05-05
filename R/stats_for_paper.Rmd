@@ -1264,6 +1264,8 @@ First, we have our definitions of the different zone types with shortened names 
 Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison of accuracy across zone type. This removes `r n.reg.users.removed` of the `r n.reg` sets of routes from registered users (i.e., `r n.reg - n.reg.users.removed` left). There is still `r n.anon` sets of routes from anonymous users.
 
 ```{r turk.zone.type.distribution, echo=FALSE, fig.width=4.5, fig.height=4}
+zones.without.anon.data <- c('Nbhd Mixed-Use', 'Special Purpose', 'Unzoned')
+
 zoning.with.volunteer.type <-
   data.with.raw.accuracy %>%
   select(condition.id, is.anon.route) %>%
@@ -1314,7 +1316,7 @@ land.use.by.volunteer.type.filtered <-
   ungroup() %>%
   select(volunteer.type, zone.type, percent.of.streets) %>%
   rbind(all.dc.zoning.data) %>%
-  filter(!(zone.type %in% c('Nbhd Mixed-Use', 'Special Purpose', 'Unzoned')))
+  filter(!(zone.type %in% zones.without.anon.data))
 
 ggplot(data = land.use.by.volunteer.type, aes(x = zone.type, y = percent.of.streets, fill = volunteer.type)) +
   geom_col(position = 'dodge') +
@@ -1408,11 +1410,13 @@ NOTE: The red dots on the graphs are means.
 *Takeaways*:
 
 ```{r turk.zone.type.analysis, echo=FALSE, fig.width=4.5, fig.height=4}
+# Get predominant zone type for each condition.
 condition.land.use <-
   zoning.with.volunteer.type %>%
   group_by(condition.id) %>%
   count(zone.type) %>%
-  slice(which.max(n))
+  slice(which.max(n)) %>%
+  filter(!(zone.type %in% zones.without.anon.data))
 
 zone.type.analysis.data <-
   data.with.raw.accuracy %>%
