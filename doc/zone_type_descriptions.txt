@@ -1,0 +1,319 @@
+These descriptions come from a CSV that is also located in this direction, called "Zoning Regulations of 2016 Development Standards.ods". It was downloaded from https://dcoz.dc.gov/page/summary-zone-districts on April 4th, 2018.
+
+You can check out a map showing the different zones here: http://maps.dcoz.dc.gov/zr16/
+
+DOWNTOWN
+Our description: high-density commercial and residential development
+
+Many descriptions from above CSV:
+Permits high density housing with a limited amount of commercial uses permitted on only the ground floor
+
+Ensures development consistent with historic resources in the vicinity of Judiciary Square and the White House
+
+Permits high-density development of commercial and mixed uses
+
+Permits high-density development of commercial and mixed uses
+
+Permits high-density mixed use development with an emphasis on residential uses
+
+Permits high density development, with incentives for residential use in predominantly non-residential areas
+
+Permits high density commercial and mixed use development through requirements and incentives for residential use
+
+Permits high-density commercial and residential development
+
+Permits high-density commercial development in the downtown core
+
+Permits the highest density commercial development that is achievable under the height act
+
+Permits, with conditions, high-density development
+
+
+
+
+MIXED USE
+Our description: Moderate-density residential and non-residential buildings (e.g., retail, art use)
+
+Many descriptions from above CSV:
+Permits moderate density residential and non-residential buildings
+
+Permits medium to high density mixed-use development with a balance of uses 
+
+Permits open space, park, and low-density and low-height waterfront-oriented retail and arts uses
+
+Permits moderate density mixed-use development in the vicinity of the waterfront
+
+Permits medium density mixed-use development in the vicinity of the waterfront
+
+Permits high density mixed-use development in the vicinity of the waterfront
+
+Permits moderate density development with an emphasis on residential uses
+
+Permits medium density development with an emphasis on residential uses
+
+Permits moderate density mixed use development
+
+Permits medium density, compact mixed-use development with an emphasis on residential use
+
+Permits medium density mixed-use development with an emphasis on residential use
+
+Permits medium density residential and non-residential buildings
+
+Permits medium density mixed-use development with an emphasis on employment
+
+Permits high density mixed-use development with an emphasis on employment
+
+Permits medium to high density mixed-use development with a balance of uses 
+
+Permits medium density areas with an emphasis on residential use in the vicinity of the U.S. Capitol
+
+Permits moderate density mixed-use development in the vicinity of the U.S. Capitol
+
+Permits moderate density mixed-use development in the vicinity of the U.S. Capitol
+
+Permits moderate density mixed-use development in the vicinity of the U.S. Capitol
+
+Permits moderate density mixed-use development in the vicinity of the U.S. Naval Observatory
+
+Permits medium density mixed-use development with a focus on employment
+
+Permits medium to high density development with a balance of uses
+
+Permits low density mixed use development 
+
+Permits moderate density mixed use development
+
+Permits medium density, compact mixed-use develoopment with an emphasis on residential use
+
+Permits medium density, compact mixed-use develoopment with an emphasis on residential use
+
+Permits medium to high density mixed-use development with a focus on residential use
+
+Permits medium density mixed-use development
+
+Permits medium density mixed-use development with an emphasis on employment
+
+Permits high density mixed-use development including office, retail, and housing with a focus on employment
+
+
+
+
+NEIGHBORHOOD MIXED-USE
+Our description: Low-density mixed-use development with an emphasis on residential
+
+Many descriptions from above CSV:
+Permits low density mixed use development 
+
+Permits mixed-use development at a moderate to medium density with an emphasis on residential uses
+
+Permits mixed-use development at a medium density with an emphasis on residential uses
+
+Permits mixed-use development at a medium density with an emphasis on residential uses
+
+Permits mixed-use development at a medium density with an emphasis on residential uses
+
+Permits mixed-use development at a moderate density with an emphasis on arts and arts-related uses
+
+Permits mixed-use development at a medium density with an emphasis on employment and arts-realted uses
+
+Permits mixed-use development at a moderate density with an emphasis on retail uses
+
+Permits mixed-use development at a moderate to medium density with an emphasis on retail uses
+
+Permits moderate density mixed-use development
+
+Permits mixed-use development at a moderate density
+
+Permits mixed-use development at a moderate density
+
+Permits compact mixed-use development at a medium density with an emphasis on residential uses
+
+Permits mixed-use development at a medium density
+
+Permits mixed-use development at a moderate density
+
+Permits mixed-use development with a focus on employment
+
+Permits mixed-use development at a moderate density with an emphasis on residential uses
+
+
+
+
+PRODUCTION, DISTRIBUTION, AND REPAIR
+Our name: Industrial
+Our description: Moderate-density commercial and production, distribution, and repair (with heavy machinery)
+
+Many descriptions from above CSV:
+Permits moderate density commercial and production, distribution, and repair activities requiring some heavy machinery
+
+Permits medium density commercial and production, distribution, and repair activities requiring some heavy machinery
+
+Permits high density commercial and production, distribution, and repair activities requiring some heavy machinery
+
+Permits high density commercial and production, distribution, and repair activities requiring some heavy machinery, minimizing non-industrial uses
+
+Permits moderate commercial and production, distribution, and repair activities requiring some heavy machinery in the vicinity of the US Capitol
+
+Permits moderate density commercial and production, distribution, and repair activities requiring some heavy machinery
+
+Permits high density commerical and production, distribution, and repair activities requiring some heavy machinery, minmizing non-industrial uses and protects views from Fort Totten
+
+
+
+
+RESIDENTIAL
+Our description: Predominantly residential with detached houses on medium-to-large lots
+
+Many descriptions from above CSV:
+Provides areas predominantly developed with detached houses on large lots.
+
+Provides areas predominantly developed with detached houses on moderately sized lots.
+
+Permits semi-detached houses on moderately sized lots, allows for areas of detached dwellings
+
+Permits detached houses on large lots
+
+Permits detached houses on moderately-sized lots
+
+Permits single household attached rowhouses on small lots, mingled with detached and semi-detached houses
+
+Permits detached houses on large lots
+
+Permits detached houses on moderately-sized lots
+
+Promotes the conservation, enhancement, and stability of the low-density, single household neighborhood for housing and neighborhood uses
+
+Permits Single household attached rowhouses on small lot
+
+Permits detached houses on moderately-sized lots
+
+Permits detached houses on moderately-sized lots
+
+Provide areas predominantly developed with semi-detached houses on moderately-sized lots that also contain some detached dwellings
+
+Preserves mix of detached, semi-detached and attached dwellings and permits attached row houses on small lots
+
+Provide for areas predominantly developed with detached houses on large lots
+
+Allows for attached rowhouses on small lots and row dwellings mingled with detached, semi-detached, and groupings of three or more row dwellings
+
+Permits detached houses on large lots and protects quiet residential areas developed with detached dwellings
+
+Permits detached houses on moderately-sized lots
+
+Permits detached houses on large lots and protects quiet residential areas developed with detached dwellings
+
+Permits detached houses on moderately-sized lots
+
+
+
+
+RESIDENTIAL APARTMENT
+Our description: Low-to-moderate density residential including detached dwellings, rowhouses, and apartments
+
+Many descriptions from above CSV:
+Permits low to moderate-density development, including detached dwellings, rowhouses, and low-rise apartments
+
+Permits high-density apartments in Dupont Circle
+
+Permits moderate and medium-density rowhouses and apartments
+
+Permits moderate to medium density apartments
+
+Permits medium to high-desnity apartments
+
+permits high-density apartments
+
+Permits low to moderate-desnity development including detached dwellings, rowhouses, and low-rise apartments in the vicinity of the U.S. Naval Observatory
+
+Permits moderate and medium-density rowhouses and apartments in the vicinity of the U.S. Capitol.
+
+Permits moderate to high-density rowhouses and apartments in Dupont Circle
+
+Permits medium to high-desnity apartments in Dupont Circle
+
+
+
+
+RESIDENTIAL FLAT
+Our description: Low-to-moderate density residential including detached dwellings, rowhouses, and apartments
+
+Many descriptions from above CSV:
+Permits development of attached rowhouses on small lots
+
+Provide for areas proximate to Dupont Circle predominately developed with attached Row Houses
+
+Provide for areas adjacent to the US Capitol precint predominantly developed with attached houses on small lots
+
+Provide for areas predominantly developed with attached row houses of three or more stores and a mix of apartment buildings
+
+Provide for areas predominantly developed with attached row houses of three or more stores and a mix of apartment buildings
+
+
+
+
+SPECIAL PURPOSE
+Our description: Includes Fort McNair Naval Facility (and nearby high-density residential), some moderate-density residential, and some undeveloped land.
+
+Many descriptions from above CSV:
+
+sub-zone: mixed-use uptown arts
+NOTE: This area is marked for development of "arts, arts-related, and arts-supporting uses". It is meant to encourage pedestrian activity. Mostly located in the Logan Circle, Shaw, Cardozo, and Shaw neighborhoods. Source: http://handbook.dcoz.dc.gov/zones/special-purpose-zones/mixed-use-uptown-arts/
+Permits moderate density mixed use development
+
+Permits medium density, compact mixed use development with an emphasis on residential development
+
+Permits medium density mixed-use development with a focus on employment
+
+Permits medium to high density mixed-use development with a balance of uses 
+
+
+sub-zone: capitol gateway
+NOTE: This includes Fort McNair Naval facility and the nearby residential area (mostly high-density). These are located in the Southwest Waterfront and Navy Yard neighborhoods.
+Permits high-density housing and appropriate renovation of or addition to the existing housing stock
+
+Permits medium-density mixed-use development with a focus on residential use
+
+Permits high density mixed-use development with a focus on employment
+
+Permits high-density mixed use development with a balance of uses
+
+Permits medium density mixed-use development in the vicinity of the Anacostia River waterfront
+
+Mapped on lands occupied by Fort McNair Naval Facility
+
+Mapped on lands occupied by Fort McNair Naval Facility
+
+
+sub-zone: hill east
+NOTE: This is a 67-acre parcel of land just east of the Hill East neighborhood that is mostly undeveloped. It is currently home to the D.C. Jail and the former D.C. General Hospital, which now acts as an emergency homeless family shelter. There was an ambitious plan for the development of the land, but it was put on hold during the recent recession, and has not been a priority since then. Source: https://wamu.org/story/15/02/06/remaking_reservation_13_why_a_major_plot_of_undeveloped_dc_land_remains_untapped/
+
+Supports the Development of Federal Reservation 13
+
+Supports the Development of Federal Reservation 13
+
+Supports the Development of Federal Reservation 13
+
+Supports the Development of Federal Reservation 13
+
+
+sub-zone: reed-cooke
+NOTE: This is sub-area of the Adams Morgan neighborhood. Reed-Cooke is not technically a neighborhood, but it has an active civic organization called the Reed-Cooke Neighborhood Association that has taken an active interest in the area's future. This interest and involvement has led to the creation of a separate zoning framework. Source: https://en.wikipedia.org/wiki/Reed-Cooke
+
+Permits moderate and medium-density rowhouses and apartments
+
+Permits moderate density mixed-use development at a limited height with an emphasis on housing
+
+Permits medium density, compact mixed use development with an emphasis on residential development
+
+
+
+
+Unzoned
+Our description: Predominantly wooded areas (e.g., large parks, golf courses, and cemeteries) and a military base.
+
+No description provided.
+
+
+
+
