@@ -1407,6 +1407,8 @@ NOTE: In this section, the data are binary (not ordinal), and is at the street l
 
 NOTE: The red dots on the graphs are means.
 
+NOTE: N in the graphs below means number of routes that are predominantly of that zone type. However, there are 3 users who completed each route, so there are actually n * 3 data points.
+
 *Takeaways*:
 
 ```{r turk.zone.type.analysis, echo=FALSE, fig.width=4.5, fig.height=4}
@@ -1428,11 +1430,15 @@ zone.type.analysis.data <-
          label.type %in% c('All', 'Problem')) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
+n.routes.by.zone.type <- condition.land.use %>% group_by(zone.type) %>% dplyr::summarise(n = n())
+x.labels.with.n <- n.routes.by.zone.type %>% mutate(lab = paste0(zone.type, ' (n=', n, ')')) %>% pull(lab)
+
 # Create the trellis boxplots.
 ggplot(data = zone.type.analysis.data %>% filter(label.type == 'All'),
        aes(x = zone.type, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  scale_x_discrete(labels = x.labels.with.n) +
   facet_grid(accuracy.type ~ .) +
   ggtitle('Zone Type Accuracy Across All Label Types') +
   my.theme.discrete.x +
@@ -1443,6 +1449,7 @@ ggplot(data = zone.type.analysis.data %>% filter(label.type == 'Problem'),
        aes(x = zone.type, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  scale_x_discrete(labels = x.labels.with.n) +
   facet_grid(accuracy.type ~ .) +
   ggtitle('Zone Type Accuracy for Problem vs. NoProblem') +
   my.theme.discrete.x +

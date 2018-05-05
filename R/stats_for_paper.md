@@ -328,6 +328,8 @@ NOTE: In this section, the data are binary (not ordinal), and is at the street l
 
 NOTE: The red dots on the graphs are means.
 
+NOTE: N in the graphs below means number of routes that are predominantly of that zone type. However, there are 3 users who completed each route, so there are actually n \* 3 data points.
+
 *Takeaways*:
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-2.png)
