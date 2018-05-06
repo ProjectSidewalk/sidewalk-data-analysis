@@ -311,6 +311,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
 
 turk.times.path <- '../data/stats_for_paper_times-turk.csv'
 turk.labels.path <- '../data/stats_for_paper_labels-turk.csv'
+turk.labeling.times.path <- '../data/stats_for_paper_labeling_times-turk.csv'
 if (REFRESH_TURK_STUDY_DATA) {
   reg.labels.turk.study <-
     dbGetQuery(
@@ -432,25 +433,194 @@ if (REFRESH_TURK_STUDY_DATA) {
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
       GROUP BY user_audit_times.user_id;'
       )
+  reg.labeling.times.turk.study <-
+    dbGetQuery(
+      db.connection.turk.study.production,
+      'SELECT user_id, note,
+              EXTRACT
+              (
+                  EPOCH FROM
+                  (
+                      pano_time - LAG(pano_time, 1, \'00:00:00.000\')
+                          OVER (PARTITION BY user_id, gsv_panorama_id ORDER BY timestamp)
+                  )
+              ) AS seconds_to_label
+      FROM
+      (
+          SELECT user_id, gsv_panorama_id, note, action, timestamp,
+                 SUM(timediff)
+                     OVER (PARTITION BY user_id, gsv_panorama_id ORDER BY timestamp) AS pano_time
+          FROM
+          (
+              SELECT user_id, panos.gsv_panorama_id, timestamp, note, action,
+                      timestamp - LAG(timestamp) OVER
+                          (
+                              PARTITION BY user_id, panos.gsv_panorama_id ORDER BY timestamp
+                          ) AS timediff
+              FROM
+              (
+                  SELECT DISTINCT audit_task.user_id,
+                                  gsv_panorama_id,
+                                  audit_task_environment.audit_task_id
+                  FROM amt_condition
+                  INNER JOIN amt_volunteer_route
+                      ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
+                  INNER JOIN route_street
+                      ON amt_volunteer_route.route_id = route_street.route_id
+                  INNER JOIN audit_task
+                      ON  route_street.current_street_edge_id = audit_task.street_edge_id
+                      AND amt_volunteer_route.volunteer_id = audit_task.user_id
+                  INNER JOIN audit_task_interaction
+                      ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+                  INNER JOIN audit_task_environment
+                      ON audit_task_interaction.audit_task_id = audit_task_environment.audit_task_id
+                  WHERE action = \'LabelingCanvas_FinishLabeling\'
+                      AND amt_condition_id NOT IN (71, 104, 123, 124, 138)
+              ) panos
+              INNER JOIN audit_task_interaction
+                  ON panos.audit_task_id = audit_task_interaction.audit_task_id
+                  AND panos.gsv_panorama_id = audit_task_interaction.gsv_panorama_id
+          ) interactions_with_time_diffs
+          WHERE timediff < \'00:01:00.000\'
+      ) interactions_with_time_since_entering_pano
+      WHERE action = \'LabelingCanvas_FinishLabeling\';'
+    )
+  anon.labeling.times.turk.study <-
+    dbGetQuery(
+      db.connection.turk.study.production,
+      'SELECT user_id, note,
+              EXTRACT
+              (
+                  EPOCH FROM
+                  (
+                      pano_time - LAG(pano_time, 1, \'00:00:00.000\')
+                          OVER (PARTITION BY user_id, gsv_panorama_id ORDER BY timestamp)
+                  )
+              ) AS seconds_to_label
+      FROM
+      (
+          SELECT user_id, gsv_panorama_id, note, action, timestamp,
+                 SUM(timediff)
+                     OVER (PARTITION BY user_id, gsv_panorama_id ORDER BY timestamp) AS pano_time
+          FROM
+          (
+              SELECT user_id, panos.gsv_panorama_id, timestamp, note, action,
+                     timestamp - LAG(timestamp) OVER
+                         (
+                             PARTITION BY user_id, panos.gsv_panorama_id ORDER BY timestamp
+                         ) AS timediff
+              FROM
+              (
+                  SELECT DISTINCT amt_volunteer_route.ip_address AS user_id,
+                                  gsv_panorama_id,
+                                  audit_task_environment.audit_task_id
+                  FROM amt_condition
+                  INNER JOIN amt_volunteer_route
+                      ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
+                  INNER JOIN route_street
+                      ON amt_volunteer_route.route_id = route_street.route_id
+                  INNER JOIN audit_task
+                      ON  route_street.current_street_edge_id = audit_task.street_edge_id
+                  INNER JOIN audit_task_environment
+                      ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+                      AND amt_volunteer_route.ip_address = audit_task_environment.ip_address
+                  INNER JOIN audit_task_interaction
+                      ON audit_task_environment.audit_task_id = audit_task_interaction.audit_task_id
+                  WHERE action = \'LabelingCanvas_FinishLabeling\'
+                      AND amt_condition_id NOT IN (71, 104, 123, 124, 138)
+              ) panos
+              INNER JOIN audit_task_interaction
+                  ON panos.audit_task_id = audit_task_interaction.audit_task_id
+                  AND panos.gsv_panorama_id = audit_task_interaction.gsv_panorama_id
+          ) interactions_with_time_diffs
+          WHERE timediff < \'00:01:00.000\'
+      ) interactions_with_time_since_entering_pano
+      WHERE action = \'LabelingCanvas_FinishLabeling\';'
+    )
+  # make sure to not use production-gt database!
+  turk.labeling.times.turk.study <-
+    dbGetQuery(
+      db.connection.turk.study,
+      'SELECT user_id, note,
+              EXTRACT
+              (
+                  EPOCH FROM
+                  (
+                      pano_time - LAG(pano_time, 1, \'00:00:00.000\')
+                          OVER (PARTITION BY user_id, gsv_panorama_id ORDER BY timestamp)
+                  )
+              ) AS seconds_to_label
+      FROM
+      (
+          SELECT user_id, gsv_panorama_id, note, action, timestamp,
+                 SUM(timediff)
+                     OVER (PARTITION BY user_id, gsv_panorama_id ORDER BY timestamp) AS pano_time
+          FROM
+          (
+              SELECT user_id, panos.gsv_panorama_id, timestamp, note, action,
+                     timestamp - LAG(timestamp) OVER
+                         (
+                             PARTITION BY user_id, panos.gsv_panorama_id ORDER BY timestamp
+                         ) AS timediff
+              FROM
+              (
+                  SELECT DISTINCT amt_assignment.turker_id AS user_id,
+                                  gsv_panorama_id,
+                                  audit_task_environment.audit_task_id
+                  FROM amt_assignment
+                  INNER JOIN
+                  (
+                      SELECT turker_id, COUNT(DISTINCT(route_id))
+                      FROM amt_assignment
+                      WHERE completed = TRUE
+                      GROUP BY turker_id
+                  ) completed_route_counts
+                      ON amt_assignment.turker_id = completed_route_counts.turker_id
+                  INNER JOIN audit_task
+                      ON amt_assignment.amt_assignment_id = audit_task.amt_assignment_id
+                  INNER JOIN audit_task_interaction
+                      ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+                  INNER JOIN audit_task_environment
+                      ON audit_task_interaction.audit_task_id = audit_task_environment.audit_task_id
+                  WHERE ((count > 1 AND condition_id >= 122) OR (count > 2 AND condition_id < 122))
+                      AND action = \'LabelingCanvas_FinishLabeling\'
+                      AND condition_id NOT IN (71, 104, 123, 124, 138)
+              ) panos
+              INNER JOIN audit_task_interaction
+                  ON panos.audit_task_id = audit_task_interaction.audit_task_id
+                  AND panos.gsv_panorama_id = audit_task_interaction.gsv_panorama_id
+          ) interactions_with_time_diffs
+          WHERE timediff < \'00:01:00.000\'
+      ) interactions_with_time_since_entering_pano
+      WHERE action = \'LabelingCanvas_FinishLabeling\';'
+      )
   dbDisconnect(db.connection.turk.study.production)
   dbDisconnect(db.connection.turk.study)
   
   # Combine results of registerd volunteers, anon volunteers, and turkers.
   times.turk.study <- bind_rows(reg.times.turk.study, anon.times.turk.study, turk.times.turk.study)
   labels.turk.study <- bind_rows(reg.labels.turk.study, anon.labels.turk.study, turk.labels.turk.study)
+  labeling.times.turk.study <- bind_rows(reg.labeling.times.turk.study,
+                                         anon.labeling.times.turk.study,
+                                         turk.labeling.times.turk.study)
 
   # Copy the old data files over with timestamp in case we want to look back at them.
   now <- gsub(' ', '_', Sys.time())
   file.copy(turk.times.path, paste('../data/old/stats_for_paper_times-turk.csv', now, sep = '_'))
   file.copy(turk.labels.path, paste('../data/old/stats_for_paper_labels-turk.csv', now, sep = '_'))
+  file.copy(turk.labeling.times.path,
+            paste('../data/old/stats_for_paper_labeling_times-turk.csv', now, sep = '_'))
 
   # Overwrite old data files with new results of queries.
   write.csv(times.turk.study, turk.times.path, row.names = FALSE)
   write.csv(labels.turk.study, turk.labels.path, row.names = FALSE)
+  write.csv(labeling.times.turk.study, turk.labeling.times.path, row.names = FALSE)
 } else {
   times.turk.study <- read.csv(turk.times.path, colClasses = c('character', 'numeric'))
   labels.turk.study <- read.csv(turk.labels.path,
                                 colClasses = c('numeric', 'character', replicate(3, 'numeric')))
+  labeling.times.turk.study <- read.csv(turk.labeling.times.path,
+                                        colClasses = c('character', 'character', 'numeric'))
 }
 
 zoning.classes <- c('numeric', 'numeric', 'numeric', 'factor', 'factor', 'logical')
