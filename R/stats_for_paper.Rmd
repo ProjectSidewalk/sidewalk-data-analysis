@@ -20,6 +20,7 @@ library(dplyr)
 library(forcats)
 library(janitor)
 library(Kendall)
+library(stringr)
 
 # Run the following in console when you want to generate github flavored markdown as well.
 # library(rmarkdown)
@@ -1567,6 +1568,59 @@ ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.val
 * The Problem type seems to perform better than the surface problem and obstacle label types (except for surface problem precision, mentioned in the previous bullet).
 
 * NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
+
+
+### Cognitive difficulty of label types: Time to label by type
+
+NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it surprising that NoCurbRamp took longer to label than Obstacle (though only slightly).
+
+We were sort of hoping for a result where we could say that the labels with lower accuracy had longer labeling times, and we could propose that the reason is the differing cognitive difficulty between the label types. Unfortunately, that result is not fully true. CurbRamp did have the highest recall and shortest labeling time while SurfaceProblem had the lowest recall and longest labeling time; this did not hold for Obstacle and NoCurbRamp.
+
+Although this likely is not interesting to talk about in the paper, my intuition explains the results in this way: SurfaceProblem had a significantly longer labeling time than the other label types, and this is because it is much more cognitively difficult than the other types. With surface problems, odd lighting and shadows can make it unclear whether something is a surface problem, one often needs to zoom in to verify that it is a surface problem or assess its severity, and it often takes careful examination to find such labels. Ramp label types rarely have that problem. I also think that Obstacles are much more obvious than SurfaceProblems; one rarely has to zoom in, and you are unlikely to not even see an obstacle. _But_ just because Obstacles are easy to see, doesn't mean that we have agreed on what _should_ be considered an obstacle.
+
+Summary of the above paragraph: SurfaceProblems are hard to find (and are cognitively difficult), but the relationship with accuracy is not very clean because there is disagreement (and lack of training) on when to place NoCurbRamp and Obstacle label types.
+
+Time to place a label is defined as follows:
+
+* For the first label a user places on a specific panorama, the time that elapsed between stepping into the panorama and placing the label.
+* For subsequent labels on the same panorama, the time that elapsed between placing the previous label and placing the current label.
+
+```{r turk.label.difficulty.analysis, echo=FALSE, fig.width=7, fig.height=4}
+accuracy.by.label.type <-
+  turk.showing.stats.by.label.type %>%
+  filter(granularity == 'street') %>%
+  group_by(label.type) %>%
+  dplyr::summarize(mean_recall = mean(recall, na.rm = TRUE),
+                   mean_precision = mean(precision, na.rm = TRUE)) %>%
+  mutate(label.type = as.character(label.type))
+
+distinct.turkers <- data.with.raw.accuracy %>% distinct(worker1) %>% pull()
+extract_label_type <- Vectorize(
+  function(note.str) {
+  str_extract_all(note.str, '[:alpha:]+')[[1]][2]
+  }
+)
+ave.labeling.time.by.type <-
+  labeling.times.turk.study %>%
+  filter(user_id %in% distinct.turkers) %>%
+  mutate(label_type = factor(extract_label_type(note))) %>%
+  mutate(label_type = fct_recode(label_type, 'SurfaceProb' = 'SurfaceProblem')) %>%
+  mutate(label_type = as.character(label_type)) %>%
+  filter(label_type %in% LABEL_TYPES_TO_ANALYZE) %>%
+  group_by(label_type) %>%
+  dplyr::summarise(median_sec_to_label = median(seconds_to_label),
+                   mean_sec_to_label = mean(seconds_to_label)) %>%
+  inner_join(accuracy.by.label.type, by = c('label_type' = 'label.type')) %>%
+  arrange(median_sec_to_label)
+
+kable(
+  ave.labeling.time.by.type,
+  digits = 2,
+  align = 'l'
+)
+```
 
 
 ### Zone type: Land use effect on accuracy

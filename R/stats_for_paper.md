@@ -25,6 +25,7 @@ April 17, 2018
         -   [Zone types](#zone-types)
     -   [Possible Stories](#possible-stories-1)
         -   [Granularity: Street-level vs 5 meter-level](#granularity-street-level-vs-5-meter-level)
+        -   [Cognitive difficulty of label types: Time to label by type](#cognitive-difficulty-of-label-types-time-to-label-by-type)
         -   [Zone type: Land use effect on accuracy](#zone-type-land-use-effect-on-accuracy)
         -   [User behavior: Does auditing speed, etc influence accuracy](#user-behavior-does-auditing-speed-etc-influence-accuracy)
         -   [User group: Reg vs anon vs turk1 vs turk3 vs turk5](#user-group-reg-vs-anon-vs-turk1-vs-turk3-vs-turk5)
@@ -319,6 +320,30 @@ NOTE: This is a rare case where we are using the mean, since we are also showing
 -   The Problem type seems to perform better than the surface problem and obstacle label types (except for surface problem precision, mentioned in the previous bullet).
 
 -   NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
+
+### Cognitive difficulty of label types: Time to label by type
+
+NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it surprising that NoCurbRamp took longer to label than Obstacle (though only slightly).
+
+We were sort of hoping for a result where we could say that the labels with lower accuracy had longer labeling times, and we could propose that the reason is the differing cognitive difficulty between the label types. Unfortunately, that result is not fully true. CurbRamp did have the highest recall and shortest labeling time while SurfaceProblem had the lowest recall and longest labeling time; this did not hold for Obstacle and NoCurbRamp.
+
+Although this likely is not interesting to talk about in the paper, my intuition explains the results in this way: SurfaceProblem had a significantly longer labeling time than the other label types, and this is because it is much more cognitively difficult than the other types. With surface problems, odd lighting and shadows can make it unclear whether something is a surface problem, one often needs to zoom in to verify that it is a surface problem or assess its severity, and it often takes careful examination to find such labels. Ramp label types rarely have that problem. I also think that Obstacles are much more obvious than SurfaceProblems; one rarely has to zoom in, and you are unlikely to not even see an obstacle. *But* just because Obstacles are easy to see, doesn't mean that we have agreed on what *should* be considered an obstacle.
+
+Summary of the above paragraph: SurfaceProblems are hard to find (and are cognitively difficult), but the relationship with accuracy is not very clean because there is disagreement (and lack of training) on when to place NoCurbRamp and Obstacle label types.
+
+Time to place a label is defined as follows:
+
+-   For the first label a user places on a specific panorama, the time that elapsed between stepping into the panorama and placing the label.
+-   For subsequent labels on the same panorama, the time that elapsed between placing the previous label and placing the current label.
+
+| label\_type | median\_sec\_to\_label | mean\_sec\_to\_label | mean\_recall | mean\_precision |
+|:------------|:-----------------------|:---------------------|:-------------|:----------------|
+| CurbRamp    | 6.35                   | 10.27                | 0.90         | 0.95            |
+| Obstacle    | 7.73                   | 12.19                | 0.49         | 0.45            |
+| NoCurbRamp  | 8.41                   | 12.78                | 0.76         | 0.18            |
+| SurfaceProb | 10.91                  | 16.09                | 0.34         | 0.72            |
 
 ### Zone type: Land use effect on accuracy
 
