@@ -127,8 +127,6 @@ Even though 5 turkers did each route, the high level results for individual turk
 High level results
 ------------------
 
-TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br> TODO: Add "n" to a bunch of graphs. <br> TODO: Percentage of turkers who completed the HIT (maybe?).
-
 ### Ground truth label counts
 
 Below is a table showing number of ground truth labels by user group and by label type.
@@ -340,15 +338,34 @@ First, we have our definitions of the different zone types with shortened names 
 -   Neighborhood Mixed-Use (Nbhd Mixed-Use): Low-density mixed-use development with an emphasis on residential
 -   Production, distribution, and repair (Industrial): Moderate-density commercial and production, distribution, and repair (with heavy machinery)
 -   Residential: Predominantly residential with detached houses on medium-to-large lots
--   Residential Apartment/Flat (Residential Apt/Flat): Low-to-moderate density residential including detached dwellings, rowhouses, and apartments. NOTE: this is a combination of the Residential Apartment and Residential Flat zones, which have similar descriptions.
+-   Residential Apartment (Residential Apt): Medium-to-high density residential including apartments and some rowhouses
+-   Residential Flat: Low-to-moderate density residential rowhouses
 -   Special Purpose: Includes Fort McNair Naval Facility (and nearby high-density residential), some moderate-density residential, and some undeveloped land.
 -   Unzoned: Predominantly wooded areas (e.g., large parks, golf courses, and cemeteries) and a military base.
 
+NOTE: For the Special Purpose zone, there are no public roads in the Naval Facility and very few roads in the undeveloped land. Thus, the majority of the *roads* with the Special Purpose zone tag are in high-density residential areas, particularly apartments.
+
+However, we are going to look at two different groupings of these zone types, because a lot of these zones have very little data. The first grouping is done semantically, and the second is done based on density of development.
+
+-   Semantic grouping
+    -   Commercial = Downtown + Industrial
+    -   Mixed-Use = Mixed-Use + Neighborhood Mixed-Use
+    -   Residential Apt = Residential Apt + Special Purpose
+    -   Residential House = Residential + Residential Flat
+    -   Unzoned = Unzoned
+-   Density grouping
+    -   Low to Moderate Density = Neighborhood Mixed-Use + Residential + Residential Flat + Unzoned
+    -   Medium to High Density = Downtown + Mixed-Use + Industrial + Residential Apt + Special Purpose
+
+First, we analyze based on semantic grouping.
+
 ##### Distribution
 
-Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison of accuracy across zone type. This removes 13 of the 50 sets of routes from registered users (i.e., 37 left). There is still 16 sets of routes from anonymous users.
+Here is the zone type distribution for the mturk study. We assigned each street in DC a zone type based on the zone in which one of its endpoints is located. We then assigned a zone type to each route as the plurality zone type among the streets on that route. The graph below compares the zone type distributions of the anon user routes, registered user routes, and all of DC for reference.
 
-![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-2.png)
+NOTE: For regsitered and anon user routes below, it is the percentage of *routes* marked as that zone type. But for All DC Streets, it is the percentage of *streets* in DC, since we don't have a set of "routes" that makes up DC.
+
+![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-1.png)
 
 ##### Relationship with accuracy
 

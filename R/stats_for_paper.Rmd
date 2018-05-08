@@ -915,9 +915,6 @@ Even though 5 turkers did each route, the high level results for individual turk
 ## High level results
 
 ```{r turk.reading.cleaning.data, echo=FALSE, include=FALSE}
-# Get conditions to exclude
-zoning.data %>% filter(exclude) %>% distinct(condition_id)
-
 # Get IRR data
 agreement.classes <- c('numeric', 'factor', 'factor', 'factor', 'numeric', 'numeric')
 agreement.data <- read.csv('../data/irr_results-not_for_humans.csv', colClasses = agreement.classes)
@@ -1039,9 +1036,6 @@ data.with.raw.accuracy <-
   filter(label.type != 'NoSidewalk' | (granularity == 'street' & binary == TRUE))
 ```
 
-TODO: Come up with our own zone type descriptions, possibly aggregating as well. <br>
-TODO: Add "n" to a bunch of graphs. <br>
-TODO: Percentage of turkers who completed the HIT (maybe?).
 
 ### Ground truth label counts
 
@@ -1112,8 +1106,6 @@ turk.study.summary.stats.with.labels <-
          km.per.hr = 60 * meters.per.min / 1000,
          minutes.per.1k.ft = 1000 * minutes_audited / distance.feet,
          hours.audited = minutes_audited / 60)
-
-n.reg.users.removed <- zoning.data %>% filter(exclude) %>% distinct(condition.id) %>% nrow()
 ```
 
 Below is a table showing number of ground truth labels by user group and by label type.
@@ -1600,77 +1592,91 @@ First, we have our definitions of the different zone types with shortened names 
 * Neighborhood Mixed-Use (Nbhd Mixed-Use): Low-density mixed-use development with an emphasis on residential
 * Production, distribution, and repair (Industrial): Moderate-density commercial and production, distribution, and repair (with heavy machinery)
 * Residential: Predominantly residential with detached houses on medium-to-large lots
-* Residential Apartment/Flat (Residential Apt/Flat): Low-to-moderate density residential including detached dwellings, rowhouses, and apartments. NOTE: this is a combination of the Residential Apartment and Residential Flat zones, which have similar descriptions.
+* Residential Apartment (Residential Apt): Medium-to-high density residential including apartments and some rowhouses
+* Residential Flat: Low-to-moderate density residential rowhouses
 * Special Purpose: Includes Fort McNair Naval Facility (and nearby high-density residential), some moderate-density residential, and some undeveloped land.
 * Unzoned: Predominantly wooded areas (e.g., large parks, golf courses, and cemeteries) and a military base.
 
+NOTE: For the Special Purpose zone, there are no public roads in the Naval Facility and very few roads in the undeveloped land. Thus, the majority of the _roads_ with the Special Purpose zone tag are in high-density residential areas, particularly apartments.
+
+However, we are going to look at two different groupings of these zone types, because a lot of these zones have very little data. The first grouping is done semantically, and the second is done based on density of development.
+
+* Semantic grouping
+    * Commercial = Downtown + Industrial
+    * Mixed-Use = Mixed-Use + Neighborhood Mixed-Use
+    * Residential Apt = Residential Apt + Special Purpose
+    * Residential House = Residential + Residential Flat
+    * Unzoned = Unzoned
+* Density grouping
+    * Low to Moderate Density = Neighborhood Mixed-Use + Residential + Residential Flat + Unzoned
+    * Medium to High Density = Downtown + Mixed-Use + Industrial + Residential Apt + Special Purpose
+
+First, we analyze based on semantic grouping.
 
 ##### Distribution
 
-Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison of accuracy across zone type. This removes `r n.reg.users.removed` of the `r n.reg` sets of routes from registered users (i.e., `r n.reg - n.reg.users.removed` left). There is still `r n.anon` sets of routes from anonymous users.
+Here is the zone type distribution for the mturk study. We assigned each street in DC a zone type based on the zone in which one of its endpoints is located. We then assigned a zone type to each route as the plurality zone type among the streets on that route. The graph below compares the zone type distributions of the anon user routes, registered user routes, and all of DC for reference.
+
+NOTE: For regsitered and anon user routes below, it is the percentage of _routes_ marked as that zone type. But for All DC Streets, it is the percentage of _streets_ in DC, since we don't have a set of "routes" that makes up DC.
 
 ```{r turk.zone.type.distribution, echo=FALSE, fig.width=4.5, fig.height=4}
-zones.without.anon.data <- c('Nbhd Mixed-Use', 'Special Purpose', 'Unzoned')
-
-zoning.with.volunteer.type <-
-  data.with.raw.accuracy %>%
-  select(condition.id, is.anon.route) %>%
-  distinct() %>%
-  inner_join(zoning.data, by = 'condition.id') %>%
-  mutate(volunteer.type = factor(is.anon.route,
-                                 levels = c(FALSE, TRUE),
-                                 labels = c('Registered', 'Anonymous'))) %>%
-  mutate(zone.type = fct_recode(zone_type,
-                                'Downtown'             = 'Downtown Zone',
-                                'Mixed-Use'            = 'Mixed-Use Zone',
-                                'Nbhd Mixed-Use'       = 'Neighborhood Mixed-Use Zone',
-                                'Industrial'           = 'Production, Distribution, and Repair Zone',
-                                'Residential Apt/Flat' = 'Residential Apartment Zone',
-                                'Residential Apt/Flat' = 'Residential Flat Zone',
-                                'Residential'          = 'Residential Zone',
-                                'Special Purpose'      = 'Special Purpose Zone'))
-
 all.dc.zoning.data <- data_frame(
-  volunteer.type = c('All Streets'),
-  zone.type = c('Downtown',
-                'Mixed-Use',
-                'Nbhd Mixed-Use',
-                'Industrial',
-                'Residential Apt/Flat',
-                'Residential',
-                'Special Purpose',
+  volunteer.type = c('All DC Streets'),
+  zone.type = c('Downtown Zone',
+                'Mixed-Use Zone',
+                'Neighborhood Mixed-Use Zone',
+                'Production, Distribution, and Repair Zone',
+                'Residential Apartment Zone',
+                'Residential Flat Zone',
+                'Residential Zone',
+                'Special Purpose Zone',
                 'Unzoned'),
-  percent.of.streets = c(5.74, 11.73, 1.02, 2.47, 29.83, 42.89, 1.30, 5.03)
+  percent.of.routes = c(5.74, 11.73, 1.02, 2.47, 14.82, 15.01, 42.89, 1.30, 5.03)
 )
 
-land.use.by.volunteer.type <-
-  zoning.with.volunteer.type %>%
-  group_by(volunteer.type, zone.type) %>%
-  dplyr::summarize(n.streets = n()) %>%
-  complete(zone.type, fill = list(n.streets = 0)) %>%
-  mutate(percent.of.streets = 100 * n.streets / sum(n.streets)) %>%
-  ungroup() %>%
-  select(volunteer.type, zone.type, percent.of.streets) %>%
-  rbind(all.dc.zoning.data)
+recode.semantic <- function(zone.type) {
+  fct_recode(zone.type,
+             'Commercial'        = 'Downtown Zone',
+             'Mixed-Use'         = 'Mixed-Use Zone',
+             'Mixed-Use'         = 'Neighborhood Mixed-Use Zone',
+             'Commercial'        = 'Production, Distribution, and Repair Zone',
+             'Residential Apt'   = 'Residential Apartment Zone',
+             'Residential House' = 'Residential Flat Zone',
+             'Residential House' = 'Residential Zone',
+             'Residential Apt'   = 'Special Purpose Zone')
+}
 
-land.use.by.volunteer.type.filtered <-
-  zoning.with.volunteer.type %>%
-  filter(!exclude) %>%
-  group_by(volunteer.type, zone.type) %>%
-  dplyr::summarize(n.streets = n()) %>%
-  mutate(percent.of.streets = 100 * n.streets / sum(n.streets)) %>%
-  ungroup() %>%
-  select(volunteer.type, zone.type, percent.of.streets) %>%
-  rbind(all.dc.zoning.data) %>%
-  filter(!(zone.type %in% zones.without.anon.data))
+# Get predominant zone type for each condition.
+get.zone.for.conditions <- function(data, recode.func) {
+  data %>%
+    select(condition.id, is.anon.route) %>%
+    distinct() %>%
+    inner_join(zoning.data, by = 'condition.id') %>%
+    mutate(zone.type = recode.func(zone_type)) %>%
+    group_by(condition.id, is.anon.route) %>%
+    count(zone.type) %>%
+    slice(which.max(n)) %>%
+    ungroup()
+}
+get.zone.distro <- function(data, recode.func) {
+  data %>%
+    mutate(volunteer.type = factor(is.anon.route,
+                                   levels = c(FALSE, TRUE),
+                                   labels = c('Reg User Routes', 'Anon User Routes'))) %>%
+    group_by(volunteer.type, zone.type) %>%
+    dplyr::summarise(n.routes = n()) %>%
+    complete(zone.type, fill = list(n.routes = 0)) %>%
+    mutate(percent.of.routes = 100 * n.routes / sum(n.routes)) %>%
+    ungroup() %>%
+    select(volunteer.type, zone.type, percent.of.routes) %>%
+    rbind(all.dc.zoning.data %>% mutate(zone.type = recode.func(zone.type)))
+}
 
-ggplot(data = land.use.by.volunteer.type, aes(x = zone.type, y = percent.of.streets, fill = volunteer.type)) +
-  geom_col(position = 'dodge') +
-  my.theme.discrete.x +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+conditions.w.semantic.zone <- get.zone.for.conditions(data.with.raw.accuracy, recode.semantic)
+zone.distro.by.volunteer.type <- get.zone.distro(conditions.w.semantic.zone, recode.semantic)
 
-ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percent.of.streets, fill = volunteer.type)) +
+ggplot(data = zone.distro.by.volunteer.type,
+       aes(x = zone.type, y = percent.of.routes, fill = volunteer.type)) +
   geom_col(position = 'dodge') +
   my.theme.discrete.x +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
@@ -1691,17 +1697,9 @@ NOTE: N in the graphs below means number of routes that are predominantly of tha
 *Takeaways*:
 
 ```{r turk.zone.type.analysis, echo=FALSE, fig.width=4.5, fig.height=4}
-# Get predominant zone type for each condition.
-condition.land.use <-
-  zoning.with.volunteer.type %>%
-  group_by(condition.id) %>%
-  count(zone.type) %>%
-  slice(which.max(n)) %>%
-  filter(!(zone.type %in% zones.without.anon.data))
-
 zone.type.analysis.data <-
   data.with.raw.accuracy %>%
-  inner_join(condition.land.use, by = 'condition.id') %>%
+  inner_join(conditions.w.semantic.zone, by = 'condition.id') %>%
   filter(binary == TRUE,
          granularity == 'street',
          included.severity == 'all',
@@ -1709,7 +1707,7 @@ zone.type.analysis.data <-
          label.type %in% c('All', 'Problem')) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
-n.routes.by.zone.type <- condition.land.use %>% group_by(zone.type) %>% dplyr::summarise(n = n())
+n.routes.by.zone.type <- conditions.w.semantic.zone %>% group_by(zone.type) %>% dplyr::summarise(n = n())
 x.labels.with.n <- n.routes.by.zone.type %>% mutate(lab = paste0(zone.type, ' (n=', n, ')')) %>% pull(lab)
 
 # Create the trellis boxplots.
