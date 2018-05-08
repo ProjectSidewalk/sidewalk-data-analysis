@@ -1710,7 +1710,7 @@ plot.gt.dist.for.zone.type <- function(data, n.data, l.data) {
          aes(x = zone.type, y = gt.labels.per.100m, fill = label.type)) +
     geom_col(position = 'dodge') +
     my.theme.discrete.x +
-    scale_fill_manual(values = c('green', 'red', 'blue', 'orange')) +
+    scale_fill_manual(values = c('#66CC66', 'red', 'blue', 'orange')) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
     scale_x_discrete(labels = xlabs) +
     ylab('GT Labels per 100 Meters') +
