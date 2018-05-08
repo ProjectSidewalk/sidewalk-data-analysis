@@ -1578,7 +1578,7 @@ Next, we will check the spherity assumption (coming soon!)
 
 ### Zone type: Land use effect on accuracy
 
-##### Definitions
+#### Definitions
 
 First, we have our definitions of the different zone types with shortened names that we use in parens (these can also be found in doc/zone_type_descriptions.txt):
 
@@ -1606,15 +1606,7 @@ However, we are going to look at two different groupings of these zone types, be
     * Low to Moderate Density = Neighborhood Mixed-Use + Residential + Residential Flat + Unzoned
     * Medium to High Density = Downtown + Mixed-Use + Industrial + Residential Apt + Special Purpose
 
-First, we analyze based on semantic grouping.
-
-##### Distribution
-
-Here is the zone type distribution for the mturk study. We assigned each street in DC a zone type based on the zone in which one of its endpoints is located. We then assigned a zone type to each route as the plurality zone type among the streets on that route. The graph below compares the zone type distributions of the anon user routes, registered user routes, and all of DC for reference.
-
-NOTE: For regsitered and anon user routes below, it is the percentage of _routes_ marked as that zone type. But for All DC Streets, it is the percentage of _streets_ in DC, since we don't have a set of "routes" that makes up DC.
-
-```{r turk.zone.type.distribution, echo=FALSE, fig.width=4, fig.height=3}
+```{r turk.zone.type.setup, echo=FALSE}
 all.dc.zoning.data <- data_frame(
   volunteer.type = c('All DC Streets'),
   zone.type = c('Downtown Zone',
@@ -1638,7 +1630,20 @@ recode.semantic <- function(zone.type) {
              'Residential Apt'   = 'Residential Apartment Zone',
              'Residential House' = 'Residential Flat Zone',
              'Residential House' = 'Residential Zone',
-             'Residential Apt'   = 'Special Purpose Zone')
+             'Residential Apt'   = 'Special Purpose Zone',
+             'Unzoned'           = 'Unzoned')
+}
+recode.density <- function(zone.type) {
+  fct_recode(zone.type,
+             'Medium-High Density'  = 'Downtown Zone',
+             'Medium-High Density'  = 'Mixed-Use Zone',
+             'Low-Moderate Density' = 'Neighborhood Mixed-Use Zone',
+             'Medium-High Density'  = 'Production, Distribution, and Repair Zone',
+             'Medium-High Density'  = 'Residential Apartment Zone',
+             'Low-Moderate Density' = 'Residential Flat Zone',
+             'Low-Moderate Density' = 'Residential Zone',
+             'Medium-High Density'  = 'Special Purpose Zone',
+             'Low-Moderate Density' = 'Unzoned')
 }
 
 # Get predominant zone type for each condition.
@@ -1664,18 +1669,11 @@ get.zone.distro <- function(data, recode.func) {
     mutate(percent.of.routes = 100 * n.routes / sum(n.routes)) %>%
     ungroup() %>%
     select(volunteer.type, zone.type, percent.of.routes) %>%
-    rbind(all.dc.zoning.data %>% mutate(zone.type = recode.func(zone.type)))
+    rbind(all.dc.zoning.data %>% mutate(zone.type = recode.func(zone.type))) %>%
+    group_by(volunteer.type, zone.type) %>%
+    dplyr::summarise(percent.of.routes = sum(percent.of.routes)) %>%
+    ungroup()
 }
-
-conditions.w.semantic.zone <- get.zone.for.conditions(data.with.raw.accuracy, recode.semantic)
-zone.distro.by.volunteer.type <- get.zone.distro(conditions.w.semantic.zone, recode.semantic)
-
-ggplot(data = zone.distro.by.volunteer.type,
-       aes(x = zone.type, y = percent.of.routes, fill = volunteer.type)) +
-  geom_col(position = 'dodge') +
-  my.theme.discrete.x +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 
 # GT label counts by label type and route.
 gt.count.by.condition.and.label.type <-
@@ -1697,21 +1695,9 @@ get.gt.count.distro <- function(data, recode.func) {
     ungroup() %>%
     select(label.type, zone.type, gt.labels)
 }
-gt.count.semantic.zone <- get.gt.count.distro(conditions.w.semantic.zone, recode.semantic)
 
-n.routes.by.zone.type <- conditions.w.semantic.zone %>% group_by(zone.type) %>% summarise(n = n())
-route.count.zone.lookup <- setNames(n.routes.by.zone.type$n, n.routes.by.zone.type$zone.type)
-
-total.gt.by.zone <- gt.count.semantic.zone %>% group_by(zone.type) %>% summarise(L = sum(gt.labels))
-gt.label.count.zone.lookup <- setNames(total.gt.by.zone$L, total.gt.by.zone$zone.type)
-```
-
-
-Below, we look at the distribution of the labels types in the ground truth, by zone type. Commercial seems to be the only zone that has a noticeably different distribution of label types. However, we have only two routes for that zone type so we can't draw anything of statistical significance from that.
-
-```{r gt.label.dist.zone.plot, fig.height=1.5, fig.width=10, warning=FALSE, message=FALSE, echo=FALSE}
-plot.gt.dist.for.zone.type <- function(zone.type.str, N, L) {
-  ggplot(data = gt.count.semantic.zone %>% filter(zone.type == zone.type.str),
+plot.gt.dist.for.zone.type <- function(data, zone.type.str, N, L) {
+  ggplot(data = data %>% filter(zone.type == zone.type.str),
          aes(x = label.type, y = gt.labels, fill = label.type)) +
     geom_col(position = 'dodge') +
     my.theme.discrete.x +
@@ -1723,21 +1709,76 @@ plot.gt.dist.for.zone.type <- function(zone.type.str, N, L) {
     ggtitle(paste0(zone.type.str, '(N=', N, ';L=', L, ')')) +
     scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 }
-grid.arrange(plot.gt.dist.for.zone.type('Commercial',
-                                        route.count.zone.lookup['Commercial'],
-                                        gt.label.count.zone.lookup['Commercial']),
-             plot.gt.dist.for.zone.type('Mixed-Use',
-                                        route.count.zone.lookup['Mixed-Use'],
-                                        gt.label.count.zone.lookup['Mixed-Use']),
-             plot.gt.dist.for.zone.type('Residential Apt',
-                                        route.count.zone.lookup['Residential Apt'],
-                                        gt.label.count.zone.lookup['Residential Apt']),
-             plot.gt.dist.for.zone.type('Residential House',
-                                        route.count.zone.lookup['Residential House'],
-                                        gt.label.count.zone.lookup['Residential House']),
-             plot.gt.dist.for.zone.type('Unzoned',
-                                        route.count.zone.lookup['Unzoned'],
-                                        gt.label.count.zone.lookup['Unzoned']),
+```
+
+#### Semantic grouping
+
+As a reminder, the grouping is defined as follows:
+
+* Commercial = Downtown + Industrial
+* Mixed-Use = Mixed-Use + Neighborhood Mixed-Use
+* Residential Apt = Residential Apt + Special Purpose
+* Residential House = Residential + Residential Flat
+* Unzoned = Unzoned
+
+##### Distribution
+
+Here is the zone type distribution for the mturk study. We assigned each street in DC a zone type based on the zone in which one of its endpoints is located. We then assigned a zone type to each route as the plurality zone type among the streets on that route. The graph below compares the zone type distributions of the anon user routes, registered user routes, and all of DC for reference.
+
+NOTE: For regsitered and anon user routes below, it is the percentage of _routes_ marked as that zone type. But for All DC Streets, it is the percentage of _streets_ in DC, since we don't have a set of "routes" that makes up DC.
+
+```{r turk.zone.type.distribution.semantic, echo=FALSE, fig.width=4, fig.height=3}
+conditions.w.semantic.zone <- get.zone.for.conditions(data.with.raw.accuracy, recode.semantic)
+zone.distro.by.volunteer.type <- get.zone.distro(conditions.w.semantic.zone, recode.semantic)
+
+ggplot(data = zone.distro.by.volunteer.type,
+       aes(x = zone.type, y = percent.of.routes, fill = volunteer.type)) +
+  geom_col(position = 'dodge') +
+  my.theme.discrete.x +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+```
+
+
+Below, we look at the distribution of the labels types in the ground truth, by zone type. Commercial seems to be the only zone that has a noticeably different distribution of label types. However, we have only two routes for that zone type so we can't draw anything of statistical significance from that.
+
+```{r gt.label.dist.zone.plot.semantic, fig.height=1.5, fig.width=10, warning=FALSE, message=FALSE, echo=FALSE}
+gt.count.semantic.zone <- get.gt.count.distro(conditions.w.semantic.zone, recode.semantic)
+
+n.routes.by.zone.type.semantic <-
+  conditions.w.semantic.zone %>%
+  group_by(zone.type) %>%
+  dplyr::summarise(N = n())
+route.count.zone.lookup.semantic <- setNames(n.routes.by.zone.type.semantic$N,
+                                             n.routes.by.zone.type.semantic$zone.type)
+
+total.gt.by.zone.semantic <-
+  gt.count.semantic.zone %>%
+  group_by(zone.type) %>%
+  dplyr::summarise(L = sum(gt.labels))
+gt.label.count.zone.lookup.semantic <- setNames(total.gt.by.zone.semantic$L,
+                                                total.gt.by.zone.semantic$zone.type)
+
+grid.arrange(plot.gt.dist.for.zone.type(gt.count.semantic.zone,
+                                        'Commercial',
+                                        route.count.zone.lookup.semantic['Commercial'],
+                                        gt.label.count.zone.lookup.semantic['Commercial']),
+             plot.gt.dist.for.zone.type(gt.count.semantic.zone,
+                                        'Mixed-Use',
+                                        route.count.zone.lookup.semantic['Mixed-Use'],
+                                        gt.label.count.zone.lookup.semantic['Mixed-Use']),
+             plot.gt.dist.for.zone.type(gt.count.semantic.zone,
+                                        'Residential Apt',
+                                        route.count.zone.lookup.semantic['Residential Apt'],
+                                        gt.label.count.zone.lookup.semantic['Residential Apt']),
+             plot.gt.dist.for.zone.type(gt.count.semantic.zone,
+                                        'Residential House',
+                                        route.count.zone.lookup.semantic['Residential House'],
+                                        gt.label.count.zone.lookup.semantic['Residential House']),
+             plot.gt.dist.for.zone.type(gt.count.semantic.zone,
+                                        'Unzoned',
+                                        route.count.zone.lookup.semantic['Unzoned'],
+                                        gt.label.count.zone.lookup.semantic['Unzoned']),
              ncol = 5)
 
 # Version of the plot where they are on the same scale
@@ -1761,8 +1802,10 @@ NOTE: The red dots on the graphs are means.
 
 NOTE: N in the graphs below means number of routes that are predominantly of that zone type. However, there are 3 users who completed each route, so there are actually n * 3 data points.
 
-```{r turk.zone.type.analysis, echo=FALSE, fig.width=4.5, fig.height=4}
-zone.type.analysis.data <-
+The only noticeable difference I see right away is particularly high recall and low precision for Unzoned relative to the other zones. However, there were only 2 routes classified as Unzoned, so we don't have enough data to make any judgements on that. The 3 zone types with significant data (Mixed-Use, Residential Apt, and Residential House) all seem to have roughly equal accuracies.
+
+```{r turk.zone.type.analysis.semantic, echo=FALSE, fig.width=4.5, fig.height=4}
+zone.type.analysis.data.semantic <-
   data.with.raw.accuracy %>%
   inner_join(conditions.w.semantic.zone, by = 'condition.id') %>%
   filter(binary == TRUE,
@@ -1772,27 +1815,150 @@ zone.type.analysis.data <-
          label.type %in% c('All', 'Problem')) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
-x.labels.with.n <- n.routes.by.zone.type %>% mutate(lab = paste0(zone.type, ' (n=', n, ')')) %>% pull(lab)
+x.labels.with.n.semantic <-
+  n.routes.by.zone.type.semantic %>%
+  inner_join(total.gt.by.zone.semantic, by = 'zone.type') %>%
+  mutate(lab = paste0(zone.type, ' (N=', N, ';L=', L, ')')) %>%
+  pull(lab)
 
 # Create the trellis boxplots.
-ggplot(data = zone.type.analysis.data %>% filter(label.type == 'All'),
+ggplot(data = zone.type.analysis.data.semantic %>% filter(label.type == 'All'),
        aes(x = zone.type, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
-  scale_x_discrete(labels = x.labels.with.n) +
+  scale_x_discrete(labels = x.labels.with.n.semantic) +
   facet_grid(accuracy.type ~ .) +
-  ggtitle('Zone Type Accuracy Across All Label Types') +
+  ggtitle('Zone Type Accuracy - All Label Types') +
   my.theme.discrete.x +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 
-ggplot(data = zone.type.analysis.data %>% filter(label.type == 'Problem'),
+ggplot(data = zone.type.analysis.data.semantic %>% filter(label.type == 'Problem'),
        aes(x = zone.type, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
-  scale_x_discrete(labels = x.labels.with.n) +
+  scale_x_discrete(labels = x.labels.with.n.semantic) +
   facet_grid(accuracy.type ~ .) +
-  ggtitle('Zone Type Accuracy for Problem vs. NoProblem') +
+  ggtitle('Zone Type Accuracy - Problem v NoProblem') +
+  my.theme.discrete.x +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+```
+
+#### Density grouping
+
+As a reminder, the grouping is defined as follows:
+
+* Low to Moderate Density = Neighborhood Mixed-Use + Residential + Residential Flat + Unzoned
+* Medium to High Density = Downtown + Mixed-Use + Industrial + Residential Apt + Special Purpose
+
+##### Distribution
+
+Here is the zone type distribution for the mturk study. We assigned each street in DC a zone type based on the zone in which one of its endpoints is located. We then assigned a zone type to each route as the plurality zone type among the streets on that route. The graph below compares the zone type distributions of the anon user routes, registered user routes, and all of DC for reference.
+
+NOTE: For regsitered and anon user routes below, it is the percentage of _routes_ marked as that zone type. But for All DC Streets, it is the percentage of _streets_ in DC, since we don't have a set of "routes" that makes up DC.
+
+```{r turk.zone.type.distribution.density, echo=FALSE, fig.width=4, fig.height=3}
+conditions.w.density.zone <- get.zone.for.conditions(data.with.raw.accuracy, recode.density)
+zone.distro.by.volunteer.type <- get.zone.distro(conditions.w.density.zone, recode.density)
+
+ggplot(data = zone.distro.by.volunteer.type,
+       aes(x = zone.type, y = percent.of.routes, fill = volunteer.type)) +
+  geom_col(position = 'dodge') +
+  my.theme.discrete.x +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+```
+
+
+Below, we look at the distribution of the labels types in the ground truth, by zone type. The types of density appear to have similar distributions of label types.
+
+```{r gt.label.dist.zone.plot.density, fig.height=2, fig.width=6, warning=FALSE, message=FALSE, echo=FALSE}
+gt.count.density.zone <- get.gt.count.distro(conditions.w.density.zone, recode.density)
+
+n.routes.by.zone.type.density <-
+  conditions.w.density.zone %>%
+  group_by(zone.type) %>%
+  dplyr::summarise(N = n())
+route.count.zone.lookup.density <- setNames(n.routes.by.zone.type.density$N,
+                                             n.routes.by.zone.type.density$zone.type)
+
+total.gt.by.zone.density <-
+  gt.count.density.zone %>%
+  group_by(zone.type) %>%
+  dplyr::summarise(L = sum(gt.labels))
+gt.label.count.zone.lookup.density <- setNames(total.gt.by.zone.density$L,
+                                                total.gt.by.zone.density$zone.type)
+
+grid.arrange(plot.gt.dist.for.zone.type(gt.count.density.zone,
+                                        'Low-Moderate Density',
+                                        route.count.zone.lookup.density['Low-Moderate Density'],
+                                        gt.label.count.zone.lookup.density['Low-Moderate Density']),
+             plot.gt.dist.for.zone.type(gt.count.density.zone,
+                                        'Medium-High Density',
+                                        route.count.zone.lookup.density['Medium-High Density'],
+                                        gt.label.count.zone.lookup.density['Medium-High Density']),
+             ncol = 2)
+
+# Version of the plot where they are on the same scale
+# ggplot(data = gt.count.density.zone,
+#        aes(gt.count.density.zone = zone.type, y = gt.labels, fill = label.type)) +
+#   geom_col(position = 'dodge') +
+#   my.theme.discrete.x +
+#   scale_fill_manual(values = c('green', 'red', 'blue', 'orange'), guide = FALSE) +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+#   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+```
+
+
+##### Relationship with accuracy
+
+The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
+
+NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+NOTE: The red dots on the graphs are means.
+
+NOTE: N in the graphs below means number of routes that are predominantly of that zone type. However, there are 3 users who completed each route, so there are actually n * 3 data points.
+
+There does not appear to be a significant difference in accuracy between the densities.
+
+```{r turk.zone.type.analysis.density, echo=FALSE, fig.width=4, fig.height=5}
+zone.type.analysis.data.density <-
+  data.with.raw.accuracy %>%
+  inner_join(conditions.w.density.zone, by = 'condition.id') %>%
+  filter(binary == TRUE,
+         granularity == 'street',
+         included.severity == 'all',
+         n.workers == 1,
+         label.type %in% c('All', 'Problem')) %>%
+  gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
+
+x.labels.with.n.density <-
+  n.routes.by.zone.type.density %>%
+  inner_join(total.gt.by.zone.density, by = 'zone.type') %>%
+  mutate(lab = paste0(zone.type, ' (N=', N, ';L=', L, ')')) %>%
+  pull(lab)
+
+# Create the trellis boxplots.
+ggplot(data = zone.type.analysis.data.density %>% filter(label.type == 'All'),
+       aes(x = zone.type, y = accuracy.value)) +
+  geom_boxplot() +
+  stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  scale_x_discrete(labels = x.labels.with.n.density) +
+  facet_grid(accuracy.type ~ .) +
+  ggtitle('Zone Type Accuracy - All Label Types') +
+  my.theme.discrete.x +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+
+ggplot(data = zone.type.analysis.data.density %>% filter(label.type == 'Problem'),
+       aes(x = zone.type, y = accuracy.value)) +
+  geom_boxplot() +
+  stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
+  scale_x_discrete(labels = x.labels.with.n.density) +
+  facet_grid(accuracy.type ~ .) +
+  ggtitle('Zone Type Accuracy - Problem v NoProblem') +
   my.theme.discrete.x +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot

@@ -329,7 +329,7 @@ Next, we will check the spherity assumption (coming soon!)
 
 ### Zone type: Land use effect on accuracy
 
-##### Definitions
+#### Definitions
 
 First, we have our definitions of the different zone types with shortened names that we use in parens (these can also be found in doc/zone\_type\_descriptions.txt):
 
@@ -357,7 +357,15 @@ However, we are going to look at two different groupings of these zone types, be
     -   Low to Moderate Density = Neighborhood Mixed-Use + Residential + Residential Flat + Unzoned
     -   Medium to High Density = Downtown + Mixed-Use + Industrial + Residential Apt + Special Purpose
 
-First, we analyze based on semantic grouping.
+#### Semantic grouping
+
+As a reminder, the grouping is defined as follows:
+
+-   Commercial = Downtown + Industrial
+-   Mixed-Use = Mixed-Use + Neighborhood Mixed-Use
+-   Residential Apt = Residential Apt + Special Purpose
+-   Residential House = Residential + Residential Flat
+-   Unzoned = Unzoned
 
 ##### Distribution
 
@@ -365,11 +373,11 @@ Here is the zone type distribution for the mturk study. We assigned each street 
 
 NOTE: For regsitered and anon user routes below, it is the percentage of *routes* marked as that zone type. But for All DC Streets, it is the percentage of *streets* in DC, since we don't have a set of "routes" that makes up DC.
 
-![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-1.png)
+![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution.semantic-1.png)
 
 Below, we look at the distribution of the labels types in the ground truth, by zone type. Commercial seems to be the only zone that has a noticeably different distribution of label types. However, we have only two routes for that zone type so we can't draw anything of statistical significance from that.
 
-![](stats_for_paper_files/figure-markdown_github/gt.label.dist.zone.plot-1.png)
+![](stats_for_paper_files/figure-markdown_github/gt.label.dist.zone.plot.semantic-1.png)
 
 ##### Relationship with accuracy
 
@@ -381,7 +389,42 @@ NOTE: The red dots on the graphs are means.
 
 NOTE: N in the graphs below means number of routes that are predominantly of that zone type. However, there are 3 users who completed each route, so there are actually n \* 3 data points.
 
-![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-2.png)
+The only noticeable difference I see right away is particularly high recall and low precision for Unzoned relative to the other zones. However, there were only 2 routes classified as Unzoned, so we don't have enough data to make any judgements on that. The 3 zone types with significant data (Mixed-Use, Residential Apt, and Residential House) all seem to have roughly equal accuracies.
+
+![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis.semantic-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis.semantic-2.png)
+
+#### Density grouping
+
+As a reminder, the grouping is defined as follows:
+
+-   Low to Moderate Density = Neighborhood Mixed-Use + Residential + Residential Flat + Unzoned
+-   Medium to High Density = Downtown + Mixed-Use + Industrial + Residential Apt + Special Purpose
+
+##### Distribution
+
+Here is the zone type distribution for the mturk study. We assigned each street in DC a zone type based on the zone in which one of its endpoints is located. We then assigned a zone type to each route as the plurality zone type among the streets on that route. The graph below compares the zone type distributions of the anon user routes, registered user routes, and all of DC for reference.
+
+NOTE: For regsitered and anon user routes below, it is the percentage of *routes* marked as that zone type. But for All DC Streets, it is the percentage of *streets* in DC, since we don't have a set of "routes" that makes up DC.
+
+![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution.density-1.png)
+
+Below, we look at the distribution of the labels types in the ground truth, by zone type. The types of density appear to have similar distributions of label types.
+
+![](stats_for_paper_files/figure-markdown_github/gt.label.dist.zone.plot.density-1.png)
+
+##### Relationship with accuracy
+
+The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
+
+NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+NOTE: The red dots on the graphs are means.
+
+NOTE: N in the graphs below means number of routes that are predominantly of that zone type. However, there are 3 users who completed each route, so there are actually n \* 3 data points.
+
+There does not appear to be a significant difference in accuracy between the densities.
+
+![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis.density-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis.density-2.png)
 
 ### User behavior: Does auditing speed, etc influence accuracy
 
