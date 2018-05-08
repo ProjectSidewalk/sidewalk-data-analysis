@@ -1689,24 +1689,31 @@ gt.count.by.condition.and.label.type <-
 
 get.gt.count.distro <- function(data, recode.func) {
   data %>%
+    mutate(meters = if_else(is.anon.route, 609.6, 1219.2)) %>%
     inner_join(gt.count.by.condition.and.label.type, by = 'condition.id') %>%
     group_by(label.type, zone.type) %>%
-    dplyr::summarise(gt.labels = sum(gt.labels)) %>%
+    dplyr::summarise(gt.labels = sum(gt.labels),
+                     meters = sum(meters)) %>%
     ungroup() %>%
-    select(label.type, zone.type, gt.labels)
+    mutate(gt.labels.per.100m = 100 * gt.labels / meters) %>%
+    select(label.type, zone.type, gt.labels, gt.labels.per.100m)
 }
 
-plot.gt.dist.for.zone.type <- function(data, zone.type.str, N, L) {
-  ggplot(data = data %>% filter(zone.type == zone.type.str),
-         aes(x = label.type, y = gt.labels, fill = label.type)) +
+plot.gt.dist.for.zone.type <- function(data, n.data, l.data) {
+  xlabs <-
+    data %>%
+    distinct(zone.type) %>%
+    mutate(lab = paste0(zone.type, ' (N=', n.data[zone.type], ';L=', l.data[zone.type], ')')) %>%
+    pull(lab)
+
+  ggplot(data = data,
+         aes(x = zone.type, y = gt.labels.per.100m, fill = label.type)) +
     geom_col(position = 'dodge') +
     my.theme.discrete.x +
-    scale_fill_manual(values = c('green', 'red', 'blue', 'orange'), guide = FALSE) +
-    theme(axis.text.x = element_blank(),
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank(),
-          plot.title = element_text(size = 8)) +
-    ggtitle(paste0(zone.type.str, '(N=', N, ';L=', L, ')')) +
+    scale_fill_manual(values = c('green', 'red', 'blue', 'orange')) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+    scale_x_discrete(labels = xlabs) +
+    ylab('GT Labels per 100 Meters') +
     scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 }
 ```
@@ -1740,9 +1747,9 @@ ggplot(data = zone.distro.by.volunteer.type,
 ```
 
 
-Below, we look at the distribution of the labels types in the ground truth, by zone type. Commercial seems to be the only zone that has a noticeably different distribution of label types. However, we have only two routes for that zone type so we can't draw anything of statistical significance from that.
+Below, we look at the distribution of the label type densities in the ground truth, by zone type. Commercial seems to be the only zone that has a noticeably different distribution of label types. However, we have only two routes for that zone type so we can't draw anything of statistical significance from that.
 
-```{r gt.label.dist.zone.plot.semantic, fig.height=1.5, fig.width=10, warning=FALSE, message=FALSE, echo=FALSE}
+```{r gt.label.dist.zone.plot.semantic, fig.height=4, fig.width=6, warning=FALSE, message=FALSE, echo=FALSE}
 gt.count.semantic.zone <- get.gt.count.distro(conditions.w.semantic.zone, recode.semantic)
 
 n.routes.by.zone.type.semantic <-
@@ -1759,36 +1766,9 @@ total.gt.by.zone.semantic <-
 gt.label.count.zone.lookup.semantic <- setNames(total.gt.by.zone.semantic$L,
                                                 total.gt.by.zone.semantic$zone.type)
 
-grid.arrange(plot.gt.dist.for.zone.type(gt.count.semantic.zone,
-                                        'Commercial',
-                                        route.count.zone.lookup.semantic['Commercial'],
-                                        gt.label.count.zone.lookup.semantic['Commercial']),
-             plot.gt.dist.for.zone.type(gt.count.semantic.zone,
-                                        'Mixed-Use',
-                                        route.count.zone.lookup.semantic['Mixed-Use'],
-                                        gt.label.count.zone.lookup.semantic['Mixed-Use']),
-             plot.gt.dist.for.zone.type(gt.count.semantic.zone,
-                                        'Residential Apt',
-                                        route.count.zone.lookup.semantic['Residential Apt'],
-                                        gt.label.count.zone.lookup.semantic['Residential Apt']),
-             plot.gt.dist.for.zone.type(gt.count.semantic.zone,
-                                        'Residential House',
-                                        route.count.zone.lookup.semantic['Residential House'],
-                                        gt.label.count.zone.lookup.semantic['Residential House']),
-             plot.gt.dist.for.zone.type(gt.count.semantic.zone,
-                                        'Unzoned',
-                                        route.count.zone.lookup.semantic['Unzoned'],
-                                        gt.label.count.zone.lookup.semantic['Unzoned']),
-             ncol = 5)
-
-# Version of the plot where they are on the same scale
-# ggplot(data = gt.count.semantic.zone,
-#        aes(gt.count.semantic.zone = zone.type, y = gt.labels, fill = label.type)) +
-#   geom_col(position = 'dodge') +
-#   my.theme.discrete.x +
-#   scale_fill_manual(values = c('green', 'red', 'blue', 'orange'), guide = FALSE) +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-#   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+plot.gt.dist.for.zone.type(gt.count.semantic.zone,
+                           route.count.zone.lookup.semantic,
+                           gt.label.count.zone.lookup.semantic)
 ```
 
 
@@ -1871,9 +1851,9 @@ ggplot(data = zone.distro.by.volunteer.type,
 ```
 
 
-Below, we look at the distribution of the labels types in the ground truth, by zone type. The types of density appear to have similar distributions of label types.
+Below, we look at the distribution of the label type densities in the ground truth, by zone type. The types of density appear to have similar distributions of label types.
 
-```{r gt.label.dist.zone.plot.density, fig.height=2, fig.width=6, warning=FALSE, message=FALSE, echo=FALSE}
+```{r gt.label.dist.zone.plot.density, fig.height=4, fig.width=6, warning=FALSE, message=FALSE, echo=FALSE}
 gt.count.density.zone <- get.gt.count.distro(conditions.w.density.zone, recode.density)
 
 n.routes.by.zone.type.density <-
@@ -1890,24 +1870,9 @@ total.gt.by.zone.density <-
 gt.label.count.zone.lookup.density <- setNames(total.gt.by.zone.density$L,
                                                 total.gt.by.zone.density$zone.type)
 
-grid.arrange(plot.gt.dist.for.zone.type(gt.count.density.zone,
-                                        'Low-Moderate Density',
-                                        route.count.zone.lookup.density['Low-Moderate Density'],
-                                        gt.label.count.zone.lookup.density['Low-Moderate Density']),
-             plot.gt.dist.for.zone.type(gt.count.density.zone,
-                                        'Medium-High Density',
-                                        route.count.zone.lookup.density['Medium-High Density'],
-                                        gt.label.count.zone.lookup.density['Medium-High Density']),
-             ncol = 2)
-
-# Version of the plot where they are on the same scale
-# ggplot(data = gt.count.density.zone,
-#        aes(gt.count.density.zone = zone.type, y = gt.labels, fill = label.type)) +
-#   geom_col(position = 'dodge') +
-#   my.theme.discrete.x +
-#   scale_fill_manual(values = c('green', 'red', 'blue', 'orange'), guide = FALSE) +
-#   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-#   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+plot.gt.dist.for.zone.type(gt.count.density.zone,
+                           route.count.zone.lookup.density,
+                           gt.label.count.zone.lookup.density)
 ```
 
 

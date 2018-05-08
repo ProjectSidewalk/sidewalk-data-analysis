@@ -375,7 +375,7 @@ NOTE: For regsitered and anon user routes below, it is the percentage of *routes
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution.semantic-1.png)
 
-Below, we look at the distribution of the labels types in the ground truth, by zone type. Commercial seems to be the only zone that has a noticeably different distribution of label types. However, we have only two routes for that zone type so we can't draw anything of statistical significance from that.
+Below, we look at the distribution of the label type densities in the ground truth, by zone type. Commercial seems to be the only zone that has a noticeably different distribution of label types. However, we have only two routes for that zone type so we can't draw anything of statistical significance from that.
 
 ![](stats_for_paper_files/figure-markdown_github/gt.label.dist.zone.plot.semantic-1.png)
 
@@ -408,7 +408,7 @@ NOTE: For regsitered and anon user routes below, it is the percentage of *routes
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution.density-1.png)
 
-Below, we look at the distribution of the labels types in the ground truth, by zone type. The types of density appear to have similar distributions of label types.
+Below, we look at the distribution of the label type densities in the ground truth, by zone type. The types of density appear to have similar distributions of label types.
 
 ![](stats_for_paper_files/figure-markdown_github/gt.label.dist.zone.plot.density-1.png)
 
