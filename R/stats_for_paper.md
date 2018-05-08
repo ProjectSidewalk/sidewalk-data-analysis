@@ -22,7 +22,6 @@ April 17, 2018
         -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Descriptive stats for users](#descriptive-stats-for-users)
         -   [IRR](#irr)
-        -   [Zone types](#zone-types)
     -   [Possible Stories](#possible-stories-1)
         -   [Granularity: Street-level vs 5 meter-level](#granularity-street-level-vs-5-meter-level)
         -   [Cognitive difficulty of label types: Time to label by type](#cognitive-difficulty-of-label-types-time-to-label-by-type)
@@ -273,23 +272,6 @@ NOTE: In this table, the data is binary (not ordinal), and is at the street leve
 | SurfaceProb | 0.477            |
 | Problem     | 0.475            |
 
-### Zone types
-
-First, we have our definitions of the different zone types with shortened names that we use in parens (these can also be found in doc/zone\_type\_descriptions.txt):
-
--   Downtown: High-density commercial and residential development
--   Mixed-Use: Moderate-density residential and non-residential buildings (e.g., retail, art use)
--   Neighborhood Mixed-Use (Nbhd Mixed-Use): Low-density mixed-use development with an emphasis on residential
--   Production, distribution, and repair (Industrial): Moderate-density commercial and production, distribution, and repair (with heavy machinery)
--   Residential: Predominantly residential with detached houses on medium-to-large lots
--   Residential Apartment/Flat (Residential Apt/Flat): Low-to-moderate density residential including detached dwellings, rowhouses, and apartments. NOTE: this is a combination of the Residential Apartment and Residential Flat zones, which have similar descriptions.
--   Special Purpose: Includes Fort McNair Naval Facility (and nearby high-density residential), some moderate-density residential, and some undeveloped land.
--   Unzoned: Predominantly wooded areas (e.g., large parks, golf courses, and cemeteries) and a military base.
-
-Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison of accuracy across zone type. This removes 13 of the 50 sets of routes from registered users (i.e., 37 left). There is still 16 sets of routes from anonymous users.
-
-![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-2.png)
-
 Possible Stories
 ----------------
 
@@ -348,6 +330,27 @@ As we can see in the first row of histograms below, the data are not normally di
 Next, we will check the spherity assumption (coming soon!)
 
 ### Zone type: Land use effect on accuracy
+
+##### Definitions
+
+First, we have our definitions of the different zone types with shortened names that we use in parens (these can also be found in doc/zone\_type\_descriptions.txt):
+
+-   Downtown: High-density commercial and residential development
+-   Mixed-Use: Moderate-density residential and non-residential buildings (e.g., retail, art use)
+-   Neighborhood Mixed-Use (Nbhd Mixed-Use): Low-density mixed-use development with an emphasis on residential
+-   Production, distribution, and repair (Industrial): Moderate-density commercial and production, distribution, and repair (with heavy machinery)
+-   Residential: Predominantly residential with detached houses on medium-to-large lots
+-   Residential Apartment/Flat (Residential Apt/Flat): Low-to-moderate density residential including detached dwellings, rowhouses, and apartments. NOTE: this is a combination of the Residential Apartment and Residential Flat zones, which have similar descriptions.
+-   Special Purpose: Includes Fort McNair Naval Facility (and nearby high-density residential), some moderate-density residential, and some undeveloped land.
+-   Unzoned: Predominantly wooded areas (e.g., large parks, golf courses, and cemeteries) and a military base.
+
+##### Distribution
+
+Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison of accuracy across zone type. This removes 13 of the 50 sets of routes from registered users (i.e., 37 left). There is still 16 sets of routes from anonymous users.
+
+![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-2.png)
+
+##### Relationship with accuracy
 
 The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
 

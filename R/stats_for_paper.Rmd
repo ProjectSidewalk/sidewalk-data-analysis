@@ -1417,91 +1417,6 @@ kable(
 
 
 
-### Zone types
-
-First, we have our definitions of the different zone types with shortened names that we use in parens (these can also be found in doc/zone_type_descriptions.txt):
-
-* Downtown: High-density commercial and residential development
-* Mixed-Use: Moderate-density residential and non-residential buildings (e.g., retail, art use)
-* Neighborhood Mixed-Use (Nbhd Mixed-Use): Low-density mixed-use development with an emphasis on residential
-* Production, distribution, and repair (Industrial): Moderate-density commercial and production, distribution, and repair (with heavy machinery)
-* Residential: Predominantly residential with detached houses on medium-to-large lots
-* Residential Apartment/Flat (Residential Apt/Flat): Low-to-moderate density residential including detached dwellings, rowhouses, and apartments. NOTE: this is a combination of the Residential Apartment and Residential Flat zones, which have similar descriptions.
-* Special Purpose: Includes Fort McNair Naval Facility (and nearby high-density residential), some moderate-density residential, and some undeveloped land.
-* Unzoned: Predominantly wooded areas (e.g., large parks, golf courses, and cemeteries) and a military base.
-
-
-
-Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison of accuracy across zone type. This removes `r n.reg.users.removed` of the `r n.reg` sets of routes from registered users (i.e., `r n.reg - n.reg.users.removed` left). There is still `r n.anon` sets of routes from anonymous users.
-
-```{r turk.zone.type.distribution, echo=FALSE, fig.width=4.5, fig.height=4}
-zones.without.anon.data <- c('Nbhd Mixed-Use', 'Special Purpose', 'Unzoned')
-
-zoning.with.volunteer.type <-
-  data.with.raw.accuracy %>%
-  select(condition.id, is.anon.route) %>%
-  distinct() %>%
-  inner_join(zoning.data, by = 'condition.id') %>%
-  mutate(volunteer.type = factor(is.anon.route,
-                                 levels = c(FALSE, TRUE),
-                                 labels = c('Registered', 'Anonymous'))) %>%
-  mutate(zone.type = fct_recode(zone_type,
-                                'Downtown'             = 'Downtown Zone',
-                                'Mixed-Use'            = 'Mixed-Use Zone',
-                                'Nbhd Mixed-Use'       = 'Neighborhood Mixed-Use Zone',
-                                'Industrial'           = 'Production, Distribution, and Repair Zone',
-                                'Residential Apt/Flat' = 'Residential Apartment Zone',
-                                'Residential Apt/Flat' = 'Residential Flat Zone',
-                                'Residential'          = 'Residential Zone',
-                                'Special Purpose'      = 'Special Purpose Zone'))
-
-all.dc.zoning.data <- data_frame(
-  volunteer.type = c('All Streets'),
-  zone.type = c('Downtown',
-                'Mixed-Use',
-                'Nbhd Mixed-Use',
-                'Industrial',
-                'Residential Apt/Flat',
-                'Residential',
-                'Special Purpose',
-                'Unzoned'),
-  percent.of.streets = c(5.74, 11.73, 1.02, 2.47, 29.83, 42.89, 1.30, 5.03)
-)
-
-land.use.by.volunteer.type <-
-  zoning.with.volunteer.type %>%
-  group_by(volunteer.type, zone.type) %>%
-  dplyr::summarize(n.streets = n()) %>%
-  complete(zone.type, fill = list(n.streets = 0)) %>%
-  mutate(percent.of.streets = 100 * n.streets / sum(n.streets)) %>%
-  ungroup() %>%
-  select(volunteer.type, zone.type, percent.of.streets) %>%
-  rbind(all.dc.zoning.data)
-
-land.use.by.volunteer.type.filtered <-
-  zoning.with.volunteer.type %>%
-  filter(!exclude) %>%
-  group_by(volunteer.type, zone.type) %>%
-  dplyr::summarize(n.streets = n()) %>%
-  mutate(percent.of.streets = 100 * n.streets / sum(n.streets)) %>%
-  ungroup() %>%
-  select(volunteer.type, zone.type, percent.of.streets) %>%
-  rbind(all.dc.zoning.data) %>%
-  filter(!(zone.type %in% zones.without.anon.data))
-
-ggplot(data = land.use.by.volunteer.type, aes(x = zone.type, y = percent.of.streets, fill = volunteer.type)) +
-  geom_col(position = 'dodge') +
-  my.theme.discrete.x +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
-
-ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percent.of.streets, fill = volunteer.type)) +
-  geom_col(position = 'dodge') +
-  my.theme.discrete.x +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
-```
-
 ## Possible Stories
 
 ### Granularity: Street-level vs 5 meter-level
@@ -1676,6 +1591,95 @@ Next, we will check the spherity assumption (coming soon!)
 
 ### Zone type: Land use effect on accuracy
 
+##### Definitions
+
+First, we have our definitions of the different zone types with shortened names that we use in parens (these can also be found in doc/zone_type_descriptions.txt):
+
+* Downtown: High-density commercial and residential development
+* Mixed-Use: Moderate-density residential and non-residential buildings (e.g., retail, art use)
+* Neighborhood Mixed-Use (Nbhd Mixed-Use): Low-density mixed-use development with an emphasis on residential
+* Production, distribution, and repair (Industrial): Moderate-density commercial and production, distribution, and repair (with heavy machinery)
+* Residential: Predominantly residential with detached houses on medium-to-large lots
+* Residential Apartment/Flat (Residential Apt/Flat): Low-to-moderate density residential including detached dwellings, rowhouses, and apartments. NOTE: this is a combination of the Residential Apartment and Residential Flat zones, which have similar descriptions.
+* Special Purpose: Includes Fort McNair Naval Facility (and nearby high-density residential), some moderate-density residential, and some undeveloped land.
+* Unzoned: Predominantly wooded areas (e.g., large parks, golf courses, and cemeteries) and a military base.
+
+
+##### Distribution
+
+Here is the zone type distribution for the mturk study. This shows the distribution of zone type for the routes that we took from anonymous and registered users and compare it to the distribution across all of DC. There are three zone types where anonymous users have no data, but registered users do. So the second graph shows the distribution when we remove the sets of routes from registered users the contain data from those three zone types. We will likely use the second set of data for comparison of accuracy across zone type. This removes `r n.reg.users.removed` of the `r n.reg` sets of routes from registered users (i.e., `r n.reg - n.reg.users.removed` left). There is still `r n.anon` sets of routes from anonymous users.
+
+```{r turk.zone.type.distribution, echo=FALSE, fig.width=4.5, fig.height=4}
+zones.without.anon.data <- c('Nbhd Mixed-Use', 'Special Purpose', 'Unzoned')
+
+zoning.with.volunteer.type <-
+  data.with.raw.accuracy %>%
+  select(condition.id, is.anon.route) %>%
+  distinct() %>%
+  inner_join(zoning.data, by = 'condition.id') %>%
+  mutate(volunteer.type = factor(is.anon.route,
+                                 levels = c(FALSE, TRUE),
+                                 labels = c('Registered', 'Anonymous'))) %>%
+  mutate(zone.type = fct_recode(zone_type,
+                                'Downtown'             = 'Downtown Zone',
+                                'Mixed-Use'            = 'Mixed-Use Zone',
+                                'Nbhd Mixed-Use'       = 'Neighborhood Mixed-Use Zone',
+                                'Industrial'           = 'Production, Distribution, and Repair Zone',
+                                'Residential Apt/Flat' = 'Residential Apartment Zone',
+                                'Residential Apt/Flat' = 'Residential Flat Zone',
+                                'Residential'          = 'Residential Zone',
+                                'Special Purpose'      = 'Special Purpose Zone'))
+
+all.dc.zoning.data <- data_frame(
+  volunteer.type = c('All Streets'),
+  zone.type = c('Downtown',
+                'Mixed-Use',
+                'Nbhd Mixed-Use',
+                'Industrial',
+                'Residential Apt/Flat',
+                'Residential',
+                'Special Purpose',
+                'Unzoned'),
+  percent.of.streets = c(5.74, 11.73, 1.02, 2.47, 29.83, 42.89, 1.30, 5.03)
+)
+
+land.use.by.volunteer.type <-
+  zoning.with.volunteer.type %>%
+  group_by(volunteer.type, zone.type) %>%
+  dplyr::summarize(n.streets = n()) %>%
+  complete(zone.type, fill = list(n.streets = 0)) %>%
+  mutate(percent.of.streets = 100 * n.streets / sum(n.streets)) %>%
+  ungroup() %>%
+  select(volunteer.type, zone.type, percent.of.streets) %>%
+  rbind(all.dc.zoning.data)
+
+land.use.by.volunteer.type.filtered <-
+  zoning.with.volunteer.type %>%
+  filter(!exclude) %>%
+  group_by(volunteer.type, zone.type) %>%
+  dplyr::summarize(n.streets = n()) %>%
+  mutate(percent.of.streets = 100 * n.streets / sum(n.streets)) %>%
+  ungroup() %>%
+  select(volunteer.type, zone.type, percent.of.streets) %>%
+  rbind(all.dc.zoning.data) %>%
+  filter(!(zone.type %in% zones.without.anon.data))
+
+ggplot(data = land.use.by.volunteer.type, aes(x = zone.type, y = percent.of.streets, fill = volunteer.type)) +
+  geom_col(position = 'dodge') +
+  my.theme.discrete.x +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+
+ggplot(data = land.use.by.volunteer.type.filtered, aes(x = zone.type, y = percent.of.streets, fill = volunteer.type)) +
+  geom_col(position = 'dodge') +
+  my.theme.discrete.x +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+```
+
+
+##### Relationship with accuracy
+
 The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
 
 NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
@@ -1731,6 +1735,7 @@ ggplot(data = zone.type.analysis.data %>% filter(label.type == 'Problem'),
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 ```
+
 
 
 ### User behavior: Does auditing speed, etc influence accuracy
