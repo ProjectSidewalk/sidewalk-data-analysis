@@ -367,6 +367,10 @@ NOTE: For regsitered and anon user routes below, it is the percentage of *routes
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution-1.png)
 
+Below, we look at the distribution of the labels types in the ground truth, by zone type. Commercial seems to be the only zone that has a noticeably different distribution of label types. However, we have only two routes for that zone type so we can't draw anything of statistical significance from that.
+
+![](stats_for_paper_files/figure-markdown_github/gt.label.dist.zone.plot-1.png)
+
 ##### Relationship with accuracy
 
 The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
@@ -376,8 +380,6 @@ NOTE: In this section, the data are binary (not ordinal), and is at the street l
 NOTE: The red dots on the graphs are means.
 
 NOTE: N in the graphs below means number of routes that are predominantly of that zone type. However, there are 3 users who completed each route, so there are actually n \* 3 data points.
-
-*Takeaways*:
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis-2.png)
 

@@ -14,6 +14,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
 library(RPostgreSQL)
+library(gridExtra)
 library(ggplot2) # may need to use devtools::install_github('tidyverse/ggplot2') if version < 2.2.2
 library(tidyr)
 library(dplyr)
@@ -1521,12 +1522,6 @@ kable(
   digits = 2,
   align = 'l'
 )
-
-# We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is
-# significant. Since our observations are not normally distributed (multiple observations from each
-# user), our next option is the Repeated Measures ANOVA. To use this, we need to check that the
-# observations for each level are normally distributed, and we have to check for "spherity".
-
 ```
 
 Now we want to check if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since users placed multiple labels, we are actually going to go with a Repeated Measures ANOVA. To use this, we need to check that the observations for each label type are normally distributed, and we have to check for "spherity".
@@ -1619,7 +1614,7 @@ Here is the zone type distribution for the mturk study. We assigned each street 
 
 NOTE: For regsitered and anon user routes below, it is the percentage of _routes_ marked as that zone type. But for All DC Streets, it is the percentage of _streets_ in DC, since we don't have a set of "routes" that makes up DC.
 
-```{r turk.zone.type.distribution, echo=FALSE, fig.width=4.5, fig.height=4}
+```{r turk.zone.type.distribution, echo=FALSE, fig.width=4, fig.height=3}
 all.dc.zoning.data <- data_frame(
   volunteer.type = c('All DC Streets'),
   zone.type = c('Downtown Zone',
@@ -1681,6 +1676,78 @@ ggplot(data = zone.distro.by.volunteer.type,
   my.theme.discrete.x +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+
+# GT label counts by label type and route.
+gt.count.by.condition.and.label.type <-
+  data.with.raw.accuracy %>%
+  filter(worker.type %in% c('anon', 'reg'),
+         binary == FALSE,
+         included.severity == 'all',
+         granularity == 'street',
+         label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+  group_by(condition.id, label.type) %>%
+  summarize(gt.labels = sum(true.pos, false.neg)) %>%
+  ungroup()
+
+get.gt.count.distro <- function(data, recode.func) {
+  data %>%
+    inner_join(gt.count.by.condition.and.label.type, by = 'condition.id') %>%
+    group_by(label.type, zone.type) %>%
+    dplyr::summarise(gt.labels = sum(gt.labels)) %>%
+    ungroup() %>%
+    select(label.type, zone.type, gt.labels)
+}
+gt.count.semantic.zone <- get.gt.count.distro(conditions.w.semantic.zone, recode.semantic)
+
+n.routes.by.zone.type <- conditions.w.semantic.zone %>% group_by(zone.type) %>% summarise(n = n())
+route.count.zone.lookup <- setNames(n.routes.by.zone.type$n, n.routes.by.zone.type$zone.type)
+
+total.gt.by.zone <- gt.count.semantic.zone %>% group_by(zone.type) %>% summarise(L = sum(gt.labels))
+gt.label.count.zone.lookup <- setNames(total.gt.by.zone$L, total.gt.by.zone$zone.type)
+```
+
+
+Below, we look at the distribution of the labels types in the ground truth, by zone type. Commercial seems to be the only zone that has a noticeably different distribution of label types. However, we have only two routes for that zone type so we can't draw anything of statistical significance from that.
+
+```{r gt.label.dist.zone.plot, fig.height=1.5, fig.width=10, warning=FALSE, message=FALSE, echo=FALSE}
+plot.gt.dist.for.zone.type <- function(zone.type.str, N, L) {
+  ggplot(data = gt.count.semantic.zone %>% filter(zone.type == zone.type.str),
+         aes(x = label.type, y = gt.labels, fill = label.type)) +
+    geom_col(position = 'dodge') +
+    my.theme.discrete.x +
+    scale_fill_manual(values = c('green', 'red', 'blue', 'orange'), guide = FALSE) +
+    theme(axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          plot.title = element_text(size = 8)) +
+    ggtitle(paste0(zone.type.str, '(N=', N, ';L=', L, ')')) +
+    scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+}
+grid.arrange(plot.gt.dist.for.zone.type('Commercial',
+                                        route.count.zone.lookup['Commercial'],
+                                        gt.label.count.zone.lookup['Commercial']),
+             plot.gt.dist.for.zone.type('Mixed-Use',
+                                        route.count.zone.lookup['Mixed-Use'],
+                                        gt.label.count.zone.lookup['Mixed-Use']),
+             plot.gt.dist.for.zone.type('Residential Apt',
+                                        route.count.zone.lookup['Residential Apt'],
+                                        gt.label.count.zone.lookup['Residential Apt']),
+             plot.gt.dist.for.zone.type('Residential House',
+                                        route.count.zone.lookup['Residential House'],
+                                        gt.label.count.zone.lookup['Residential House']),
+             plot.gt.dist.for.zone.type('Unzoned',
+                                        route.count.zone.lookup['Unzoned'],
+                                        gt.label.count.zone.lookup['Unzoned']),
+             ncol = 5)
+
+# Version of the plot where they are on the same scale
+# ggplot(data = gt.count.semantic.zone,
+#        aes(gt.count.semantic.zone = zone.type, y = gt.labels, fill = label.type)) +
+#   geom_col(position = 'dodge') +
+#   my.theme.discrete.x +
+#   scale_fill_manual(values = c('green', 'red', 'blue', 'orange'), guide = FALSE) +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+#   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 ```
 
 
@@ -1694,8 +1761,6 @@ NOTE: The red dots on the graphs are means.
 
 NOTE: N in the graphs below means number of routes that are predominantly of that zone type. However, there are 3 users who completed each route, so there are actually n * 3 data points.
 
-*Takeaways*:
-
 ```{r turk.zone.type.analysis, echo=FALSE, fig.width=4.5, fig.height=4}
 zone.type.analysis.data <-
   data.with.raw.accuracy %>%
@@ -1707,7 +1772,6 @@ zone.type.analysis.data <-
          label.type %in% c('All', 'Problem')) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
-n.routes.by.zone.type <- conditions.w.semantic.zone %>% group_by(zone.type) %>% dplyr::summarise(n = n())
 x.labels.with.n <- n.routes.by.zone.type %>% mutate(lab = paste0(zone.type, ' (n=', n, ')')) %>% pull(lab)
 
 # Create the trellis boxplots.
