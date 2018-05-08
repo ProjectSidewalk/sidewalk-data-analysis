@@ -209,7 +209,7 @@ Permits detached houses on moderately-sized lots
 
 
 RESIDENTIAL APARTMENT
-Our description: Low-to-moderate density residential including detached dwellings, rowhouses, and apartments
+Our description: Medium-to-high density residential including apartments and some rowhouses
 
 Many descriptions from above CSV:
 Permits low to moderate-density development, including detached dwellings, rowhouses, and low-rise apartments
@@ -236,7 +236,7 @@ Permits medium to high-desnity apartments in Dupont Circle
 
 
 RESIDENTIAL FLAT
-Our description: Low-to-moderate density residential including detached dwellings, rowhouses, and apartments
+Our description: Low-to-moderate density residential rowhouses
 
 Many descriptions from above CSV:
 Permits development of attached rowhouses on small lots
