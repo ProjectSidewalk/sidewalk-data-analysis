@@ -1513,7 +1513,8 @@ ave.labeling.time.by.type <-
   filter(label_type %in% LABEL_TYPES_TO_ANALYZE) %>%
   group_by(label_type) %>%
   dplyr::summarise(median_sec_to_label = median(seconds_to_label),
-                   mean_sec_to_label = mean(seconds_to_label)) %>%
+                   mean_s_to_label = mean(seconds_to_label),
+                   sd_s_to_label = sd(seconds_to_label)) %>%
   inner_join(accuracy.by.label.type, by = c('label_type' = 'label.type')) %>%
   arrange(median_sec_to_label)
 

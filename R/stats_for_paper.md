@@ -312,12 +312,12 @@ Time to place a label is defined as follows:
 -   For the first label a user places on a specific panorama, the time that elapsed between stepping into the panorama and placing the label.
 -   For subsequent labels on the same panorama, the time that elapsed between placing the previous label and placing the current label.
 
-| label\_type | median\_sec\_to\_label | mean\_sec\_to\_label | mean\_recall | mean\_precision |
-|:------------|:-----------------------|:---------------------|:-------------|:----------------|
-| CurbRamp    | 6.35                   | 10.27                | 0.90         | 0.95            |
-| Obstacle    | 7.73                   | 12.19                | 0.49         | 0.45            |
-| NoCurbRamp  | 8.41                   | 12.78                | 0.76         | 0.18            |
-| SurfaceProb | 10.91                  | 16.09                | 0.34         | 0.72            |
+| label\_type | median\_sec\_to\_label | mean\_s\_to\_label | sd\_s\_to\_label | mean\_recall | mean\_precision |
+|:------------|:-----------------------|:-------------------|:-----------------|:-------------|:----------------|
+| CurbRamp    | 6.35                   | 10.27              | 14.48            | 0.90         | 0.95            |
+| Obstacle    | 7.73                   | 12.19              | 16.14            | 0.49         | 0.45            |
+| NoCurbRamp  | 8.41                   | 12.78              | 15.73            | 0.76         | 0.18            |
+| SurfaceProb | 10.91                  | 16.09              | 17.55            | 0.34         | 0.72            |
 
 Now we want to check if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since users placed multiple labels, we are actually going to go with a Repeated Measures ANOVA. To use this, we need to check that the observations for each label type are normally distributed, and we have to check for "spherity".
 
