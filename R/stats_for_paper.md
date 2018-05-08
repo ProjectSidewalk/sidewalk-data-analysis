@@ -327,12 +327,6 @@ NOTE: In this section, the data are binary (not ordinal), and is at the street l
 
 Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it surprising that NoCurbRamp took longer to label than Obstacle (though only slightly).
 
-We were sort of hoping for a result where we could say that the labels with lower accuracy had longer labeling times, and we could propose that the reason is the differing cognitive difficulty between the label types. Unfortunately, that result is not fully true. CurbRamp did have the highest recall and shortest labeling time while SurfaceProblem had the lowest recall and longest labeling time; this did not hold for Obstacle and NoCurbRamp.
-
-Although this likely is not interesting to talk about in the paper, my intuition explains the results in this way: SurfaceProblem had a significantly longer labeling time than the other label types, and this is because it is much more cognitively difficult than the other types. With surface problems, odd lighting and shadows can make it unclear whether something is a surface problem, one often needs to zoom in to verify that it is a surface problem or assess its severity, and it often takes careful examination to find such labels. Ramp label types rarely have that problem. I also think that Obstacles are much more obvious than SurfaceProblems; one rarely has to zoom in, and you are unlikely to not even see an obstacle. *But* just because Obstacles are easy to see, doesn't mean that we have agreed on what *should* be considered an obstacle.
-
-Summary of the above paragraph: SurfaceProblems are hard to find (and are cognitively difficult), but the relationship with accuracy is not very clean because there is disagreement (and lack of training) on when to place NoCurbRamp and Obstacle label types.
-
 Time to place a label is defined as follows:
 
 -   For the first label a user places on a specific panorama, the time that elapsed between stepping into the panorama and placing the label.
@@ -344,6 +338,14 @@ Time to place a label is defined as follows:
 | Obstacle    | 7.73                   | 12.19                | 0.49         | 0.45            |
 | NoCurbRamp  | 8.41                   | 12.78                | 0.76         | 0.18            |
 | SurfaceProb | 10.91                  | 16.09                | 0.34         | 0.72            |
+
+Now we want to check if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since users placed multiple labels, we are actually going to go with a Repeated Measures ANOVA. To use this, we need to check that the observations for each label type are normally distributed, and we have to check for "spherity".
+
+As we can see in the first row of histograms below, the data are not normally distributed. However, the data fit a normal distribution very well after a log transformation (shown in the second row of histograms).
+
+![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-1.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-2.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-3.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-4.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-5.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-6.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-7.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-8.png)
+
+Next, we will check the spherity assumption (coming soon!)
 
 ### Zone type: Land use effect on accuracy
 
