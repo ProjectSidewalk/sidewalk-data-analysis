@@ -24,7 +24,7 @@ April 17, 2018
         -   [IRR](#irr)
     -   [Possible Stories](#possible-stories-1)
         -   [Granularity: Street-level vs 5 meter-level](#granularity-street-level-vs-5-meter-level)
-        -   [Cognitive difficulty of label types: Time to label by type](#cognitive-difficulty-of-label-types-time-to-label-by-type)
+        -   [Visual search time: Time to label by type](#visual-search-time-time-to-label-by-type)
         -   [Zone type: Land use effect on accuracy](#zone-type-land-use-effect-on-accuracy)
         -   [User behavior: Does auditing speed, etc influence accuracy](#user-behavior-does-auditing-speed-etc-influence-accuracy)
         -   [User group: Reg vs anon vs turk1 vs turk3 vs turk5](#user-group-reg-vs-anon-vs-turk1-vs-turk3-vs-turk5)
@@ -301,31 +301,33 @@ NOTE: This is a rare case where we are using the mean, since we are also showing
 
 -   NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
 
-### Cognitive difficulty of label types: Time to label by type
+### Visual search time: Time to label by type
 
 NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it surprising that NoCurbRamp took longer to label than Obstacle (though only slightly).
+Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it surprising that NoCurbRamp took longer to label than Obstacle.
 
 Time to place a label is defined as follows:
 
 -   For the first label a user places on a specific panorama, the time that elapsed between stepping into the panorama and placing the label.
 -   For subsequent labels on the same panorama, the time that elapsed between placing the previous label and placing the current label.
 
-| label\_type | median\_sec\_to\_label | mean\_s\_to\_label | sd\_s\_to\_label | mean\_recall | mean\_precision |
-|:------------|:-----------------------|:-------------------|:-----------------|:-------------|:----------------|
-| CurbRamp    | 6.35                   | 10.27              | 14.48            | 0.90         | 0.95            |
-| Obstacle    | 7.73                   | 12.19              | 16.14            | 0.49         | 0.45            |
-| NoCurbRamp  | 8.41                   | 12.78              | 15.73            | 0.76         | 0.18            |
-| SurfaceProb | 10.91                  | 16.09              | 17.55            | 0.34         | 0.72            |
+| label\_type | mean\_sec\_to\_label | median\_s\_to\_label | sd\_s\_to\_label | mean\_recall | mean\_precision |
+|:------------|:---------------------|:---------------------|:-----------------|:-------------|:----------------|
+| CurbRamp    | 8.14                 | 6.89                 | 5.29             | 0.90         | 0.95            |
+| Obstacle    | 10.10                | 8.21                 | 7.54             | 0.49         | 0.45            |
+| NoCurbRamp  | 12.78                | 9.46                 | 10.20            | 0.76         | 0.18            |
+| SurfaceProb | 13.77                | 10.92                | 8.41             | 0.34         | 0.72            |
 
-Now we want to check if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since users placed multiple labels, we are actually going to go with a Repeated Measures ANOVA. To use this, we need to check that the observations for each label type are normally distributed, and we have to check for "spherity".
+Now we want to check if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since each user's labeling time is recorded *for each label type*, our next idea would be to run a Repeated Measures ANOVA.
 
-As we can see in the first row of histograms below, the data are not normally distributed. However, the data fit a normal distribution very well after a log transformation (shown in the second row of histograms).
+However, rANOVA would require us to throw out data for any user who did not place a label of each label type. We have 130 users with labeling time values for curb ramps, but only 84 users have data for surface problems. This would mean throwing away a large amount of data, giving us less power and possibly biasing the results. Thus, we turn to our next option: linear mixed-effect models.
 
-![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-1.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-2.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-3.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-4.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-5.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-6.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-7.png)![](stats_for_paper_files/figure-markdown_github/turk.label.difficulty.RMANOVA.assumption-8.png)
+TODO: Figure out what the assumptions are for linear mixed-effect models, check them, and figure out how best to relay the results of such an analysis.
 
-Next, we will check the spherity assumption (coming soon!)
+    ##             numDF denDF  F-value p-value
+    ## (Intercept)     1   299 398.0174  <.0001
+    ## label_type      3   299  16.8947  <.0001
 
 ### Zone type: Land use effect on accuracy
 

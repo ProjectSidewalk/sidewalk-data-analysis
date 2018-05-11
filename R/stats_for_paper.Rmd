@@ -14,7 +14,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 library(knitr)
 library(RPostgreSQL)
-library(gridExtra)
 library(ggplot2) # may need to use devtools::install_github('tidyverse/ggplot2') if version < 2.2.2
 library(tidyr)
 library(dplyr)
@@ -22,6 +21,7 @@ library(forcats)
 library(janitor)
 library(Kendall)
 library(stringr)
+library(nlme)
 
 # Run the following in console when you want to generate github flavored markdown as well.
 # library(rmarkdown)
@@ -1478,11 +1478,11 @@ ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.val
 * NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
 
 
-### Cognitive difficulty of label types: Time to label by type
+### Visual search time: Time to label by type
 
 NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it surprising that NoCurbRamp took longer to label than Obstacle (though only slightly).
+Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it surprising that NoCurbRamp took longer to label than Obstacle.
 
 Time to place a label is defined as follows:
 
@@ -1498,83 +1498,65 @@ accuracy.by.label.type <-
                    mean_precision = mean(precision, na.rm = TRUE)) %>%
   mutate(label.type = as.character(label.type))
 
-distinct.turkers <- data.with.raw.accuracy %>% distinct(worker1) %>% pull()
+distinct.workers <- data.with.raw.accuracy %>% distinct(worker1) %>% pull()
 extract_label_type <- Vectorize(
   function(note.str) {
   str_extract_all(note.str, '[:alpha:]+')[[1]][2]
   }
 )
-ave.labeling.time.by.type <-
+ave.labeling.time.by.type.and.user <-
   labeling.times.turk.study %>%
-  filter(user_id %in% distinct.turkers) %>%
+  filter(user_id %in% distinct.workers) %>%
   mutate(label_type = factor(extract_label_type(note))) %>%
   mutate(label_type = fct_recode(label_type, 'SurfaceProb' = 'SurfaceProblem')) %>%
   mutate(label_type = as.character(label_type)) %>%
   filter(label_type %in% LABEL_TYPES_TO_ANALYZE) %>%
-  group_by(label_type) %>%
-  dplyr::summarise(median_sec_to_label = median(seconds_to_label),
-                   mean_s_to_label = mean(seconds_to_label),
+  group_by(label_type, user_id) %>%
+  dplyr::summarise(seconds_to_label = median(seconds_to_label))  # probs want to take log here
+
+ave.labeling.time.by.type <-
+  ave.labeling.time.by.type.and.user %>%
+  dplyr::summarise(mean_sec_to_label = mean(seconds_to_label),  # across users, by label type
+                   median_s_to_label = median(seconds_to_label),
                    sd_s_to_label = sd(seconds_to_label)) %>%
   inner_join(accuracy.by.label.type, by = c('label_type' = 'label.type')) %>%
-  arrange(median_sec_to_label)
+  arrange(mean_sec_to_label)
 
 kable(
   ave.labeling.time.by.type,
   digits = 2,
   align = 'l'
 )
+
+n.ramp.users <- sum(ave.labeling.time.by.type.and.user$label_type == 'CurbRamp')
+n.surface.prob.users <- sum(ave.labeling.time.by.type.and.user$label_type == 'SurfaceProb')
 ```
 
-Now we want to check if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since users placed multiple labels, we are actually going to go with a Repeated Measures ANOVA. To use this, we need to check that the observations for each label type are normally distributed, and we have to check for "spherity".
+Now we want to check if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since each user's labeling time is recorded _for each label type_, our next idea would be to run a Repeated Measures ANOVA.
 
-As we can see in the first row of histograms below, the data are not normally distributed. However, the data fit a normal distribution very well after a log transformation (shown in the second row of histograms).
+However, rANOVA would require us to throw out data for any user who did not place a label of each label type. We have `r n.ramp.users` users with labeling time values for curb ramps, but only `r n.surface.prob.users` users have data for surface problems. This would mean throwing away a large amount of data, giving us less power and possibly biasing the results. Thus, we turn to our next option: linear mixed-effect models.
+
+TODO: Figure out what the assumptions are for linear mixed-effect models, check them, and figure out how best to relay the results of such an analysis.
 
 ```{r turk.label.difficulty.RMANOVA.assumption, echo=FALSE, fig.width=2, fig.height=2, message=FALSE}
-labeling.times.with.type <-
-  labeling.times.turk.study %>%
-  filter(user_id %in% distinct.turkers) %>%
-  mutate(label_type = factor(extract_label_type(note))) %>%
-  mutate(label_type = fct_recode(label_type, 'SurfaceProb' = 'SurfaceProblem')) %>%
-  mutate(label_type = as.character(label_type)) %>%
-  filter(label_type %in% LABEL_TYPES_TO_ANALYZE) %>%
-  mutate(label_type = factor(label_type))
+# Very helpful site that brought me from thinking in terms of repeated measures ANOVA to mixed model
+# https://m-clark.github.io/docs/mixedModels/anovamixed.html
+# Here is what the analysis would have looked like for rANOVA (you can see the similar F-scores):
+# summary(aov(seconds_to_label ~ label_type + Error(user_id),
+#             data = ave.labeling.time.by.type.and.user))
 
-ggplot(labeling.times.with.type %>% filter(label_type == 'CurbRamp'), aes(x = seconds_to_label)) +
-  geom_histogram() +
-  ggtitle('CurbRamp') +
-  theme_bw()
-ggplot(labeling.times.with.type %>% filter(label_type == 'NoCurbRamp'), aes(x = seconds_to_label)) +
-  geom_histogram() +
-  ggtitle('NoCurbRamp') +
-  theme_bw()
-ggplot(labeling.times.with.type %>% filter(label_type == 'Obstacle'), aes(x = seconds_to_label)) +
-  geom_histogram() +
-  ggtitle('Obstacle') +
-  theme_bw()
-ggplot(labeling.times.with.type %>% filter(label_type == 'SurfaceProb'), aes(x = seconds_to_label)) +
-  geom_histogram() +
-  ggtitle('SurfaceProb') +
-  theme_bw()
+anova(lme(seconds_to_label ~ label_type, random = ~ 1 | user_id,
+          data = ave.labeling.time.by.type.and.user))
 
-ggplot(labeling.times.with.type %>% filter(label_type == 'CurbRamp'), aes(x = log(seconds_to_label))) +
-  geom_histogram() +
-  ggtitle('CurbRamp') +
-  theme_bw()
-ggplot(labeling.times.with.type %>% filter(label_type == 'NoCurbRamp'), aes(x = log(seconds_to_label))) +
-  geom_histogram() +
-  ggtitle('NoCurbRamp') +
-  theme_bw()
-ggplot(labeling.times.with.type %>% filter(label_type == 'Obstacle'), aes(x = log(seconds_to_label))) +
-  geom_histogram() +
-  ggtitle('Obstacle') +
-  theme_bw()
-ggplot(labeling.times.with.type %>% filter(label_type == 'SurfaceProb'), aes(x = log(seconds_to_label))) +
-  geom_histogram() +
-  ggtitle('SurfaceProb') +
-  theme_bw()
+# Checking assumptions:
+# https://stats.stackexchange.com/questions/77891/checking-assumptions-lmer-lme-mixed-models-in-r
+# Homogeneity of variance:
+# plot(lme(seconds_to_label ~ label_type, random = ~ 1 | user_id,
+#          data = ave.labeling.time.by.type.and.user))
+# Normally distributed residuals:
+# qqnorm(lme(seconds_to_label ~ label_type, random = ~ 1 | user_id,
+#                     data = ave.labeling.time.by.type.and.user), ~ranef(., level=1))
 ```
-
-Next, we will check the spherity assumption (coming soon!)
 
 
 ### Zone type: Land use effect on accuracy
