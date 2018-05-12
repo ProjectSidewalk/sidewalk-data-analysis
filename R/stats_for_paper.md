@@ -321,13 +321,40 @@ Time to place a label is defined as follows:
 
 Now we want to check if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since each user's labeling time is recorded *for each label type*, our next idea would be to run a Repeated Measures ANOVA.
 
-However, rANOVA would require us to throw out data for any user who did not place a label of each label type. We have 130 users with labeling time values for curb ramps, but only 84 users have data for surface problems. This would mean throwing away a large amount of data, giving us less power and possibly biasing the results. Thus, we turn to our next option: linear mixed-effect models.
+However, rANOVA would require us to throw out data for any user who did not place a label of each label type. We have 130 users with labeling time values for curb ramps, but only 119 users have data for surface problems. This would mean throwing away a large amount of data, giving us less power and possibly biasing the results. Thus, we turn to our next option: linear mixed-effect models.
 
-TODO: Figure out what the assumptions are for linear mixed-effect models, check them, and figure out how best to relay the results of such an analysis.
+Another reason for using a linear mixed-effect model is because we want to take into account the differences between users, the differences between routes, and the fact that the user factor is nested in the route factor (each user appears in only one route).
 
-    ##             numDF denDF  F-value p-value
-    ## (Intercept)     1   299 398.0174  <.0001
-    ## label_type      3   299  16.8947  <.0001
+For some background on linear mixed-effect models, the reference I found most helpful was this one: <https://stats.idre.ucla.edu/other/mult-pkg/introduction-to-linear-mixed-models/>.
+
+We created 3 models. The first relates label type to labeling time, the second relates label type to recall, and the third relates label type to precision. In each model, label type is the fixed effect, and we include both user and route as random effects. In the formula for the model, we also indicate that user is nested in route. You can think of these random effects as assuming that each user/route have different baseline values for the outcome variable (e.g., user X1 on route Y1 might have a different baseline labeling time from user X2 on route Y1, or user X3 on route Y2). Then the model is looking to see if there is a relationship between label type and labeling time, given the differing baseline levels among users/routes.
+
+Once each model is created, we can run an ANOVA test on the output, where the null hypothesis is that the mean of our outcome variable is equal for every label type. So when we reject the null (which we do for each of the 3 tests), it says that at least one of the label types is not equal to the others.
+
+To test that the ordering of the label types are statistically significant (e.g., that CurbRamp labeling time is significantly lower than Obstacle labeling time, etc), we have to do a post-hoc Tukey's HSD test. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are statistically significant.
+
+From the tables below (where `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001) we see that for labeling time, CurbRamp &lt; Obstacle &lt; NoCurbRamp = SurfaceProblem; for recall, CurbRamp &gt; NoCurbRamp &gt; Obstacle &gt; SurfaceProblem; and for precision, CurbRamp &gt; SurfaceProblem &gt; Obstacle &gt; NoCurbRamp.
+
+| label.type  | sec.to.label | sig.greater.than.CurbRamp | sig.gt.Obstacle | sig.gt.NoCurbRamp |
+|:------------|:-------------|:--------------------------|:----------------|:------------------|
+| CurbRamp    | 8.14         | -                         | -               | -                 |
+| Obstacle    | 10.10        | 0.011\*                   | -               | -                 |
+| NoCurbRamp  | 12.78        | 0.000\*\*\*               | 0.027\*         | -                 |
+| SurfaceProb | 13.77        | 0.000\*\*\*               | 0.005\*\*       | 0.301             |
+
+| label.type  | recall | sig.less.than.CurbRamp | sig.lt.NoCurbRamp | sig.lt.Obstacle |
+|:------------|:-------|:-----------------------|:------------------|:----------------|
+| CurbRamp    | 0.91   | -                      | -                 | -               |
+| NoCurbRamp  | 0.76   | 0.007\*\*              | -                 | -               |
+| Obstacle    | 0.49   | 0.000\*\*\*            | 0.000\*\*\*       | -               |
+| SurfaceProb | 0.34   | 0.000\*\*\*            | 0.000\*\*         | 0.015\*         |
+
+| label.type     | sec.to.label | sig.less.than.CurbRamp | sig.lt.SurfaceProblem | sig.lt.Obstacle |
+|:---------------|:-------------|:-----------------------|:----------------------|:----------------|
+| CurbRamp       | 0.95         | -                      | -                     | -               |
+| SurfaceProblem | 0.72         | 0.000\*\*\*\*          | -                     | -               |
+| Obstacle       | 0.45         | 0.000\*\*\*            | 0.000\*\*\*           | -               |
+| NoCurbRamp     | 0.18         | 0.000\*\*\*            | 0.000\*\*\*           | 0.000\*\*\*     |
 
 ### Zone type: Land use effect on accuracy
 
