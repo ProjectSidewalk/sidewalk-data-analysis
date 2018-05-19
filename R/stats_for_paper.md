@@ -94,9 +94,9 @@ NOTE: A "session" below is defined as a sequence of audit task interactions for 
 
 | role       | n.users | miles | km    | missions | audits | minutes.audited | minutes.audited.std | km.per.hr | km.per.hr.std | m.per.min | m.per.min.std | minutes.per.1k.ft | minutes.per.1k.ft.std | labels | label.per.100m | labels.per.100m.std | sessions | mins.per.sess |
 |:-----------|:--------|:------|:------|:---------|:-------|:----------------|:--------------------|:----------|:--------------|:----------|:--------------|:------------------|:----------------------|:-------|:---------------|:--------------------|:---------|:--------------|
-| Anonymous  | 293     | 0.083 | 0.133 | 0.0      | 2      | 10.36           | 21.748              | 0.835     | 1.380         | 13.912    | NA            | 21.910            | 71.870                | 17.0   | 10.508         | 37.934              | 2        | 5.920         |
-| Turker     | 122     | 0.364 | 0.586 | 4.0      | 5      | 25.59           | 753.837             | 1.439     | 2.073         | 23.982    | NA            | 12.710            | 68.241                | 59.0   | 8.900          | 17.996              | 1        | 24.090        |
-| Registered | 188     | 0.540 | 0.869 | 3.5      | 8      | 28.65           | 71.989              | 2.305     | 2.572         | 38.419    | NA            | 7.939             | 45.570                | 70.5   | 6.800          | 20.334              | 1        | 19.752        |
+| Anonymous  | 293     | 0.083 | 0.133 | 0.0      | 2      | 10.36           | 21.748              | 0.835     | 1.380         | 13.912    | -             | 21.910            | 71.870                | 17.0   | 10.508         | 37.934              | 2        | 5.920         |
+| Turker     | 122     | 0.364 | 0.586 | 4.0      | 5      | 25.59           | 753.837             | 1.439     | 2.073         | 23.982    | -             | 12.710            | 68.241                | 59.0   | 8.900          | 17.996              | 1        | 24.090        |
+| Registered | 188     | 0.540 | 0.869 | 3.5      | 8      | 28.65           | 71.989              | 2.305     | 2.572         | 38.419    | -             | 7.939             | 45.570                | 70.5   | 6.800          | 20.334              | 1        | 19.752        |
 
 | role       | n\_users | miles | km   | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
 |:-----------|:---------|:------|:-----|:---------|:---------|:-------|:---------------|:-------|:-----------|
@@ -305,21 +305,23 @@ NOTE: This is a rare case where we are using the mean, since we are also showing
 
 NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it surprising that NoCurbRamp took longer to label than Obstacle.
+NOTE: We believe that a user's "typical" visual search time is more accurately represented by their median visual search time than mean due to the long right tail of the distribution of search times.
+
+Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition for the most part: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it a bit surprising that NoCurbRamp took longer to label than Obstacle.
 
 Time to place a label is defined as follows:
 
 -   For the first label a user places on a specific panorama, the time that elapsed between stepping into the panorama and placing the label.
 -   For subsequent labels on the same panorama, the time that elapsed between placing the previous label and placing the current label.
 
-| label\_type | mean\_sec\_to\_label | median\_s\_to\_label | sd\_s\_to\_label | mean\_recall | mean\_precision |
-|:------------|:---------------------|:---------------------|:-----------------|:-------------|:----------------|
-| CurbRamp    | 8.14                 | 6.89                 | 5.29             | 0.90         | 0.95            |
-| Obstacle    | 10.10                | 8.21                 | 7.54             | 0.49         | 0.45            |
-| NoCurbRamp  | 12.78                | 9.46                 | 10.20            | 0.76         | 0.18            |
-| SurfaceProb | 13.77                | 10.92                | 8.41             | 0.34         | 0.72            |
+| label.type  | median.s.to.label | mean.sec.to.label | sd.s.to.label | mean\_recall | mean\_precision |
+|:------------|:------------------|:------------------|:--------------|:-------------|:----------------|
+| CurbRamp    | 6.89              | 8.14              | 5.29          | 0.90         | 0.95            |
+| Obstacle    | 8.21              | 10.10             | 7.54          | 0.49         | 0.45            |
+| NoCurbRamp  | 9.46              | 12.78             | 10.20         | 0.76         | 0.18            |
+| SurfaceProb | 10.92             | 13.77             | 8.41          | 0.34         | 0.72            |
 
-Now we want to check if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since each user's labeling time is recorded *for each label type*, our next idea would be to run a Repeated Measures ANOVA.
+Now we want to check if label types have a statistically significant difference in visual search time. We also want to see if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since each user's labeling time is recorded *for each label type*, our next idea would be to run a Repeated Measures ANOVA.
 
 However, rANOVA would require us to throw out data for any user who did not place a label of each label type. We have 130 users with labeling time values for curb ramps, but only 119 users have data for surface problems. This would mean throwing away a large amount of data, giving us less power and possibly biasing the results. Thus, we turn to our next option: linear mixed-effect models.
 
@@ -327,34 +329,28 @@ Another reason for using a linear mixed-effect model is because we want to take 
 
 For some background on linear mixed-effect models, the reference I found most helpful was this one: <https://stats.idre.ucla.edu/other/mult-pkg/introduction-to-linear-mixed-models/>.
 
-We created 3 models. The first relates label type to labeling time, the second relates label type to recall, and the third relates label type to precision. In each model, label type is the fixed effect, and we include both user and route as random effects. In the formula for the model, we also indicate that user is nested in route. You can think of these random effects as assuming that each user/route have different baseline values for the outcome variable (e.g., user X1 on route Y1 might have a different baseline labeling time from user X2 on route Y1, or user X3 on route Y2). Then the model is looking to see if there is a relationship between label type and labeling time, given the differing baseline levels among users/routes.
+*The Model*: To determine the association between visual search time and label type, we use a linear mixed-effects model where our outcome variable is visual search time, we have label type as a fixed effect, and we have user id nested in route id as random effects. We model the random effects as intercepts, meaning that we assume different baseline visual search times for each user and route, but expect the differences in visual search times between label types to be similar across users/routes.
 
-Once each model is created, we can run an ANOVA test on the output, where the null hypothesis is that the mean of our outcome variable is equal for every label type. So when we reject the null (which we do for each of the 3 tests), it says that at least one of the label types is not equal to the others.
+*The Assumptions*: Our two assumptions are that the residuals of the fit are normally distributed (normality) and have constant variance across the range of fitted values (heteroscedasticity). To check for normality, we first use the Shapiro-Wilk test. In this test, the null hypothesis is that the residuals are normally distributed; if we *fail* to reject the null, then we meet our assumption that the residuals are normally distributed. This test has a high type 1 error rate (often says that data are *not* normally distributed when they really *are*), but it is good to check the test because it is a quick and easy way to say the data are normal if the test succeeds. If we fail the test, we check a histogram of the residuals to see if they are normally distributed. For heteroscedasticity, we make a scatterplot with the standardized residuals on the y-axis, and fitted visual search times on the x-axis. If the variance in the residuals (y-axis) is constant across the fitted values (x-axis), this constitutes "constant variance", and so we would meet the heteroscedasticity assumption.
 
-To test that the ordering of the label types are statistically significant (e.g., that CurbRamp labeling time is significantly lower than Obstacle labeling time, etc), we have to do a post-hoc Tukey's HSD test. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are statistically significant.
+Using the Shapiro-Wilk test, we reject the null (p &lt; 0.001), meaning we have not proven that the residuals are normally distributed. The histogram on the left of the residuals looks relatively normal, but there are some outliers, and it has a long-ish right tail. More importantly, we really do not seem to meet the heteroscedasticity assumption, given how the variance seems much larger for longer labeling times in the qq plot on the right.
 
-From the tables below (where `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001) we see that for labeling time, CurbRamp &lt; Obstacle &lt; NoCurbRamp = SurfaceProblem; for recall, CurbRamp &gt; NoCurbRamp &gt; Obstacle &gt; SurfaceProblem; and for precision, CurbRamp &gt; SurfaceProblem &gt; Obstacle &gt; NoCurbRamp.
+![](stats_for_paper_files/figure-markdown_github/turk.visual.search.time.lme.assumption.2-1.png)![](stats_for_paper_files/figure-markdown_github/turk.visual.search.time.lme.assumption.2-2.png)
 
-| label.type  | sec.to.label | sig.greater.than.CurbRamp | sig.gt.Obstacle | sig.gt.NoCurbRamp |
-|:------------|:-------------|:--------------------------|:----------------|:------------------|
-| CurbRamp    | 8.14         | -                         | -               | -                 |
-| Obstacle    | 10.10        | 0.011\*                   | -               | -                 |
-| NoCurbRamp  | 12.78        | 0.000\*\*\*               | 0.027\*         | -                 |
-| SurfaceProb | 13.77        | 0.000\*\*\*               | 0.005\*\*       | 0.301             |
+To try and deal with not meeting the normality or heteroscedasticity assumptions, we perform a log transform on our outcome variable (labeling time). After the transformation, we still fail the Shapiro-Wilk test (p &lt; 0.001), but the histogram on the left looks clearly normal, and the residuals on the right seem to have nearly constant variance. Thus, we meet the assumptions necessary to use this model after the transformation.
 
-| label.type  | recall | sig.less.than.CurbRamp | sig.lt.NoCurbRamp | sig.lt.Obstacle |
-|:------------|:-------|:-----------------------|:------------------|:----------------|
-| CurbRamp    | 0.91   | -                      | -                 | -               |
-| NoCurbRamp  | 0.76   | 0.007\*\*              | -                 | -               |
-| Obstacle    | 0.49   | 0.000\*\*\*            | 0.000\*\*\*       | -               |
-| SurfaceProb | 0.34   | 0.000\*\*\*            | 0.000\*\*         | 0.015\*         |
+![](stats_for_paper_files/figure-markdown_github/turk.visual.search.time.lme.test.1-1.png)![](stats_for_paper_files/figure-markdown_github/turk.visual.search.time.lme.test.1-2.png)
 
-| label.type     | sec.to.label | sig.less.than.CurbRamp | sig.lt.SurfaceProblem | sig.lt.Obstacle |
-|:---------------|:-------------|:-----------------------|:----------------------|:----------------|
-| CurbRamp       | 0.95         | -                      | -                     | -               |
-| SurfaceProblem | 0.72         | 0.000\*\*\*\*          | -                     | -               |
-| Obstacle       | 0.45         | 0.000\*\*\*            | 0.000\*\*\*           | -               |
-| NoCurbRamp     | 0.18         | 0.000\*\*\*            | 0.000\*\*\*           | 0.000\*\*\*     |
+Using a likelihood ratio test, we find the contribution by the fixed effect (label type) to be statistically significant (Likelihood ratio = 78.871, p &lt; 0.001), i.e., the association between label type and labeling time is statistically significant. To test that the ordering of the label types are statistically significant (e.g., that CurbRamp labeling time is significantly lower than Obstacle labeling time, etc), we do a post-hoc Tukey's HSD test. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a table below.
+
+NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+| label.type  | test            | p.value           | z.value | seconds.to.label | log.seconds.to.label |
+|:------------|:----------------|:------------------|:--------|:-----------------|:---------------------|
+| CurbRamp    | -               | -                 | -       | 6.894            | 1.931                |
+| Obstacle    | &gt; CurbRamp   | &lt; 0.001 \*\*\* | 3.862   | 8.214            | 2.106                |
+| NoCurbRamp  | &gt; Obstacle   | 0.007 \*\*        | 2.935   | 9.464            | 2.247                |
+| SurfaceProb | &gt; NoCurbRamp | 0.048 \*          | 1.981   | 10.917           | 2.390                |
 
 ### Zone type: Land use effect on accuracy
 

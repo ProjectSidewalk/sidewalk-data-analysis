@@ -50,6 +50,24 @@ LABEL_TYPES_TO_ANALYZE = c('All', 'Problem', 'CurbRamp', 'NoCurbRamp', 'Obstacle
 # Variables commonly used in plotting
 my.theme.discrete.x <- theme_bw() + theme(panel.grid.major.x = element_blank())
 ACCURACY_BREAKS <- c(0, 0.25, 0.5, 0.75, 1.0)
+
+# Helpful functions
+print.p.value <- function(p) {
+  if_else(p < 0.001, 'p < 0.001', paste0('p = ', format(round(p, digits = 3), scientific = FALSE)))
+}
+p.num.to.p.str.with.sig.code <- function(p.value) {
+  sig.code <- case_when(
+    p.value < 0.001 ~ '***',
+    p.value < 0.01  ~ '**',
+    p.value < 0.05  ~ '*',
+    TRUE            ~ '')
+  formatted.p.value <- if_else(
+    p.value < 0.001,
+    '< 0.001',
+    format(round(p.value, digits = 3), scientific = FALSE)
+  )
+  paste(formatted.p.value, sig.code)
+}
 ```
 
 ```{r connect, echo=FALSE}
@@ -632,6 +650,9 @@ zoning.data <- read.csv('../data/street_zoning_info.csv', colClasses = zoning.cl
 ```
 
 ```{r transforming.data, echo=FALSE, warning=FALSE}
+# Change the _ column names to . separated.
+names(labeling.times.turk.study) <- gsub("\\_", ".", names(labeling.times.turk.study))
+
 # Takes a distance in feet and approximates the number of missions the user completed. The
 # approximation assumes that the first missions are 500, 500, 1000, 2000, and 1280 feet, and all the
 # remaining missions are half a mile (2640 feet).
@@ -1483,7 +1504,9 @@ ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.val
 
 NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it surprising that NoCurbRamp took longer to label than Obstacle.
+NOTE: We believe that a user's "typical" visual search time is more accurately represented by their median visual search time than mean due to the long right tail of the distribution of search times.
+
+Below is a table that shows the average time to place a label by label type along with the average recall and precision. The results match my intuition for the most part: CurbRamp has the shortest labeling time, SurfaceProblem has the longest labeling time, and NoCurbRamp and Obstacle are somewhere in between. However, I do find it a bit surprising that NoCurbRamp took longer to label than Obstacle.
 
 Time to place a label is defined as follows:
 
@@ -1505,25 +1528,26 @@ extract_label_type <- Vectorize(
   str_extract_all(note.str, '[:alpha:]+')[[1]][2]
   }
 )
+
 ave.labeling.time.by.type.and.user <-
   labeling.times.turk.study %>%
-  filter(user_id %in% distinct.workers) %>%
-  mutate(label_type = factor(extract_label_type(note))) %>%
-  mutate(label_type = fct_recode(label_type, 'SurfaceProb' = 'SurfaceProblem')) %>%
-  filter(label_type %in% LABEL_TYPES_TO_ANALYZE) %>%
-  mutate(label_type = factor(label_type)) %>%  # drops filtered out levels
-  mutate(log_sec = log(seconds_to_label)) %>%
-  group_by(label_type, user_id) %>%
-  dplyr::summarise(seconds_to_label = median(seconds_to_label))  # probs want to take log here
+  filter(user.id %in% distinct.workers) %>%
+  mutate(label.type = factor(extract_label_type(note))) %>%
+  mutate(label.type = fct_recode(label.type, 'SurfaceProb' = 'SurfaceProblem')) %>%
+  filter(label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
+  mutate(label.type = factor(label.type)) %>%  # drops filtered out levels
+  group_by(label.type, user.id) %>%
+  dplyr::summarise(seconds.to.label = median(seconds.to.label)) %>%
+  mutate(log.seconds.to.label = log(seconds.to.label))
 
 ave.labeling.time.by.type <-
   ave.labeling.time.by.type.and.user %>%
-  dplyr::summarise(mean_sec_to_label = mean(seconds_to_label),  # across users, by label type
-                   median_s_to_label = median(seconds_to_label),
-                   sd_s_to_label = sd(seconds_to_label)) %>%
-  mutate(label_type = as.character(label_type)) %>%
-  inner_join(accuracy.by.label.type, by = c('label_type' = 'label.type')) %>%
-  arrange(mean_sec_to_label)
+  dplyr::summarise(median.s.to.label = median(seconds.to.label), # across users, by label type
+                   mean.sec.to.label = mean(seconds.to.label),
+                   sd.s.to.label = sd(seconds.to.label)) %>%
+  mutate(label.type = as.character(label.type)) %>%
+  inner_join(accuracy.by.label.type, by = 'label.type') %>%
+  arrange(mean.sec.to.label)
 
 kable(
   ave.labeling.time.by.type,
@@ -1531,11 +1555,11 @@ kable(
   align = 'l'
 )
 
-n.ramp.users <- sum(ave.labeling.time.by.type.and.user$label_type == 'CurbRamp')
-n.surface.prob.users <- sum(ave.labeling.time.by.type.and.user$label_type == 'NoCurbRamp')
+n.ramp.users <- sum(ave.labeling.time.by.type.and.user$label.type == 'CurbRamp')
+n.surface.prob.users <- sum(ave.labeling.time.by.type.and.user$label.type == 'NoCurbRamp')
 ```
 
-Now we want to check if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since each user's labeling time is recorded _for each label type_, our next idea would be to run a Repeated Measures ANOVA.
+Now we want to check if label types have a statistically significant difference in visual search time. We also want to see if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since each user's labeling time is recorded _for each label type_, our next idea would be to run a Repeated Measures ANOVA.
 
 However, rANOVA would require us to throw out data for any user who did not place a label of each label type. We have `r n.ramp.users` users with labeling time values for curb ramps, but only `r n.surface.prob.users` users have data for surface problems. This would mean throwing away a large amount of data, giving us less power and possibly biasing the results. Thus, we turn to our next option: linear mixed-effect models.
 
@@ -1543,152 +1567,117 @@ Another reason for using a linear mixed-effect model is because we want to take 
 
 For some background on linear mixed-effect models, the reference I found most helpful was this one: https://stats.idre.ucla.edu/other/mult-pkg/introduction-to-linear-mixed-models/.
 
-We created 3 models. The first relates label type to labeling time, the second relates label type to recall, and the third relates label type to precision. In each model, label type is the fixed effect, and we include both user and route as random effects. In the formula for the model, we also indicate that user is nested in route. You can think of these random effects as assuming that each user/route have different baseline values for the outcome variable (e.g., user X1 on route Y1 might have a different baseline labeling time from user X2 on route Y1, or user X3 on route Y2). Then the model is looking to see if there is a relationship between label type and labeling time, given the differing baseline levels among users/routes.
+_The Model_: To determine the association between visual search time and label type, we use a linear mixed-effects model where our outcome variable is visual search time, we have label type as a fixed effect, and we have user id nested in route id as random effects. We model the random effects as intercepts, meaning that we assume different baseline visual search times for each user and route, but expect the differences in visual search times between label types to be similar across users/routes.
 
-Once each model is created, we can run an ANOVA test on the output, where the null hypothesis is that the mean of our outcome variable is equal for every label type. So when we reject the null (which we do for each of the 3 tests), it says that at least one of the label types is not equal to the others.
+_The Assumptions_: Our two assumptions are that the residuals of the fit are normally distributed (normality) and have constant variance across the range of fitted values (heteroscedasticity). To check for normality, we first use the Shapiro-Wilk test. In this test, the null hypothesis is that the residuals are normally distributed; if we _fail_ to reject the null, then we meet our assumption that the residuals are normally distributed. This test has a high type 1 error rate (often says that data are _not_ normally distributed when they really _are_), but it is good to check the test because it is a quick and easy way to say the data are normal if the test succeeds. If we fail the test, we check a histogram of the residuals to see if they are normally distributed. For heteroscedasticity, we make a scatterplot with the standardized residuals on the y-axis, and fitted visual search times on the x-axis. If the variance in the residuals (y-axis) is constant across the fitted values (x-axis), this constitutes "constant variance", and so we would meet the heteroscedasticity assumption.
 
-To test that the ordering of the label types are statistically significant (e.g., that CurbRamp labeling time is significantly lower than Obstacle labeling time, etc), we have to do a post-hoc Tukey's HSD test. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are statistically significant.
-
-From the tables below (where `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001) we see that for labeling time, CurbRamp < Obstacle < NoCurbRamp = SurfaceProblem; for recall, CurbRamp > NoCurbRamp > Obstacle > SurfaceProblem; and for precision, CurbRamp > SurfaceProblem > Obstacle > NoCurbRamp.
-
-
-```{r turk.label.difficulty.RMANOVA.assumption, echo=FALSE, fig.width=2, fig.height=2, message=FALSE, warning=FALSE}
+```{r turk.visual.search.time.lme.assumption.1, echo=FALSE}
 # Very helpful site that brought me from thinking in terms of repeated measures ANOVA to mixed model
 # https://m-clark.github.io/docs/mixedModels/anovamixed.html
 # Here is what the analysis would have looked like for rANOVA (you can see the similar F-scores):
-# summary(aov(seconds_to_label ~ label_type + Error(user_id),
+# summary(aov(seconds.to.label ~ label.type + Error(user.id),
 #             data = ave.labeling.time.by.type.and.user))
 
 pre.test.data <- turk.showing.stats.by.label.type %>%
   filter(granularity == 'street') %>%
   filter(label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
-  mutate(label.type = as.character(label.type),
+  mutate(label.type = factor(label.type), # drop unused levels
          condition.id = factor(condition.id)) %>%
   select(condition.id, worker1, recall, precision, label.type) %>%
   inner_join(ave.labeling.time.by.type.and.user,
-             by = c('worker1' = 'user_id', 'label.type' = 'label_type'))
+             by = c('worker1' = 'user.id', 'label.type' = 'label.type')) %>%
+  rename(user.id = worker1) %>%
+  mutate(user.id = factor(user.id))
 
 labeling.time.test.data <-
   pre.test.data %>%
-  select(worker1, condition.id, seconds_to_label, label.type) %>%
+  select(user.id, condition.id, label.type, seconds.to.label, log.seconds.to.label) %>%
   na.omit() %>%
-  mutate(worker1 = factor(worker1),
-         label.type = factor(label.type))
-recall.test.data <-
-  pre.test.data %>%
-  select(worker1, condition.id, recall, label.type) %>%
-  na.omit() %>%
-  mutate(worker1 = factor(worker1),
-         label.type = factor(label.type))
-precision.test.data <-
-  pre.test.data %>%
-  select(worker1, condition.id, precision, label.type) %>%
-  na.omit() %>%
-  mutate(worker1 = factor(worker1),
-         label.type = factor(label.type))
+  droplevels()
 
-# This models random intercepts... So it assumes the slope is the same for each user, but that
-# they have different intercepts, i.e., their baseline level of accuracy is different, but the
-# effect of label type is the same across users and routes
 # After checking up on these different methods, using ?p.adjust you find the following:
 # "There seems no reason to use the unmodified Bonferroni correction because it is dominated by
 # Holm's method, which is also valid under arbitrary assumptions."
-labeling.times.model <- lme(seconds_to_label ~ label.type,
-              random = ~ 1 | condition.id / worker1,
-              data = labeling.time.test.data)
-# summary(glht(labeling.times.model, linfct = mcp(label.type = 'Tukey')), test = adjusted('holm'))
+labeling.time.model <- lme(fixed = seconds.to.label ~ label.type,
+                           random = ~ 1 | condition.id / user.id,
+                           data = labeling.time.test.data,
+                           method = 'ML')
 
-recall.model <- lme(recall ~ label.type,
-                    random = ~ 1 | condition.id / worker1,
-                    data = recall.test.data)
-# summary(glht(recall.model, linfct = mcp(label.type = 'Tukey')), test = adjusted('holm'))
+labeling.time.shapiro <- shapiro.test(residuals(labeling.time.model))
+```
 
-precision.model <- lme(precision ~ label.type,
-                    random = ~ 1 | condition.id / worker1,
-                    data = precision.test.data)
-# summary(glht(precision.model, linfct = mcp(label.type = 'Tukey')), test = adjusted('holm'))
+Using the Shapiro-Wilk test, we reject the null (`r print.p.value(labeling.time.shapiro$p.value)`), meaning we have not proven that the residuals are normally distributed. The histogram on the left of the residuals looks relatively normal, but there are some outliers, and it has a long-ish right tail. More importantly, we really do not seem to meet the heteroscedasticity assumption, given how the variance seems much larger for longer labeling times in the qq plot on the right.
+
+```{r turk.visual.search.time.lme.assumption.2, echo=FALSE, fig.width=3.5, fig.height=3.5}
+ggplot(aes(x = residuals.labeling.time.model.),
+       data = data.frame(residuals(labeling.time.model))) +
+  geom_histogram(binwidth = 2) +
+  theme_bw()
+plot(labeling.time.model, resid(., type = "p") ~ fitted(.), abline = 0)
 
 
+log.labeling.time.model <- update(labeling.time.model, fixed = log.seconds.to.label ~ label.type)
 
-# y <- turk.showing.stats.by.label.type %>%
-#   filter(granularity == 'street') %>%
-#   filter(label.type == 'All') %>%
-#   mutate(condition.id = factor(condition.id)) %>%
-#   select(condition.id, worker1, recall, label.type) %>%
-#   inner_join(ave.labeling.time.by.type.and.user,
-#              by = c('worker1' = 'user_id', 'label.type' = 'label_type')) %>%
-#   na.omit()
-# 
-# z <- turk.showing.stats.by.label.type %>%
-#   filter(granularity == 'street') %>%
-#   filter(label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
-#   mutate(label.type = factor(label.type),
-#          condition.id = factor(condition.id)) %>%
-#   dplyr::select(condition.id, worker1, recall, label.type) %>%
-#   na.omit()
-# 
-# anova(lme(recall ~ seconds_to_label + label.type, random = ~ 1 | worker1, data = x))
-# 
-# z %>% group_by(label.type) %>% dplyr::summarise_at(vars(recall), mean)
-# anova(lme(recall ~ label.type, random = ~ 1 | worker1, data = z))
-# summary(glht(lme(recall ~ label.type, random = ~ 1 | worker1, data = z),
-#              linfct = mcp(label.type = "Tukey")),
-#         test = adjusted("holm"))
-# 
-# 
-# 
-# # the actual stuff...
-# anova(lme(seconds_to_label ~ label_type, random = ~ 1 | user_id,
-#           data = ave.labeling.time.by.type.and.user))
-# 
-# # Pairwise comparisons (post-hoc test)
-# summary(glht(lme(seconds_to_label ~ label_type,
-#                  random = ~ 1 | user_id,
-#                  data = ave.labeling.time.by.type.and.user),
-#              linfct = mcp(label_type = "Tukey")),
-#         test = adjusted("holm"))
+log.labeling.time.shapiro <- shapiro.test(residuals(log.labeling.time.model))
+```
 
-# Checking assumptions:
-# https://stats.stackexchange.com/questions/77891/checking-assumptions-lmer-lme-mixed-models-in-r
-# Homogeneity of variance:
-# plot(lme(seconds_to_label ~ label_type, random = ~ 1 | user_id,
-#          data = ave.labeling.time.by.type.and.user))
-# Normally distributed residuals:
-# qqnorm(lme(seconds_to_label ~ label_type, random = ~ 1 | user_id,
-#                     data = ave.labeling.time.by.type.and.user), ~ranef(., level=1))
-kable(
-  data.frame(
-    'label type' = c('CurbRamp', 'Obstacle', 'NoCurbRamp', 'SurfaceProb'),
-    'sec to label' = c(8.14, 10.10, 12.78, 13.77),
-    'sig greater than CurbRamp' = c('-', '0.011*', '0.000***', '0.000***'),
-    'sig gt Obstacle' = c('-', '-', '0.027*', '0.005**'),
-    'sig gt NoCurbRamp' = c('-', '-', '-', '0.301')
-  ),
-  digits = 3,
-  align = 'l'
-)
-kable(
-  data.frame(
-    'label type' = c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb'),
-    'recall' = c(0.91, 0.76, 0.49, 0.34),
-    'sig less than CurbRamp' = c('-', '0.007**', '0.000***', '0.000***'),
-    'sig lt NoCurbRamp' = c('-', '-', '0.000***', '0.000**'),
-    'sig lt Obstacle' = c('-', '-', '-', '0.015*')
-  ),
-  digits = 3,
-  align = 'l'
-)
-kable(
-  data.frame(
-    'label type' = c('CurbRamp', 'SurfaceProblem', 'Obstacle', 'NoCurbRamp'),
-    'sec to label' = c(0.95, 0.72, 0.45, 0.18),
-    'sig less than CurbRamp' = c('-', '0.000****', '0.000***', '0.000***'),
-    'sig lt SurfaceProblem' = c('-', '-', '0.000***', '0.000***'),
-    'sig lt Obstacle' = c('-', '-', '-', '0.000***')
-  ),
-  digits = 3,
-  align = 'l'
-)
+To try and deal with not meeting the normality or heteroscedasticity assumptions, we perform a log transform on our outcome variable (labeling time). After the transformation, we still fail the Shapiro-Wilk test (`r print.p.value(log.labeling.time.shapiro$p.value)`), but the histogram on the left looks clearly normal, and the residuals on the right seem to have nearly constant variance. Thus, we meet the assumptions necessary to use this model after the transformation.
+
+```{r turk.visual.search.time.lme.test.1, echo=FALSE, fig.width=3.5, fig.height=3.5}
+ggplot(aes(x = residuals.log.labeling.time.model.),
+       data = data.frame(residuals(log.labeling.time.model))) +
+  geom_histogram(binwidth = 0.15) +
+  theme_bw()
+plot(log.labeling.time.model, resid(., type = "p") ~ fitted(.), abline = 0)
+
+
+log.labeling.time.model.base <- update(log.labeling.time.model, fixed = log.seconds.to.label ~ 1)
+lrt.labeling.time <- anova(log.labeling.time.model.base, log.labeling.time.model)
+```
+
+Using a likelihood ratio test, we find the contribution by the fixed effect (label type) to be statistically significant (Likelihood ratio = `r format(lrt.labeling.time['log.labeling.time.model','L.Ratio'], digits = 5)`, `r print.p.value(lrt.labeling.time['log.labeling.time.model','p-value'])`), i.e., the association between label type and labeling time is statistically significant. To test that the ordering of the label types are statistically significant (e.g., that CurbRamp labeling time is significantly lower than Obstacle labeling time, etc), we do a post-hoc Tukey's HSD test. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a table below.
+
+NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+```{r turk.visual.search.time.lme.test.2, echo=FALSE}
+tukey.log.labeling.time <- summary(glht(log.labeling.time.model,
+                                        linfct = mcp(label.type = 'Tukey')),
+                                   test = adjusted('holm'))
+
+# Makes a vector with the label types in order of largest to smallest labeling times.
+labeling.time.label.type.ordering <-
+  labeling.time.test.data %>%
+  group_by(label.type) %>%
+  summarize(log.seconds.to.label = mean(log.seconds.to.label)) %>%
+  arrange(log.seconds.to.label) %>%
+  pull(label.type) %>%
+  as.character()
+
+# Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
+tukey.log.labeling.time.clean <-
+  data.frame(comparison = names(tukey.log.labeling.time$test$pvalues),
+             p.value = unname(tukey.log.labeling.time$test$pvalues),
+             z.value = unname(tukey.log.labeling.time$test$tstat)) %>%
+  mutate(comparison = if_else(z.value < 0,
+                              gsub("([[:alpha:]]+) - ([[:alpha:]]+)", "\\2 - \\1", comparison),
+                              as.character(comparison)),
+         first.type = gsub("([[:alpha:]]+) - ([[:alpha:]]+)", "\\1", comparison),
+         second.type = gsub("([[:alpha:]]+) - ([[:alpha:]]+)", "\\2", comparison),
+         first.index = match(first.type, labeling.time.label.type.ordering),
+         second.index = match(second.type, labeling.time.label.type.ordering),
+         test = paste('>', second.type),
+         p.value = p.num.to.p.str.with.sig.code(p.value),
+         z.value = format(abs(z.value), digits = 4, scientific = FALSE)) %>%
+  filter(first.index - second.index == 1) %>%
+  right_join(ave.labeling.time.by.type, by = c('first.type' = 'label.type')) %>%
+  mutate(label.type = factor(first.type, levels = labeling.time.label.type.ordering),
+         seconds.to.label = median.s.to.label,
+         log.seconds.to.label = log(seconds.to.label)) %>%
+  arrange(label.type) %>%
+  dplyr::select(label.type, test, p.value, z.value, seconds.to.label, log.seconds.to.label)
+
+options(knitr.kable.NA = '-')
+kable(tukey.log.labeling.time.clean, digits = 3, align = 'l')
 ```
 
 
