@@ -279,7 +279,34 @@ Below we compare street vs 5 meter level recall and precision by label type.
 
 NOTE: In this section, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-NOTE: This is a rare case where we are using the mean, since we are also showing standard error at the same time.
+Below is a table showing label type accuracy at the two granularity levels, followed by a graph that gives a visual representation of the mean and standard error.
+
+| accuracy.type | label.type  | granularity | mean.accuracy | median.accuracy | sd    | se    |
+|:--------------|:------------|:------------|:--------------|:----------------|:------|:------|
+| recall        | All         | street      | 0.688         | 0.714           | 0.196 | 0.017 |
+| recall        | All         | 5\_meter    | 0.502         | 0.543           | 0.224 | 0.019 |
+| recall        | Problem     | street      | 0.639         | 0.714           | 0.323 | 0.028 |
+| recall        | Problem     | 5\_meter    | 0.228         | 0.200           | 0.195 | 0.017 |
+| recall        | CurbRamp    | street      | 0.902         | 1.000           | 0.210 | 0.018 |
+| recall        | CurbRamp    | 5\_meter    | 0.716         | 0.789           | 0.254 | 0.022 |
+| recall        | NoCurbRamp  | street      | 0.762         | 1.000           | 0.406 | 0.052 |
+| recall        | NoCurbRamp  | 5\_meter    | 0.548         | 0.633           | 0.450 | 0.058 |
+| recall        | Obstacle    | street      | 0.486         | 0.500           | 0.379 | 0.035 |
+| recall        | Obstacle    | 5\_meter    | 0.210         | 0.143           | 0.256 | 0.024 |
+| recall        | SurfaceProb | street      | 0.344         | 0.333           | 0.329 | 0.029 |
+| recall        | SurfaceProb | 5\_meter    | 0.129         | 0.034           | 0.214 | 0.019 |
+| precision     | All         | street      | 0.675         | 0.674           | 0.172 | 0.015 |
+| precision     | All         | 5\_meter    | 0.465         | 0.472           | 0.181 | 0.016 |
+| precision     | Problem     | street      | 0.693         | 0.714           | 0.284 | 0.026 |
+| precision     | Problem     | 5\_meter    | 0.273         | 0.250           | 0.221 | 0.020 |
+| precision     | CurbRamp    | street      | 0.950         | 1.000           | 0.074 | 0.006 |
+| precision     | CurbRamp    | 5\_meter    | 0.638         | 0.667           | 0.199 | 0.017 |
+| precision     | NoCurbRamp  | street      | 0.179         | 0.000           | 0.279 | 0.026 |
+| precision     | NoCurbRamp  | 5\_meter    | 0.108         | 0.000           | 0.223 | 0.021 |
+| precision     | Obstacle    | street      | 0.447         | 0.500           | 0.365 | 0.035 |
+| precision     | Obstacle    | 5\_meter    | 0.174         | 0.087           | 0.220 | 0.021 |
+| precision     | SurfaceProb | street      | 0.715         | 0.817           | 0.339 | 0.035 |
+| precision     | SurfaceProb | 5\_meter    | 0.343         | 0.268           | 0.333 | 0.034 |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
 
@@ -439,7 +466,7 @@ Below, we look at the distribution of the label type densities in the ground tru
 
 ##### Relationship with accuracy
 
-The first graph shows all label types aggregated, the second shows the problem vs. no problem type.
+We first show a table with the mean/median/sd for accuracy in the two zones. This is followed by a pair of graphs where the first graph shows all label types aggregated, the second shows the problem vs. no problem type.
 
 NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
@@ -448,6 +475,17 @@ NOTE: The red dots on the graphs are means.
 NOTE: N in the graphs below means number of routes that are predominantly of that zone type. However, there are 3 users who completed each route, so there are actually n \* 3 data points.
 
 There does not appear to be a significant difference in accuracy between the densities.
+
+| accuracy.type | label.type | zone.type            | mean.accuracy | median.accuracy | sd    |
+|:--------------|:-----------|:---------------------|:--------------|:----------------|:------|
+| recall        | All        | Medium-High Density  | 0.718         | 0.737           | 0.183 |
+| recall        | All        | Low-Moderate Density | 0.672         | 0.704           | 0.202 |
+| recall        | Problem    | Medium-High Density  | 0.705         | 0.750           | 0.300 |
+| recall        | Problem    | Low-Moderate Density | 0.603         | 0.667           | 0.332 |
+| precision     | All        | Medium-High Density  | 0.651         | 0.636           | 0.141 |
+| precision     | All        | Low-Moderate Density | 0.688         | 0.700           | 0.185 |
+| precision     | Problem    | Medium-High Density  | 0.697         | 0.750           | 0.273 |
+| precision     | Problem    | Low-Moderate Density | 0.691         | 0.714           | 0.292 |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis.density-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis.density-2.png)
 
