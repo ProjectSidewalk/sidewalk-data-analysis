@@ -547,11 +547,13 @@ TODO: Make some graphs.
 
 ### Low severity: Removing low severity effect on recall
 
-NOTE: I did this analysis using both &gt;=3 and &gt;=4. We are probably doing analysis on &gt;=4, so I put that section first, but the section for &gt;=3 is right after table of label counts. The &gt;=4 analysis did not produce significant results, but the &gt;=3 analysis did.
+NOTE: I did this analysis using both &gt;=3 and &gt;=4, and both produced significant results. The difference between low and high severity is larger for &gt;=3 compared to &gt;=4, and thus the p-value is smaller. However, we could use &gt;=4 if the story is more compelling.
 
 NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-Below is a table showing the average recall across all users for labels that had severity &lt;=3 (in the ground truth) and labels that had severity &gt;=4, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 153 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.13. Thus, with an alpha level of 0.05, we fail to reject the null hypothesis, and *cannot* conclude that the means are different.
+Below is a table showing the average recall across all users for labels that had severity &lt;=3 (in the ground truth) and labels that had severity &gt;=4, along with the number of labels that fall into each of those categories.
+
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = 6.3564, p = 0.012).
 
 <table style="width:100%;">
 <colgroup>
@@ -600,7 +602,9 @@ Below is a table showing the average recall across all users for labels that had
 </tbody>
 </table>
 
-Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with 236 degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of 0.014. Thus, with an alpha level of 0.05, we reject the null hypothesis, and conclude that the means are in fact different. And we can see that the high severity recall is higher than the low severity recall, which matches our intuition.
+Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories.
+
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = 8.438, p = 0.004).
 
 <table style="width:100%;">
 <colgroup>

@@ -7,7 +7,8 @@ output:
     toc: yes
   html_document:
     toc: yes
-  
+editor_options:
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -16,6 +17,7 @@ library(knitr)
 library(RPostgreSQL)
 library(multcomp) # experimenting with stuff (glht), might remove later
 library(nlme)
+library(lme4)
 library(ggplot2) # may need to use devtools::install_github('tidyverse/ggplot2') if version < 2.2.2
 library(tidyr)
 library(dplyr)
@@ -2278,12 +2280,12 @@ TODO: Make some graphs.
 
 ### Low severity: Removing low severity effect on recall
 
-NOTE: I did this analysis using both >=3 and >=4. We are probably doing analysis on >=4, so I put that section first, but the section for >=3 is right after table of label counts. The >=4 analysis did not produce significant results, but the >=3 analysis did.
+NOTE: I did this analysis using both >=3 and >=4, and both produced significant results. The difference between low and high severity is larger for >=3 compared to >=4, and thus the p-value is smaller. However, we could use >=4 if the story is more compelling.
 
 NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 ```{r turk.high.severity.setup.1, echo=FALSE}
-low.severity.check.data <-
+low.severity.check.data.1 <-
   data.with.raw.accuracy %>%
   filter(included.severity %in% c('all', '<=3', '>=4'),
          label.type == 'Problem',
@@ -2294,8 +2296,8 @@ low.severity.check.data <-
                                     labels = c('all', '<=3', '>=4'),
                                     levels = c('all', '<=3', '>=4')))
 
-recall.by.severity <-
-  low.severity.check.data %>%
+recall.by.severity.1 <-
+  low.severity.check.data.1 %>%
   filter(binary == TRUE) %>%
   group_by(included.severity) %>%
   summarize(n.users = sum(!is.na(recall)),
@@ -2303,25 +2305,39 @@ recall.by.severity <-
             median.recall = median(recall, na.rm = TRUE),
             std.recall = sd(recall, na.rm = TRUE))
 
-gt.counts.by.severity <-
-  low.severity.check.data %>%
+gt.counts.by.severity.1 <-
+  low.severity.check.data.1 %>%
   filter(worker.type == 'turk1',
          binary == FALSE) %>%
   group_by(included.severity) %>%
   summarize(gt.problem.labels = sum(true.pos, false.neg))
 
-severity.test <- t.test(recall ~ included.severity,
-                        data = low.severity.check.data %>%
-                          filter(binary == TRUE, included.severity != 'all') %>%
-                          droplevels)
+severity.test.data.1 <-
+  low.severity.check.data.1 %>%
+  filter(binary == TRUE, included.severity != 'all') %>%
+  mutate(user.id = factor(worker1),
+         condition.id = factor(condition.id)) %>%
+  select(user.id, condition.id, included.severity, true.pos, false.neg, recall) %>%
+  na.omit() %>%
+  droplevels()
 
+severity.model.1 <- glmer(recall ~ included.severity + (1 | condition.id / user.id),
+                        data = severity.test.data.1,
+                        family = binomial(link = 'logit'),
+                        weights = true.pos + false.neg,
+                        control = glmerControl(optimizer = "bobyqa",
+                                               optCtrl = list(maxfun = 100000)))
+
+lrt.severity.1 <- drop1(severity.model.1, test = 'Chisq')
 ```
 
-Below is a table showing the average recall across all users for labels that had severity <=3 (in the ground truth) and labels that had severity >=4, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with `r format(as.numeric(severity.test$parameter), digit = 2)` degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of `r format(severity.test$p.value, digits = 2)`. Thus, with an alpha level of 0.05, we fail to reject the null hypothesis, and _cannot_ conclude that the means are different.
+Below is a table showing the average recall across all users for labels that had severity <=3 (in the ground truth) and labels that had severity >=4, along with the number of labels that fall into each of those categories.
+
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = `r format(lrt.severity.1['included.severity','LRT'], digits = 5)`, `r print.p.value(lrt.severity.1['included.severity','Pr(Chi)'])`).
 
 ```{r turk.high.severity.analysis.1, echo=FALSE, fig.width=8, fig.height=6}
 kable(
-  inner_join(gt.counts.by.severity, recall.by.severity, by = 'included.severity'),
+  inner_join(gt.counts.by.severity.1, recall.by.severity.1, by = 'included.severity'),
   format = 'markdown',
   digits = 3,
   align = 'l'
@@ -2357,14 +2373,35 @@ gt.counts.by.severity.2 <-
   group_by(included.severity) %>%
   summarize(gt.problem.labels = sum(true.pos, false.neg))
 
-severity.test <- t.test(recall ~ included.severity,
-                        data = low.severity.check.data.2 %>%
-                          filter(binary == TRUE, included.severity != 'all') %>%
-                          droplevels)
+severity.test.data.2 <-
+  low.severity.check.data.2 %>%
+  filter(binary == TRUE, included.severity != 'all') %>%
+  mutate(user.id = factor(worker1),
+         condition.id = factor(condition.id)) %>%
+  select(user.id, condition.id, included.severity, true.pos, false.neg, recall) %>%
+  na.omit() %>%
+  droplevels()
 
+severity.model.2 <- glmer(recall ~ included.severity + (1 | condition.id / user.id),
+                        data = severity.test.data.2,
+                        family = binomial(link = 'logit'),
+                        weights = true.pos + false.neg,
+                        control = glmerControl(optimizer = "bobyqa",
+                                               optCtrl = list(maxfun = 100000)))
+
+lrt.severity.2 <- drop1(severity.model.2, test = 'Chisq')
+
+# Possible diagnostic plots...
+# qqnorm(residuals(severity.model))
+# ggplot(aes(sample = residuals.severity.model.),
+#        data = data.frame(residuals(severity.model))) +
+#   geom_qq() +
+#   geom_qq_line()
 ```
 
-Below is a table showing the average recall across all users for labels that had severity <=2 (in the ground truth) and labels that had severity >=3, along with the number of labels that fall into each of those categories. We also ran a two sample t-test with `r format(as.numeric(severity.test$parameter), digit = 2)` degrees of freedom, where the null hypothesis is that the average (mean) recall for the low severity labels is equal to the average recall for the high severity labels. We got a p-values of `r format(severity.test$p.value, digits = 2)`. Thus, with an alpha level of 0.05, we reject the null hypothesis, and conclude that the means are in fact different. And we can see that the high severity recall is higher than the low severity recall, which matches our intuition.
+Below is a table showing the average recall across all users for labels that had severity <=2 (in the ground truth) and labels that had severity >=3, along with the number of labels that fall into each of those categories.
+
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = `r format(lrt.severity.2['included.severity','LRT'], digits = 5)`, `r print.p.value(lrt.severity.2['included.severity','Pr(Chi)'])`).
 
 ```{r turk.high.severity.analysis.2, echo=FALSE, fig.width=8, fig.height=6}
 kable(
