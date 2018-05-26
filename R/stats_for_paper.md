@@ -17,12 +17,12 @@ April 17, 2018
     -   [High level results](#high-level-results-1)
         -   [Ground truth label counts](#ground-truth-label-counts)
         -   [Aggregate accuracy](#aggregate-accuracy)
-        -   [Accuracy by user group](#accuracy-by-user-group)
         -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Descriptive stats for users](#descriptive-stats-for-users)
         -   [IRR](#irr)
     -   [Possible Stories](#possible-stories-1)
         -   [Granularity: Street-level vs 5 meter-level](#granularity-street-level-vs-5-meter-level)
+        -   [Accuracy by user group](#accuracy-by-user-group)
         -   [Accuracy by label type](#accuracy-by-label-type)
         -   [Visual search time: Time to label by type](#visual-search-time-time-to-label-by-type)
         -   [Zone type: Land use effect on accuracy](#zone-type-land-use-effect-on-accuracy)
@@ -160,32 +160,6 @@ Median accuracy across all users - 5 meter level:
 | All        | 0.543  | 0.472     | 0.468     |
 | Problem    | 0.200  | 0.250     | 0.222     |
 
-### Accuracy by user group
-
-Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. These are again as an aggregate across all label types (all.\*) and for the problem vs no problem type (prob.\*).
-
-NOTE: In these two tables, the data is binary (not ordinal).
-
-Median accuracy by user group - street level:
-
-| user.type | all.recall | all.prec | all.f.meas | prob.recall | prob.prec | prob.f.meas |
-|:----------|:-----------|:---------|:-----------|:------------|:----------|:------------|
-| anon      | 0.523      | 0.780    | 0.667      | 0.292       | 1.000     | 0.500       |
-| reg       | 0.771      | 0.636    | 0.667      | 0.800       | 0.667     | 0.727       |
-| turk1     | 0.707      | 0.700    | 0.648      | 0.667       | 0.750     | 0.667       |
-| turk3     | 0.620      | 0.815    | 0.700      | 0.571       | 0.800     | 0.667       |
-| turk5     | 0.571      | 0.917    | 0.698      | 0.333       | 1.000     | 0.500       |
-
-Median accuracy by user group - 5 meter level:
-
-| user.type | all.recall | all.prec | all.f.meas | prob.recall | prob.prec | prob.f.meas |
-|:----------|:-----------|:---------|:-----------|:------------|:----------|:------------|
-| anon      | 0.415      | 0.664    | 0.552      | 0.066       | 0.417     | 0.154       |
-| reg       | 0.589      | 0.420    | 0.460      | 0.250       | 0.229     | 0.231       |
-| turk1     | 0.490      | 0.489    | 0.471      | 0.200       | 0.267     | 0.211       |
-| turk3     | 0.509      | 0.667    | 0.559      | 0.125       | 0.286     | 0.205       |
-| turk5     | 0.504      | 0.750    | 0.584      | 0.081       | 0.333     | 0.182       |
-
 ### Voting: Improved recall when at least one turker marks
 
 Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
@@ -298,6 +272,94 @@ Below is a table showing label type accuracy at the two granularity levels, foll
 -   The Problem type seems to perform better than the surface problem and obstacle label types (except for surface problem precision, mentioned in the previous bullet).
 
 -   NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
+
+### Accuracy by user group
+
+NOTE: In these two tables, the data is binary (not ordinal) and these are median accuracies aggregated across all label types (all.\*) and for the problem vs no problem type (prob.\*).
+
+#### Summary stats
+
+Median accuracy by user group - street level:
+
+| user.type | all.recall | all.prec | all.f.meas | prob.recall | prob.prec | prob.f.meas |
+|:----------|:-----------|:---------|:-----------|:------------|:----------|:------------|
+| anon      | 0.523      | 0.780    | 0.667      | 0.292       | 1.000     | 0.500       |
+| reg       | 0.771      | 0.636    | 0.667      | 0.800       | 0.667     | 0.727       |
+| turk1     | 0.707      | 0.700    | 0.648      | 0.667       | 0.750     | 0.667       |
+| turk3     | 0.620      | 0.815    | 0.700      | 0.571       | 0.800     | 0.667       |
+| turk5     | 0.571      | 0.917    | 0.698      | 0.333       | 1.000     | 0.500       |
+
+Median accuracy by user group - 5 meter level:
+
+| user.type | all.recall | all.prec | all.f.meas | prob.recall | prob.prec | prob.f.meas |
+|:----------|:-----------|:---------|:-----------|:------------|:----------|:------------|
+| anon      | 0.415      | 0.664    | 0.552      | 0.066       | 0.417     | 0.154       |
+| reg       | 0.589      | 0.420    | 0.460      | 0.250       | 0.229     | 0.231       |
+| turk1     | 0.490      | 0.489    | 0.471      | 0.200       | 0.267     | 0.211       |
+| turk3     | 0.509      | 0.667    | 0.559      | 0.125       | 0.286     | 0.205       |
+| turk5     | 0.504      | 0.750    | 0.584      | 0.081       | 0.333     | 0.182       |
+
+#### Statistical significance
+
+NOTE: This is at the street level (not 5 meter level).
+
+We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision as binomial and used a logistic link function.
+
+To test that the ordering of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall for the Problem type, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall-all, then precision-problem, then precision-all, and finally precision-problem).
+
+NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+| worker.type | test       | p.value    | z.value | recall |
+|:------------|:-----------|:-----------|:--------|:-------|
+| reg         | -          | -          | -       | 0.756  |
+| turk1       | &lt; reg   | 0.002 \*\* | 3.662   | 0.678  |
+| turk3       | &lt; turk1 | 0.032 \*   | 2.655   | 0.621  |
+| turk5       | &lt; turk3 | 0.503      | 1.025   | 0.594  |
+| turk5       | &lt; turk1 | 0.002 \*\* | 3.674   | 0.594  |
+| anon        | &lt; turk5 | 0.503      | 1.147   | 0.519  |
+| anon        | &lt; turk3 | 0.278      | 1.681   | 0.519  |
+| anon        | &lt; turk1 | 0.010 \*   | 3.081   | 0.519  |
+
+| worker.type | test       | p.value           | z.value | precision |
+|:------------|:-----------|:------------------|:--------|:----------|
+| turk5       | -          | -                 | -       | 0.878     |
+| turk3       | &lt; turk5 | &lt; 0.001 \*\*\* | 3.891   | 0.810     |
+| anon        | &lt; turk3 | 0.489             | 0.692   | 0.743     |
+| anon        | &lt; turk5 | 0.023 \*          | 2.839   | 0.743     |
+| turk1       | &lt; anon  | 0.113             | 2.078   | 0.688     |
+| turk1       | &lt; turk3 | &lt; 0.001 \*\*\* | 6.050   | 0.688     |
+| reg         | &lt; turk1 | 0.113             | 1.940   | 0.637     |
+| reg         | &lt; anon  | 0.023 \*          | 2.784   | 0.637     |
+
+| worker.type | test       | p.value           | z.value | recall |
+|:------------|:-----------|:------------------|:--------|:-------|
+| reg         | -          | -                 | -       | 0.728  |
+| turk1       | &lt; reg   | &lt; 0.001 \*\*\* | 4.4683  | 0.626  |
+| turk3       | &lt; turk1 | 0.041 \*          | 2.3198  | 0.556  |
+| anon        | &lt; turk5 | 0.445             | 0.7641  | 0.418  |
+| anon        | &lt; turk3 | 0.028 \*          | 2.5986  | 0.418  |
+| turk5       | &lt; turk3 | 0.002 \*\*        | 3.5438  | 0.399  |
+
+| worker.type | test       | p.value  | z.value | precision |
+|:------------|:-----------|:---------|:--------|:----------|
+| anon        | -          | -        | -       | 0.910     |
+| turk5       | -          | -        | -       | 0.790     |
+| turk3       | &lt; turk5 | 1.000    | 0.57950 | 0.762     |
+| turk3       | &lt; anon  | 1.000    | 0.17250 | 0.762     |
+| turk1       | &lt; turk3 | 0.876    | 1.53363 | 0.713     |
+| turk1       | &lt; turk5 | 0.419    | 1.93987 | 0.713     |
+| turk1       | &lt; anon  | 1.000    | 0.75589 | 0.713     |
+| reg         | &lt; turk1 | 1.000    | 1.15151 | 0.617     |
+| reg         | &lt; turk3 | 0.088    | 2.58328 | 0.617     |
+| reg         | &lt; turk5 | 0.044 \* | 2.85118 | 0.617     |
+
+    ## # A tibble: 4 x 2
+    ##   worker.type precision
+    ##   <fct>           <dbl>
+    ## 1 anon            0.910
+    ## 2 turk1           0.836
+    ## 3 turk3           0.894
+    ## 4 turk5           0.940
 
 ### Accuracy by label type
 

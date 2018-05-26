@@ -72,40 +72,53 @@ p.num.to.p.str.with.sig.code <- function(p.value) {
   )
   paste(formatted.p.value, sig.code)
 }
-format.tukey.table <- function(tukey, outcome.var, test.data, descending = FALSE) {
+
+
+# user.group.test.data.recall.all
+format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, descending = FALSE) {
   ordering.sign <- if_else(descending == TRUE, '<', '>')
 
   outcome.by.type <-
     test.data %>%
-    mutate(label.type = as.character(label.type)) %>%
-    group_by(label.type) %>%
+    mutate(!!fixed.var := as.character(!!sym(fixed.var))) %>%
+    group_by(!!sym(fixed.var)) %>%
     dplyr::summarize_at(vars(outcome.var), mean)
 
   ordering <-
-    if(descending == TRUE) {
-      outcome.by.type %>% arrange(desc(!!sym(outcome.var))) %>% pull(label.type)
+    if (descending == TRUE) {
+      outcome.by.type %>% arrange(desc(!!sym(outcome.var))) %>% pull(fixed.var)
     } else {
-      outcome.by.type %>% arrange(!!sym(outcome.var)) %>% pull(label.type)
+      outcome.by.type %>% arrange(!!sym(outcome.var)) %>% pull(fixed.var)
     }
 
-  data.frame(comparison = names(tukey$test$pvalues),
-             p.value = unname(tukey$test$pvalues),
-             z.value = unname(tukey$test$tstat)) %>%
-  mutate(comparison = if_else((descending == TRUE & z.value > 0) | (descending == FALSE & z.value < 0),
-                              gsub("([[:alpha:]]+) - ([[:alpha:]]+)", "\\2 - \\1", comparison),
-                              as.character(comparison)),
-         first.type = gsub("([[:alpha:]]+) - ([[:alpha:]]+)", "\\1", comparison),
-         second.type = gsub("([[:alpha:]]+) - ([[:alpha:]]+)", "\\2", comparison),
-         first.index = match(first.type, ordering),
-         second.index = match(second.type, ordering),
-         test = paste(ordering.sign, second.type),
-         p.value = p.num.to.p.str.with.sig.code(p.value),
-         z.value = format(abs(z.value), digits = 4, scientific = FALSE)) %>%
-  filter(first.index - second.index == 1) %>%
-  right_join(outcome.by.type, by = c('first.type' = 'label.type')) %>%
-  mutate(label.type = factor(first.type, levels = ordering)) %>%
-  arrange(label.type) %>%
-  dplyr::select(label.type, test, p.value, z.value, outcome.var)
+  tukey.with.vars.split <-
+    data.frame(comparison = names(tukey$test$pvalues),
+               p = unname(tukey$test$pvalues),
+               z.value = unname(tukey$test$tstat)) %>%
+    mutate(comparison = if_else((descending == TRUE & z.value > 0)
+                                | (descending == FALSE & z.value < 0),
+                                gsub("([[:alnum:]]+) - ([[:alnum:]]+)", "\\2 - \\1", comparison),
+                                as.character(comparison)),
+           first.type = gsub("([[:alnum:]]+) - ([[:alnum:]]+)", "\\1", comparison),
+           second.type = gsub("([[:alnum:]]+) - ([[:alnum:]]+)", "\\2", comparison),
+           first.index = match(first.type, ordering),
+           second.index = match(second.type, ordering),
+           test = paste(ordering.sign, second.type),
+           p.value = p.num.to.p.str.with.sig.code(p),
+           z.value = format(abs(z.value), digits = 4, scientific = FALSE))
+
+  indices.to.start <-
+    tukey.with.vars.split %>%
+    filter(p < 0.05 | second.index == 1) %>%
+    group_by(first.index) %>%
+    dplyr::summarise(start.second.index = max(second.index))
+
+  inner_join(tukey.with.vars.split, indices.to.start, by = 'first.index') %>%
+    filter(second.index >= start.second.index) %>%
+    right_join(outcome.by.type, by = c('first.type' = fixed.var)) %>%
+    mutate(!!fixed.var := factor(first.type, levels = ordering)) %>%
+    arrange(!!sym(fixed.var), desc(second.index)) %>%
+    dplyr::select(fixed.var, test, p.value, z.value, outcome.var)
 }
 ```
 
@@ -1245,50 +1258,6 @@ kable(
 ```
 
 
-### Accuracy by user group
-
-Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per user group. These are again as an aggregate across all label types (all.\*) and for the problem vs no problem type (prob.\*).
-
-NOTE: In these two tables, the data is binary (not ordinal).
-
-Median accuracy by user group - street level:
-
-```{r turk.showing.stats.4, echo=FALSE}
-turk.showing.stats.4.and.5 <- 
-  turk.study.summary.stats %>%
-    group_by(worker.type, granularity) %>%
-    dplyr::summarize(
-      all.recall = median(all.recall, na.rm = TRUE),
-      all.prec = median(all.precision, na.rm = TRUE),
-      all.f.meas = median(all.f.measure, na.rm = TRUE),
-      prob.recall = median(prob.recall, na.rm = TRUE),
-      prob.prec = median(prob.precision, na.rm = TRUE),
-      prob.f.meas = median(prob.f.measure, na.rm = TRUE)
-    ) %>%
-    dplyr::rename(user.type = worker.type)
-
-kable(
-  turk.showing.stats.4.and.5 %>%
-    filter(granularity == 'street') %>%
-    select(-granularity),
-  digits = 3,
-  align = 'l'
-  )
-```
-
-Median accuracy by user group - 5 meter level:
-
-```{r turk.showing.stats.5, echo=FALSE}
-kable(
-  turk.showing.stats.4.and.5 %>%
-    filter(granularity == '5_meter') %>%
-    select(-granularity),
-  digits = 3,
-  align = 'l'
-  )
-```
-
-
 ### Voting: Improved recall when at least one turker marks
 
 ```{r turk.voting.method.setup, echo=FALSE}
@@ -1499,6 +1468,180 @@ ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.val
 * NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
 
 
+### Accuracy by user group
+
+NOTE: In these two tables, the data is binary (not ordinal) and these are median accuracies aggregated across all label types (all.\*) and for the problem vs no problem type (prob.\*).
+
+#### Summary stats
+
+Median accuracy by user group - street level:
+
+```{r turk.showing.stats.4, echo=FALSE}
+turk.showing.stats.4.and.5 <-
+  turk.study.summary.stats %>%
+    group_by(worker.type, granularity) %>%
+    dplyr::summarize(
+      all.recall = median(all.recall, na.rm = TRUE),
+      all.prec = median(all.precision, na.rm = TRUE),
+      all.f.meas = median(all.f.measure, na.rm = TRUE),
+      prob.recall = median(prob.recall, na.rm = TRUE),
+      prob.prec = median(prob.precision, na.rm = TRUE),
+      prob.f.meas = median(prob.f.measure, na.rm = TRUE)
+    ) %>%
+    dplyr::rename(user.type = worker.type)
+
+kable(
+  turk.showing.stats.4.and.5 %>%
+    filter(granularity == 'street') %>%
+    select(-granularity),
+  digits = 3,
+  align = 'l'
+  )
+```
+
+Median accuracy by user group - 5 meter level:
+
+```{r turk.showing.stats.5, echo=FALSE}
+kable(
+  turk.showing.stats.4.and.5 %>%
+    filter(granularity == '5_meter') %>%
+    select(-granularity),
+  digits = 3,
+  align = 'l'
+  )
+```
+
+
+#### Statistical significance
+
+NOTE: This is at the street level (not 5 meter level).
+
+We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision as binomial and used a logistic link function.
+
+```{r turk.user.group.accuracy.glmm, echo=FALSE}
+# TODO include the fact that the single turker is included in turk3, etc as a random effect
+user.group.test.data <-
+  data.with.raw.accuracy %>%
+  filter(worker.type != 'turk0',
+         n.workers == 1 || (n.workers == 3 && worker.thresh = 2) || (n.workers == 5 && worker.thresh == 3),
+         granularity == 'street',
+         binary == TRUE,
+         included.severity == 'all',
+         label.type %in% c('All', 'Problem')) %>%
+  mutate(label.type = factor(label.type),
+         condition.id = factor(condition.id),
+         worker.type = factor(worker.type))
+
+user.group.test.data.recall.all <-
+  user.group.test.data %>%
+  filter(label.type == 'All') %>%
+  select(condition.id, worker.type, true.pos, false.neg, recall) %>%
+  na.omit() %>%
+  droplevels()
+user.group.test.data.prec.all <-
+  user.group.test.data %>%
+  filter(label.type == 'All') %>%
+  select(condition.id, worker.type, true.pos, false.pos, precision) %>%
+  na.omit() %>%
+  droplevels()
+user.group.test.data.recall.prob <-
+  user.group.test.data %>%
+  filter(label.type == 'Problem') %>%
+  select(condition.id, worker.type, true.pos, false.neg, recall) %>%
+  na.omit() %>%
+  droplevels()
+user.group.test.data.prec.prob <-
+  user.group.test.data %>%
+  filter(label.type == 'Problem') %>%
+  select(condition.id, worker.type, true.pos, false.pos, precision) %>%
+  na.omit() %>%
+  droplevels()
+
+user.group.recall.all.model <- glmer(recall ~ worker.type + (1 | condition.id),
+                           data = user.group.test.data.recall.all,
+                           family = binomial(link = 'logit'),
+                           weights = true.pos + false.neg,
+                           control = glmerControl(optimizer = "bobyqa",
+                                                  optCtrl = list(maxfun = 100000)))
+lrt.user.group.recall.all <- drop1(user.group.recall.all.model, test = 'Chisq')
+tukey.user.group.recall.all <- summary(glht(user.group.recall.all.model, linfct = mcp(worker.type = 'Tukey')),
+                             test = adjusted('holm'))
+
+
+user.group.prec.all.model <- glmer(precision ~ worker.type + (1 | condition.id),
+                         data = user.group.test.data.prec.all,
+                         family = binomial(link = 'logit'),
+                         weights = true.pos + false.pos,
+                         control = glmerControl(optimizer = "bobyqa",
+                                                optCtrl = list(maxfun = 100000)))
+lrt.user.group.prec.all <- drop1(user.group.prec.all.model, test = 'Chisq')
+tukey.user.group.prec.all <- summary(glht(user.group.prec.all.model, linfct = mcp(worker.type = 'Tukey')),
+                           test = adjusted('holm'))
+
+user.group.recall.prob.model <- glmer(recall ~ worker.type + (1 | condition.id),
+                           data = user.group.test.data.recall.prob,
+                           family = binomial(link = 'logit'),
+                           weights = true.pos + false.neg,
+                           control = glmerControl(optimizer = "bobyqa",
+                                                  optCtrl = list(maxfun = 100000)))
+lrt.user.group.recall.prob <- drop1(user.group.recall.prob.model, test = 'Chisq')
+tukey.user.group.recall.prob <- summary(glht(user.group.recall.prob.model, linfct = mcp(worker.type = 'Tukey')),
+                             test = adjusted('holm'))
+
+
+user.group.prec.prob.model <- glmer(precision ~ worker.type + (1 | condition.id),
+                         data = user.group.test.data.prec.prob,
+                         family = binomial(link = 'logit'),
+                         weights = true.pos + false.pos,
+                         control = glmerControl(optimizer = "bobyqa",
+                                                optCtrl = list(maxfun = 100000)))
+lrt.user.group.prec.prob <- drop1(user.group.prec.prob.model, test = 'Chisq')
+tukey.user.group.prec.prob <- summary(glht(user.group.prec.prob.model, linfct = mcp(worker.type = 'Tukey')),
+                           test = adjusted('holm'))
+```
+
+
+To test that the ordering of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall for the Problem type, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall-all, then precision-problem, then precision-all, and finally precision-problem).
+
+NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+```{r turk.user.group.accuracy.tukey, echo=FALSE}
+# Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
+tukey.user.group.recall.all.clean <- format.tukey.table(tukey.user.group.recall.all,
+                                                  'recall',
+                                                  'worker.type',
+                                                  user.group.test.data.recall.all,
+                                                  descending = TRUE)
+tukey.user.group.prec.all.clean <- format.tukey.table(tukey.user.group.prec.all,
+                                            'precision',
+                                            'worker.type',
+                                            user.group.test.data.prec.all,
+                                            descending = TRUE)
+tukey.user.group.recall.prob.clean <- format.tukey.table(tukey.user.group.recall.prob,
+                                                  'recall',
+                                                  'worker.type',
+                                                  user.group.test.data.recall.prob,
+                                                  descending = TRUE)
+tukey.user.group.prec.prob.clean <- format.tukey.table(tukey.user.group.prec.prob,
+                                            'precision',
+                                            'worker.type',
+                                            user.group.test.data.prec.prob,
+                                            descending = TRUE)
+
+kable(tukey.user.group.recall.all.clean, digits = 3, align = 'l')
+kable(tukey.user.group.prec.all.clean, digits = 3, align = 'l')
+kable(tukey.user.group.recall.prob.clean, digits = 3, align = 'l')
+kable(tukey.user.group.prec.prob.clean, digits = 3, align = 'l')
+
+# Why no significant diff between anon user and others for problem precision..? Because anon users
+# seem to have gotten the routes where everyone had more precision:
+user.group.test.data %>%
+  filter(label.type == 'Problem', is.anon.route == TRUE) %>%
+  group_by(worker.type) %>%
+  dplyr::summarise(precision = mean(precision, na.rm = TRUE))
+```
+
+
 ### Accuracy by label type
 
 NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), we only consider the first turker to audit each route, and these are median accuracies.
@@ -1558,7 +1701,7 @@ NOTE: This is at the street level (not 5 meter level).
 
 We created binomial mixed effects models to determine the relationship between label type and recall/precision. We had label type as the fixed effect and user id nested in route id as random effects. We modeled recall/precision as binomial and used a logistic link function.
 
-```{r turk.label.type.recall.glmm, echo=FALSE}
+```{r turk.label.type.accuracy.glmm, echo=FALSE}
 type.test.data <-
   turk.showing.stats.by.label.type %>%
   filter(granularity == 'street',
@@ -1606,12 +1749,18 @@ To test that the ordering of the label types are statistically significant (e.g.
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
-```{r turk.label.type.recall.tukey, echo=FALSE}
+```{r turk.label.type.accuracy.tukey, echo=FALSE}
 # Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
-tukey.type.recall.clean <-
-  format.tukey.table(tukey.type.recall, 'recall', type.test.data.recall, descending = TRUE)
-tukey.type.prec.clean <-
-  format.tukey.table(tukey.type.prec, 'precision', type.test.data.prec, descending = TRUE)
+tukey.type.recall.clean <- format.tukey.table(tukey.type.recall,
+                                              'recall',
+                                              'label.type',
+                                              type.test.data.recall,
+                                              descending = TRUE)
+tukey.type.prec.clean <- format.tukey.table(tukey.type.prec,
+                                            'precision',
+                                            'label.type',
+                                            type.test.data.prec,
+                                            descending = TRUE)
 
 kable(tukey.type.recall.clean, digits = 3, align = 'l')
 kable(tukey.type.prec.clean, digits = 3, align = 'l')
@@ -1765,6 +1914,7 @@ tukey.log.labeling.time <- summary(glht(log.labeling.time.model,
 # Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
 tukey.log.labeling.time.clean <- format.tukey.table(tukey.log.labeling.time,
                                                     'seconds.to.label',
+                                                    'label.type',
                                                     labeling.time.test.data,
                                                     descending = FALSE)
 
