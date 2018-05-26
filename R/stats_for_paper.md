@@ -365,6 +365,15 @@ Precision, Problem type: Likelihood ratio = 11.415, p = 0.022
 | reg         | &lt; turk3 | 0.088    | 2.58328 | 0.617     |
 | reg         | &lt; turk5 | 0.044 \* | 2.85118 | 0.617     |
 
+One interesting thing I am seeing is anon users have a much higher average precision for the Problem type than other user groups, but the difference is not statistically significant. It turns out that on routes audited by anonymous users, turkers *also* had much higher Problem type precision than for registered user routes. This can be seen in the following table:
+
+| worker.type | problem.precision.on.anon.routes |
+|:------------|:---------------------------------|
+| anon        | 0.910                            |
+| turk1       | 0.836                            |
+| turk3       | 0.894                            |
+| turk5       | 0.940                            |
+
 ### Accuracy by label type
 
 NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), we only consider the first turker to audit each route, and these are median accuracies.

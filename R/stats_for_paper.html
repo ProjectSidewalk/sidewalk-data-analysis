@@ -1359,6 +1359,33 @@ April 17, 2018</p>
 </tr>
 </tbody>
 </table>
+<p>One interesting thing I am seeing is anon users have a much higher average precision for the Problem type than other user groups, but the difference is not statistically significant. It turns out that on routes audited by anonymous users, turkers <em>also</em> had much higher Problem type precision than for registered user routes. This can be seen in the following table:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">worker.type</th>
+<th align="left">problem.precision.on.anon.routes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">anon</td>
+<td align="left">0.910</td>
+</tr>
+<tr class="even">
+<td align="left">turk1</td>
+<td align="left">0.836</td>
+</tr>
+<tr class="odd">
+<td align="left">turk3</td>
+<td align="left">0.894</td>
+</tr>
+<tr class="even">
+<td align="left">turk5</td>
+<td align="left">0.940</td>
+</tr>
+</tbody>
+</table>
 <h3 id="accuracy-by-label-type">Accuracy by label type</h3>
 <p>NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), we only consider the first turker to audit each route, and these are median accuracies.</p>
 <h4 id="summary-stats-1">Summary stats</h4>

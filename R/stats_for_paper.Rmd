@@ -1652,12 +1652,19 @@ kable(tukey.user.group.prec.prob.clean, digits = 3, align = 'l')
 
 # Why no significant diff between anon user and others for problem precision..? Because anon users
 # seem to have gotten the routes where everyone had more precision:
-problem.prec.anon.routes <-
-  user.group.test.data %>%
-  filter(label.type == 'Problem', is.anon.route == TRUE) %>%
-  group_by(worker.type) %>%
-  dplyr::summarise(precision = mean(precision, na.rm = TRUE))
+problem.prec.anon.routes.table <-
+  kable(
+    user.group.test.data %>%
+      filter(label.type == 'Problem', is.anon.route == TRUE) %>%
+      group_by(worker.type) %>%
+      dplyr::summarise(problem.precision.on.anon.routes = mean(precision, na.rm = TRUE)),
+    digits = 3,
+    align = 'l'
+  )
 ```
+
+One interesting thing I am seeing is anon users have a much higher average precision for the Problem type than other user groups, but the difference is not statistically significant. It turns out that on routes audited by anonymous users, turkers _also_ had much higher Problem type precision than for registered user routes. This can be seen in the following table:
+`r problem.prec.anon.routes.table`
 
 
 ### Accuracy by label type
