@@ -305,9 +305,15 @@ NOTE: This is at the street level (not 5 meter level).
 
 We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision as binomial and used a logistic link function.
 
-To test that the ordering of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall for the Problem type, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall-all, then precision-problem, then precision-all, and finally precision-problem).
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (worker type) to have a statistically significant association with both recall and precision for both the Problem type and all label types aggregated (results shown below).
+
+To test that the orderings of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall for the Problem type, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
+
+Recall, all label types: Likelihood ratio = 63.925, p &lt; 0.001
 
 | worker.type | test       | p.value    | z.value | recall |
 |:------------|:-----------|:-----------|:--------|:-------|
@@ -320,6 +326,8 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 | anon        | &lt; turk3 | 0.278      | 1.681   | 0.519  |
 | anon        | &lt; turk1 | 0.010 \*   | 3.081   | 0.519  |
 
+Precision, all label types: Likelihood ratio = 167.44, p &lt; 0.001
+
 | worker.type | test       | p.value           | z.value | precision |
 |:------------|:-----------|:------------------|:--------|:----------|
 | turk5       | -          | -                 | -       | 0.878     |
@@ -331,6 +339,8 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 | reg         | &lt; turk1 | 0.113             | 1.940   | 0.637     |
 | reg         | &lt; anon  | 0.023 \*          | 2.784   | 0.637     |
 
+Recall, Problem type: Likelihood ratio = 110.62, p &lt; 0.001
+
 | worker.type | test       | p.value           | z.value | recall |
 |:------------|:-----------|:------------------|:--------|:-------|
 | reg         | -          | -                 | -       | 0.728  |
@@ -339,6 +349,8 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 | anon        | &lt; turk5 | 0.445             | 0.7641  | 0.418  |
 | anon        | &lt; turk3 | 0.028 \*          | 2.5986  | 0.418  |
 | turk5       | &lt; turk3 | 0.002 \*\*        | 3.5438  | 0.399  |
+
+Precision, Problem type: Likelihood ratio = 11.415, p = 0.022
 
 | worker.type | test       | p.value  | z.value | precision |
 |:------------|:-----------|:---------|:--------|:----------|
@@ -352,14 +364,6 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 | reg         | &lt; turk1 | 1.000    | 1.15151 | 0.617     |
 | reg         | &lt; turk3 | 0.088    | 2.58328 | 0.617     |
 | reg         | &lt; turk5 | 0.044 \* | 2.85118 | 0.617     |
-
-    ## # A tibble: 4 x 2
-    ##   worker.type precision
-    ##   <fct>           <dbl>
-    ## 1 anon            0.910
-    ## 2 turk1           0.836
-    ## 3 turk3           0.894
-    ## 4 turk5           0.940
 
 ### Accuracy by label type
 

@@ -1564,9 +1564,6 @@ user.group.recall.all.model <- glmer(recall ~ worker.type + (1 | condition.id),
                            control = glmerControl(optimizer = "bobyqa",
                                                   optCtrl = list(maxfun = 100000)))
 lrt.user.group.recall.all <- drop1(user.group.recall.all.model, test = 'Chisq')
-tukey.user.group.recall.all <- summary(glht(user.group.recall.all.model, linfct = mcp(worker.type = 'Tukey')),
-                             test = adjusted('holm'))
-
 
 user.group.prec.all.model <- glmer(precision ~ worker.type + (1 | condition.id),
                          data = user.group.test.data.prec.all,
@@ -1575,8 +1572,6 @@ user.group.prec.all.model <- glmer(precision ~ worker.type + (1 | condition.id),
                          control = glmerControl(optimizer = "bobyqa",
                                                 optCtrl = list(maxfun = 100000)))
 lrt.user.group.prec.all <- drop1(user.group.prec.all.model, test = 'Chisq')
-tukey.user.group.prec.all <- summary(glht(user.group.prec.all.model, linfct = mcp(worker.type = 'Tukey')),
-                           test = adjusted('holm'))
 
 user.group.recall.prob.model <- glmer(recall ~ worker.type + (1 | condition.id),
                            data = user.group.test.data.recall.prob,
@@ -1585,9 +1580,6 @@ user.group.recall.prob.model <- glmer(recall ~ worker.type + (1 | condition.id),
                            control = glmerControl(optimizer = "bobyqa",
                                                   optCtrl = list(maxfun = 100000)))
 lrt.user.group.recall.prob <- drop1(user.group.recall.prob.model, test = 'Chisq')
-tukey.user.group.recall.prob <- summary(glht(user.group.recall.prob.model, linfct = mcp(worker.type = 'Tukey')),
-                             test = adjusted('holm'))
-
 
 user.group.prec.prob.model <- glmer(precision ~ worker.type + (1 | condition.id),
                          data = user.group.test.data.prec.prob,
@@ -1596,46 +1588,72 @@ user.group.prec.prob.model <- glmer(precision ~ worker.type + (1 | condition.id)
                          control = glmerControl(optimizer = "bobyqa",
                                                 optCtrl = list(maxfun = 100000)))
 lrt.user.group.prec.prob <- drop1(user.group.prec.prob.model, test = 'Chisq')
-tukey.user.group.prec.prob <- summary(glht(user.group.prec.prob.model, linfct = mcp(worker.type = 'Tukey')),
-                           test = adjusted('holm'))
 ```
 
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (worker type) to have a statistically significant association with both recall and precision for both the Problem type and all label types aggregated (results shown below).
 
-To test that the ordering of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall for the Problem type, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall-all, then precision-problem, then precision-all, and finally precision-problem).
+To test that the orderings of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall for the Problem type, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
-```{r turk.user.group.accuracy.tukey, echo=FALSE}
+NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
+
+Recall, all label types: Likelihood ratio = `r format(lrt.user.group.recall.all['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.recall.all['worker.type','Pr(Chi)'])`
+
+```{r turk.user.group.recall.all.tukey, echo=FALSE}
 # Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
+tukey.user.group.recall.all <- summary(glht(user.group.recall.all.model, linfct = mcp(worker.type = 'Tukey')),
+                             test = adjusted('holm'))
 tukey.user.group.recall.all.clean <- format.tukey.table(tukey.user.group.recall.all,
                                                   'recall',
                                                   'worker.type',
                                                   user.group.test.data.recall.all,
                                                   descending = TRUE)
+kable(tukey.user.group.recall.all.clean, digits = 3, align = 'l')
+```
+
+Precision, all label types: Likelihood ratio = `r format(lrt.user.group.prec.all['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.prec.all['worker.type','Pr(Chi)'])`
+
+```{r turk.user.group.prec.all.tukey, echo=FALSE}
+tukey.user.group.prec.all <- summary(glht(user.group.prec.all.model, linfct = mcp(worker.type = 'Tukey')),
+                           test = adjusted('holm'))
 tukey.user.group.prec.all.clean <- format.tukey.table(tukey.user.group.prec.all,
                                             'precision',
                                             'worker.type',
                                             user.group.test.data.prec.all,
                                             descending = TRUE)
+kable(tukey.user.group.prec.all.clean, digits = 3, align = 'l')
+```
+
+Recall, Problem type: Likelihood ratio = `r format(lrt.user.group.recall.prob['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.recall.prob['worker.type','Pr(Chi)'])`
+
+```{r turk.user.group.recall.prob.tukey, echo=FALSE}
+tukey.user.group.recall.prob <- summary(glht(user.group.recall.prob.model, linfct = mcp(worker.type = 'Tukey')),
+                             test = adjusted('holm'))
 tukey.user.group.recall.prob.clean <- format.tukey.table(tukey.user.group.recall.prob,
                                                   'recall',
                                                   'worker.type',
                                                   user.group.test.data.recall.prob,
                                                   descending = TRUE)
+kable(tukey.user.group.recall.prob.clean, digits = 3, align = 'l')
+```
+
+Precision, Problem type: Likelihood ratio = `r format(lrt.user.group.prec.prob['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.prec.prob['worker.type','Pr(Chi)'])`
+
+```{r turk.user.group.prec.prob.tukey, echo=FALSE}
+tukey.user.group.prec.prob <- summary(glht(user.group.prec.prob.model, linfct = mcp(worker.type = 'Tukey')),
+                           test = adjusted('holm'))
 tukey.user.group.prec.prob.clean <- format.tukey.table(tukey.user.group.prec.prob,
                                             'precision',
                                             'worker.type',
                                             user.group.test.data.prec.prob,
                                             descending = TRUE)
-
-kable(tukey.user.group.recall.all.clean, digits = 3, align = 'l')
-kable(tukey.user.group.prec.all.clean, digits = 3, align = 'l')
-kable(tukey.user.group.recall.prob.clean, digits = 3, align = 'l')
 kable(tukey.user.group.prec.prob.clean, digits = 3, align = 'l')
 
 # Why no significant diff between anon user and others for problem precision..? Because anon users
 # seem to have gotten the routes where everyone had more precision:
-user.group.test.data %>%
+problem.prec.anon.routes <-
+  user.group.test.data %>%
   filter(label.type == 'Problem', is.anon.route == TRUE) %>%
   group_by(worker.type) %>%
   dplyr::summarise(precision = mean(precision, na.rm = TRUE))
