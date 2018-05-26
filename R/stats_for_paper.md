@@ -18,12 +18,12 @@ April 17, 2018
         -   [Ground truth label counts](#ground-truth-label-counts)
         -   [Aggregate accuracy](#aggregate-accuracy)
         -   [Accuracy by user group](#accuracy-by-user-group)
-        -   [Accuracy by label type](#accuracy-by-label-type)
         -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Descriptive stats for users](#descriptive-stats-for-users)
         -   [IRR](#irr)
     -   [Possible Stories](#possible-stories-1)
         -   [Granularity: Street-level vs 5 meter-level](#granularity-street-level-vs-5-meter-level)
+        -   [Accuracy by label type](#accuracy-by-label-type)
         -   [Visual search time: Time to label by type](#visual-search-time-time-to-label-by-type)
         -   [Zone type: Land use effect on accuracy](#zone-type-land-use-effect-on-accuracy)
         -   [User behavior: Does auditing speed, etc influence accuracy](#user-behavior-does-auditing-speed-etc-influence-accuracy)
@@ -186,35 +186,6 @@ Median accuracy by user group - 5 meter level:
 | turk3     | 0.509      | 0.667    | 0.559      | 0.125       | 0.286     | 0.205       |
 | turk5     | 0.504      | 0.750    | 0.584      | 0.081       | 0.333     | 0.182       |
 
-### Accuracy by label type
-
-Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type. This is done at the street level and 5 meter levels.
-
-NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
-
-Median accuracy by label type - street level:
-
-| label.type  | recall.md | recall.mn | recall.std | prec.md | prec.mn | prec.std | f.md  | f.mn  | f.std |
-|:------------|:----------|:----------|:-----------|:--------|:--------|:---------|:------|:------|:------|
-| All         | 0.714     | 0.688     | 0.196      | 0.674   | 0.675   | 0.172    | 0.667 | 0.662 | 0.129 |
-| Problem     | 0.714     | 0.639     | 0.323      | 0.714   | 0.693   | 0.284    | 0.667 | 0.649 | 0.226 |
-| CurbRamp    | 1.000     | 0.902     | 0.210      | 1.000   | 0.950   | 0.074    | 0.958 | 0.918 | 0.132 |
-| NoCurbRamp  | 1.000     | 0.762     | 0.406      | 0.000   | 0.179   | 0.279    | 0.500 | 0.542 | 0.227 |
-| Obstacle    | 0.500     | 0.486     | 0.379      | 0.500   | 0.447   | 0.365    | 0.545 | 0.581 | 0.211 |
-| SurfaceProb | 0.333     | 0.344     | 0.329      | 0.817   | 0.715   | 0.339    | 0.500 | 0.555 | 0.214 |
-| NoSidewalk  | 0.600     | 0.557     | 0.420      | 0.958   | 0.716   | 0.355    | 0.667 | 0.751 | 0.201 |
-
-Median accuracy by label type - 5 meter level:
-
-| label.type  | recall.md | recall.mn | recall.std | prec.md | prec.mn | prec.std | f.md  | f.mn  | f.std |
-|:------------|:----------|:----------|:-----------|:--------|:--------|:---------|:------|:------|:------|
-| All         | 0.543     | 0.502     | 0.224      | 0.472   | 0.465   | 0.181    | 0.468 | 0.455 | 0.165 |
-| Problem     | 0.200     | 0.228     | 0.195      | 0.250   | 0.273   | 0.221    | 0.222 | 0.229 | 0.116 |
-| CurbRamp    | 0.789     | 0.716     | 0.254      | 0.667   | 0.638   | 0.199    | 0.689 | 0.642 | 0.188 |
-| NoCurbRamp  | 0.633     | 0.548     | 0.450      | 0.000   | 0.108   | 0.223    | 0.400 | 0.401 | 0.244 |
-| Obstacle    | 0.143     | 0.210     | 0.256      | 0.087   | 0.174   | 0.220    | 0.267 | 0.279 | 0.134 |
-| SurfaceProb | 0.034     | 0.129     | 0.214      | 0.268   | 0.343   | 0.333    | 0.214 | 0.265 | 0.199 |
-
 ### Voting: Improved recall when at least one turker marks
 
 Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
@@ -328,6 +299,61 @@ Below is a table showing label type accuracy at the two granularity levels, foll
 
 -   NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.
 
+### Accuracy by label type
+
+NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), we only consider the first turker to audit each route, and these are median accuracies.
+
+#### Summary stats
+
+Median accuracy by label type - street level:
+
+| label.type  | recall.md | recall.mn | recall.std | prec.md | prec.mn | prec.std | f.md  | f.mn  | f.std |
+|:------------|:----------|:----------|:-----------|:--------|:--------|:---------|:------|:------|:------|
+| All         | 0.714     | 0.688     | 0.196      | 0.674   | 0.675   | 0.172    | 0.667 | 0.662 | 0.129 |
+| Problem     | 0.714     | 0.639     | 0.323      | 0.714   | 0.693   | 0.284    | 0.667 | 0.649 | 0.226 |
+| CurbRamp    | 1.000     | 0.902     | 0.210      | 1.000   | 0.950   | 0.074    | 0.958 | 0.918 | 0.132 |
+| NoCurbRamp  | 1.000     | 0.762     | 0.406      | 0.000   | 0.179   | 0.279    | 0.500 | 0.542 | 0.227 |
+| Obstacle    | 0.500     | 0.486     | 0.379      | 0.500   | 0.447   | 0.365    | 0.545 | 0.581 | 0.211 |
+| SurfaceProb | 0.333     | 0.344     | 0.329      | 0.817   | 0.715   | 0.339    | 0.500 | 0.555 | 0.214 |
+| NoSidewalk  | 0.600     | 0.557     | 0.420      | 0.958   | 0.716   | 0.355    | 0.667 | 0.751 | 0.201 |
+
+Median accuracy by label type - 5 meter level:
+
+| label.type  | recall.md | recall.mn | recall.std | prec.md | prec.mn | prec.std | f.md  | f.mn  | f.std |
+|:------------|:----------|:----------|:-----------|:--------|:--------|:---------|:------|:------|:------|
+| All         | 0.543     | 0.502     | 0.224      | 0.472   | 0.465   | 0.181    | 0.468 | 0.455 | 0.165 |
+| Problem     | 0.200     | 0.228     | 0.195      | 0.250   | 0.273   | 0.221    | 0.222 | 0.229 | 0.116 |
+| CurbRamp    | 0.789     | 0.716     | 0.254      | 0.667   | 0.638   | 0.199    | 0.689 | 0.642 | 0.188 |
+| NoCurbRamp  | 0.633     | 0.548     | 0.450      | 0.000   | 0.108   | 0.223    | 0.400 | 0.401 | 0.244 |
+| Obstacle    | 0.143     | 0.210     | 0.256      | 0.087   | 0.174   | 0.220    | 0.267 | 0.279 | 0.134 |
+| SurfaceProb | 0.034     | 0.129     | 0.214      | 0.268   | 0.343   | 0.333    | 0.214 | 0.265 | 0.199 |
+
+#### Statistical significance
+
+NOTE: This is at the street level (not 5 meter level).
+
+We created binomial mixed effects models to determine the relationship between label type and recall/precision. We had label type as the fixed effect and user id nested in route id as random effects. We modeled recall/precision as binomial and used a logistic link function.
+
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = 688.06, p &lt; 0.001). We also found label type to have a statistically significant association with precision (likelihood ratio = 1050.1, p &lt; 0.001).
+
+To test that the ordering of the label types are statistically significant (e.g., that NoCurbRamp recall is significantly lower than CurbRamp recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall, then precision).
+
+NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+| label.type  | test            | p.value           | z.value | recall |
+|:------------|:----------------|:------------------|:--------|:-------|
+| CurbRamp    | -               | -                 | -       | 0.902  |
+| NoCurbRamp  | &lt; CurbRamp   | &lt; 0.001 \*\*\* | 3.758   | 0.762  |
+| Obstacle    | &lt; NoCurbRamp | &lt; 0.001 \*\*\* | 5.233   | 0.486  |
+| SurfaceProb | &lt; Obstacle   | &lt; 0.001 \*\*\* | 5.234   | 0.344  |
+
+| label.type  | test             | p.value           | z.value | precision |
+|:------------|:-----------------|:------------------|:--------|:----------|
+| CurbRamp    | -                | -                 | -       | 0.950     |
+| SurfaceProb | &lt; CurbRamp    | &lt; 0.001 \*\*\* | 11.397  | 0.715     |
+| Obstacle    | &lt; SurfaceProb | &lt; 0.001 \*\*\* | 6.037   | 0.447     |
+| NoCurbRamp  | &lt; Obstacle    | &lt; 0.001 \*\*\* | 7.854   | 0.179     |
+
 ### Visual search time: Time to label by type
 
 NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
@@ -372,12 +398,12 @@ Using a likelihood ratio test, we find the contribution by the fixed effect (lab
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
-| label.type  | test            | p.value           | z.value | seconds.to.label | log.seconds.to.label |
-|:------------|:----------------|:------------------|:--------|:-----------------|:---------------------|
-| CurbRamp    | -               | -                 | -       | 6.894            | 1.931                |
-| Obstacle    | &gt; CurbRamp   | &lt; 0.001 \*\*\* | 3.862   | 8.214            | 2.106                |
-| NoCurbRamp  | &gt; Obstacle   | 0.007 \*\*        | 2.935   | 9.464            | 2.247                |
-| SurfaceProb | &gt; NoCurbRamp | 0.048 \*          | 1.981   | 10.917           | 2.390                |
+| label.type  | test            | p.value           | z.value | seconds.to.label |
+|:------------|:----------------|:------------------|:--------|:-----------------|
+| CurbRamp    | -               | -                 | -       | 8.139            |
+| Obstacle    | &gt; CurbRamp   | &lt; 0.001 \*\*\* | 3.862   | 10.102           |
+| NoCurbRamp  | &gt; Obstacle   | 0.007 \*\*        | 2.935   | 12.784           |
+| SurfaceProb | &gt; NoCurbRamp | 0.048 \*          | 1.981   | 13.766           |
 
 ### Zone type: Land use effect on accuracy
 

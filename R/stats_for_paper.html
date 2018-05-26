@@ -52,7 +52,6 @@ April 17, 2018</p>
 <li><a href="#ground-truth-label-counts">Ground truth label counts</a></li>
 <li><a href="#aggregate-accuracy">Aggregate accuracy</a></li>
 <li><a href="#accuracy-by-user-group">Accuracy by user group</a></li>
-<li><a href="#accuracy-by-label-type">Accuracy by label type</a></li>
 <li><a href="#voting-improved-recall-when-at-least-one-turker-marks">Voting: Improved recall when at least one turker marks</a></li>
 <li><a href="#descriptive-stats-for-users">Descriptive stats for users</a></li>
 <li><a href="#irr">IRR</a></li>
@@ -60,6 +59,7 @@ April 17, 2018</p>
 <li><a href="#possible-stories-1">Possible Stories</a>
 <ul>
 <li><a href="#granularity-street-level-vs-5-meter-level">Granularity: Street-level vs 5 meter-level</a></li>
+<li><a href="#accuracy-by-label-type">Accuracy by label type</a></li>
 <li><a href="#visual-search-time-time-to-label-by-type">Visual search time: Time to label by type</a></li>
 <li><a href="#zone-type-land-use-effect-on-accuracy">Zone type: Land use effect on accuracy</a></li>
 <li><a href="#user-behavior-does-auditing-speed-etc-influence-accuracy">User behavior: Does auditing speed, etc influence accuracy</a></li>
@@ -652,227 +652,6 @@ April 17, 2018</p>
 </tr>
 </tbody>
 </table>
-<h3 id="accuracy-by-label-type">Accuracy by label type</h3>
-<p>Then we show the above accuracy measures (but for only precision, recall, and f-measure), as an average (median) per label type. This is done at the street level and 5 meter levels.</p>
-<p>NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.</p>
-<p>Median accuracy by label type - street level:</p>
-<table style="width:100%;">
-<colgroup>
-<col width="13%"></col>
-<col width="11%"></col>
-<col width="11%"></col>
-<col width="12%"></col>
-<col width="9%"></col>
-<col width="9%"></col>
-<col width="10%"></col>
-<col width="7%"></col>
-<col width="7%"></col>
-<col width="7%"></col>
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">label.type</th>
-<th align="left">recall.md</th>
-<th align="left">recall.mn</th>
-<th align="left">recall.std</th>
-<th align="left">prec.md</th>
-<th align="left">prec.mn</th>
-<th align="left">prec.std</th>
-<th align="left">f.md</th>
-<th align="left">f.mn</th>
-<th align="left">f.std</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">All</td>
-<td align="left">0.714</td>
-<td align="left">0.688</td>
-<td align="left">0.196</td>
-<td align="left">0.674</td>
-<td align="left">0.675</td>
-<td align="left">0.172</td>
-<td align="left">0.667</td>
-<td align="left">0.662</td>
-<td align="left">0.129</td>
-</tr>
-<tr class="even">
-<td align="left">Problem</td>
-<td align="left">0.714</td>
-<td align="left">0.639</td>
-<td align="left">0.323</td>
-<td align="left">0.714</td>
-<td align="left">0.693</td>
-<td align="left">0.284</td>
-<td align="left">0.667</td>
-<td align="left">0.649</td>
-<td align="left">0.226</td>
-</tr>
-<tr class="odd">
-<td align="left">CurbRamp</td>
-<td align="left">1.000</td>
-<td align="left">0.902</td>
-<td align="left">0.210</td>
-<td align="left">1.000</td>
-<td align="left">0.950</td>
-<td align="left">0.074</td>
-<td align="left">0.958</td>
-<td align="left">0.918</td>
-<td align="left">0.132</td>
-</tr>
-<tr class="even">
-<td align="left">NoCurbRamp</td>
-<td align="left">1.000</td>
-<td align="left">0.762</td>
-<td align="left">0.406</td>
-<td align="left">0.000</td>
-<td align="left">0.179</td>
-<td align="left">0.279</td>
-<td align="left">0.500</td>
-<td align="left">0.542</td>
-<td align="left">0.227</td>
-</tr>
-<tr class="odd">
-<td align="left">Obstacle</td>
-<td align="left">0.500</td>
-<td align="left">0.486</td>
-<td align="left">0.379</td>
-<td align="left">0.500</td>
-<td align="left">0.447</td>
-<td align="left">0.365</td>
-<td align="left">0.545</td>
-<td align="left">0.581</td>
-<td align="left">0.211</td>
-</tr>
-<tr class="even">
-<td align="left">SurfaceProb</td>
-<td align="left">0.333</td>
-<td align="left">0.344</td>
-<td align="left">0.329</td>
-<td align="left">0.817</td>
-<td align="left">0.715</td>
-<td align="left">0.339</td>
-<td align="left">0.500</td>
-<td align="left">0.555</td>
-<td align="left">0.214</td>
-</tr>
-<tr class="odd">
-<td align="left">NoSidewalk</td>
-<td align="left">0.600</td>
-<td align="left">0.557</td>
-<td align="left">0.420</td>
-<td align="left">0.958</td>
-<td align="left">0.716</td>
-<td align="left">0.355</td>
-<td align="left">0.667</td>
-<td align="left">0.751</td>
-<td align="left">0.201</td>
-</tr>
-</tbody>
-</table>
-<p>Median accuracy by label type - 5 meter level:</p>
-<table style="width:100%;">
-<colgroup>
-<col width="13%"></col>
-<col width="11%"></col>
-<col width="11%"></col>
-<col width="12%"></col>
-<col width="9%"></col>
-<col width="9%"></col>
-<col width="10%"></col>
-<col width="7%"></col>
-<col width="7%"></col>
-<col width="7%"></col>
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">label.type</th>
-<th align="left">recall.md</th>
-<th align="left">recall.mn</th>
-<th align="left">recall.std</th>
-<th align="left">prec.md</th>
-<th align="left">prec.mn</th>
-<th align="left">prec.std</th>
-<th align="left">f.md</th>
-<th align="left">f.mn</th>
-<th align="left">f.std</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">All</td>
-<td align="left">0.543</td>
-<td align="left">0.502</td>
-<td align="left">0.224</td>
-<td align="left">0.472</td>
-<td align="left">0.465</td>
-<td align="left">0.181</td>
-<td align="left">0.468</td>
-<td align="left">0.455</td>
-<td align="left">0.165</td>
-</tr>
-<tr class="even">
-<td align="left">Problem</td>
-<td align="left">0.200</td>
-<td align="left">0.228</td>
-<td align="left">0.195</td>
-<td align="left">0.250</td>
-<td align="left">0.273</td>
-<td align="left">0.221</td>
-<td align="left">0.222</td>
-<td align="left">0.229</td>
-<td align="left">0.116</td>
-</tr>
-<tr class="odd">
-<td align="left">CurbRamp</td>
-<td align="left">0.789</td>
-<td align="left">0.716</td>
-<td align="left">0.254</td>
-<td align="left">0.667</td>
-<td align="left">0.638</td>
-<td align="left">0.199</td>
-<td align="left">0.689</td>
-<td align="left">0.642</td>
-<td align="left">0.188</td>
-</tr>
-<tr class="even">
-<td align="left">NoCurbRamp</td>
-<td align="left">0.633</td>
-<td align="left">0.548</td>
-<td align="left">0.450</td>
-<td align="left">0.000</td>
-<td align="left">0.108</td>
-<td align="left">0.223</td>
-<td align="left">0.400</td>
-<td align="left">0.401</td>
-<td align="left">0.244</td>
-</tr>
-<tr class="odd">
-<td align="left">Obstacle</td>
-<td align="left">0.143</td>
-<td align="left">0.210</td>
-<td align="left">0.256</td>
-<td align="left">0.087</td>
-<td align="left">0.174</td>
-<td align="left">0.220</td>
-<td align="left">0.267</td>
-<td align="left">0.279</td>
-<td align="left">0.134</td>
-</tr>
-<tr class="even">
-<td align="left">SurfaceProb</td>
-<td align="left">0.034</td>
-<td align="left">0.129</td>
-<td align="left">0.214</td>
-<td align="left">0.268</td>
-<td align="left">0.343</td>
-<td align="left">0.333</td>
-<td align="left">0.214</td>
-<td align="left">0.265</td>
-<td align="left">0.199</td>
-</tr>
-</tbody>
-</table>
 <h3 id="voting-improved-recall-when-at-least-one-turker-marks">Voting: Improved recall when at least one turker marks</h3>
 <p>Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the &quot;at least one&quot; voting method)?</p>
 <p>For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.8 and their precision was 0.67.</p>
@@ -1293,6 +1072,315 @@ April 17, 2018</p>
 <li><p>The Problem type seems to perform better than the surface problem and obstacle label types (except for surface problem precision, mentioned in the previous bullet).</p></li>
 <li><p>NoCurbRamp seems to have high recall and low precision. This fits my intuition; since users know to expect curb ramps at intersections, if they arrive at an intersection and a curb ramp is not there, they know to place a NoCurbRamp label. However, if there was no sidewalk at all, then we did not add the missing curb ramp labels to the ground truth dataset, and this is not something that we covered during onboarding. I suspect that this, paired with users marking storm drains as missing curb ramps, were the main reasons for the low recall. Both could be addressed through proper training.</p></li>
 </ul>
+<h3 id="accuracy-by-label-type">Accuracy by label type</h3>
+<p>NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), we only consider the first turker to audit each route, and these are median accuracies.</p>
+<h4 id="summary-stats">Summary stats</h4>
+<p>Median accuracy by label type - street level:</p>
+<table style="width:100%;">
+<colgroup>
+<col width="13%"></col>
+<col width="11%"></col>
+<col width="11%"></col>
+<col width="12%"></col>
+<col width="9%"></col>
+<col width="9%"></col>
+<col width="10%"></col>
+<col width="7%"></col>
+<col width="7%"></col>
+<col width="7%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">label.type</th>
+<th align="left">recall.md</th>
+<th align="left">recall.mn</th>
+<th align="left">recall.std</th>
+<th align="left">prec.md</th>
+<th align="left">prec.mn</th>
+<th align="left">prec.std</th>
+<th align="left">f.md</th>
+<th align="left">f.mn</th>
+<th align="left">f.std</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">All</td>
+<td align="left">0.714</td>
+<td align="left">0.688</td>
+<td align="left">0.196</td>
+<td align="left">0.674</td>
+<td align="left">0.675</td>
+<td align="left">0.172</td>
+<td align="left">0.667</td>
+<td align="left">0.662</td>
+<td align="left">0.129</td>
+</tr>
+<tr class="even">
+<td align="left">Problem</td>
+<td align="left">0.714</td>
+<td align="left">0.639</td>
+<td align="left">0.323</td>
+<td align="left">0.714</td>
+<td align="left">0.693</td>
+<td align="left">0.284</td>
+<td align="left">0.667</td>
+<td align="left">0.649</td>
+<td align="left">0.226</td>
+</tr>
+<tr class="odd">
+<td align="left">CurbRamp</td>
+<td align="left">1.000</td>
+<td align="left">0.902</td>
+<td align="left">0.210</td>
+<td align="left">1.000</td>
+<td align="left">0.950</td>
+<td align="left">0.074</td>
+<td align="left">0.958</td>
+<td align="left">0.918</td>
+<td align="left">0.132</td>
+</tr>
+<tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">1.000</td>
+<td align="left">0.762</td>
+<td align="left">0.406</td>
+<td align="left">0.000</td>
+<td align="left">0.179</td>
+<td align="left">0.279</td>
+<td align="left">0.500</td>
+<td align="left">0.542</td>
+<td align="left">0.227</td>
+</tr>
+<tr class="odd">
+<td align="left">Obstacle</td>
+<td align="left">0.500</td>
+<td align="left">0.486</td>
+<td align="left">0.379</td>
+<td align="left">0.500</td>
+<td align="left">0.447</td>
+<td align="left">0.365</td>
+<td align="left">0.545</td>
+<td align="left">0.581</td>
+<td align="left">0.211</td>
+</tr>
+<tr class="even">
+<td align="left">SurfaceProb</td>
+<td align="left">0.333</td>
+<td align="left">0.344</td>
+<td align="left">0.329</td>
+<td align="left">0.817</td>
+<td align="left">0.715</td>
+<td align="left">0.339</td>
+<td align="left">0.500</td>
+<td align="left">0.555</td>
+<td align="left">0.214</td>
+</tr>
+<tr class="odd">
+<td align="left">NoSidewalk</td>
+<td align="left">0.600</td>
+<td align="left">0.557</td>
+<td align="left">0.420</td>
+<td align="left">0.958</td>
+<td align="left">0.716</td>
+<td align="left">0.355</td>
+<td align="left">0.667</td>
+<td align="left">0.751</td>
+<td align="left">0.201</td>
+</tr>
+</tbody>
+</table>
+<p>Median accuracy by label type - 5 meter level:</p>
+<table style="width:100%;">
+<colgroup>
+<col width="13%"></col>
+<col width="11%"></col>
+<col width="11%"></col>
+<col width="12%"></col>
+<col width="9%"></col>
+<col width="9%"></col>
+<col width="10%"></col>
+<col width="7%"></col>
+<col width="7%"></col>
+<col width="7%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">label.type</th>
+<th align="left">recall.md</th>
+<th align="left">recall.mn</th>
+<th align="left">recall.std</th>
+<th align="left">prec.md</th>
+<th align="left">prec.mn</th>
+<th align="left">prec.std</th>
+<th align="left">f.md</th>
+<th align="left">f.mn</th>
+<th align="left">f.std</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">All</td>
+<td align="left">0.543</td>
+<td align="left">0.502</td>
+<td align="left">0.224</td>
+<td align="left">0.472</td>
+<td align="left">0.465</td>
+<td align="left">0.181</td>
+<td align="left">0.468</td>
+<td align="left">0.455</td>
+<td align="left">0.165</td>
+</tr>
+<tr class="even">
+<td align="left">Problem</td>
+<td align="left">0.200</td>
+<td align="left">0.228</td>
+<td align="left">0.195</td>
+<td align="left">0.250</td>
+<td align="left">0.273</td>
+<td align="left">0.221</td>
+<td align="left">0.222</td>
+<td align="left">0.229</td>
+<td align="left">0.116</td>
+</tr>
+<tr class="odd">
+<td align="left">CurbRamp</td>
+<td align="left">0.789</td>
+<td align="left">0.716</td>
+<td align="left">0.254</td>
+<td align="left">0.667</td>
+<td align="left">0.638</td>
+<td align="left">0.199</td>
+<td align="left">0.689</td>
+<td align="left">0.642</td>
+<td align="left">0.188</td>
+</tr>
+<tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">0.633</td>
+<td align="left">0.548</td>
+<td align="left">0.450</td>
+<td align="left">0.000</td>
+<td align="left">0.108</td>
+<td align="left">0.223</td>
+<td align="left">0.400</td>
+<td align="left">0.401</td>
+<td align="left">0.244</td>
+</tr>
+<tr class="odd">
+<td align="left">Obstacle</td>
+<td align="left">0.143</td>
+<td align="left">0.210</td>
+<td align="left">0.256</td>
+<td align="left">0.087</td>
+<td align="left">0.174</td>
+<td align="left">0.220</td>
+<td align="left">0.267</td>
+<td align="left">0.279</td>
+<td align="left">0.134</td>
+</tr>
+<tr class="even">
+<td align="left">SurfaceProb</td>
+<td align="left">0.034</td>
+<td align="left">0.129</td>
+<td align="left">0.214</td>
+<td align="left">0.268</td>
+<td align="left">0.343</td>
+<td align="left">0.333</td>
+<td align="left">0.214</td>
+<td align="left">0.265</td>
+<td align="left">0.199</td>
+</tr>
+</tbody>
+</table>
+<h4 id="statistical-significance">Statistical significance</h4>
+<p>NOTE: This is at the street level (not 5 meter level).</p>
+<p>We created binomial mixed effects models to determine the relationship between label type and recall/precision. We had label type as the fixed effect and user id nested in route id as random effects. We modeled recall/precision as binomial and used a logistic link function.</p>
+<p>Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = 688.06, p &lt; 0.001). We also found label type to have a statistically significant association with precision (likelihood ratio = 1050.1, p &lt; 0.001).</p>
+<p>To test that the ordering of the label types are statistically significant (e.g., that NoCurbRamp recall is significantly lower than CurbRamp recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall, then precision).</p>
+<p>NOTE: <code>*</code> means less than 0.05, <code>**</code> means less than 0.01, and <code>***</code> means less than 0.001</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">label.type</th>
+<th align="left">test</th>
+<th align="left">p.value</th>
+<th align="left">z.value</th>
+<th align="left">recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">CurbRamp</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">0.902</td>
+</tr>
+<tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">&lt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">3.758</td>
+<td align="left">0.762</td>
+</tr>
+<tr class="odd">
+<td align="left">Obstacle</td>
+<td align="left">&lt; NoCurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">5.233</td>
+<td align="left">0.486</td>
+</tr>
+<tr class="even">
+<td align="left">SurfaceProb</td>
+<td align="left">&lt; Obstacle</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">5.234</td>
+<td align="left">0.344</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">label.type</th>
+<th align="left">test</th>
+<th align="left">p.value</th>
+<th align="left">z.value</th>
+<th align="left">precision</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">CurbRamp</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">0.950</td>
+</tr>
+<tr class="even">
+<td align="left">SurfaceProb</td>
+<td align="left">&lt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">11.397</td>
+<td align="left">0.715</td>
+</tr>
+<tr class="odd">
+<td align="left">Obstacle</td>
+<td align="left">&lt; SurfaceProb</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">6.037</td>
+<td align="left">0.447</td>
+</tr>
+<tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">&lt; Obstacle</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">7.854</td>
+<td align="left">0.179</td>
+</tr>
+</tbody>
+</table>
 <h3 id="visual-search-time-time-to-label-by-type">Visual search time: Time to label by type</h3>
 <p>NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.</p>
 <p>NOTE: We believe that a user's &quot;typical&quot; visual search time is more accurately represented by their median visual search time than mean due to the long right tail of the distribution of search times.</p>
@@ -1376,7 +1464,6 @@ April 17, 2018</p>
 <th align="left">p.value</th>
 <th align="left">z.value</th>
 <th align="left">seconds.to.label</th>
-<th align="left">log.seconds.to.label</th>
 </tr>
 </thead>
 <tbody>
@@ -1385,32 +1472,28 @@ April 17, 2018</p>
 <td align="left">-</td>
 <td align="left">-</td>
 <td align="left">-</td>
-<td align="left">6.894</td>
-<td align="left">1.931</td>
+<td align="left">8.139</td>
 </tr>
 <tr class="even">
 <td align="left">Obstacle</td>
 <td align="left">&gt; CurbRamp</td>
 <td align="left">&lt; 0.001 ***</td>
 <td align="left">3.862</td>
-<td align="left">8.214</td>
-<td align="left">2.106</td>
+<td align="left">10.102</td>
 </tr>
 <tr class="odd">
 <td align="left">NoCurbRamp</td>
 <td align="left">&gt; Obstacle</td>
 <td align="left">0.007 **</td>
 <td align="left">2.935</td>
-<td align="left">9.464</td>
-<td align="left">2.247</td>
+<td align="left">12.784</td>
 </tr>
 <tr class="even">
 <td align="left">SurfaceProb</td>
 <td align="left">&gt; NoCurbRamp</td>
 <td align="left">0.048 *</td>
 <td align="left">1.981</td>
-<td align="left">10.917</td>
-<td align="left">2.390</td>
+<td align="left">13.766</td>
 </tr>
 </tbody>
 </table>
