@@ -561,6 +561,8 @@ NOTE: For regsitered and anon user routes below, it is the percentage of *routes
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution.density-1.png)
 
+Since there are many residential routes in each group, the number of residential routes is of interest. Of the 43 low-moderate density routes, 41 were residential (95.35%). And of the 23 medium-high density routes, 13 were residential (56.52%).
+
 Below, we look at the distribution of the label type densities in the ground truth, by zone type. The types of density appear to have similar distributions of label types.
 
 ![](stats_for_paper_files/figure-markdown_github/gt.label.dist.zone.plot.density-1.png)

@@ -2219,20 +2219,33 @@ ggplot(data = zone.distro.by.volunteer.type,
   my.theme.discrete.x +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+
+# Setup needed for paragraph below.
+n.residential.routes.by.density <-
+  conditions.w.density.zone %>%
+  inner_join(conditions.w.semantic.zone, by = 'condition.id', suffix = c('.density', '.semantic')) %>%
+  filter(zone.type.semantic %in% c('Residential House', 'Residential Apt')) %>%
+  count(zone.type.density)
+residential.route.count.lookup.density <- setNames(n.residential.routes.by.density$n,
+                                                   n.residential.routes.by.density$zone.type.density)
+n.routes.by.zone.type.density <-
+  conditions.w.density.zone %>%
+  group_by(zone.type) %>%
+  dplyr::summarise(N = n())
+route.count.zone.lookup.density <- setNames(n.routes.by.zone.type.density$N,
+                                            n.routes.by.zone.type.density$zone.type)
+percentage.residential.lookup <-
+  setNames(100 * n.residential.routes.by.density$n / n.routes.by.zone.type.density$N,
+           n.routes.by.zone.type.density$zone.type)
 ```
+
+Since there are many residential routes in each group, the number of residential routes is of interest. Of the `r unname(route.count.zone.lookup.density['Low-Moderate Density'])` low-moderate density routes, `r unname(residential.route.count.lookup.density['Low-Moderate Density'])` were residential (`r format(unname(percentage.residential.lookup['Low-Moderate Density']), digits = 4)`%). And of the `r unname(route.count.zone.lookup.density['Medium-High Density'])` medium-high density routes, `r unname(residential.route.count.lookup.density['Medium-High Density'])` were residential (`r format(unname(percentage.residential.lookup['Medium-High Density']), digits = 4)`%).
 
 
 Below, we look at the distribution of the label type densities in the ground truth, by zone type. The types of density appear to have similar distributions of label types.
 
 ```{r gt.label.dist.zone.plot.density, fig.height=4, fig.width=6, warning=FALSE, message=FALSE, echo=FALSE}
 gt.count.density.zone <- get.gt.count.distro(conditions.w.density.zone, recode.density)
-
-n.routes.by.zone.type.density <-
-  conditions.w.density.zone %>%
-  group_by(zone.type) %>%
-  dplyr::summarise(N = n())
-route.count.zone.lookup.density <- setNames(n.routes.by.zone.type.density$N,
-                                             n.routes.by.zone.type.density$zone.type)
 
 total.gt.by.zone.density <-
   gt.count.density.zone %>%
