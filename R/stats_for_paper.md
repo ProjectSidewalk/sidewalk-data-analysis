@@ -594,53 +594,36 @@ There does not appear to be a significant difference in accuracy between the den
 
 ### User behavior: Does auditing speed, etc influence accuracy
 
-Variables being investigated: labeling frequency, auditing speed, recall, and precision.
+Variables being investigated: labeling frequency, auditing speed, and visual search time association with recall and precision. I'm also taking a look at both the All and Problem (vs. NoProblem) label types; we had been planning to only look at the All type, but it was easy enough for me to add both, and we can see if there is anything interesting there.
 
 NOTE: In this section, the data are binary (not ordinal), at the street level granularity (not 5 meter level) we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 First, let's take a look at the relationships between the variables.
 
-![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.fits-1.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.tests.fits-2.png)
+![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.graphs-1.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.graphs-2.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.graphs-3.png)
 
-The only variables that seem to have a relationship are recall and labeling frequency, so let's try doing a correlation test between them.
+From these graphs, the potential associations I was seeing (before running the tests) were a possible positive association between labeling frequency and recall (both Problem and All types) and a possible negative association between visual search time and recall (both Problem and All types). In fact, these are the four cases where we find statistically significant results.
 
-Ideally, we would like to do a correlation test based on the Pearson's correlation coefficient (denoted 'r'). However, this comes with quite a few assumptions. Assumptions include normality of both variables, a linear relationship between the variables, and homoscedasticity of the residuals. One of the most important assumptions is the absence of outliers, as Pearson's r is very sensitive to outliers. You can see in the graph above that there are some major outliers in our data, so we aren't going to use the Pearson's r correlation coefficient (I am adding some small graphs that look at the other assumptions below the results, if you're curious).
+To test for the associations between the user behaviors and accuracy, we created 4 binomial mixed effect models (one for accuracy type, precision and recall; and label type, All and Problem). We had the 3 user behaviors as individual fixed effects (labeling frequency, audit speed, and visual search time), which we scaled and centered so that estimates and standard errors between the predictors is easier. We used user id nested in route id as the random effects. We modeled recall and precision as binomial and used the standard logistic link function. We performed likelihood ratio tests (LRTs) to determine the significance of the predictors.
 
-Since we are not using the Pearson correlation coefficient, we compute a non-parametric rank correlation. We choose Kendall's tau-b coefficient over Spearman's rho coefficient because Kendall's tau-b makes adjustments for tied ranks, and there are many ties in our accuracy data (e.g., we have many users with recall = 1; so the rank is tied for all of those). Note that there are variants on Spearman's rho that account for ties, but I believe it is more common to use Kendall's tau-b.
+Below is a table showing the summaries of the models and results of the LRTs. The estimate and standard error columns come from the models (along with the association column, which denotes direction of relationship), and the p value and LRT stat come from the likelihood ratio tests.
 
-Below is a table with the tau correlation coefficient (on a scale from -1 to 1, where further from 0 means larger correlation) and p-value, where the null hypothesis is that the correlation is 0. I also added the tests for the other combinations of variables for the sake of completeness. I also added a test of the relationship between labeling frequency and auditing speed, which was (not surprisingly) statistically significant.
+| accuracy.type | label.type | param           | association | estimate | std.err | p.value           | LRT    |
+|:--------------|:-----------|:----------------|:------------|:---------|:--------|:------------------|:-------|
+| recall        | All        | label.freq      | +           | 0.302    | 0.094   | 0.002 \*\*        | 9.938  |
+| recall        | All        | audit.speed     | NA          | 0.009    | 0.088   | 0.919             | 0.010  |
+| recall        | All        | viz.search.time | -           | -0.369   | 0.114   | &lt; 0.001 \*\*\* | 11.149 |
+| recall        | Problem    | label.freq      | +           | 0.509    | 0.178   | 0.004 \*\*        | 8.390  |
+| recall        | Problem    | audit.speed     | NA          | 0.067    | 0.170   | 0.692             | 0.157  |
+| recall        | Problem    | viz.search.time | -           | -0.382   | 0.154   | 0.011 \*          | 6.457  |
+| precision     | All        | label.freq      | NA          | -0.121   | 0.075   | 0.108             | 2.586  |
+| precision     | All        | audit.speed     | NA          | -0.009   | 0.081   | 0.912             | 0.012  |
+| precision     | All        | viz.search.time | NA          | -0.055   | 0.111   | 0.622             | 0.243  |
+| precision     | Problem    | label.freq      | NA          | 0.148    | 0.157   | 0.350             | 0.874  |
+| precision     | Problem    | audit.speed     | NA          | 0.253    | 0.171   | 0.141             | 2.166  |
+| precision     | Problem    | viz.search.time | NA          | 0.315    | 0.174   | 0.068             | 3.323  |
 
-| first.var | second.var | r      | p.value.r | tau    | p.value.tau |
-|:----------|:-----------|:-------|:----------|:-------|:------------|
-| frequency | recall     | 0.354  | 0.00003   | 0.278  | 0.00000     |
-| speed     | recall     | -0.069 | 0.43219   | -0.025 | 0.67644     |
-| frequency | precision  | -0.086 | 0.32958   | -0.046 | 0.44151     |
-| speed     | precision  | 0.002  | 0.97802   | 0.003  | 0.96076     |
-| frequency | speed      | -0.447 | 0.00000   | -0.372 | 0.00000     |
-
-We found the correlation between labeling frequency and recall (r = 0.278) to be statistically significant (p = 0). We also found the correlation between labeling frequency and auditing speed (r = -0.372) to be statistically significant (p = 0). There was not a significant correlation between either of those variables and precision, or between auditing speed and recall.
-
-This matches our intuition. Placing more labels is associated with higher recall (makes sense), and placing more labels is associated with slower auditing speeds (also makes sense).<br>
-
-*For those interested*, here is a look at the normality of the relevant variables in the tests above. As mentioned above, we don't use the Pearson's r because these variables have outliers. They also (sort of) don't meet the normality assumption. It is sort of a toss up for these variables in terms of normality, honestly. Below are histograms for them, and qq plots (which compares quantiles in the sample to a theoretical normal distribution, so values that trail off the line on the ends indicate non-normality).
-
-![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.normality-1.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.normality-2.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.normality-3.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.normality-4.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.normality-5.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis.correlation.normality-6.png)
-
-*Old graphs/text below for reference:*
-
-Below we investigate how user behavior is associated with performance in our turk study. The graphs below are more exploratory. I am not sure that we can be guaranteed any statistical significance by simply looking at the graphs below. We can always formulate hypothesis tests once we narrow down what we want to look at.
-
-For the second graph, we are only looking at users with a speed of less than 100 meters per minute, because only 5 users (3.8%) had speeds higher than that. The max speed was 181 meters per minute.
-
-![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis-1.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.analysis-2.png)
-
-*Takeaways*:
-
--   Labeling frequency seems to have a positive relationship with recall, which is what we would have expected.
-
--   Labeling frequency seems to have a more positive relationship with the Problem (vs no problem) type than for the all label types combined (at least for the highest labeling frequencies, greater than 15 labels per 100m). I would think that, for the highest labeling frequencies, this comes from users who are labeling driveways as curb ramps. This would hurt their curb ramp precision, but not Problem type precision.
-
--   Auditing speed did not seem to have a big impact on performance by itself.
+The positive association between labeling frequency and recall is expected, as someone who placed more labels probably correctly found more attributes. The negative association between visual search time and recall is less intuitive, and I don't think we have a solid reason for why this might be the case. It may be that users that take longer to place a label are more distracted, so they are more likely to miss things. Or longer visual search time may mean that they are having a harder time panning with the tool (possibly those using a laptop track pad instead of a mouse), and so they may not want to pan as far.
 
 ### User group: Reg vs anon vs turk1 vs turk3 vs turk5
 

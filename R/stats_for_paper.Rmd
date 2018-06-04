@@ -2036,9 +2036,9 @@ get.zone.distro <- function(data, recode.func) {
                                    labels = c('Reg User Routes', 'Anon User Routes'))) %>%
     group_by(volunteer.type, zone.type) %>%
     dplyr::summarise(n.routes = n()) %>%
+    ungroup() %>%
     complete(zone.type, fill = list(n.routes = 0)) %>%
     mutate(percent.of.routes = 100 * n.routes / sum(n.routes)) %>%
-    ungroup() %>%
     select(volunteer.type, zone.type, percent.of.routes) %>%
     rbind(all.dc.zoning.data %>% mutate(zone.type = recode.func(zone.type))) %>%
     group_by(volunteer.type, zone.type) %>%
@@ -2107,9 +2107,9 @@ NOTE: For regsitered and anon user routes below, it is the percentage of _routes
 
 ```{r turk.zone.type.distribution.semantic, echo=FALSE, fig.width=4, fig.height=3}
 conditions.w.semantic.zone <- get.zone.for.conditions(data.with.raw.accuracy, recode.semantic)
-zone.distro.by.volunteer.type <- get.zone.distro(conditions.w.semantic.zone, recode.semantic)
+semantic.zone.distro.by.user.group <- get.zone.distro(conditions.w.semantic.zone, recode.semantic)
 
-ggplot(data = zone.distro.by.volunteer.type,
+ggplot(data = semantic.zone.distro.by.user.group,
        aes(x = zone.type, y = percent.of.routes, fill = volunteer.type)) +
   geom_col(position = 'dodge') +
   my.theme.discrete.x +
@@ -2211,9 +2211,9 @@ NOTE: For regsitered and anon user routes below, it is the percentage of _routes
 
 ```{r turk.zone.type.distribution.density, echo=FALSE, fig.width=4, fig.height=3}
 conditions.w.density.zone <- get.zone.for.conditions(data.with.raw.accuracy, recode.density)
-zone.distro.by.volunteer.type <- get.zone.distro(conditions.w.density.zone, recode.density)
+density.zone.distro.by.user.group <- get.zone.distro(conditions.w.density.zone, recode.density)
 
-ggplot(data = zone.distro.by.volunteer.type,
+ggplot(data = density.zone.distro.by.user.group,
        aes(x = zone.type, y = percent.of.routes, fill = volunteer.type)) +
   geom_col(position = 'dodge') +
   my.theme.discrete.x +
@@ -2328,7 +2328,7 @@ ggplot(data = zone.type.analysis.data.density %>% filter(label.type == 'Problem'
 
 ### User behavior: Does auditing speed, etc influence accuracy
 
-Variables being investigated: labeling frequency, auditing speed, recall, and precision.
+Variables being investigated: labeling frequency, auditing speed, and visual search time association with recall and precision. I'm also taking a look at both the All and Problem (vs. NoProblem) label types; we had been planning to only look at the All type, but it was easy enough for me to add both, and we can see if there is anything interesting there.
 
 NOTE: In this section, the data are binary (not ordinal), at the street level granularity (not 5 meter level) we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
@@ -2344,191 +2344,214 @@ turk.behavior.data <-
   dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
   ungroup() %>%
   left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
-  mutate(n.missions = if_else(is.anon.route, 2, 3),
-         distance.feet = if_else(is.anon.route, 2000, 4000),
+  mutate(distance.feet = if_else(is.anon.route, 2000, 4000),
          distance.meters = distance.feet / 3.28084,
          labels.per.100m = 100 * n.labels / distance.meters,
-         meters.per.min = distance.meters / minutes_audited,
-         km.per.hr = 60 * meters.per.min / 1000,
-         minutes.per.1k.ft = 1000 * minutes_audited / distance.feet,
-         hours.audited = minutes_audited / 60) %>%
-  gather(key = accuracy.type, value = accuracy.value, recall, precision, f.measure) %>%
-  mutate(accuracy.type = factor(accuracy.type, levels = c('recall', 'precision', 'f.measure'))) %>%
+         meters.per.min = distance.meters / minutes_audited) %>%
+  gather(key = accuracy.type, value = accuracy.value, recall, precision) %>%
+  mutate(accuracy.type = factor(accuracy.type, levels = c('recall', 'precision'))) %>%
   filter(label.type %in% c('All', 'Problem'))
 
-meters.per.min.threshold <- 100
-test1 <-
-  turk.behavior.data %>%
-    filter(accuracy.type == 'recall', label.type == 'All') %>%
-    dplyr::summarise(n.above.threshold = sum(meters.per.min >= meters.per.min.threshold),
-                     n = n())
-n.above.thresh <- as.numeric(test1$n.above.threshold)
-n.total <- as.numeric(test1$n)
-percent.above.thresh <- format(100 * n.above.thresh / n.total, digits = 2)
-max.speed <- format(max(turk.behavior.data$meters.per.min), digits = 2)
+
+individual.search.times <-
+  labeling.times.turk.study %>%
+  mutate(label.type = factor(extract_label_type(note))) %>%
+  mutate(label.type = fct_recode(label.type, 'SurfaceProb' = 'SurfaceProblem')) %>%
+  filter(label.type %in% LABEL_TYPES_TO_ANALYZE)
+avg.search.times.prob <-
+  individual.search.times %>%
+  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+  group_by(user.id) %>%
+  summarize(seconds.to.label = median(seconds.to.label)) %>%
+  mutate(label.type = 'Problem')
+avg.search.times.all <-
+  individual.search.times %>%
+  group_by(user.id) %>%
+  summarize(seconds.to.label = median(seconds.to.label)) %>%
+  mutate(label.type = 'All')
+
+# Combines user behavior and accuracy data from various sources. So we start by filtering for the
+# accuracy data we are using (single user, binary, etc.), then we do joins to get label counts and
+# auditing times, and visual search times.
+behavior.test.data.unscaled <-
+  data.with.raw.accuracy %>%
+  filter(worker.type %in% c('anon', 'reg', 'turk1'),
+         binary == TRUE,
+         included.severity == 'all',
+         granularity == 'street',
+         label.type %in% c('All', 'Problem')) %>%
+  inner_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
+  group_by_at(vars(condition.id:raw.accuracy)) %>%
+  dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
+  ungroup() %>%
+  inner_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
+  mutate(distance.feet = if_else(is.anon.route, 2000, 4000),  # intermediate value
+         distance.meters = distance.feet / 3.28084,           # intermediate value
+         labels.per.100m = 100 * n.labels / distance.meters,
+         meters.per.min = distance.meters / minutes_audited,
+         user.id = worker1,
+         label.type = as.character(label.type)) %>%
+  inner_join(rbind(avg.search.times.prob, avg.search.times.all),
+             by = c('user.id', 'label.type')) %>%
+  gather(key = accuracy.type, value = accuracy.value, recall, precision, factor_key = TRUE) %>%
+  mutate(user.id = factor(worker1),
+         route.id = factor(condition.id))
+
+# Scale the variables used in the tests.
+behavior.test.data <-
+  behavior.test.data.unscaled %>%
+  mutate(viz.search.time = scale(seconds.to.label),
+         label.freq = scale(labels.per.100m),
+         audit.speed = scale(meters.per.min))
+
+# Subset the data for each individual model
+behavior.test.data.recall.prob <-
+  behavior.test.data %>%
+  filter(label.type == 'Problem',
+         accuracy.type == 'recall') %>%
+  rename(recall = accuracy.value) %>%
+  select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.neg, recall) %>%
+  na.omit() %>%
+  droplevels()
+behavior.test.data.recall.all <-
+  behavior.test.data %>%
+  filter(label.type == 'All',
+         accuracy.type == 'recall') %>%
+  rename(recall = accuracy.value) %>%
+  select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.neg, recall) %>%
+  na.omit() %>%
+  droplevels()
+behavior.test.data.prec.prob <-
+  behavior.test.data %>%
+  filter(label.type == 'Problem',
+         accuracy.type == 'precision') %>%
+  rename(precision = accuracy.value) %>%
+  select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.pos, precision) %>%
+  na.omit() %>%
+  droplevels()
+behavior.test.data.prec.all <-
+  behavior.test.data %>%
+  filter(label.type == 'All',
+         accuracy.type == 'precision') %>%
+  rename(precision = accuracy.value) %>%
+  select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.pos, precision) %>%
+  na.omit() %>%
+  droplevels()
 ```
 
 First, let's take a look at the relationships between the variables.
 
-```{r turk.user.behavior.analysis.correlation.tests.fits, echo=FALSE, fig.width=3, fig.height=4.5}
-# Subset the data appropriately.
-turk.behavior.corr.test.data <-
-  turk.behavior.data %>%
-  filter(label.type == 'All', accuracy.type != 'f.measure')
-turk.behavior.rec <- turk.behavior.corr.test.data %>% filter(accuracy.type == 'recall')
-turk.behavior.prec <- turk.behavior.corr.test.data %>% filter(accuracy.type == 'precision')
-
+```{r turk.user.behavior.graphs, echo=FALSE, fig.width=4.5, fig.height=4.5}
 # Plot relationships between variables.
-ggplot(turk.behavior.corr.test.data, aes(x = labels.per.100m, y = accuracy.value)) +
-  geom_point() +
-  stat_smooth(method = 'lm') +
-  theme_bw() +
-  facet_grid(accuracy.type ~ .)
-ggplot(turk.behavior.corr.test.data, aes(x = meters.per.min, y = accuracy.value)) +
-  geom_point() +
-  stat_smooth(method = 'lm') +
-  theme_bw() +
-  facet_grid(accuracy.type ~ .)
-```
-
-The only variables that seem to have a relationship are recall and labeling frequency, so let's try doing a correlation test between them.
-
-Ideally, we would like to do a correlation test based on the Pearson's correlation coefficient (denoted 'r'). However, this comes with quite a few assumptions. Assumptions include normality of both variables, a linear relationship between the variables, and homoscedasticity of the residuals. One of the most important assumptions is the absence of outliers, as Pearson's r is very sensitive to outliers. You can see in the graph above that there are some major outliers in our data, so we aren't going to use the Pearson's r correlation coefficient (I am adding some small graphs that look at the other assumptions below the results, if you're curious).
-
-Since we are not using the Pearson correlation coefficient, we compute a non-parametric rank correlation. We choose Kendall's tau-b coefficient over Spearman's rho coefficient because Kendall's tau-b makes adjustments for tied ranks, and there are many ties in our accuracy data (e.g., we have many users with recall = 1; so the rank is tied for all of those). Note that there are variants on Spearman's rho that account for ties, but I believe it is more common to use Kendall's tau-b.
-
-Below is a table with the tau correlation coefficient (on a scale from -1 to 1, where further from 0 means larger correlation) and p-value, where the null hypothesis is that the correlation is 0. I also added the tests for the other combinations of variables for the sake of completeness. I also added a test of the relationship between labeling frequency and auditing speed, which was (not surprisingly) statistically significant.
-
-```{r turk.user.behavior.analysis.correlation.tests, echo=FALSE, fig.width=2.5, fig.height=5}
-# Kendall rank correlation coefficients.
-freq.rec.k <- Kendall(turk.behavior.rec$labels.per.100m, turk.behavior.rec$accuracy.value)
-speed.rec.k <- Kendall(turk.behavior.rec$meters.per.min, turk.behavior.rec$accuracy.value)
-freq.prec.k <- Kendall(turk.behavior.prec$labels.per.100m, turk.behavior.prec$accuracy.value)
-speed.prec.k <- Kendall(turk.behavior.prec$meters.per.min, turk.behavior.prec$accuracy.value)
-freq.speed.k <- Kendall(turk.behavior.rec$labels.per.100m, turk.behavior.rec$meters.per.min)
-
-# Note: cor.test defaults to Pearson coefficient.
-freq.rec.p <- cor.test(turk.behavior.rec$labels.per.100m, turk.behavior.rec$accuracy.value)
-speed.rec.p <- cor.test(turk.behavior.rec$meters.per.min, turk.behavior.rec$accuracy.value)
-freq.prec.p <- cor.test(turk.behavior.prec$labels.per.100m, turk.behavior.prec$accuracy.value)
-speed.prec.p <- cor.test(turk.behavior.prec$meters.per.min, turk.behavior.prec$accuracy.value)
-freq.speed.p <- cor.test(turk.behavior.rec$labels.per.100m, turk.behavior.rec$meters.per.min)
-
-kendall.list <- list(freq.rec.k, speed.rec.k, freq.prec.k, speed.prec.k, freq.speed.k)
-pearson.list <- list(freq.rec.p, speed.rec.p, freq.prec.p, speed.prec.p, freq.speed.p)
-
-first.var <- c('frequency', 'speed', 'frequency', 'speed', 'frequency')
-second.var <- c('recall', 'recall', 'precision', 'precision', 'speed')
-r <- unlist(lapply(pearson.list, function(x) x$estimate))
-p.val.r <- unlist(lapply(pearson.list, function(x) x$p.value))
-tau <- unlist(lapply(kendall.list, function(x) x$tau))
-p.val.tau <- unlist(lapply(kendall.list, function(x) x$sl[1]))
-
-kable(
-  data.frame(first.var,
-             second.var,
-             r = r,
-             p.value.r = format(round(p.val.r, digits = 5), scientific = FALSE, digits = 5),
-             tau = tau,
-             p.value.tau = format(round(p.val.tau, digits = 5), scientific = FALSE, digits = 5)),
-  align = 'l',
-  digits = 3
-)
-```
-
-We found the correlation between labeling frequency and recall (r = `r format(freq.rec.k$tau, digits = 3)`) to be statistically significant (p = `r format(round(freq.rec.k$sl[1], digits = 5), scientific = FALSE, digits = 5)`). We also found the correlation between labeling frequency and auditing speed (r = `r format(freq.speed.k$tau, digits = 3)`) to be statistically significant (p = `r format(round(freq.speed.k$sl[1], digits = 5), scientific = FALSE, digits = 5)`). There was not a significant correlation between either of those variables and precision, or between auditing speed and recall.
-
-This matches our intuition. Placing more labels is associated with higher recall (makes sense), and placing more labels is associated with slower auditing speeds (also makes sense).<br>
-
-
-_For those interested_, here is a look at the normality of the relevant variables in the tests above. As mentioned above, we don't use the Pearson's r because these variables have outliers. They also (sort of) don't meet the normality assumption. It is sort of a toss up for these variables in terms of normality, honestly. Below are histograms for them, and qq plots (which compares quantiles in the sample to a theoretical normal distribution, so values that trail off the line on the ends indicate non-normality).
-
-```{r turk.user.behavior.analysis.correlation.normality, echo=FALSE, fig.width=2.5, fig.height=2.5}
-# Reference on checking normality: http://www.sthda.com/english/wiki/normality-test-in-r
-
-# Recall histogram.
-ggplot(data = turk.behavior.rec,
-       aes(x = accuracy.value)) +
-  geom_histogram(binwidth = 0.1, na.rm = TRUE) +
-  xlab('Recall') +
-  theme_bw()
-# Labeling frequency histogram.
-ggplot(data = turk.behavior.rec,
-       aes(x = labels.per.100m)) +
-  geom_histogram(binwidth = 1,na.rm = TRUE) +
-  theme_bw()
-# Auditing speed histogram.
-ggplot(data = turk.behavior.rec,
-       aes(x = meters.per.min)) +
-  geom_histogram(binwidth = 10,na.rm = TRUE) +
-  theme_bw()
-
-# Recall qq plot.
-ggplot(data = turk.behavior.rec,
-       aes(sample = accuracy.value)) +
-  stat_qq(na.rm = TRUE) +
-  geom_qq_line(na.rm = TRUE) +
-  xlab('Theoretical normal') +
-  ylab('Recall') +
-  theme_bw()
-# Labeling frequency qq plot.
-ggplot(data = turk.behavior.rec,
-       aes(sample = labels.per.100m)) +
-  stat_qq(na.rm = TRUE) +
-  geom_qq_line(na.rm = TRUE) +
-  xlab('Theoretical normal') +
-  ylab('Labels per 100m') +
-  theme_bw()
-# Auditing speed qq plot.
-ggplot(data = turk.behavior.rec,
-       aes(sample = meters.per.min)) +
-  stat_qq(na.rm = TRUE) +
-  geom_qq_line(na.rm = TRUE) +
-  xlab('Theoretical normal') +
-  ylab('Meters per minute') +
-  theme_bw()
-
-# Shapiro normality tests for labeling frequency and recall.
-normality.shapiro.recall <- shapiro.test(turk.behavior.rec %>% pull(accuracy.value))
-normality.shapiro.labeling.freq <- shapiro.test(turk.behavior.rec %>% pull(labels.per.100m))
-normality.shapiro.auditing.speed <- shapiro.test(turk.behavior.rec %>% pull(meters.per.min))
-```
-
-
-*Old graphs/text below for reference:*
-
-Below we investigate how user behavior is associated with performance in our turk study. The graphs below are more exploratory. I am not sure that we can be guaranteed any statistical significance by simply looking at the graphs below. We can always formulate hypothesis tests once we narrow down what we want to look at.
-
-For the second graph, we are only looking at users with a speed of less than `r meters.per.min.threshold` meters per minute, because only `r n.above.thresh` users (`r percent.above.thresh`%) had speeds higher than that. The max speed was `r max.speed` meters per minute.
-
-```{r turk.user.behavior.analysis, echo=FALSE, fig.width=4.5, fig.height=5}
-ggplot(data = turk.behavior.data, aes(x = labels.per.100m, y = accuracy.value)) +
+ggplot(behavior.test.data.unscaled, aes(x = labels.per.100m, y = accuracy.value)) +
   geom_point(na.rm = TRUE) +
-  geom_smooth(method = 'lm', na.rm = TRUE, fullrange = TRUE) +
-  facet_grid(accuracy.type ~ label.type) +
-  scale_x_continuous(expand = c(0.01, 0)) +
-  scale_y_continuous(limits = c(-0.5, 1.5), breaks = ACCURACY_BREAKS, expand = c(0.025, 0)) +
+  stat_smooth(method = 'loess', na.rm = TRUE) +
+  theme_bw() +
   coord_cartesian(ylim = c(0, 1)) +
-  theme_bw()
-
-ggplot(data = turk.behavior.data %>% filter(meters.per.min < meters.per.min.threshold),
-       mapping = aes(x = meters.per.min, y = accuracy.value)) +
+  xlab('Labeling Frequency (# labels / 100 meters)') +
+  facet_grid(accuracy.type ~ label.type)
+ggplot(behavior.test.data.unscaled, aes(x = meters.per.min, y = accuracy.value)) +
   geom_point(na.rm = TRUE) +
-  geom_smooth(method = 'lm', na.rm = TRUE, fullrange = TRUE) +
-  facet_grid(accuracy.type ~ label.type) +
-  scale_x_continuous(expand = c(0.01, 0)) +
-  scale_y_continuous(limits = c(-0.5, 1.5), breaks = ACCURACY_BREAKS, expand = c(0.025, 0)) +
+  stat_smooth(method = 'loess', na.rm = TRUE) +
+  theme_bw() +
   coord_cartesian(ylim = c(0, 1)) +
-  theme_bw()
+  xlab('Auditing Speed (meters / minute)') +
+  facet_grid(accuracy.type ~ label.type)
+ggplot(behavior.test.data.unscaled, aes(x = seconds.to.label, y = accuracy.value)) +
+  geom_point(na.rm = TRUE) +
+  stat_smooth(method = 'loess', na.rm = TRUE) +
+  theme_bw() +
+  coord_cartesian(ylim = c(0, 1)) +
+  xlab('Visual Search Time (seconds to label)') +
+  facet_grid(accuracy.type ~ label.type)
 ```
 
-*Takeaways*:
+From these graphs, the potential associations I was seeing (before running the tests) were a possible positive association between labeling frequency and recall (both Problem and All types) and a possible negative association between visual search time and recall (both Problem and All types). In fact, these are the four cases where we find statistically significant results.
 
-* Labeling frequency seems to have a positive relationship with recall, which is what we would have expected.
+To test for the associations between the user behaviors and accuracy, we created 4 binomial mixed effect models (one for accuracy type, precision and recall; and label type, All and Problem). We had the 3 user behaviors as individual fixed effects (labeling frequency, audit speed, and visual search time), which we scaled and centered so that estimates and standard errors between the predictors is easier. We used user id nested in route id as the random effects. We modeled recall and precision as binomial and used the standard logistic link function. We performed likelihood ratio tests (LRTs) to determine the significance of the predictors.
 
-* Labeling frequency seems to have a more positive relationship with the Problem (vs no problem) type than for the all label types combined (at least for the highest labeling frequencies, greater than 15 labels per 100m). I would think that, for the highest labeling frequencies, this comes from users who are labeling driveways as curb ramps. This would hurt their curb ramp precision, but not Problem type precision.
+Below is a table showing the summaries of the models and results of the LRTs. The estimate and standard error columns come from the models (along with the association column, which denotes direction of relationship), and the p value and LRT stat come from the likelihood ratio tests.
 
-* Auditing speed did not seem to have a big impact on performance by itself.
+```{r turk.user.behavior.tests, echo=FALSE}
+# Create the different models, along with likelihood ratio tests and data frames with relevant
+# stats extracted from the model and LRT.
+# Found the following link helpful in looking for solutions to convergence errors:
+# https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html
+behavior.recall.prob.model <-
+  glmer(recall ~ label.freq + audit.speed + viz.search.time + (1 | condition.id / user.id),
+        data = behavior.test.data.recall.prob,
+        family = binomial(link = 'logit'),
+        weights = true.pos + false.neg,
+        control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)))
+lrt.behavior.recall.prob <- drop1(behavior.recall.prob.model, test = 'Chisq')
+coeff.recall.prob <-
+  data.frame(summary(behavior.recall.prob.model)$coefficients) %>%
+  mutate(param = dimnames(summary(behavior.recall.prob.model)$coefficients)[[1]],
+         label.type = 'Problem',
+         accuracy.type = 'recall',
+         LRT = lrt.behavior.recall.prob$LRT,
+         p = lrt.behavior.recall.prob$`Pr(Chi)`)
+
+behavior.recall.all.model <-
+  glmer(recall ~ label.freq + audit.speed + viz.search.time + (1 | condition.id / user.id),
+        data = behavior.test.data.recall.all,
+        family = binomial(link = 'logit'),
+        weights = true.pos + false.neg,
+        control = glmerControl(optimizer = "Nelder_Mead", optCtrl = list(maxfun = 100000)))
+lrt.behavior.recall.all <- drop1(behavior.recall.all.model, test = 'Chisq')
+coeff.recall.all <-
+  data.frame(summary(behavior.recall.all.model)$coefficients) %>%
+  mutate(param = dimnames(summary(behavior.recall.all.model)$coefficients)[[1]],
+         label.type = 'All',
+         accuracy.type = 'recall',
+         LRT = lrt.behavior.recall.all$LRT,
+         p = lrt.behavior.recall.all$`Pr(Chi)`)
+
+behavior.prec.prob.model <-
+  glmer(precision ~  label.freq +  audit.speed + viz.search.time + (1 | condition.id / user.id),
+        data = behavior.test.data.prec.prob,
+        family = binomial(link = 'logit'),
+        weights = true.pos + false.pos,
+        control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)))
+lrt.behavior.prec.prob <- drop1(behavior.prec.prob.model, test = 'Chisq')
+coeff.precision.prob <-
+  data.frame(summary(behavior.prec.prob.model)$coefficients) %>%
+  mutate(param = dimnames(summary(behavior.prec.prob.model)$coefficients)[[1]],
+         label.type = 'Problem',
+         accuracy.type = 'precision',
+         LRT = lrt.behavior.prec.prob$LRT,
+         p = lrt.behavior.prec.prob$`Pr(Chi)`)
+
+behavior.prec.all.model <-
+  glmer(precision ~  label.freq +  audit.speed + viz.search.time + (1 | condition.id / user.id),
+        data = behavior.test.data.prec.all,
+        family = binomial(link = 'logit'),
+        weights = true.pos + false.pos,
+        control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)))
+lrt.behavior.prec.all <- drop1(behavior.prec.all.model, test = 'Chisq')
+coeff.precision.all <-
+  data.frame(summary(behavior.prec.all.model)$coefficients) %>%
+  mutate(param = dimnames(summary(behavior.prec.all.model)$coefficients)[[1]],
+         label.type = 'All',
+         accuracy.type = 'precision',
+         LRT = lrt.behavior.prec.all$LRT,
+         p = lrt.behavior.prec.all$`Pr(Chi)`)
+
+# Create nice looking table with important stats from each of the models/tests above.
+all.coeffs <-
+  rbind(coeff.recall.all, coeff.recall.prob, coeff.precision.all, coeff.precision.prob) %>%
+  filter(param != '(Intercept)') %>%
+  mutate(association = case_when(Estimate > 0 & p < 0.05 ~ '+',
+                                 Estimate < 0 & p < 0.05 ~ '-',
+                                 TRUE                    ~ 'NA'),
+         p.value = p.num.to.p.str.with.sig.code(p)) %>%
+  dplyr::rename(estimate = Estimate, std.err = Std..Error) %>%
+  select(accuracy.type, label.type, param, association, estimate, std.err, p.value, LRT)
+
+kable(all.coeffs, digits = 3, align = 'l')
+```
+
+The positive association between labeling frequency and recall is expected, as someone who placed more labels probably correctly found more attributes. The negative association between visual search time and recall is less intuitive, and I don't think we have a solid reason for why this might be the case. It may be that users that take longer to place a label are more distracted, so they are more likely to miss things. Or longer visual search time may mean that they are having a harder time panning with the tool (possibly those using a laptop track pad instead of a mouse), and so they may not want to pan as far.
 
 
 ### User group: Reg vs anon vs turk1 vs turk3 vs turk5
