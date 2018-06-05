@@ -50,6 +50,7 @@ TOTAL_STREET_DIST_METERS <- 1730179
 TOTAL_STREET_DIST_MILES <- TOTAL_STREET_DIST_METERS / 1609.34
 
 LABEL_TYPES_TO_ANALYZE = c('All', 'Problem', 'CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')
+NON_AGGREGATE_TYPES = c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')
 
 # Variables commonly used in plotting
 my.theme.discrete.x <- theme_bw() + theme(panel.grid.major.x = element_blank())
@@ -1202,7 +1203,23 @@ turk.study.summary.stats.with.labels <-
 
 Below is a table showing number of ground truth labels by user group and by label type.
 
-```{r turk.showing.stats.1, echo=FALSE}
+```{r turk.showing.stats.gt, echo=FALSE}
+# GT label counts by label type and route.
+gt.count.by.route.and.label.type <-
+  data.with.raw.accuracy %>%
+  filter(worker.type %in% c('anon', 'reg'),
+         binary == FALSE,
+         included.severity == 'all',
+         granularity == 'street') %>%
+  group_by(condition.id, label.type) %>%
+  summarize(gt.labels = sum(true.pos, false.neg)) %>%
+  ungroup()
+
+gt.count.by.label.type <-
+  gt.count.by.route.and.label.type %>%
+  group_by(label.type) %>%
+  summarise_at(vars(gt.labels), sum)
+
 gt.count.data <-
   data.with.raw.accuracy %>%
   filter(worker.type %in% c('anon', 'reg'),
@@ -1412,7 +1429,7 @@ NOTE: In this section, the data is binary (not ordinal), we are only considering
 
 Below is a table showing label type accuracy at the two granularity levels, followed by a graph that gives a visual representation of the mean and standard error.
 
-```{r turk.granularity.analysis, echo=FALSE, fig.width=7, fig.height=4}
+```{r turk.granularity.analysis, echo=FALSE, fig.width=7.5, fig.height=4.5}
 granularity.analysis.data <-
   data.with.raw.accuracy %>%
   filter(included.severity == 'all',
@@ -1420,17 +1437,6 @@ granularity.analysis.data <-
          n.workers == 1,
          label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
-
-# Make the set of labels that give the number of observations for each sub-graph.
-granularity.analysis.labels <-
-  granularity.analysis.data %>%
-  group_by(label.type, accuracy.type, granularity) %>%
-  dplyr::summarize(n = sum(!is.na(accuracy.value))) %>%
-  dplyr::summarize(n_label = paste0('n = (',
-                                    first(n[granularity == '5_meter']), ',',
-                                    first(n[granularity == 'street']),
-                                    ')')) %>%
-  ungroup()
 
 granularity.analysis.summary <-
   granularity.analysis.data %>%
@@ -1454,10 +1460,21 @@ kable(
   align = 'l'
 )
 
+# Make the set of labels that give the number of observations for each sub-graph.
+granularity.analysis.labels <-
+  granularity.analysis.data %>%
+  filter(granularity == 'street', accuracy.type == 'recall') %>%
+  group_by(label.type) %>%
+  dplyr::summarise(n.users = sum(!is.na(accuracy.value))) %>%
+  inner_join(gt.count.by.label.type, by = 'label.type') %>%
+  mutate(label = paste0(label.type, '\nN=', n.users, ';L=', gt.labels)) %>%
+  pull(label)
+
 ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.value)) +
   geom_col(aes(group = granularity, fill = granularity), position = position_dodge()) +
   geom_errorbar(aes(ymin = error.bar.min, ymax = error.bar.max, group = granularity),
                 width = 0.25, position = position_dodge(0.9)) +
+  scale_x_discrete(labels = granularity.analysis.labels) +
   scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.0), expand = c(0.01, 0)) +
   facet_grid(accuracy.type ~ .) +
   ggtitle('Street vs. 5 Meter level Granularity') +
@@ -1757,7 +1774,7 @@ We created binomial mixed effects models to determine the relationship between l
 type.test.data <-
   turk.showing.stats.by.label.type %>%
   filter(granularity == 'street',
-         label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+         label.type %in% NON_AGGREGATE_TYPES) %>%
   mutate(label.type = factor(label.type),
          user.id = factor(worker1),
          condition.id = factor(condition.id))
@@ -1891,7 +1908,7 @@ _The Assumptions_: Our two assumptions are that the residuals of the fit are nor
 
 pre.test.data <- turk.showing.stats.by.label.type %>%
   filter(granularity == 'street') %>%
-  filter(label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+  filter(label.type %in% NON_AGGREGATE_TYPES) %>%
   mutate(label.type = factor(label.type), # drop unused levels
          condition.id = factor(condition.id)) %>%
   select(condition.id, worker1, recall, precision, label.type) %>%
@@ -2065,25 +2082,13 @@ get.zone.distro <- function(data, recode.func) {
     ungroup()
 }
 
-# GT label counts by label type and route.
-gt.count.by.condition.and.label.type <-
-  data.with.raw.accuracy %>%
-  filter(worker.type %in% c('anon', 'reg'),
-         binary == FALSE,
-         included.severity == 'all',
-         granularity == 'street',
-         label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
-  group_by(condition.id, label.type) %>%
-  summarize(gt.labels = sum(true.pos, false.neg)) %>%
-  ungroup()
-
 get.gt.count.distro <- function(data, recode.func) {
   data %>%
     mutate(meters = if_else(is.anon.route, 609.6, 1219.2)) %>%
-    inner_join(gt.count.by.condition.and.label.type, by = 'condition.id') %>%
+    inner_join(gt.count.by.route.and.label.type %>% filter(label.type %in% NON_AGGREGATE_TYPES),
+               by = 'condition.id') %>%
     group_by(label.type, zone.type) %>%
-    dplyr::summarise(gt.labels = sum(gt.labels),
-                     meters = sum(meters)) %>%
+    summarise_at(vars(gt.labels, meters), sum) %>%
     ungroup() %>%
     mutate(gt.labels.per.100m = 100 * gt.labels / meters) %>%
     select(label.type, zone.type, gt.labels, gt.labels.per.100m)
@@ -2093,7 +2098,7 @@ plot.gt.dist.for.zone.type <- function(data, n.data, l.data) {
   xlabs <-
     data %>%
     distinct(zone.type) %>%
-    mutate(lab = paste0(zone.type, ' (N=', n.data[zone.type], ';L=', l.data[zone.type], ')')) %>%
+    mutate(lab = paste0(zone.type, '\nN=', n.data[zone.type], '; L=', l.data[zone.type])) %>%
     pull(lab)
 
   ggplot(data = data,
@@ -2188,7 +2193,7 @@ zone.type.analysis.data.semantic <-
 x.labels.with.n.semantic <-
   n.routes.by.zone.type.semantic %>%
   inner_join(total.gt.by.zone.semantic, by = 'zone.type') %>%
-  mutate(lab = paste0(zone.type, ' (N=', N, ';L=', L, ')')) %>%
+  mutate(lab = paste0(zone.type, '\nN=', N, '; L=', L)) %>%
   pull(lab)
 
 # Create the trellis boxplots.
@@ -2316,7 +2321,7 @@ kable(
 x.labels.with.n.density <-
   n.routes.by.zone.type.density %>%
   inner_join(total.gt.by.zone.density, by = 'zone.type') %>%
-  mutate(lab = paste0(zone.type, ' (N=', N, ';L=', L, ')')) %>%
+  mutate(lab = paste0(zone.type, '\nN=', N, '; L=', L)) %>%
   pull(lab)
 
 # Create the trellis boxplots.
