@@ -1346,7 +1346,7 @@ kable(
     group_by(worker.type) %>%
     dplyr::summarize(
       lab.p.100m = median(labels.per.100m, na.rm = TRUE),
-      lab.p.100m = sd(labels.per.100m, na.rm = TRUE),
+      lab.p.100m.std = sd(labels.per.100m, na.rm = TRUE),
       m.p.min = median(meters.per.min, na.rm = TRUE),
       m.p.min.sd = sd(meters.per.min, na.rm = TRUE),
       min.audited = median(minutes_audited, na.rm = TRUE),

@@ -185,11 +185,11 @@ Next we have some descriptive statistics of users, by user group. These are aver
 
 NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-| worker.type | lab.p.100m | m.p.min | m.p.min.sd | min.audited | min.audited.sd | sec.to.label | sec.to.label.sd |
-|:------------|:-----------|:--------|:-----------|:------------|:---------------|:-------------|:----------------|
-| anon        | 3.382      | 47.547  | 38.164     | 12.835      | 6.302          | 6.939        | 10.058          |
-| reg         | 3.457      | 51.794  | 30.429     | 23.570      | 12.945         | 5.232        | 2.522           |
-| turk1       | 4.109      | 31.067  | 11.234     | 33.350      | 16.038         | 8.416        | 4.560           |
+| worker.type | lab.p.100m | lab.p.100m.std | m.p.min | m.p.min.sd | min.audited | min.audited.sd | sec.to.label | sec.to.label.sd |
+|:------------|:-----------|:---------------|:--------|:-----------|:------------|:---------------|:-------------|:----------------|
+| anon        | 4.921      | 3.382          | 47.547  | 38.164     | 12.835      | 6.302          | 6.939        | 10.058          |
+| reg         | 5.988      | 3.457          | 51.794  | 30.429     | 23.570      | 12.945         | 5.232        | 2.522           |
+| turk1       | 7.669      | 4.109          | 31.067  | 11.234     | 33.350      | 16.038         | 8.416        | 4.560           |
 
 Below, we have a table of aggregate (sum) stats by user group.
 
