@@ -701,7 +701,7 @@ if (REFRESH_TURK_STUDY_DATA) {
 
 zoning.classes <- c('numeric', 'numeric', 'numeric', 'factor', 'factor', 'logical')
 zoning.data <- read.csv('../data/street_zoning_info.csv', colClasses = zoning.classes) %>%
-  dplyr::rename(condition.id = condition_id)
+  rename(condition.id = condition_id)
 ```
 
 ```{r transforming.data, echo=FALSE, warning=FALSE}
@@ -748,7 +748,7 @@ approximate.missions.completed <- Vectorize(
 # Computes minutes_per_mission as either minutes_audited / missions_completed if at least one
 # mission was completed, other wise 500 * minutes_audited / feet_audited (how long the first mission
 # would take, given the auditing speed for what they had done)
-approximate.minutes.per.mission <- Vectorize(
+approx.min.per.mission <- Vectorize(
   function(time.audited, missions.completed, dist.in.feet) {
     if (missions.completed > 0) time.audited / missions.completed
     else 500 * time.audited / dist.in.feet
@@ -789,12 +789,9 @@ speeds <-
   audit.length %>%
   left_join(all.mission.counts, by = 'user_id') %>%
   left_join(times, by = 'user_id') %>%
-  mutate(feet_per_min = feet_audited / minutes_audited,
-         meters_audited = feet_audited / 3.28084,
+  mutate(meters_audited = feet_audited / 3.28084,
          m_per_min = meters_audited / minutes_audited,
-         km_per_hr = 60 * m_per_min / 1000,
-         minutes_per_mission = approximate.minutes.per.mission(minutes_audited, mission_count, feet_audited),
-         minutes_per_1k_ft = 1000 * minutes_audited / feet_audited,
+         mins_per_mission = approx.min.per.mission(minutes_audited, mission_count, feet_audited),
          hours_audited = minutes_audited / 60,
          minutes_per_session = minutes_audited / n_sessions)
 
@@ -945,12 +942,8 @@ kable(
       audits = median(audit_count, na.rm = TRUE),
       minutes.audited = median(minutes_audited, na.rm = TRUE),
       minutes.audited.std = sd(minutes_audited, na.rm = TRUE),
-      km.per.hr = median(km_per_hr, na.rm = TRUE),
-      km.per.hr.std = sd(km_per_hr[km_per_hr != Inf], na.rm = TRUE),
       m.per.min = median(m_per_min, na.rm = TRUE),
       m.per.min.std = sd(m_per_min[m_per_min = Inf], na.rm = TRUE),
-      minutes.per.1k.ft = median(minutes_per_1k_ft, na.rm = TRUE),
-      minutes.per.1k.ft.std = sd(minutes_per_1k_ft, na.rm = TRUE),
       labels = median(label_count, na.rm = TRUE),
       label.per.100m = median(labels_per_100m, na.rm = TRUE),
       labels.per.100m.std = sd(labels_per_100m, na.rm = TRUE),
@@ -1204,8 +1197,6 @@ turk.study.summary.stats.with.labels <-
          distance.meters = distance.feet / 3.28084,
          labels.per.100m = 100 * n.labels / distance.meters,
          meters.per.min = distance.meters / minutes_audited,
-         km.per.hr = 60 * meters.per.min / 1000,
-         minutes.per.1k.ft = 1000 * minutes_audited / distance.feet,
          hours.audited = minutes_audited / 60)
 ```
 
@@ -1354,16 +1345,12 @@ kable(
     filter(granularity == 'street') %>%  # granularity doesn't affect these stats
     group_by(worker.type) %>%
     dplyr::summarize(
-      labs.p.100m = median(labels.per.100m, na.rm = TRUE),
-      labs.p.100m = sd(labels.per.100m, na.rm = TRUE),
-      km.p.hr = median(km.per.hr, na.rm = TRUE),
-      km.p.hr.std = sd(km.per.hr, na.rm = TRUE),
+      lab.p.100m = median(labels.per.100m, na.rm = TRUE),
+      lab.p.100m = sd(labels.per.100m, na.rm = TRUE),
       m.p.min = median(meters.per.min, na.rm = TRUE),
       m.p.min.std = sd(meters.per.min, na.rm = TRUE),
-      mins.p.1k.ft = median(minutes.per.1k.ft, na.rm = TRUE),
-      mins.p.1k.ft.std = sd(minutes.per.1k.ft, na.rm = TRUE),
-      mins.audited = median(minutes_audited, na.rm = TRUE),
-      mins.audited.std = sd(minutes_audited, na.rm = TRUE),
+      min.audited = median(minutes_audited, na.rm = TRUE),
+      min.audited.std = sd(minutes_audited, na.rm = TRUE),
       sec.to.label = median(seconds.to.label, na.rm = TRUE),
       sec.to.label.std = sd(seconds.to.label, na.rm = TRUE)
     ),
@@ -1516,7 +1503,7 @@ turk.showing.stats.4.and.5 <-
       prob.prec = median(prob.precision, na.rm = TRUE),
       prob.f.meas = median(prob.f.measure, na.rm = TRUE)
     ) %>%
-    dplyr::rename(user.type = worker.type)
+    rename(user.type = worker.type)
 
 kable(
   turk.showing.stats.4.and.5 %>%
@@ -2529,7 +2516,7 @@ all.coeffs <-
                                  Estimate < 0 & p < 0.05 ~ '-',
                                  TRUE                    ~ 'NA'),
          p.value = p.num.to.p.str.with.sig.code(p)) %>%
-  dplyr::rename(estimate = Estimate, std.err = Std..Error) %>%
+  rename(estimate = Estimate, std.err = Std..Error) %>%
   select(accuracy.type, label.type, param, association, estimate, std.err, p.value, LRT)
 
 kable(all.coeffs, digits = 3, align = 'l')
