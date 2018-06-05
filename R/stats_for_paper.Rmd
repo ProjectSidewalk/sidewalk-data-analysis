@@ -225,7 +225,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
                  (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
           FROM audit_task_interaction
           INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
-          WHERE action = \'ViewControl_MouseDown\'
+          WHERE action IN (\'ViewControl_MouseDown\', \'LabelingCanvas_MouseDown\')
               AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
           ) user_audit_times
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
@@ -249,7 +249,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
           INNER JOIN audit_task_environment
               ON audit_task.audit_task_id = audit_task_environment.audit_task_id
-          WHERE action = \'ViewControl_MouseDown\'
+          WHERE action IN (\'ViewControl_MouseDown\', \'LabelingCanvas_MouseDown\')
           AND audit_task.user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
           AND ip_address IN
           (
@@ -280,7 +280,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
               FROM audit_task_interaction
               INNER JOIN audit_task
                   ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
-              WHERE action = \'ViewControl_MouseDown\'
+              WHERE action IN (\'ViewControl_MouseDown\', \'LabelingCanvas_MouseDown\')
                   AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
           ) user_audit_times
           WHERE diff > \'01:00:00.000\'
@@ -312,7 +312,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
                   ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
               INNER JOIN audit_task_environment
                   ON audit_task.audit_task_id = audit_task_environment.audit_task_id
-              WHERE action = \'ViewControl_MouseDown\'
+              WHERE action IN (\'ViewControl_MouseDown\', \'LabelingCanvas_MouseDown\')
                   AND audit_task.user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
                   AND ip_address IN
               (
@@ -453,7 +453,7 @@ if (REFRESH_TURK_STUDY_DATA) {
               AND amt_volunteer_route.volunteer_id = audit_task.user_id
           INNER JOIN audit_task_interaction
               ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
-          WHERE action = \'ViewControl_MouseDown\'
+          WHERE action IN (\'ViewControl_MouseDown\', \'LabelingCanvas_MouseDown\')
               AND amt_condition_id NOT IN (71, 104, 123, 124, 138)
           ) user_audit_times
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
@@ -483,7 +483,7 @@ if (REFRESH_TURK_STUDY_DATA) {
               AND amt_volunteer_route.ip_address = audit_task_environment.ip_address
           INNER JOIN audit_task_interaction
               ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
-          WHERE action = \'ViewControl_MouseDown\'
+          WHERE action IN (\'ViewControl_MouseDown\', \'LabelingCanvas_MouseDown\')
               AND amt_condition_id NOT IN (71, 104, 123, 124, 138)
           ) user_audit_times
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
@@ -503,7 +503,7 @@ if (REFRESH_TURK_STUDY_DATA) {
           FROM amt_assignment
           INNER JOIN audit_task ON amt_assignment.amt_assignment_id = audit_task.amt_assignment_id
           INNER JOIN audit_task_interaction ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
-          WHERE action = \'ViewControl_MouseDown\'
+          WHERE action IN (\'ViewControl_MouseDown\', \'LabelingCanvas_MouseDown\')
               AND condition_id NOT IN (71, 104, 123, 124, 138)
           ) user_audit_times
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
@@ -943,7 +943,7 @@ kable(
       minutes.audited = median(minutes_audited, na.rm = TRUE),
       minutes.audited.sd = sd(minutes_audited, na.rm = TRUE),
       m.per.min = median(m_per_min, na.rm = TRUE),
-      m.per.min.sd = sd(m_per_min[m_per_min = Inf], na.rm = TRUE),
+      m.per.min.sd = sd(m_per_min, na.rm = TRUE),
       labels = median(label_count, na.rm = TRUE),
       label.per.100m = median(labels_per_100m, na.rm = TRUE),
       labels.per.100m.sd = sd(labels_per_100m, na.rm = TRUE),

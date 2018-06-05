@@ -94,15 +94,15 @@ NOTE: A "session" below is defined as a sequence of audit task interactions for 
 
 | role       | n.users | miles | km    | missions | audits | minutes.audited | minutes.audited.sd | m.per.min | m.per.min.sd | labels | label.per.100m | labels.per.100m.sd | sessions | mins.per.sess |
 |:-----------|:--------|:------|:------|:---------|:-------|:----------------|:-------------------|:----------|:-------------|:-------|:---------------|:-------------------|:---------|:--------------|
-| Anonymous  | 293     | 0.083 | 0.133 | 0.0      | 2      | 10.36           | 21.748             | 13.912    | -            | 17.0   | 10.508         | 37.934             | 2        | 5.920         |
-| Turker     | 122     | 0.364 | 0.586 | 4.0      | 5      | 25.59           | 753.837            | 23.982    | -            | 59.0   | 8.900          | 17.996             | 1        | 24.090        |
-| Registered | 188     | 0.540 | 0.869 | 3.5      | 8      | 28.65           | 71.989             | 38.419    | -            | 70.5   | 6.800          | 20.334             | 1        | 19.752        |
+| Anonymous  | 293     | 0.083 | 0.133 | 0.0      | 2      | 10.640          | 25.105             | 13.660    | 21.169       | 17.0   | 10.508         | 37.934             | 2        | 6.120         |
+| Turker     | 122     | 0.364 | 0.586 | 4.0      | 5      | 26.940          | 757.025            | 23.623    | 25.034       | 59.0   | 8.900          | 17.996             | 1        | 26.370        |
+| Registered | 188     | 0.540 | 0.869 | 3.5      | 8      | 29.335          | 139.760            | 37.314    | 29.573       | 70.5   | 6.800          | 20.334             | 1        | 20.367        |
 
 | role       | n\_users | miles | km   | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
 |:-----------|:---------|:------|:-----|:---------|:---------|:-------|:---------------|:-------|:-----------|
-| Anonymous  | 293      | 80    | 129  | 7.4%     | 316      | 1181   | 81             | 10760  | 72%        |
-| Turker     | 122      | 1016  | 1636 | 95%      | 3077     | 13207  | 444            | 103820 | 23%        |
-| Registered | 188      | 392   | 630  | 36%      | 1218     | 5171   | 158            | 35949  | 38%        |
+| Anonymous  | 293      | 80    | 129  | 7.4%     | 316      | 1181   | 86             | 10760  | 72%        |
+| Turker     | 122      | 1016  | 1636 | 95%      | 3077     | 13207  | 458            | 103820 | 23%        |
+| Registered | 188      | 392   | 630  | 36%      | 1218     | 5171   | 181            | 35949  | 38%        |
 
 Possible Stories
 ----------------
@@ -187,9 +187,9 @@ NOTE: In this table, we are only considering single users auditing (i.e., no mul
 
 | worker.type | lab.p.100m | lab.p.100m.std | m.p.min | m.p.min.sd | min.audited | min.audited.sd | sec.to.label | sec.to.label.sd |
 |:------------|:-----------|:---------------|:--------|:-----------|:------------|:---------------|:-------------|:----------------|
-| anon        | 4.921      | 3.382          | 47.547  | 38.164     | 12.835      | 6.302          | 6.939        | 10.058          |
-| reg         | 5.988      | 3.457          | 51.794  | 30.429     | 23.570      | 12.945         | 5.232        | 2.522           |
-| turk1       | 7.669      | 4.109          | 31.067  | 11.234     | 33.350      | 16.038         | 8.416        | 4.560           |
+| anon        | 4.921      | 3.382          | 47.429  | 38.167     | 12.865      | 6.327          | 6.939        | 10.058          |
+| reg         | 5.988      | 3.457          | 51.583  | 30.531     | 23.660      | 13.297         | 5.232        | 2.522           |
+| turk1       | 7.669      | 4.109          | 30.825  | 11.112     | 33.695      | 16.108         | 8.416        | 4.560           |
 
 Below, we have a table of aggregate (sum) stats by user group.
 
@@ -197,9 +197,9 @@ NOTE: In this table, we are only considering single users auditing (i.e., no mul
 
 | worker.type | n.missions | distance.miles | distance.km | n.labels | hours.audited |
 |:------------|:-----------|:---------------|:------------|:---------|:--------------|
-| anon        | 32         | 6.061          | 9.754       | 499      | 3.811         |
-| reg         | 150        | 37.879         | 60.960      | 3696     | 21.631        |
-| turk1       | 182        | 43.939         | 70.714      | 5711     | 41.103        |
+| anon        | 32         | 6.061          | 9.754       | 499      | 3.822         |
+| reg         | 150        | 37.879         | 60.960      | 3696     | 21.855        |
+| turk1       | 182        | 43.939         | 70.714      | 5711     | 41.489        |
 
 ### IRR
 
@@ -610,18 +610,18 @@ Below is a table showing the summaries of the models and results of the LRTs. Th
 
 | accuracy.type | label.type | param           | association | estimate | std.err | p.value           | LRT    |
 |:--------------|:-----------|:----------------|:------------|:---------|:--------|:------------------|:-------|
-| recall        | All        | label.freq      | +           | 0.302    | 0.094   | 0.002 \*\*        | 9.938  |
-| recall        | All        | audit.speed     | NA          | 0.009    | 0.088   | 0.919             | 0.010  |
-| recall        | All        | viz.search.time | -           | -0.369   | 0.114   | &lt; 0.001 \*\*\* | 11.149 |
-| recall        | Problem    | label.freq      | +           | 0.509    | 0.178   | 0.004 \*\*        | 8.390  |
-| recall        | Problem    | audit.speed     | NA          | 0.067    | 0.170   | 0.692             | 0.157  |
-| recall        | Problem    | viz.search.time | -           | -0.382   | 0.154   | 0.011 \*          | 6.457  |
-| precision     | All        | label.freq      | NA          | -0.121   | 0.075   | 0.108             | 2.586  |
-| precision     | All        | audit.speed     | NA          | -0.009   | 0.081   | 0.912             | 0.012  |
-| precision     | All        | viz.search.time | NA          | -0.055   | 0.111   | 0.622             | 0.243  |
-| precision     | Problem    | label.freq      | NA          | 0.148    | 0.157   | 0.350             | 0.874  |
-| precision     | Problem    | audit.speed     | NA          | 0.253    | 0.171   | 0.141             | 2.166  |
-| precision     | Problem    | viz.search.time | NA          | 0.315    | 0.174   | 0.068             | 3.323  |
+| recall        | All        | label.freq      | +           | 0.302    | 0.094   | 0.002 \*\*        | 9.951  |
+| recall        | All        | audit.speed     | NA          | 0.009    | 0.088   | 0.915             | 0.011  |
+| recall        | All        | viz.search.time | -           | -0.369   | 0.114   | &lt; 0.001 \*\*\* | 11.116 |
+| recall        | Problem    | label.freq      | +           | 0.512    | 0.178   | 0.004 \*\*        | 8.503  |
+| recall        | Problem    | audit.speed     | NA          | 0.074    | 0.169   | 0.664             | 0.188  |
+| recall        | Problem    | viz.search.time | -           | -0.379   | 0.154   | 0.012 \*          | 6.380  |
+| precision     | All        | label.freq      | NA          | -0.120   | 0.075   | 0.111             | 2.536  |
+| precision     | All        | audit.speed     | NA          | -0.007   | 0.081   | 0.933             | 0.007  |
+| precision     | All        | viz.search.time | NA          | -0.053   | 0.111   | 0.632             | 0.230  |
+| precision     | Problem    | label.freq      | NA          | 0.153    | 0.157   | 0.332             | 0.940  |
+| precision     | Problem    | audit.speed     | NA          | 0.263    | 0.172   | 0.127             | 2.329  |
+| precision     | Problem    | viz.search.time | NA          | 0.319    | 0.173   | 0.065             | 3.416  |
 
 The positive association between labeling frequency and recall is expected, as someone who placed more labels probably correctly found more attributes. The negative association between visual search time and recall is less intuitive, and I don't think we have a solid reason for why this might be the case. It may be that users that take longer to place a label are more distracted, so they are more likely to miss things. Or longer visual search time may mean that they are having a harder time panning with the tool (possibly those using a laptop track pad instead of a mouse), and so they may not want to pan as far.
 
