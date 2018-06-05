@@ -56,6 +56,7 @@ my.theme.discrete.x <- theme_bw() + theme(panel.grid.major.x = element_blank())
 ACCURACY_BREAKS <- c(0, 0.25, 0.5, 0.75, 1.0)
 
 # Helpful functions
+'%not-in%' <- function(x,y)!('%in%'(x,y))
 print.p.value <- function(p) {
   if_else(p < 0.001, 'p < 0.001', paste0('p = ', format(round(p, digits = 3), scientific = FALSE)))
 }
@@ -72,9 +73,11 @@ p.num.to.p.str.with.sig.code <- function(p.value) {
   )
   paste(formatted.p.value, sig.code)
 }
-
-
-# user.group.test.data.recall.all
+extract_label_type <- Vectorize(
+  function(note.str) {
+  str_extract_all(note.str, '[:alpha:]+')[[1]][2]
+  }
+)
 format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, descending = FALSE) {
   ordering.sign <- if_else(descending == TRUE, '<', '>')
 
@@ -704,6 +707,28 @@ zoning.data <- read.csv('../data/street_zoning_info.csv', colClasses = zoning.cl
 ```{r transforming.data, echo=FALSE, warning=FALSE}
 # Change the _ column names to . separated.
 names(labeling.times.turk.study) <- gsub("\\_", ".", names(labeling.times.turk.study))
+
+# Compute median labeling time by label type for each user.
+individual.search.times <-
+  labeling.times.turk.study %>%
+  mutate(label.type = factor(extract_label_type(note))) %>%
+  mutate(label.type = fct_recode(label.type, 'SurfaceProb' = 'SurfaceProblem')) %>%
+  filter(label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
+  dplyr::select(-note)
+individual.search.times.prob <-
+  individual.search.times %>%
+  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+  mutate(label.type = factor('Problem'))
+individual.search.times.all <-
+  individual.search.times %>%
+  mutate(label.type = factor('All'))
+
+user.search.times <-
+  rbind(individual.search.times.all, individual.search.times.prob, individual.search.times) %>%
+  group_by(user.id, label.type) %>%
+  summarize(seconds.to.label = median(seconds.to.label)) %>%
+  ungroup() %>%
+  droplevels()
 
 # Takes a distance in feet and approximates the number of missions the user completed. The
 # approximation assumes that the first missions are 500, 500, 1000, 2000, and 1280 feet, and all the
@@ -1815,25 +1840,17 @@ accuracy.by.label.type <-
   mutate(label.type = as.character(label.type))
 
 distinct.workers <- data.with.raw.accuracy %>% distinct(worker1) %>% pull()
-extract_label_type <- Vectorize(
-  function(note.str) {
-  str_extract_all(note.str, '[:alpha:]+')[[1]][2]
-  }
-)
 
 ave.labeling.time.by.type.and.user <-
-  labeling.times.turk.study %>%
-  filter(user.id %in% distinct.workers) %>%
-  mutate(label.type = factor(extract_label_type(note))) %>%
-  mutate(label.type = fct_recode(label.type, 'SurfaceProb' = 'SurfaceProblem')) %>%
-  filter(label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
-  mutate(label.type = factor(label.type)) %>%  # drops filtered out levels
-  group_by(label.type, user.id) %>%
-  dplyr::summarise(seconds.to.label = median(seconds.to.label)) %>%
+  user.search.times %>%
+  filter(user.id %in% distinct.workers,
+         label.type %not-in% c('All', 'Problem')) %>%
+  droplevels() %>%
   mutate(log.seconds.to.label = log(seconds.to.label))
 
 ave.labeling.time.by.type <-
   ave.labeling.time.by.type.and.user %>%
+  group_by(label.type) %>%
   dplyr::summarise(median.s.to.label = median(seconds.to.label), # across users, by label type
                    mean.sec.to.label = mean(seconds.to.label),
                    sd.s.to.label = sd(seconds.to.label)) %>%
@@ -2333,43 +2350,6 @@ Variables being investigated: labeling frequency, auditing speed, and visual sea
 NOTE: In this section, the data are binary (not ordinal), at the street level granularity (not 5 meter level) we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 ```{r turk.user.behavior.setup, echo=FALSE}
-turk.behavior.data <-
-  data.with.raw.accuracy %>%
-  filter(worker.type %in% c('anon', 'reg', 'turk1'),
-         binary == TRUE,
-         included.severity == 'all',
-         granularity == 'street') %>%
-  left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
-  group_by_at(vars(condition.id:raw.accuracy)) %>%
-  dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
-  ungroup() %>%
-  left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
-  mutate(distance.feet = if_else(is.anon.route, 2000, 4000),
-         distance.meters = distance.feet / 3.28084,
-         labels.per.100m = 100 * n.labels / distance.meters,
-         meters.per.min = distance.meters / minutes_audited) %>%
-  gather(key = accuracy.type, value = accuracy.value, recall, precision) %>%
-  mutate(accuracy.type = factor(accuracy.type, levels = c('recall', 'precision'))) %>%
-  filter(label.type %in% c('All', 'Problem'))
-
-
-individual.search.times <-
-  labeling.times.turk.study %>%
-  mutate(label.type = factor(extract_label_type(note))) %>%
-  mutate(label.type = fct_recode(label.type, 'SurfaceProb' = 'SurfaceProblem')) %>%
-  filter(label.type %in% LABEL_TYPES_TO_ANALYZE)
-avg.search.times.prob <-
-  individual.search.times %>%
-  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
-  group_by(user.id) %>%
-  summarize(seconds.to.label = median(seconds.to.label)) %>%
-  mutate(label.type = 'Problem')
-avg.search.times.all <-
-  individual.search.times %>%
-  group_by(user.id) %>%
-  summarize(seconds.to.label = median(seconds.to.label)) %>%
-  mutate(label.type = 'All')
-
 # Combines user behavior and accuracy data from various sources. So we start by filtering for the
 # accuracy data we are using (single user, binary, etc.), then we do joins to get label counts and
 # auditing times, and visual search times.
@@ -2380,8 +2360,10 @@ behavior.test.data.unscaled <-
          included.severity == 'all',
          granularity == 'street',
          label.type %in% c('All', 'Problem')) %>%
+  dplyr::select(condition.id, worker1, label.type, true.pos:recall, is.anon.route) %>%
+  droplevels() %>%
   inner_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
-  group_by_at(vars(condition.id:raw.accuracy)) %>%
+  group_by_at(vars(condition.id:is.anon.route)) %>%
   dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
   ungroup() %>%
   inner_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
@@ -2389,9 +2371,8 @@ behavior.test.data.unscaled <-
          distance.meters = distance.feet / 3.28084,           # intermediate value
          labels.per.100m = 100 * n.labels / distance.meters,
          meters.per.min = distance.meters / minutes_audited,
-         user.id = worker1,
-         label.type = as.character(label.type)) %>%
-  inner_join(rbind(avg.search.times.prob, avg.search.times.all),
+         user.id = worker1) %>%
+  inner_join(user.search.times %>% filter(label.type %in% c('All', 'Problem')) %>% droplevels(),
              by = c('user.id', 'label.type')) %>%
   gather(key = accuracy.type, value = accuracy.value, recall, precision, factor_key = TRUE) %>%
   mutate(user.id = factor(worker1),
