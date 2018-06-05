@@ -1198,6 +1198,7 @@ turk.study.summary.stats.with.labels <-
   group_by_at(vars(worker1:prob.f.measure)) %>%
   dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
   left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
+  left_join(user.search.times %>% filter(label.type == 'All'), by = c('worker1' = 'user.id')) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
          distance.feet = if_else(is.anon.route, 2000, 4000),
          distance.meters = distance.feet / 3.28084,
@@ -1362,7 +1363,9 @@ kable(
       mins.p.1k.ft = median(minutes.per.1k.ft, na.rm = TRUE),
       mins.p.1k.ft.std = sd(minutes.per.1k.ft, na.rm = TRUE),
       mins.audited = median(minutes_audited, na.rm = TRUE),
-      mins.audited.std = sd(minutes_audited, na.rm = TRUE)
+      mins.audited.std = sd(minutes_audited, na.rm = TRUE),
+      sec.to.label = median(seconds.to.label, na.rm = TRUE),
+      sec.to.label.std = sd(seconds.to.label, na.rm = TRUE)
     ),
   digits = 3,
   align = 'l'
