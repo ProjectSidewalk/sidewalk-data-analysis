@@ -2069,7 +2069,8 @@ get.zone.distro <- function(data, recode.func) {
   data %>%
     mutate(volunteer.type = factor(is.anon.route,
                                    levels = c(FALSE, TRUE),
-                                   labels = c('Reg User Routes', 'Anon User Routes'))) %>%
+                                   labels = c(paste('Reg User Routes:', n.reg, 'total'),
+                                              paste('Anon User Routes:', n.anon, 'total')))) %>%
     group_by(volunteer.type, zone.type) %>%
     dplyr::summarise(n.routes = n()) %>%
     ungroup() %>%
