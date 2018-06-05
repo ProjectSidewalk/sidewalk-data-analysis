@@ -941,12 +941,12 @@ kable(
       missions = median(mission_count, na.rm = TRUE),
       audits = median(audit_count, na.rm = TRUE),
       minutes.audited = median(minutes_audited, na.rm = TRUE),
-      minutes.audited.std = sd(minutes_audited, na.rm = TRUE),
+      minutes.audited.sd = sd(minutes_audited, na.rm = TRUE),
       m.per.min = median(m_per_min, na.rm = TRUE),
-      m.per.min.std = sd(m_per_min[m_per_min = Inf], na.rm = TRUE),
+      m.per.min.sd = sd(m_per_min[m_per_min = Inf], na.rm = TRUE),
       labels = median(label_count, na.rm = TRUE),
       label.per.100m = median(labels_per_100m, na.rm = TRUE),
-      labels.per.100m.std = sd(labels_per_100m, na.rm = TRUE),
+      labels.per.100m.sd = sd(labels_per_100m, na.rm = TRUE),
       sessions = median(n_sessions, na.rm = TRUE),
       mins.per.sess = median(minutes_per_session, na.rm = TRUE)
       ),
@@ -1348,11 +1348,11 @@ kable(
       lab.p.100m = median(labels.per.100m, na.rm = TRUE),
       lab.p.100m = sd(labels.per.100m, na.rm = TRUE),
       m.p.min = median(meters.per.min, na.rm = TRUE),
-      m.p.min.std = sd(meters.per.min, na.rm = TRUE),
+      m.p.min.sd = sd(meters.per.min, na.rm = TRUE),
       min.audited = median(minutes_audited, na.rm = TRUE),
-      min.audited.std = sd(minutes_audited, na.rm = TRUE),
+      min.audited.sd = sd(minutes_audited, na.rm = TRUE),
       sec.to.label = median(seconds.to.label, na.rm = TRUE),
-      sec.to.label.std = sd(seconds.to.label, na.rm = TRUE)
+      sec.to.label.sd = sd(seconds.to.label, na.rm = TRUE)
     ),
   digits = 3,
   align = 'l'
@@ -1489,19 +1489,25 @@ NOTE: In these two tables, the data is binary (not ordinal) and these are median
 
 #### Summary stats
 
-Median accuracy by user group - street level:
+Mean accuracy by user group - street level:
 
 ```{r turk.showing.stats.4, echo=FALSE}
 turk.showing.stats.4.and.5 <-
   turk.study.summary.stats %>%
     group_by(worker.type, granularity) %>%
     dplyr::summarize(
-      all.recall = median(all.recall, na.rm = TRUE),
-      all.prec = median(all.precision, na.rm = TRUE),
-      all.f.meas = median(all.f.measure, na.rm = TRUE),
-      prob.recall = median(prob.recall, na.rm = TRUE),
-      prob.prec = median(prob.precision, na.rm = TRUE),
-      prob.f.meas = median(prob.f.measure, na.rm = TRUE)
+      all.rec = mean(all.recall, na.rm = TRUE),
+      all.rec.sd = sd(all.recall, na.rm = TRUE),
+      all.prec = mean(all.precision, na.rm = TRUE),
+      all.prec.sd = sd(all.precision, na.rm = TRUE),
+      all.f = mean(all.f.measure, na.rm = TRUE),
+      all.f.sd = sd(all.f.measure, na.rm = TRUE),
+      prob.rec = mean(prob.recall, na.rm = TRUE),
+      prob.rec.sd = sd(prob.recall, na.rm = TRUE),
+      prob.prec = mean(prob.precision, na.rm = TRUE),
+      prob.prec.sd = sd(prob.precision, na.rm = TRUE),
+      prob.f = mean(prob.f.measure, na.rm = TRUE),
+      prob.f.sd = sd(prob.f.measure, na.rm = TRUE)
     ) %>%
     rename(user.type = worker.type)
 
@@ -1514,7 +1520,7 @@ kable(
   )
 ```
 
-Median accuracy by user group - 5 meter level:
+Mean accuracy by user group - 5 meter level:
 
 ```{r turk.showing.stats.5, echo=FALSE}
 kable(
@@ -1701,13 +1707,13 @@ kable(
     group_by(label.type) %>%
     dplyr::summarize(recall.md = median(recall, na.rm = TRUE),
                      recall.mn = mean(recall, na.rm = TRUE),
-                     recall.std = sd(recall, na.rm = TRUE),
+                     recall.sd = sd(recall, na.rm = TRUE),
                      prec.md = median(precision, na.rm = TRUE),
                      prec.mn = mean(precision, na.rm = TRUE),
-                     prec.std = sd(precision, na.rm = TRUE),
+                     prec.sd = sd(precision, na.rm = TRUE),
                      f.md = median(f.measure, na.rm = TRUE),
                      f.mn = mean(f.measure, na.rm = TRUE),
-                     f.std = sd(f.measure, na.rm = TRUE)),
+                     f.sd = sd(f.measure, na.rm = TRUE)),
   digits = 3,
   align = 'l'
   )
@@ -1722,13 +1728,13 @@ kable(
     group_by(label.type) %>%
     dplyr::summarize(recall.md = median(recall, na.rm = TRUE),
                      recall.mn = mean(recall, na.rm = TRUE),
-                     recall.std = sd(recall, na.rm = TRUE),
+                     recall.sd = sd(recall, na.rm = TRUE),
                      prec.md = median(precision, na.rm = TRUE),
                      prec.mn = mean(precision, na.rm = TRUE),
-                     prec.std = sd(precision, na.rm = TRUE),
+                     prec.sd = sd(precision, na.rm = TRUE),
                      f.md = median(f.measure, na.rm = TRUE),
                      f.mn = mean(f.measure, na.rm = TRUE),
-                     f.std = sd(f.measure, na.rm = TRUE)),
+                     f.sd = sd(f.measure, na.rm = TRUE)),
   digits = 3,
   align = 'l'
   )
@@ -2561,7 +2567,7 @@ recall.by.severity.1 <-
   summarize(n.users = sum(!is.na(recall)),
             mean.recall = mean(recall, na.rm = TRUE),
             median.recall = median(recall, na.rm = TRUE),
-            std.recall = sd(recall, na.rm = TRUE))
+            sd.recall = sd(recall, na.rm = TRUE))
 
 gt.counts.by.severity.1 <-
   low.severity.check.data.1 %>%
@@ -2622,7 +2628,7 @@ recall.by.severity.2 <-
   summarize(n.users = sum(!is.na(recall)),
             mean.recall = mean(recall, na.rm = TRUE),
             median.recall = median(recall, na.rm = TRUE),
-            std.recall = sd(recall, na.rm = TRUE))
+            sd.recall = sd(recall, na.rm = TRUE))
 
 gt.counts.by.severity.2 <-
   low.severity.check.data.2 %>%

@@ -92,11 +92,11 @@ Below are the medians for a few metrics (followed by sums), split by user group.
 
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
 
-| role       | n.users | miles | km    | missions | audits | minutes.audited | minutes.audited.std | m.per.min | m.per.min.std | labels | label.per.100m | labels.per.100m.std | sessions | mins.per.sess |
-|:-----------|:--------|:------|:------|:---------|:-------|:----------------|:--------------------|:----------|:--------------|:-------|:---------------|:--------------------|:---------|:--------------|
-| Anonymous  | 293     | 0.083 | 0.133 | 0.0      | 2      | 10.36           | 21.748              | 13.912    | -             | 17.0   | 10.508         | 37.934              | 2        | 5.920         |
-| Turker     | 122     | 0.364 | 0.586 | 4.0      | 5      | 25.59           | 753.837             | 23.982    | -             | 59.0   | 8.900          | 17.996              | 1        | 24.090        |
-| Registered | 188     | 0.540 | 0.869 | 3.5      | 8      | 28.65           | 71.989              | 38.419    | -             | 70.5   | 6.800          | 20.334              | 1        | 19.752        |
+| role       | n.users | miles | km    | missions | audits | minutes.audited | minutes.audited.sd | m.per.min | m.per.min.sd | labels | label.per.100m | labels.per.100m.sd | sessions | mins.per.sess |
+|:-----------|:--------|:------|:------|:---------|:-------|:----------------|:-------------------|:----------|:-------------|:-------|:---------------|:-------------------|:---------|:--------------|
+| Anonymous  | 293     | 0.083 | 0.133 | 0.0      | 2      | 10.36           | 21.748             | 13.912    | -            | 17.0   | 10.508         | 37.934             | 2        | 5.920         |
+| Turker     | 122     | 0.364 | 0.586 | 4.0      | 5      | 25.59           | 753.837            | 23.982    | -            | 59.0   | 8.900          | 17.996             | 1        | 24.090        |
+| Registered | 188     | 0.540 | 0.869 | 3.5      | 8      | 28.65           | 71.989             | 38.419    | -            | 70.5   | 6.800          | 20.334             | 1        | 19.752        |
 
 | role       | n\_users | miles | km   | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
 |:-----------|:---------|:------|:-----|:---------|:---------|:-------|:---------------|:-------|:-----------|
@@ -185,11 +185,11 @@ Next we have some descriptive statistics of users, by user group. These are aver
 
 NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-| worker.type | lab.p.100m | m.p.min | m.p.min.std | min.audited | min.audited.std | sec.to.label | sec.to.label.std |
-|:------------|:-----------|:--------|:------------|:------------|:----------------|:-------------|:-----------------|
-| anon        | 3.382      | 47.547  | 38.164      | 12.835      | 6.302           | 6.939        | 10.058           |
-| reg         | 3.457      | 51.794  | 30.429      | 23.570      | 12.945          | 5.232        | 2.522            |
-| turk1       | 4.109      | 31.067  | 11.234      | 33.350      | 16.038          | 8.416        | 4.560            |
+| worker.type | lab.p.100m | m.p.min | m.p.min.sd | min.audited | min.audited.sd | sec.to.label | sec.to.label.sd |
+|:------------|:-----------|:--------|:-----------|:------------|:---------------|:-------------|:----------------|
+| anon        | 3.382      | 47.547  | 38.164     | 12.835      | 6.302          | 6.939        | 10.058          |
+| reg         | 3.457      | 51.794  | 30.429     | 23.570      | 12.945         | 5.232        | 2.522           |
+| turk1       | 4.109      | 31.067  | 11.234     | 33.350      | 16.038         | 8.416        | 4.560           |
 
 Below, we have a table of aggregate (sum) stats by user group.
 
@@ -279,25 +279,25 @@ NOTE: In these two tables, the data is binary (not ordinal) and these are median
 
 #### Summary stats
 
-Median accuracy by user group - street level:
+Mean accuracy by user group - street level:
 
-| user.type | all.recall | all.prec | all.f.meas | prob.recall | prob.prec | prob.f.meas |
-|:----------|:-----------|:---------|:-----------|:------------|:----------|:------------|
-| anon      | 0.523      | 0.780    | 0.667      | 0.292       | 1.000     | 0.500       |
-| reg       | 0.771      | 0.636    | 0.667      | 0.800       | 0.667     | 0.727       |
-| turk1     | 0.707      | 0.700    | 0.648      | 0.667       | 0.750     | 0.667       |
-| turk3     | 0.620      | 0.815    | 0.700      | 0.571       | 0.800     | 0.667       |
-| turk5     | 0.571      | 0.917    | 0.698      | 0.333       | 1.000     | 0.500       |
+| user.type | all.rec | all.rec.sd | all.prec | all.prec.sd | all.f | all.f.sd | prob.rec | prob.rec.sd | prob.prec | prob.prec.sd | prob.f | prob.f.sd |
+|:----------|:--------|:-----------|:---------|:------------|:------|:---------|:---------|:------------|:----------|:-------------|:-------|:----------|
+| anon      | 0.519   | 0.204      | 0.743    | 0.283       | 0.638 | 0.151    | 0.418    | 0.363       | 0.910     | 0.189        | 0.623  | 0.230     |
+| reg       | 0.756   | 0.162      | 0.637    | 0.124       | 0.675 | 0.106    | 0.728    | 0.278       | 0.617     | 0.290        | 0.652  | 0.229     |
+| turk1     | 0.678   | 0.194      | 0.688    | 0.164       | 0.658 | 0.140    | 0.626    | 0.322       | 0.713     | 0.273        | 0.652  | 0.227     |
+| turk3     | 0.621   | 0.153      | 0.810    | 0.155       | 0.686 | 0.112    | 0.556    | 0.304       | 0.762     | 0.287        | 0.642  | 0.207     |
+| turk5     | 0.594   | 0.139      | 0.878    | 0.142       | 0.696 | 0.110    | 0.399    | 0.294       | 0.790     | 0.291        | 0.570  | 0.209     |
 
-Median accuracy by user group - 5 meter level:
+Mean accuracy by user group - 5 meter level:
 
-| user.type | all.recall | all.prec | all.f.meas | prob.recall | prob.prec | prob.f.meas |
-|:----------|:-----------|:---------|:-----------|:------------|:----------|:------------|
-| anon      | 0.415      | 0.664    | 0.552      | 0.066       | 0.417     | 0.154       |
-| reg       | 0.589      | 0.420    | 0.460      | 0.250       | 0.229     | 0.231       |
-| turk1     | 0.490      | 0.489    | 0.471      | 0.200       | 0.267     | 0.211       |
-| turk3     | 0.509      | 0.667    | 0.559      | 0.125       | 0.286     | 0.205       |
-| turk5     | 0.504      | 0.750    | 0.584      | 0.081       | 0.333     | 0.182       |
+| user.type | all.rec | all.rec.sd | all.prec | all.prec.sd | all.f | all.f.sd | prob.rec | prob.rec.sd | prob.prec | prob.prec.sd | prob.f | prob.f.sd |
+|:----------|:--------|:-----------|:---------|:------------|:------|:---------|:---------|:------------|:----------|:-------------|:-------|:----------|
+| anon      | 0.390   | 0.245      | 0.580    | 0.269       | 0.480 | 0.225    | 0.091    | 0.099       | 0.418     | 0.332        | 0.179  | 0.108     |
+| reg       | 0.567   | 0.190      | 0.427    | 0.129       | 0.464 | 0.122    | 0.271    | 0.191       | 0.217     | 0.128        | 0.228  | 0.086     |
+| turk1     | 0.481   | 0.231      | 0.466    | 0.180       | 0.443 | 0.179    | 0.230    | 0.202       | 0.291     | 0.242        | 0.239  | 0.137     |
+| turk3     | 0.502   | 0.195      | 0.645    | 0.176       | 0.540 | 0.161    | 0.153    | 0.136       | 0.312     | 0.257        | 0.225  | 0.113     |
+| turk5     | 0.506   | 0.172      | 0.713    | 0.175       | 0.573 | 0.150    | 0.104    | 0.109       | 0.402     | 0.331        | 0.205  | 0.114     |
 
 #### Statistical significance
 
@@ -382,26 +382,26 @@ NOTE: In the two tables below, the data are binary (not ordinal), we are only co
 
 Median accuracy by label type - street level:
 
-| label.type  | recall.md | recall.mn | recall.std | prec.md | prec.mn | prec.std | f.md  | f.mn  | f.std |
-|:------------|:----------|:----------|:-----------|:--------|:--------|:---------|:------|:------|:------|
-| All         | 0.714     | 0.688     | 0.196      | 0.674   | 0.675   | 0.172    | 0.667 | 0.662 | 0.129 |
-| Problem     | 0.714     | 0.639     | 0.323      | 0.714   | 0.693   | 0.284    | 0.667 | 0.649 | 0.226 |
-| CurbRamp    | 1.000     | 0.902     | 0.210      | 1.000   | 0.950   | 0.074    | 0.958 | 0.918 | 0.132 |
-| NoCurbRamp  | 1.000     | 0.762     | 0.406      | 0.000   | 0.179   | 0.279    | 0.500 | 0.542 | 0.227 |
-| Obstacle    | 0.500     | 0.486     | 0.379      | 0.500   | 0.447   | 0.365    | 0.545 | 0.581 | 0.211 |
-| SurfaceProb | 0.333     | 0.344     | 0.329      | 0.817   | 0.715   | 0.339    | 0.500 | 0.555 | 0.214 |
-| NoSidewalk  | 0.600     | 0.557     | 0.420      | 0.958   | 0.716   | 0.355    | 0.667 | 0.751 | 0.201 |
+| label.type  | recall.md | recall.mn | recall.sd | prec.md | prec.mn | prec.sd | f.md  | f.mn  | f.sd  |
+|:------------|:----------|:----------|:----------|:--------|:--------|:--------|:------|:------|:------|
+| All         | 0.714     | 0.688     | 0.196     | 0.674   | 0.675   | 0.172   | 0.667 | 0.662 | 0.129 |
+| Problem     | 0.714     | 0.639     | 0.323     | 0.714   | 0.693   | 0.284   | 0.667 | 0.649 | 0.226 |
+| CurbRamp    | 1.000     | 0.902     | 0.210     | 1.000   | 0.950   | 0.074   | 0.958 | 0.918 | 0.132 |
+| NoCurbRamp  | 1.000     | 0.762     | 0.406     | 0.000   | 0.179   | 0.279   | 0.500 | 0.542 | 0.227 |
+| Obstacle    | 0.500     | 0.486     | 0.379     | 0.500   | 0.447   | 0.365   | 0.545 | 0.581 | 0.211 |
+| SurfaceProb | 0.333     | 0.344     | 0.329     | 0.817   | 0.715   | 0.339   | 0.500 | 0.555 | 0.214 |
+| NoSidewalk  | 0.600     | 0.557     | 0.420     | 0.958   | 0.716   | 0.355   | 0.667 | 0.751 | 0.201 |
 
 Median accuracy by label type - 5 meter level:
 
-| label.type  | recall.md | recall.mn | recall.std | prec.md | prec.mn | prec.std | f.md  | f.mn  | f.std |
-|:------------|:----------|:----------|:-----------|:--------|:--------|:---------|:------|:------|:------|
-| All         | 0.543     | 0.502     | 0.224      | 0.472   | 0.465   | 0.181    | 0.468 | 0.455 | 0.165 |
-| Problem     | 0.200     | 0.228     | 0.195      | 0.250   | 0.273   | 0.221    | 0.222 | 0.229 | 0.116 |
-| CurbRamp    | 0.789     | 0.716     | 0.254      | 0.667   | 0.638   | 0.199    | 0.689 | 0.642 | 0.188 |
-| NoCurbRamp  | 0.633     | 0.548     | 0.450      | 0.000   | 0.108   | 0.223    | 0.400 | 0.401 | 0.244 |
-| Obstacle    | 0.143     | 0.210     | 0.256      | 0.087   | 0.174   | 0.220    | 0.267 | 0.279 | 0.134 |
-| SurfaceProb | 0.034     | 0.129     | 0.214      | 0.268   | 0.343   | 0.333    | 0.214 | 0.265 | 0.199 |
+| label.type  | recall.md | recall.mn | recall.sd | prec.md | prec.mn | prec.sd | f.md  | f.mn  | f.sd  |
+|:------------|:----------|:----------|:----------|:--------|:--------|:--------|:------|:------|:------|
+| All         | 0.543     | 0.502     | 0.224     | 0.472   | 0.465   | 0.181   | 0.468 | 0.455 | 0.165 |
+| Problem     | 0.200     | 0.228     | 0.195     | 0.250   | 0.273   | 0.221   | 0.222 | 0.229 | 0.116 |
+| CurbRamp    | 0.789     | 0.716     | 0.254     | 0.667   | 0.638   | 0.199   | 0.689 | 0.642 | 0.188 |
+| NoCurbRamp  | 0.633     | 0.548     | 0.450     | 0.000   | 0.108   | 0.223   | 0.400 | 0.401 | 0.244 |
+| Obstacle    | 0.143     | 0.210     | 0.256     | 0.087   | 0.174   | 0.220   | 0.267 | 0.279 | 0.134 |
+| SurfaceProb | 0.034     | 0.129     | 0.214     | 0.268   | 0.343   | 0.333   | 0.214 | 0.265 | 0.199 |
 
 #### Statistical significance
 
@@ -643,12 +643,12 @@ We also created a binomial mixed effects model to determine the relationship bet
 
 <table style="width:100%;">
 <colgroup>
-<col width="21%" />
-<col width="21%" />
+<col width="22%" />
+<col width="22%" />
 <col width="10%" />
-<col width="14%" />
+<col width="15%" />
 <col width="17%" />
-<col width="13%" />
+<col width="12%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -657,7 +657,7 @@ We also created a binomial mixed effects model to determine the relationship bet
 <th align="left">n.users</th>
 <th align="left">mean.recall</th>
 <th align="left">median.recall</th>
-<th align="left">std.recall</th>
+<th align="left">sd.recall</th>
 </tr>
 </thead>
 <tbody>
@@ -694,12 +694,12 @@ We also created a binomial mixed effects model to determine the relationship bet
 
 <table style="width:100%;">
 <colgroup>
-<col width="21%" />
-<col width="21%" />
+<col width="22%" />
+<col width="22%" />
 <col width="10%" />
-<col width="14%" />
+<col width="15%" />
 <col width="17%" />
-<col width="13%" />
+<col width="12%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -708,7 +708,7 @@ We also created a binomial mixed effects model to determine the relationship bet
 <th align="left">n.users</th>
 <th align="left">mean.recall</th>
 <th align="left">median.recall</th>
-<th align="left">std.recall</th>
+<th align="left">sd.recall</th>
 </tr>
 </thead>
 <tbody>
