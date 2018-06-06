@@ -88,15 +88,15 @@ There were 958 users who placed 240442 labels pre-filtering. Researchers account
 
 TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
 
-Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
+Below are the means/medains/sds for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
 
-| role       | n.users | miles | km    | missions | audits | minutes.audited | minutes.audited.sd | m.per.min | m.per.min.sd | labels | label.per.100m | labels.per.100m.sd | sessions | mins.per.sess |
-|:-----------|:--------|:------|:------|:---------|:-------|:----------------|:-------------------|:----------|:-------------|:-------|:---------------|:-------------------|:---------|:--------------|
-| Anonymous  | 293     | 0.083 | 0.133 | 0.0      | 2      | 10.640          | 25.105             | 13.660    | 21.169       | 17.0   | 10.508         | 37.934             | 2        | 6.120         |
-| Turker     | 122     | 0.364 | 0.586 | 4.0      | 5      | 26.940          | 757.025            | 23.623    | 25.034       | 59.0   | 8.900          | 17.996             | 1        | 26.370        |
-| Registered | 188     | 0.540 | 0.869 | 3.5      | 8      | 29.335          | 139.760            | 37.314    | 29.573       | 70.5   | 6.800          | 20.334             | 1        | 20.367        |
+| role       | n.users | audit\_count\_md | audit\_count\_mn | audit\_count\_sd | km\_md | km\_mn | km\_sd | label\_count\_md | label\_count\_mn | label\_count\_sd | labels\_per\_100m\_md | labels\_per\_100m\_mn | labels\_per\_100m\_sd | miles\_audited\_md | miles\_audited\_mn | miles\_audited\_sd | minutes\_audited\_md | minutes\_audited\_mn | minutes\_audited\_sd | minutes\_per\_session\_md | minutes\_per\_session\_mn | minutes\_per\_session\_sd | mission\_count\_md | mission\_count\_mn | mission\_count\_sd | m\_per\_min\_md | m\_per\_min\_mn | m\_per\_min\_sd | n\_sessions\_md | n\_sessions\_mn | n\_sessions\_sd |
+|:-----------|:--------|:-----------------|:-----------------|:-----------------|:-------|:-------|:-------|:-----------------|:-----------------|:-----------------|:----------------------|:----------------------|:----------------------|:-------------------|:-------------------|:-------------------|:---------------------|:---------------------|:---------------------|:--------------------------|:--------------------------|:--------------------------|:-------------------|:-------------------|:-------------------|:----------------|:----------------|:----------------|:----------------|:----------------|:----------------|
+| Anonymous  | 293     | 2                | 4.031            | 12.690           | 0.133  | 0.439  | 1.685  | 17.0             | 36.724           | 89.948           | 10.508                | 23.164                | 37.934                | 0.083              | 0.273              | 1.047              | 10.640               | 17.589               | 25.105               | 6.120                     | 9.289                     | 10.913                    | 0.0                | 1.078              | 2.554              | 13.660          | 19.980          | 21.169          | 2               | 2.232           | 1.902           |
+| Turker     | 122     | 5                | 108.254          | 419.687          | 0.586  | 13.408 | 52.259 | 59.0             | 850.984          | 2961.015         | 8.900                 | 13.962                | 17.996                | 0.364              | 8.331              | 32.472             | 26.940               | 225.221              | 757.025              | 26.370                    | 37.720                    | 34.596                    | 4.0                | 25.221             | 87.298             | 23.623          | 30.571          | 25.034          | 1               | 3.082           | 6.756           |
+| Registered | 188     | 8                | 27.505           | 111.245          | 0.869  | 3.352  | 14.658 | 70.5             | 191.218          | 731.406          | 6.800                 | 11.262                | 20.334                | 0.540              | 2.083              | 9.108              | 29.335               | 57.882               | 139.760              | 20.367                    | 28.329                    | 27.346                    | 3.5                | 6.479              | 22.646             | 37.314          | 42.404          | 29.573          | 1               | 2.101           | 3.638           |
 
 | role       | n\_users | miles | km   | coverage | missions | audits | hours\_audited | labels | &gt;1 sess |
 |:-----------|:---------|:------|:-----|:---------|:---------|:-------|:---------------|:-------|:-----------|
@@ -142,54 +142,52 @@ A total of 330 turkers, 50 registered users, and 16 anonymous users were part of
 
 ### Aggregate accuracy
 
-Below are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and for problem vs no problem. We see that the accuracies are comparable at the street level, but accuracy is much higher for curb ramps than problems at the 5 meter level.
+Below are two tables (street level, then 5 meter level) showing mean accuracy across all users when aggregating over all label types, and for problem vs no problem. We see that the accuracies are comparable at the street level, but accuracy is much higher for curb ramps than problems at the 5 meter level.
 
 NOTE: In these two tables, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-Median accuracy across all users - street level:
+Mean accuracy across all users - street level:
 
 | label.type | recall | precision | f.measure |
 |:-----------|:-------|:----------|:----------|
-| All        | 0.714  | 0.674     | 0.667     |
-| Problem    | 0.714  | 0.714     | 0.667     |
+| All        | 0.688  | 0.675     | 0.662     |
+| Problem    | 0.639  | 0.693     | 0.649     |
 
-Median accuracy across all users - 5 meter level:
+Mean accuracy across all users - 5 meter level:
 
 | label.type | recall | precision | f.measure |
 |:-----------|:-------|:----------|:----------|
-| All        | 0.543  | 0.472     | 0.468     |
-| Problem    | 0.200  | 0.250     | 0.222     |
+| All        | 0.502  | 0.465     | 0.455     |
+| Problem    | 0.228  | 0.273     | 0.229     |
 
 ### Voting: Improved recall when at least one turker marks
 
 Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
 
-For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.8 and their precision was 0.67.
+For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.73 and their precision was 0.62.
 
 NOTE: In this section we are looking at *problem vs no problem*, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
 
 *Takeaways*:
 
--   The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
-
--   It would be interesting to see what this looks like at the 5 meter level as well.
+-   The mean recall improves significantly when going from majority vote to the "at least one" voting method, accompanied by a much smaller decrease in precision. Since recall is much more important to us, this is the voting method we should likely use going forward.
 
 | voting.method | recall | precision |
 |:--------------|:-------|:----------|
-| majority.vote | 0.333  | 1.000     |
-| at.least.one  | 1.000  | 0.667     |
+| majority.vote | 0.399  | 0.790     |
+| at.least.one  | 0.962  | 0.643     |
 
 ### Descriptive stats for users
 
-Next we have some descriptive statistics of users, by user group. These are average (median) stats.
+Next we have some descriptive statistics of users, by user group. These are average (mean/median) stats.
 
 NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-| worker.type | lab.p.100m | lab.p.100m.std | m.p.min | m.p.min.sd | min.audited | min.audited.sd | sec.to.label | sec.to.label.sd |
-|:------------|:-----------|:---------------|:--------|:-----------|:------------|:---------------|:-------------|:----------------|
-| anon        | 4.921      | 3.382          | 47.429  | 38.167     | 12.865      | 6.327          | 6.939        | 10.058          |
-| reg         | 5.988      | 3.457          | 51.583  | 30.531     | 23.660      | 13.297         | 5.232        | 2.522           |
-| turk1       | 7.669      | 4.109          | 30.825  | 11.112     | 33.695      | 16.108         | 8.416        | 4.560           |
+| worker.type | lab.p.100m.mn | lab.p.100m.md | lab.p.100m.std | m.p.min.mn | m.p.min.md | m.p.min.sd | min.audited.mn | min.audited.md | min.audited.sd | sec.to.label.mn | sec.to.label.md | sec.to.label.sd |
+|:------------|:--------------|:--------------|:---------------|:-----------|:-----------|:-----------|:---------------|:---------------|:---------------|:----------------|:----------------|:----------------|
+| anon        | 5.116         | 4.921         | 3.382          | 55.232     | 47.429     | 38.167     | 14.332         | 12.865         | 6.327          | 10.446          | 6.939           | 10.058          |
+| reg         | 6.063         | 5.988         | 3.457          | 58.561     | 51.583     | 30.531     | 26.226         | 23.660         | 13.297         | 5.943           | 5.232           | 2.522           |
+| turk1       | 8.320         | 7.669         | 4.109          | 31.597     | 30.825     | 11.112     | 37.717         | 33.695         | 16.108         | 9.599           | 8.416           | 4.560           |
 
 Below, we have a table of aggregate (sum) stats by user group.
 
@@ -275,7 +273,7 @@ Below is a table showing label type accuracy at the two granularity levels, foll
 
 ### Accuracy by user group
 
-NOTE: In these two tables, the data is binary (not ordinal) and these are median accuracies aggregated across all label types (all.\*) and for the problem vs no problem type (prob.\*).
+NOTE: In these two tables, the data is binary (not ordinal) and these are mean/median accuracies aggregated across all label types (all.\*) and for the problem vs no problem type (prob.\*).
 
 #### Summary stats
 
@@ -376,7 +374,7 @@ One interesting thing I am seeing is anon users have a much higher average preci
 
 ### Accuracy by label type
 
-NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), we only consider the first turker to audit each route, and these are median accuracies.
+NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 #### Summary stats
 

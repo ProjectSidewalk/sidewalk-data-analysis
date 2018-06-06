@@ -927,30 +927,43 @@ There were `r n.users.pre.filter` users who placed `r n.labels.pre.filter` label
 
 TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
 
-Below are the medians for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
+Below are the means/medains/sds for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
 
 ```{r public.deployment.showing.stats, echo=FALSE, warning=FALSE}
+summarise_vars <- function(data, group, var.names = NULL, col.start = NULL, col.end = NULL,
+                           funcs = funs(md = median, mn = mean, sd = sd), only.numeric = TRUE,
+                           include.n = FALSE) {
+
+  if (!is.null(col.start) & !is.null(col.end) & is.null(var.names)) {
+    var.names <- names(data)[match(col.start, names(data)):match(col.end, names(data))]
+  }
+
+  if (is.null(var.names) & only.numeric) {
+    summarised <- data %>% group_by(!!sym(group)) %>% summarise_if(is.numeric, funcs, na.rm = TRUE)
+  } else if (is.null(var.names)) {
+    summarised <- data %>% group_by(!!sym(group)) %>% summarise_all(funcs, na.rm = TRUE)
+  } else {
+    summarised <- data %>% group_by(!!sym(group)) %>% summarise_at(vars(var.names), funcs, na.rm = TRUE)
+  }
+
+  if (include.n) {
+    data %>%
+      group_by(!!sym(group)) %>%
+      dplyr::summarise(n.users = n()) %>%
+      inner_join(summarised, by = group) %>%
+      select(group, n.users, 2 + order(colnames(.)[colnames(.) %not-in% c(group, 'n.users')]))
+  } else {
+    summarised %>%
+      select(group, 1 + order(colnames(.)[colnames(.) != group]))
+  }
+}
 kable(
   filtered.speeds %>%
-    group_by(role) %>%
-    dplyr::summarise(
-      n.users = n(),
-      miles = median(miles_audited, na.rm = TRUE),
-      km = median(meters_audited / 1000, na.rm = TRUE),
-      missions = median(mission_count, na.rm = TRUE),
-      audits = median(audit_count, na.rm = TRUE),
-      minutes.audited = median(minutes_audited, na.rm = TRUE),
-      minutes.audited.sd = sd(minutes_audited, na.rm = TRUE),
-      m.per.min = median(m_per_min, na.rm = TRUE),
-      m.per.min.sd = sd(m_per_min, na.rm = TRUE),
-      labels = median(label_count, na.rm = TRUE),
-      label.per.100m = median(labels_per_100m, na.rm = TRUE),
-      labels.per.100m.sd = sd(labels_per_100m, na.rm = TRUE),
-      sessions = median(n_sessions, na.rm = TRUE),
-      mins.per.sess = median(minutes_per_session, na.rm = TRUE)
-      ),
+    mutate(km = meters_audited / 1000) %>%
+    select(-meters_audited, -feet_audited, -mins_per_mission, -hours_audited) %>%
+    summarise_vars('role', include.n = TRUE),
   digits = 3,
   align = 'l'
   )
@@ -1157,7 +1170,7 @@ aggregate.accuracy.data <-
          label.type %in% c('All', 'Problem')) %>%
   select_at(vars(label.type, granularity, recall, precision, f.measure)) %>%
   group_by(label.type, granularity) %>%
-  summarize_at(vars(recall, precision, f.measure), median, na.rm = TRUE) %>%
+  summarize_at(vars(recall, precision, f.measure), mean, na.rm = TRUE) %>%
   ungroup()
 
 # We filter down to the data we care about, then in the group_by we get down to 2 entries per group;
@@ -1262,11 +1275,11 @@ A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` ano
 
 ### Aggregate accuracy
 
-Below are two tables (street level, then 5 meter level) showing average (median) accuracy across all users when aggregating over all label types, and for problem vs no problem. We see that the accuracies are comparable at the street level, but accuracy is much higher for curb ramps than problems at the 5 meter level.
+Below are two tables (street level, then 5 meter level) showing mean accuracy across all users when aggregating over all label types, and for problem vs no problem. We see that the accuracies are comparable at the street level, but accuracy is much higher for curb ramps than problems at the 5 meter level.
 
 NOTE: In these two tables, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
-Median accuracy across all users - street level:
+Mean accuracy across all users - street level:
 
 ```{r turk.showing.stats.2, echo=FALSE}
 kable(
@@ -1279,7 +1292,7 @@ kable(
   )
 ```
 
-Median accuracy across all users - 5 meter level:
+Mean accuracy across all users - 5 meter level:
 
 ```{r turk.showing.stats.3, echo=FALSE}
 kable(
@@ -1308,7 +1321,7 @@ voting.method.data <-
                                         'at.least.one',
                                         'majority.vote'))) %>%
   group_by(worker.type, voting.method, label.type, granularity) %>%
-  dplyr::summarize_at(vars(recall, precision), median, na.rm = TRUE) %>%
+  dplyr::summarize_at(vars(recall, precision), mean, na.rm = TRUE) %>%
   ungroup()
 
 # Get registered user recall to compare to
@@ -1335,9 +1348,7 @@ NOTE: In this section we are looking at _problem vs no problem_, the data are bi
 
 *Takeaways*:
 
-* The median recall is actually perfect for street level when using this other voting method, and the precision is still at 0.67, which isn't bad at all! This actually gives 5 turkers higher recall than registered users, and their precision is equal.
-
-* It would be interesting to see what this looks like at the 5 meter level as well.
+* The mean recall improves significantly when going from majority vote to the "at least one" voting method, accompanied by a much smaller decrease in precision. Since recall is much more important to us, this is the voting method we should likely use going forward.
 
 ```{r turk.voting.method.analysis, echo=FALSE}
 kable(
@@ -1352,7 +1363,7 @@ kable(
 
 ### Descriptive stats for users
 
-Next we have some descriptive statistics of users, by user group. These are average (median) stats.
+Next we have some descriptive statistics of users, by user group. These are average (mean/median) stats.
 
 NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
@@ -1362,13 +1373,17 @@ kable(
     filter(granularity == 'street') %>%  # granularity doesn't affect these stats
     group_by(worker.type) %>%
     dplyr::summarize(
-      lab.p.100m = median(labels.per.100m, na.rm = TRUE),
+      lab.p.100m.mn = mean(labels.per.100m, na.rm = TRUE),
+      lab.p.100m.md = median(labels.per.100m, na.rm = TRUE),
       lab.p.100m.std = sd(labels.per.100m, na.rm = TRUE),
-      m.p.min = median(meters.per.min, na.rm = TRUE),
+      m.p.min.mn = mean(meters.per.min, na.rm = TRUE),
+      m.p.min.md = median(meters.per.min, na.rm = TRUE),
       m.p.min.sd = sd(meters.per.min, na.rm = TRUE),
-      min.audited = median(minutes_audited, na.rm = TRUE),
+      min.audited.mn = mean(minutes_audited, na.rm = TRUE),
+      min.audited.md = median(minutes_audited, na.rm = TRUE),
       min.audited.sd = sd(minutes_audited, na.rm = TRUE),
-      sec.to.label = median(seconds.to.label, na.rm = TRUE),
+      sec.to.label.mn = mean(seconds.to.label, na.rm = TRUE),
+      sec.to.label.md = median(seconds.to.label, na.rm = TRUE),
       sec.to.label.sd = sd(seconds.to.label, na.rm = TRUE)
     ),
   digits = 3,
@@ -1502,7 +1517,7 @@ ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.val
 
 ### Accuracy by user group
 
-NOTE: In these two tables, the data is binary (not ordinal) and these are median accuracies aggregated across all label types (all.\*) and for the problem vs no problem type (prob.\*).
+NOTE: In these two tables, the data is binary (not ordinal) and these are mean/median accuracies aggregated across all label types (all.\*) and for the problem vs no problem type (prob.\*).
 
 #### Summary stats
 
@@ -1713,7 +1728,7 @@ One interesting thing I am seeing is anon users have a much higher average preci
 
 ### Accuracy by label type
 
-NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), we only consider the first turker to audit each route, and these are median accuracies.
+NOTE: In the two tables below, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 #### Summary stats
 
