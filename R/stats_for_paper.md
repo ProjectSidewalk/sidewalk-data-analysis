@@ -529,6 +529,14 @@ NOTE: For regsitered and anon user routes below, it is the percentage of *routes
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution.semantic-1.png)
 
+| zone.type         | n.routes | n.neighborhoods |
+|:------------------|:---------|:----------------|
+| Commercial        | 2        | 2               |
+| Mixed-Use         | 8        | 8               |
+| Residential Apt   | 11       | 10              |
+| Residential House | 43       | 40              |
+| Unzoned           | 2        | 2               |
+
 Below, we look at the distribution of the label type densities in the ground truth, by zone type. Commercial seems to be the only zone that has a noticeably different distribution of label types. However, we have only two routes for that zone type so we can't draw anything of statistical significance from that.
 
 ![](stats_for_paper_files/figure-markdown_github/gt.label.dist.zone.plot.semantic-1.png)
@@ -561,6 +569,11 @@ Here is the zone type distribution for the mturk study. We assigned each street 
 NOTE: For regsitered and anon user routes below, it is the percentage of *routes* marked as that zone type. But for All DC Streets, it is the percentage of *streets* in DC, since we don't have a set of "routes" that makes up DC.
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution.density-1.png)
+
+| zone.type            | n.routes | n.neighborhoods |
+|:---------------------|:---------|:----------------|
+| Medium-High Density  | 23       | 22              |
+| Low-Moderate Density | 43       | 40              |
 
 Since there are many residential routes in each group, the number of residential routes is of interest. Of the 43 low-moderate density routes, 41 were residential (95.35%). And of the 23 medium-high density routes, 13 were residential (56.52%).
 

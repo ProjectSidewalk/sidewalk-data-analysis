@@ -2148,6 +2148,15 @@ ggplot(data = semantic.zone.distro.by.user.group,
   my.theme.discrete.x +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+
+kable(
+  conditions.w.semantic.zone %>%
+    inner_join(route.regions, by = c('condition.id' = 'condition_id')) %>%
+    group_by(zone.type) %>%
+    dplyr::summarise(n.routes = n(),
+                     n.neighborhoods = length(unique(region_id))),
+  align = 'l'
+)
 ```
 
 
@@ -2252,6 +2261,15 @@ ggplot(data = density.zone.distro.by.user.group,
   my.theme.discrete.x +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
+
+kable(
+  conditions.w.density.zone %>%
+    inner_join(route.regions, by = c('condition.id' = 'condition_id')) %>%
+    group_by(zone.type) %>%
+    dplyr::summarise(n.routes = n(),
+                     n.neighborhoods = length(unique(region_id))),
+  align = 'l'
+)
 
 # Setup needed for paragraph below.
 n.residential.routes.by.density <-
