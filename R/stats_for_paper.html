@@ -425,14 +425,14 @@ April 17, 2018</p>
 <thead>
 <tr class="header">
 <th align="left">role</th>
-<th align="left">n_users</th>
-<th align="left">miles</th>
-<th align="left">km</th>
-<th align="left">coverage</th>
-<th align="left">missions</th>
+<th align="left">n.users</th>
 <th align="left">audits</th>
 <th align="left">hours_audited</th>
+<th align="left">km</th>
 <th align="left">labels</th>
+<th align="left">miles</th>
+<th align="left">missions</th>
+<th align="left">coverage</th>
 <th align="left">&gt;1 sess</th>
 </tr>
 </thead>
@@ -440,37 +440,37 @@ April 17, 2018</p>
 <tr class="odd">
 <td align="left">Anonymous</td>
 <td align="left">293</td>
-<td align="left">80</td>
-<td align="left">129</td>
-<td align="left">7.4%</td>
-<td align="left">316</td>
 <td align="left">1181</td>
 <td align="left">86</td>
+<td align="left">129</td>
 <td align="left">10760</td>
+<td align="left">80</td>
+<td align="left">316</td>
+<td align="left">7.4%</td>
 <td align="left">72%</td>
 </tr>
 <tr class="even">
 <td align="left">Turker</td>
 <td align="left">122</td>
-<td align="left">1016</td>
-<td align="left">1636</td>
-<td align="left">95%</td>
-<td align="left">3077</td>
 <td align="left">13207</td>
 <td align="left">458</td>
+<td align="left">1636</td>
 <td align="left">103820</td>
+<td align="left">1016</td>
+<td align="left">3077</td>
+<td align="left">94.5%</td>
 <td align="left">23%</td>
 </tr>
 <tr class="odd">
 <td align="left">Registered</td>
 <td align="left">188</td>
-<td align="left">392</td>
-<td align="left">630</td>
-<td align="left">36%</td>
-<td align="left">1218</td>
 <td align="left">5171</td>
 <td align="left">181</td>
+<td align="left">630</td>
 <td align="left">35949</td>
+<td align="left">392</td>
+<td align="left">1218</td>
+<td align="left">36.4%</td>
 <td align="left">38%</td>
 </tr>
 </tbody>
@@ -626,81 +626,86 @@ April 17, 2018</p>
 <p>NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.</p>
 <table>
 <colgroup>
-<col width="6%"></col>
+<col width="5%"></col>
+<col width="3%"></col>
+<col width="8%"></col>
+<col width="8%"></col>
+<col width="8%"></col>
+<col width="9%"></col>
+<col width="9%"></col>
+<col width="9%"></col>
+<col width="5%"></col>
+<col width="5%"></col>
+<col width="5%"></col>
 <col width="7%"></col>
 <col width="7%"></col>
-<col width="8%"></col>
-<col width="6%"></col>
-<col width="6%"></col>
-<col width="6%"></col>
-<col width="8%"></col>
-<col width="8%"></col>
-<col width="8%"></col>
-<col width="8%"></col>
-<col width="8%"></col>
-<col width="8%"></col>
+<col width="7%"></col>
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">worker.type</th>
-<th align="left">lab.p.100m.mn</th>
-<th align="left">lab.p.100m.md</th>
-<th align="left">lab.p.100m.std</th>
-<th align="left">m.p.min.mn</th>
-<th align="left">m.p.min.md</th>
-<th align="left">m.p.min.sd</th>
-<th align="left">min.audited.mn</th>
-<th align="left">min.audited.md</th>
-<th align="left">min.audited.sd</th>
-<th align="left">sec.to.label.mn</th>
-<th align="left">sec.to.label.md</th>
-<th align="left">sec.to.label.sd</th>
+<th align="left">n.users</th>
+<th align="left">labels.per.100m_md</th>
+<th align="left">labels.per.100m_mn</th>
+<th align="left">labels.per.100m_sd</th>
+<th align="left">minutes_audited_md</th>
+<th align="left">minutes_audited_mn</th>
+<th align="left">minutes_audited_sd</th>
+<th align="left">m.p.min_md</th>
+<th align="left">m.p.min_mn</th>
+<th align="left">m.p.min_sd</th>
+<th align="left">sec.p.label_md</th>
+<th align="left">sec.p.label_mn</th>
+<th align="left">sec.p.label_sd</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">anon</td>
-<td align="left">5.116</td>
+<td align="left">16</td>
 <td align="left">4.921</td>
+<td align="left">5.116</td>
 <td align="left">3.382</td>
-<td align="left">55.232</td>
-<td align="left">47.429</td>
-<td align="left">38.167</td>
-<td align="left">14.332</td>
 <td align="left">12.865</td>
+<td align="left">14.332</td>
 <td align="left">6.327</td>
-<td align="left">10.446</td>
+<td align="left">47.429</td>
+<td align="left">55.232</td>
+<td align="left">38.167</td>
 <td align="left">6.939</td>
+<td align="left">10.446</td>
 <td align="left">10.058</td>
 </tr>
 <tr class="even">
 <td align="left">reg</td>
-<td align="left">6.063</td>
+<td align="left">50</td>
 <td align="left">5.988</td>
+<td align="left">6.063</td>
 <td align="left">3.457</td>
-<td align="left">58.561</td>
-<td align="left">51.583</td>
-<td align="left">30.531</td>
-<td align="left">26.226</td>
 <td align="left">23.660</td>
+<td align="left">26.226</td>
 <td align="left">13.297</td>
-<td align="left">5.943</td>
+<td align="left">51.583</td>
+<td align="left">58.561</td>
+<td align="left">30.531</td>
 <td align="left">5.232</td>
+<td align="left">5.943</td>
 <td align="left">2.522</td>
 </tr>
 <tr class="odd">
 <td align="left">turk1</td>
-<td align="left">8.320</td>
+<td align="left">66</td>
 <td align="left">7.669</td>
+<td align="left">8.320</td>
 <td align="left">4.109</td>
-<td align="left">31.597</td>
-<td align="left">30.825</td>
-<td align="left">11.112</td>
-<td align="left">37.717</td>
 <td align="left">33.695</td>
+<td align="left">37.717</td>
 <td align="left">16.108</td>
-<td align="left">9.599</td>
+<td align="left">30.825</td>
+<td align="left">31.597</td>
+<td align="left">11.112</td>
 <td align="left">8.416</td>
+<td align="left">9.599</td>
 <td align="left">4.560</td>
 </tr>
 </tbody>
@@ -708,40 +713,53 @@ April 17, 2018</p>
 <p>Below, we have a table of aggregate (sum) stats by user group.</p>
 <p>NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.</p>
 <table>
+<colgroup>
+<col width="14%"></col>
+<col width="10%"></col>
+<col width="14%"></col>
+<col width="17%"></col>
+<col width="16%"></col>
+<col width="11%"></col>
+<col width="13%"></col>
+</colgroup>
 <thead>
 <tr class="header">
 <th align="left">worker.type</th>
-<th align="left">n.missions</th>
-<th align="left">distance.miles</th>
+<th align="left">n.users</th>
 <th align="left">distance.km</th>
-<th align="left">n.labels</th>
+<th align="left">distance.miles</th>
 <th align="left">hours.audited</th>
+<th align="left">n.labels</th>
+<th align="left">n.missions</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">anon</td>
-<td align="left">32</td>
-<td align="left">6.061</td>
+<td align="left">16</td>
 <td align="left">9.754</td>
-<td align="left">499</td>
+<td align="left">6.061</td>
 <td align="left">3.822</td>
+<td align="left">499</td>
+<td align="left">32</td>
 </tr>
 <tr class="even">
 <td align="left">reg</td>
-<td align="left">150</td>
-<td align="left">37.879</td>
+<td align="left">50</td>
 <td align="left">60.960</td>
-<td align="left">3696</td>
+<td align="left">37.879</td>
 <td align="left">21.855</td>
+<td align="left">3696</td>
+<td align="left">150</td>
 </tr>
 <tr class="odd">
 <td align="left">turk1</td>
-<td align="left">182</td>
-<td align="left">43.939</td>
+<td align="left">66</td>
 <td align="left">70.714</td>
-<td align="left">5711</td>
+<td align="left">43.939</td>
 <td align="left">41.489</td>
+<td align="left">5711</td>
+<td align="left">182</td>
 </tr>
 </tbody>
 </table>
@@ -1659,101 +1677,101 @@ April 17, 2018</p>
 <thead>
 <tr class="header">
 <th align="left">label.type</th>
-<th align="left">recall.md</th>
-<th align="left">recall.mn</th>
-<th align="left">recall.sd</th>
-<th align="left">prec.md</th>
-<th align="left">prec.mn</th>
-<th align="left">prec.sd</th>
-<th align="left">f.md</th>
-<th align="left">f.mn</th>
-<th align="left">f.sd</th>
+<th align="left">f_md</th>
+<th align="left">f_mn</th>
+<th align="left">f_sd</th>
+<th align="left">prec_md</th>
+<th align="left">prec_mn</th>
+<th align="left">prec_sd</th>
+<th align="left">recall_md</th>
+<th align="left">recall_mn</th>
+<th align="left">recall_sd</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">All</td>
-<td align="left">0.714</td>
-<td align="left">0.688</td>
-<td align="left">0.196</td>
-<td align="left">0.674</td>
-<td align="left">0.675</td>
-<td align="left">0.172</td>
 <td align="left">0.667</td>
 <td align="left">0.662</td>
 <td align="left">0.129</td>
+<td align="left">0.674</td>
+<td align="left">0.675</td>
+<td align="left">0.172</td>
+<td align="left">0.714</td>
+<td align="left">0.688</td>
+<td align="left">0.196</td>
 </tr>
 <tr class="even">
 <td align="left">Problem</td>
-<td align="left">0.714</td>
-<td align="left">0.639</td>
-<td align="left">0.323</td>
-<td align="left">0.714</td>
-<td align="left">0.693</td>
-<td align="left">0.284</td>
 <td align="left">0.667</td>
 <td align="left">0.649</td>
 <td align="left">0.226</td>
+<td align="left">0.714</td>
+<td align="left">0.693</td>
+<td align="left">0.284</td>
+<td align="left">0.714</td>
+<td align="left">0.639</td>
+<td align="left">0.323</td>
 </tr>
 <tr class="odd">
 <td align="left">CurbRamp</td>
-<td align="left">1.000</td>
-<td align="left">0.902</td>
-<td align="left">0.210</td>
-<td align="left">1.000</td>
-<td align="left">0.950</td>
-<td align="left">0.074</td>
 <td align="left">0.958</td>
 <td align="left">0.918</td>
 <td align="left">0.132</td>
+<td align="left">1.000</td>
+<td align="left">0.950</td>
+<td align="left">0.074</td>
+<td align="left">1.000</td>
+<td align="left">0.902</td>
+<td align="left">0.210</td>
 </tr>
 <tr class="even">
 <td align="left">NoCurbRamp</td>
-<td align="left">1.000</td>
-<td align="left">0.762</td>
-<td align="left">0.406</td>
-<td align="left">0.000</td>
-<td align="left">0.179</td>
-<td align="left">0.279</td>
 <td align="left">0.500</td>
 <td align="left">0.542</td>
 <td align="left">0.227</td>
+<td align="left">0.000</td>
+<td align="left">0.179</td>
+<td align="left">0.279</td>
+<td align="left">1.000</td>
+<td align="left">0.762</td>
+<td align="left">0.406</td>
 </tr>
 <tr class="odd">
 <td align="left">Obstacle</td>
-<td align="left">0.500</td>
-<td align="left">0.486</td>
-<td align="left">0.379</td>
-<td align="left">0.500</td>
-<td align="left">0.447</td>
-<td align="left">0.365</td>
 <td align="left">0.545</td>
 <td align="left">0.581</td>
 <td align="left">0.211</td>
+<td align="left">0.500</td>
+<td align="left">0.447</td>
+<td align="left">0.365</td>
+<td align="left">0.500</td>
+<td align="left">0.486</td>
+<td align="left">0.379</td>
 </tr>
 <tr class="even">
 <td align="left">SurfaceProb</td>
-<td align="left">0.333</td>
-<td align="left">0.344</td>
-<td align="left">0.329</td>
-<td align="left">0.817</td>
-<td align="left">0.715</td>
-<td align="left">0.339</td>
 <td align="left">0.500</td>
 <td align="left">0.555</td>
 <td align="left">0.214</td>
+<td align="left">0.817</td>
+<td align="left">0.715</td>
+<td align="left">0.339</td>
+<td align="left">0.333</td>
+<td align="left">0.344</td>
+<td align="left">0.329</td>
 </tr>
 <tr class="odd">
 <td align="left">NoSidewalk</td>
-<td align="left">0.600</td>
-<td align="left">0.557</td>
-<td align="left">0.420</td>
-<td align="left">0.958</td>
-<td align="left">0.716</td>
-<td align="left">0.355</td>
 <td align="left">0.667</td>
 <td align="left">0.751</td>
 <td align="left">0.201</td>
+<td align="left">0.958</td>
+<td align="left">0.716</td>
+<td align="left">0.355</td>
+<td align="left">0.600</td>
+<td align="left">0.557</td>
+<td align="left">0.420</td>
 </tr>
 </tbody>
 </table>
@@ -1762,89 +1780,89 @@ April 17, 2018</p>
 <thead>
 <tr class="header">
 <th align="left">label.type</th>
-<th align="left">recall.md</th>
-<th align="left">recall.mn</th>
-<th align="left">recall.sd</th>
-<th align="left">prec.md</th>
-<th align="left">prec.mn</th>
-<th align="left">prec.sd</th>
-<th align="left">f.md</th>
-<th align="left">f.mn</th>
-<th align="left">f.sd</th>
+<th align="left">f_md</th>
+<th align="left">f_mn</th>
+<th align="left">f_sd</th>
+<th align="left">prec_md</th>
+<th align="left">prec_mn</th>
+<th align="left">prec_sd</th>
+<th align="left">recall_md</th>
+<th align="left">recall_mn</th>
+<th align="left">recall_sd</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td align="left">All</td>
-<td align="left">0.543</td>
-<td align="left">0.502</td>
-<td align="left">0.224</td>
-<td align="left">0.472</td>
-<td align="left">0.465</td>
-<td align="left">0.181</td>
 <td align="left">0.468</td>
 <td align="left">0.455</td>
 <td align="left">0.165</td>
+<td align="left">0.472</td>
+<td align="left">0.465</td>
+<td align="left">0.181</td>
+<td align="left">0.543</td>
+<td align="left">0.502</td>
+<td align="left">0.224</td>
 </tr>
 <tr class="even">
 <td align="left">Problem</td>
-<td align="left">0.200</td>
-<td align="left">0.228</td>
-<td align="left">0.195</td>
-<td align="left">0.250</td>
-<td align="left">0.273</td>
-<td align="left">0.221</td>
 <td align="left">0.222</td>
 <td align="left">0.229</td>
 <td align="left">0.116</td>
+<td align="left">0.250</td>
+<td align="left">0.273</td>
+<td align="left">0.221</td>
+<td align="left">0.200</td>
+<td align="left">0.228</td>
+<td align="left">0.195</td>
 </tr>
 <tr class="odd">
 <td align="left">CurbRamp</td>
-<td align="left">0.789</td>
-<td align="left">0.716</td>
-<td align="left">0.254</td>
-<td align="left">0.667</td>
-<td align="left">0.638</td>
-<td align="left">0.199</td>
 <td align="left">0.689</td>
 <td align="left">0.642</td>
 <td align="left">0.188</td>
+<td align="left">0.667</td>
+<td align="left">0.638</td>
+<td align="left">0.199</td>
+<td align="left">0.789</td>
+<td align="left">0.716</td>
+<td align="left">0.254</td>
 </tr>
 <tr class="even">
 <td align="left">NoCurbRamp</td>
-<td align="left">0.633</td>
-<td align="left">0.548</td>
-<td align="left">0.450</td>
-<td align="left">0.000</td>
-<td align="left">0.108</td>
-<td align="left">0.223</td>
 <td align="left">0.400</td>
 <td align="left">0.401</td>
 <td align="left">0.244</td>
+<td align="left">0.000</td>
+<td align="left">0.108</td>
+<td align="left">0.223</td>
+<td align="left">0.633</td>
+<td align="left">0.548</td>
+<td align="left">0.450</td>
 </tr>
 <tr class="odd">
 <td align="left">Obstacle</td>
-<td align="left">0.143</td>
-<td align="left">0.210</td>
-<td align="left">0.256</td>
-<td align="left">0.087</td>
-<td align="left">0.174</td>
-<td align="left">0.220</td>
 <td align="left">0.267</td>
 <td align="left">0.279</td>
 <td align="left">0.134</td>
+<td align="left">0.087</td>
+<td align="left">0.174</td>
+<td align="left">0.220</td>
+<td align="left">0.143</td>
+<td align="left">0.210</td>
+<td align="left">0.256</td>
 </tr>
 <tr class="even">
 <td align="left">SurfaceProb</td>
-<td align="left">0.034</td>
-<td align="left">0.129</td>
-<td align="left">0.214</td>
-<td align="left">0.268</td>
-<td align="left">0.343</td>
-<td align="left">0.333</td>
 <td align="left">0.214</td>
 <td align="left">0.265</td>
 <td align="left">0.199</td>
+<td align="left">0.268</td>
+<td align="left">0.343</td>
+<td align="left">0.333</td>
+<td align="left">0.034</td>
+<td align="left">0.129</td>
+<td align="left">0.214</td>
 </tr>
 </tbody>
 </table>

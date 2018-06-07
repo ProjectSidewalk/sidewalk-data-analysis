@@ -124,6 +124,35 @@ format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, descend
     arrange(!!sym(fixed.var), desc(second.index)) %>%
     dplyr::select(fixed.var, test, p.value, z.value, outcome.var)
 }
+
+
+summarise_vars <- function(data, group, var.names = NULL, col.start = NULL, col.end = NULL,
+                           funcs = funs(md = median, mn = mean, sd = sd), only.numeric = TRUE,
+                           include.n = FALSE) {
+
+  if (!is.null(col.start) & !is.null(col.end) & is.null(var.names)) {
+    var.names <- names(data)[match(col.start, names(data)):match(col.end, names(data))]
+  }
+
+  if (is.null(var.names) & only.numeric) {
+    summarised <- data %>% group_by(!!sym(group)) %>% summarise_if(is.numeric, funcs, na.rm = TRUE)
+  } else if (is.null(var.names)) {
+    summarised <- data %>% group_by(!!sym(group)) %>% summarise_all(funcs, na.rm = TRUE)
+  } else {
+    summarised <- data %>% group_by(!!sym(group)) %>% summarise_at(vars(var.names), funcs, na.rm = TRUE)
+  }
+
+  if (include.n) {
+    data %>%
+      group_by(!!sym(group)) %>%
+      dplyr::summarise(n.users = n()) %>%
+      inner_join(summarised, by = group) %>%
+      select(group, n.users, 2 + order(colnames(.)[colnames(.) %not-in% c(group, 'n.users')]))
+  } else {
+    summarised %>%
+      select(group, 1 + order(colnames(.)[colnames(.) != group]))
+  }
+}
 ```
 
 ```{r connect, echo=FALSE}
@@ -932,33 +961,6 @@ Below are the means/medains/sds for a few metrics (followed by sums), split by u
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
 
 ```{r public.deployment.showing.stats, echo=FALSE, warning=FALSE}
-summarise_vars <- function(data, group, var.names = NULL, col.start = NULL, col.end = NULL,
-                           funcs = funs(md = median, mn = mean, sd = sd), only.numeric = TRUE,
-                           include.n = FALSE) {
-
-  if (!is.null(col.start) & !is.null(col.end) & is.null(var.names)) {
-    var.names <- names(data)[match(col.start, names(data)):match(col.end, names(data))]
-  }
-
-  if (is.null(var.names) & only.numeric) {
-    summarised <- data %>% group_by(!!sym(group)) %>% summarise_if(is.numeric, funcs, na.rm = TRUE)
-  } else if (is.null(var.names)) {
-    summarised <- data %>% group_by(!!sym(group)) %>% summarise_all(funcs, na.rm = TRUE)
-  } else {
-    summarised <- data %>% group_by(!!sym(group)) %>% summarise_at(vars(var.names), funcs, na.rm = TRUE)
-  }
-
-  if (include.n) {
-    data %>%
-      group_by(!!sym(group)) %>%
-      dplyr::summarise(n.users = n()) %>%
-      inner_join(summarised, by = group) %>%
-      select(group, n.users, 2 + order(colnames(.)[colnames(.) %not-in% c(group, 'n.users')]))
-  } else {
-    summarised %>%
-      select(group, 1 + order(colnames(.)[colnames(.) != group]))
-  }
-}
 kable(
   filtered.speeds %>%
     mutate(km = meters_audited / 1000) %>%
@@ -967,25 +969,21 @@ kable(
   digits = 3,
   align = 'l'
   )
-
 kable(
   filtered.speeds %>%
-    group_by(role) %>%
-    dplyr::summarise(
-      n_users = n(),
-      miles = sum(miles_audited, na.rm = TRUE),
-      km = sum(meters_audited / 1000, na.rm = TRUE),
-      coverage = paste0(format(100 * sum(miles_audited, na.rm = TRUE) / TOTAL_STREET_DIST_MILES,
-                               digits = 2),
-                        '%'),
-      missions = sum(mission_count, na.rm = TRUE),
-      audits = sum(audit_count, na.rm = TRUE),
-      hours_audited = sum(hours_audited, na.rm = TRUE),
-      labels = sum(label_count, na.rm = TRUE),
-      '>1 sess' = paste0(format(100 * sum(n_sessions > 1) / n(), digits = 2), '%')
-      ),
-  digits = 0,
-  align = 'l'
+    mutate(km = meters_audited / 1000,
+           mult_sess = as.numeric(n_sessions > 1)) %>%
+    rename(miles = miles_audited,
+           audits = audit_count,
+           labels = label_count,
+           missions = mission_count) %>%
+    select(role, miles, km, missions, audits, hours_audited, labels, mult_sess) %>%
+    summarise_vars('role', funcs = sum, include.n = TRUE) %>%
+    mutate(coverage = paste0(format(100 * miles / TOTAL_STREET_DIST_MILES, digits = 2), '%'),
+           '>1 sess' = paste0(format(100 * mult_sess / n.users, digits = 2), '%')) %>%
+    select(-mult_sess),
+  align = 'l',
+  digits = 0
   )
 ```
 
@@ -1371,21 +1369,10 @@ NOTE: In this table, we are only considering single users auditing (i.e., no mul
 kable(
   turk.study.summary.stats.with.labels %>%
     filter(granularity == 'street') %>%  # granularity doesn't affect these stats
-    group_by(worker.type) %>%
-    dplyr::summarize(
-      lab.p.100m.mn = mean(labels.per.100m, na.rm = TRUE),
-      lab.p.100m.md = median(labels.per.100m, na.rm = TRUE),
-      lab.p.100m.std = sd(labels.per.100m, na.rm = TRUE),
-      m.p.min.mn = mean(meters.per.min, na.rm = TRUE),
-      m.p.min.md = median(meters.per.min, na.rm = TRUE),
-      m.p.min.sd = sd(meters.per.min, na.rm = TRUE),
-      min.audited.mn = mean(minutes_audited, na.rm = TRUE),
-      min.audited.md = median(minutes_audited, na.rm = TRUE),
-      min.audited.sd = sd(minutes_audited, na.rm = TRUE),
-      sec.to.label.mn = mean(seconds.to.label, na.rm = TRUE),
-      sec.to.label.md = median(seconds.to.label, na.rm = TRUE),
-      sec.to.label.sd = sd(seconds.to.label, na.rm = TRUE)
-    ),
+    rename(m.p.min = meters.per.min, sec.p.label = seconds.to.label) %>%
+    summarise_vars('worker.type',
+                   var.names = c('labels.per.100m', 'm.p.min', 'minutes_audited', 'sec.p.label'),
+                   include.n = TRUE),
   digits = 3,
   align = 'l'
   )
@@ -1400,16 +1387,12 @@ NOTE: In this table, we are only considering single users auditing (i.e., no mul
 kable(
   turk.study.summary.stats.with.labels %>%
     filter(granularity == 'street') %>%  # granularity doesn't affect these stats
-    group_by(worker.type) %>%
-    dplyr::summarize(
-      n.missions = sum(n.missions, na.rm = TRUE),
-      distance.feet = sum(distance.feet, na.rm = TRUE),
-      n.labels = sum(n.labels, na.rm = TRUE),
-      hours.audited = sum(hours.audited, na.rm = TRUE)
-    ) %>%
     mutate(distance.miles = distance.feet / 5280,
            distance.km = distance.feet / 3280.84) %>%
-    select(worker.type, n.missions, distance.miles, distance.km, n.labels, hours.audited),
+    summarise_vars('worker.type',
+                   c('n.missions', 'distance.miles', 'distance.km', 'n.labels', 'hours.audited'),
+                   funcs = sum,
+                   include.n = TRUE),
   digits = 3,
   align = 'l'
   )
@@ -1742,16 +1725,8 @@ turk.showing.stats.by.label.type <-
 kable(
   turk.showing.stats.by.label.type %>%
     filter(granularity == 'street') %>%
-    group_by(label.type) %>%
-    dplyr::summarize(recall.md = median(recall, na.rm = TRUE),
-                     recall.mn = mean(recall, na.rm = TRUE),
-                     recall.sd = sd(recall, na.rm = TRUE),
-                     prec.md = median(precision, na.rm = TRUE),
-                     prec.mn = mean(precision, na.rm = TRUE),
-                     prec.sd = sd(precision, na.rm = TRUE),
-                     f.md = median(f.measure, na.rm = TRUE),
-                     f.mn = mean(f.measure, na.rm = TRUE),
-                     f.sd = sd(f.measure, na.rm = TRUE)),
+    rename(prec = precision, f = f.measure) %>%
+    summarise_vars('label.type', c('recall', 'prec', 'f')),
   digits = 3,
   align = 'l'
   )
@@ -1763,16 +1738,8 @@ Mean/median/sd accuracy by label type - 5 meter level:
 kable(
   turk.showing.stats.by.label.type %>%
     filter(granularity == '5_meter') %>%
-    group_by(label.type) %>%
-    dplyr::summarize(recall.md = median(recall, na.rm = TRUE),
-                     recall.mn = mean(recall, na.rm = TRUE),
-                     recall.sd = sd(recall, na.rm = TRUE),
-                     prec.md = median(precision, na.rm = TRUE),
-                     prec.mn = mean(precision, na.rm = TRUE),
-                     prec.sd = sd(precision, na.rm = TRUE),
-                     f.md = median(f.measure, na.rm = TRUE),
-                     f.mn = mean(f.measure, na.rm = TRUE),
-                     f.sd = sd(f.measure, na.rm = TRUE)),
+    rename(prec = precision, f = f.measure) %>%
+    summarise_vars('label.type', c('recall', 'prec', 'f')),
   digits = 3,
   align = 'l'
   )
