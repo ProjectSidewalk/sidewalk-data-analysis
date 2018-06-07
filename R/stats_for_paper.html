@@ -1362,7 +1362,7 @@ April 17, 2018</p>
 <p>To test that the orderings of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall for the Problem type, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.</p>
 <p>NOTE: <code>*</code> means less than 0.05, <code>**</code> means less than 0.01, and <code>***</code> means less than 0.001</p>
 <p>NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.</p>
-<p>Recall, all label types: Likelihood ratio = 63.925, p &lt; 0.001</p>
+<p>Recall, all label types: Likelihood ratio = 63.925, p &lt; 0.001.</p>
 <table>
 <thead>
 <tr class="header">
@@ -1432,7 +1432,7 @@ April 17, 2018</p>
 </tr>
 </tbody>
 </table>
-<p>Precision, all label types: Likelihood ratio = 167.44, p &lt; 0.001</p>
+<p>Precision, all label types: Likelihood ratio = 167.44, p &lt; 0.001.</p>
 <table>
 <thead>
 <tr class="header">
@@ -1502,7 +1502,7 @@ April 17, 2018</p>
 </tr>
 </tbody>
 </table>
-<p>Recall, Problem type: Likelihood ratio = 110.62, p &lt; 0.001</p>
+<p>Recall, Problem type: Likelihood ratio = 110.62, p &lt; 0.001.</p>
 <table>
 <thead>
 <tr class="header">
@@ -1558,7 +1558,8 @@ April 17, 2018</p>
 </tr>
 </tbody>
 </table>
-<p>Precision, Problem type: Likelihood ratio = 11.415, p = 0.022</p>
+<p>Precision, Problem type: Likelihood ratio = 11.415, p = 0.022.</p>
+<p>NOTE: Although anon user have a higher average problem type precision than turk5, the model actually says that turk5 has higher precision (though it is not statistically significant). This is because there is just higher precision across the board on the anon user routes; the mixed effects model takes this into account! More on this below.</p>
 <table>
 <thead>
 <tr class="header">
@@ -1571,31 +1572,31 @@ April 17, 2018</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">anon</td>
-<td align="left">-</td>
-<td align="left">-</td>
-<td align="left">-</td>
-<td align="left">0.910</td>
-</tr>
-<tr class="even">
 <td align="left">turk5</td>
 <td align="left">-</td>
 <td align="left">-</td>
 <td align="left">-</td>
 <td align="left">0.790</td>
 </tr>
-<tr class="odd">
-<td align="left">turk3</td>
+<tr class="even">
+<td align="left">anon</td>
 <td align="left">&lt; turk5</td>
 <td align="left">1.000</td>
-<td align="left">0.57950</td>
-<td align="left">0.762</td>
+<td align="left">0.09283</td>
+<td align="left">0.910</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">turk3</td>
 <td align="left">&lt; anon</td>
 <td align="left">1.000</td>
 <td align="left">0.17250</td>
+<td align="left">0.762</td>
+</tr>
+<tr class="even">
+<td align="left">turk3</td>
+<td align="left">&lt; turk5</td>
+<td align="left">1.000</td>
+<td align="left">0.57950</td>
 <td align="left">0.762</td>
 </tr>
 <tr class="odd">
@@ -1607,16 +1608,16 @@ April 17, 2018</p>
 </tr>
 <tr class="even">
 <td align="left">turk1</td>
-<td align="left">&lt; turk5</td>
-<td align="left">0.419</td>
-<td align="left">1.93987</td>
+<td align="left">&lt; anon</td>
+<td align="left">1.000</td>
+<td align="left">0.75589</td>
 <td align="left">0.713</td>
 </tr>
 <tr class="odd">
 <td align="left">turk1</td>
-<td align="left">&lt; anon</td>
-<td align="left">1.000</td>
-<td align="left">0.75589</td>
+<td align="left">&lt; turk5</td>
+<td align="left">0.419</td>
+<td align="left">1.93987</td>
 <td align="left">0.713</td>
 </tr>
 <tr class="even">
@@ -1634,6 +1635,13 @@ April 17, 2018</p>
 <td align="left">0.617</td>
 </tr>
 <tr class="even">
+<td align="left">reg</td>
+<td align="left">&lt; anon</td>
+<td align="left">1.000</td>
+<td align="left">1.13327</td>
+<td align="left">0.617</td>
+</tr>
+<tr class="odd">
 <td align="left">reg</td>
 <td align="left">&lt; turk5</td>
 <td align="left">0.044 *</td>

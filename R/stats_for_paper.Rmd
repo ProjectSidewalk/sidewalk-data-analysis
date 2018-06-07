@@ -79,7 +79,8 @@ extract_label_type <- Vectorize(
   str_extract_all(note.str, '[:alpha:]+')[[1]][2]
   }
 )
-format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, descending = FALSE) {
+format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, ordering = NULL,
+                               descending = FALSE) {
   ordering.sign <- if_else(descending == TRUE, '<', '>')
 
   outcome.by.type <-
@@ -88,12 +89,14 @@ format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, descend
     group_by(!!sym(fixed.var)) %>%
     dplyr::summarize_at(vars(outcome.var), mean)
 
-  ordering <-
-    if (descending == TRUE) {
-      outcome.by.type %>% arrange(desc(!!sym(outcome.var))) %>% pull(fixed.var)
-    } else {
-      outcome.by.type %>% arrange(!!sym(outcome.var)) %>% pull(fixed.var)
-    }
+  if (is.null(ordering)) {
+    ordering <-
+      if (descending == TRUE) {
+        outcome.by.type %>% arrange(desc(!!sym(outcome.var))) %>% pull(fixed.var)
+      } else {
+        outcome.by.type %>% arrange(!!sym(outcome.var)) %>% pull(fixed.var)
+      }
+  }
 
   tukey.with.vars.split <-
     data.frame(comparison = names(tukey$test$pvalues),
@@ -1640,7 +1643,7 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 
 NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
 
-Recall, all label types: Likelihood ratio = `r format(lrt.user.group.recall.all['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.recall.all['worker.type','Pr(Chi)'])`
+Recall, all label types: Likelihood ratio = `r format(lrt.user.group.recall.all['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.recall.all['worker.type','Pr(Chi)'])`.
 
 ```{r turk.user.group.recall.all.tukey, echo=FALSE}
 # Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
@@ -1654,7 +1657,7 @@ tukey.user.group.recall.all.clean <- format.tukey.table(tukey.user.group.recall.
 kable(tukey.user.group.recall.all.clean, digits = 3, align = 'l')
 ```
 
-Precision, all label types: Likelihood ratio = `r format(lrt.user.group.prec.all['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.prec.all['worker.type','Pr(Chi)'])`
+Precision, all label types: Likelihood ratio = `r format(lrt.user.group.prec.all['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.prec.all['worker.type','Pr(Chi)'])`.
 
 ```{r turk.user.group.prec.all.tukey, echo=FALSE}
 tukey.user.group.prec.all <- summary(glht(user.group.prec.all.model, linfct = mcp(worker.type = 'Tukey')),
@@ -1667,7 +1670,7 @@ tukey.user.group.prec.all.clean <- format.tukey.table(tukey.user.group.prec.all,
 kable(tukey.user.group.prec.all.clean, digits = 3, align = 'l')
 ```
 
-Recall, Problem type: Likelihood ratio = `r format(lrt.user.group.recall.prob['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.recall.prob['worker.type','Pr(Chi)'])`
+Recall, Problem type: Likelihood ratio = `r format(lrt.user.group.recall.prob['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.recall.prob['worker.type','Pr(Chi)'])`.
 
 ```{r turk.user.group.recall.prob.tukey, echo=FALSE}
 tukey.user.group.recall.prob <- summary(glht(user.group.recall.prob.model, linfct = mcp(worker.type = 'Tukey')),
@@ -1680,7 +1683,9 @@ tukey.user.group.recall.prob.clean <- format.tukey.table(tukey.user.group.recall
 kable(tukey.user.group.recall.prob.clean, digits = 3, align = 'l')
 ```
 
-Precision, Problem type: Likelihood ratio = `r format(lrt.user.group.prec.prob['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.prec.prob['worker.type','Pr(Chi)'])`
+Precision, Problem type: Likelihood ratio = `r format(lrt.user.group.prec.prob['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.prec.prob['worker.type','Pr(Chi)'])`.
+
+NOTE: Although anon user have a higher average problem type precision than turk5, the model actually says that turk5 has higher precision (though it is not statistically significant). This is because there is just higher precision across the board on the anon user routes; the mixed effects model takes this into account! More on this below.
 
 ```{r turk.user.group.prec.prob.tukey, echo=FALSE}
 tukey.user.group.prec.prob <- summary(glht(user.group.prec.prob.model, linfct = mcp(worker.type = 'Tukey')),
@@ -1689,6 +1694,7 @@ tukey.user.group.prec.prob.clean <- format.tukey.table(tukey.user.group.prec.pro
                                             'precision',
                                             'worker.type',
                                             user.group.test.data.prec.prob,
+                                            ordering = c('turk5', 'anon', 'turk3', 'turk1', 'reg'),
                                             descending = TRUE)
 kable(tukey.user.group.prec.prob.clean, digits = 3, align = 'l')
 

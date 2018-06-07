@@ -311,7 +311,7 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 
 NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
 
-Recall, all label types: Likelihood ratio = 63.925, p &lt; 0.001
+Recall, all label types: Likelihood ratio = 63.925, p &lt; 0.001.
 
 | worker.type | test       | p.value    | z.value | recall |
 |:------------|:-----------|:-----------|:--------|:-------|
@@ -324,7 +324,7 @@ Recall, all label types: Likelihood ratio = 63.925, p &lt; 0.001
 | anon        | &lt; turk3 | 0.278      | 1.681   | 0.519  |
 | anon        | &lt; turk1 | 0.010 \*   | 3.081   | 0.519  |
 
-Precision, all label types: Likelihood ratio = 167.44, p &lt; 0.001
+Precision, all label types: Likelihood ratio = 167.44, p &lt; 0.001.
 
 | worker.type | test       | p.value           | z.value | precision |
 |:------------|:-----------|:------------------|:--------|:----------|
@@ -337,7 +337,7 @@ Precision, all label types: Likelihood ratio = 167.44, p &lt; 0.001
 | reg         | &lt; turk1 | 0.113             | 1.940   | 0.637     |
 | reg         | &lt; anon  | 0.023 \*          | 2.784   | 0.637     |
 
-Recall, Problem type: Likelihood ratio = 110.62, p &lt; 0.001
+Recall, Problem type: Likelihood ratio = 110.62, p &lt; 0.001.
 
 | worker.type | test       | p.value           | z.value | recall |
 |:------------|:-----------|:------------------|:--------|:-------|
@@ -348,19 +348,22 @@ Recall, Problem type: Likelihood ratio = 110.62, p &lt; 0.001
 | anon        | &lt; turk3 | 0.028 \*          | 2.5986  | 0.418  |
 | turk5       | &lt; turk3 | 0.002 \*\*        | 3.5438  | 0.399  |
 
-Precision, Problem type: Likelihood ratio = 11.415, p = 0.022
+Precision, Problem type: Likelihood ratio = 11.415, p = 0.022.
+
+NOTE: Although anon user have a higher average problem type precision than turk5, the model actually says that turk5 has higher precision (though it is not statistically significant). This is because there is just higher precision across the board on the anon user routes; the mixed effects model takes this into account! More on this below.
 
 | worker.type | test       | p.value  | z.value | precision |
 |:------------|:-----------|:---------|:--------|:----------|
-| anon        | -          | -        | -       | 0.910     |
 | turk5       | -          | -        | -       | 0.790     |
-| turk3       | &lt; turk5 | 1.000    | 0.57950 | 0.762     |
+| anon        | &lt; turk5 | 1.000    | 0.09283 | 0.910     |
 | turk3       | &lt; anon  | 1.000    | 0.17250 | 0.762     |
+| turk3       | &lt; turk5 | 1.000    | 0.57950 | 0.762     |
 | turk1       | &lt; turk3 | 0.876    | 1.53363 | 0.713     |
-| turk1       | &lt; turk5 | 0.419    | 1.93987 | 0.713     |
 | turk1       | &lt; anon  | 1.000    | 0.75589 | 0.713     |
+| turk1       | &lt; turk5 | 0.419    | 1.93987 | 0.713     |
 | reg         | &lt; turk1 | 1.000    | 1.15151 | 0.617     |
 | reg         | &lt; turk3 | 0.088    | 2.58328 | 0.617     |
+| reg         | &lt; anon  | 1.000    | 1.13327 | 0.617     |
 | reg         | &lt; turk5 | 0.044 \* | 2.85118 | 0.617     |
 
 One interesting thing I am seeing is anon users have a much higher average precision for the Problem type than other user groups, but the difference is not statistically significant. It turns out that on routes audited by anonymous users, turkers *also* had much higher Problem type precision than for registered user routes. This can be seen in the following table:
