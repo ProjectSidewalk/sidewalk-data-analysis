@@ -79,6 +79,13 @@ extract_label_type <- Vectorize(
   str_extract_all(note.str, '[:alpha:]+')[[1]][2]
   }
 )
+print.lrt.results <- function(test, model, fixed.effect) {
+  if ('Pr(Chi)' %in% names(test)) p.col <- 'Pr(Chi)' else p.col <- 'Pr(>Chi)'
+  paste0('likelihood ratio = ', format(test[fixed.effect,'LRT'], digits = 5),
+         ', df = ', test[fixed.effect,'Df'],
+         ', n = ', nobs(model),
+         ', ', print.p.value(test[fixed.effect, p.col]))
+}
 format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, ordering = NULL,
                                descending = FALSE) {
   ordering.sign <- if_else(descending == TRUE, '<', '>')
@@ -1643,7 +1650,7 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 
 NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
 
-Recall, all label types: Likelihood ratio = `r format(lrt.user.group.recall.all['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.recall.all['worker.type','Pr(Chi)'])`.
+Recall, all label types: `r print.lrt.results(lrt.user.group.recall.all, user.group.recall.all.model, 'worker.type')`.
 
 ```{r turk.user.group.recall.all.tukey, echo=FALSE}
 # Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
@@ -1657,7 +1664,7 @@ tukey.user.group.recall.all.clean <- format.tukey.table(tukey.user.group.recall.
 kable(tukey.user.group.recall.all.clean, digits = 3, align = 'l')
 ```
 
-Precision, all label types: Likelihood ratio = `r format(lrt.user.group.prec.all['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.prec.all['worker.type','Pr(Chi)'])`.
+Precision, all label types: `r print.lrt.results(lrt.user.group.prec.all, user.group.prec.all.model, 'worker.type')`
 
 ```{r turk.user.group.prec.all.tukey, echo=FALSE}
 tukey.user.group.prec.all <- summary(glht(user.group.prec.all.model, linfct = mcp(worker.type = 'Tukey')),
@@ -1670,7 +1677,7 @@ tukey.user.group.prec.all.clean <- format.tukey.table(tukey.user.group.prec.all,
 kable(tukey.user.group.prec.all.clean, digits = 3, align = 'l')
 ```
 
-Recall, Problem type: Likelihood ratio = `r format(lrt.user.group.recall.prob['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.recall.prob['worker.type','Pr(Chi)'])`.
+Recall, Problem type: `r print.lrt.results(lrt.user.group.recall.prob, user.group.recall.prob.model, 'worker.type')`
 
 ```{r turk.user.group.recall.prob.tukey, echo=FALSE}
 tukey.user.group.recall.prob <- summary(glht(user.group.recall.prob.model, linfct = mcp(worker.type = 'Tukey')),
@@ -1683,7 +1690,7 @@ tukey.user.group.recall.prob.clean <- format.tukey.table(tukey.user.group.recall
 kable(tukey.user.group.recall.prob.clean, digits = 3, align = 'l')
 ```
 
-Precision, Problem type: Likelihood ratio = `r format(lrt.user.group.prec.prob['worker.type','LRT'], digits = 5)`, `r print.p.value(lrt.user.group.prec.prob['worker.type','Pr(Chi)'])`.
+Precision, Problem type: `r print.lrt.results(lrt.user.group.prec.prob, user.group.prec.prob.model, 'worker.type')`
 
 NOTE: Although anon user have a higher average problem type precision than turk5, the model actually says that turk5 has higher precision (though it is not statistically significant). This is because there is just higher precision across the board on the anon user routes; the mixed effects model takes this into account! More on this below.
 
@@ -1800,7 +1807,7 @@ tukey.type.prec <- summary(glht(type.prec.model, linfct = mcp(label.type = 'Tuke
                            test = adjusted('holm'))
 ```
 
-Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = `r format(lrt.type.recall['label.type','LRT'], digits = 5)`, `r print.p.value(lrt.type.recall['label.type','Pr(Chi)'])`). We also found label type to have a statistically significant association with precision (likelihood ratio = `r format(lrt.type.prec['label.type','LRT'], digits = 5)`, `r print.p.value(lrt.type.prec['label.type','Pr(Chi)'])`).
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (`r print.lrt.results(lrt.type.recall, type.recall.model, 'label.type')`). We also found label type to have a statistically significant association with precision (`r print.lrt.results(lrt.type.prec, type.prec.model, 'label.type')`).
 
 To test that the ordering of the label types are statistically significant (e.g., that NoCurbRamp recall is significantly lower than CurbRamp recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall, then precision).
 
@@ -1947,11 +1954,10 @@ ggplot(aes(x = residuals.log.labeling.time.model.),
 plot(log.labeling.time.model, resid(., type = "p") ~ fitted(.), abline = 0)
 
 
-log.labeling.time.model.base <- update(log.labeling.time.model, fixed = log.seconds.to.label ~ 1)
-lrt.labeling.time <- anova(log.labeling.time.model.base, log.labeling.time.model)
+lrt.labeling.time <- drop1(log.labeling.time.model, test = 'Chisq')
 ```
 
-Using a likelihood ratio test, we find the contribution by the fixed effect (label type) to be statistically significant (Likelihood ratio = `r format(lrt.labeling.time['log.labeling.time.model','L.Ratio'], digits = 5)`, `r print.p.value(lrt.labeling.time['log.labeling.time.model','p-value'])`), i.e., the association between label type and labeling time is statistically significant. To test that the ordering of the label types are statistically significant (e.g., that CurbRamp labeling time is significantly lower than Obstacle labeling time, etc), we do a post-hoc Tukey's HSD test. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a table below.
+Using a likelihood ratio test, we find the contribution by the fixed effect (label type) to be statistically significant (`r print.lrt.results(lrt.labeling.time, log.labeling.time.model, 'label.type')`), i.e., the association between label type and labeling time is statistically significant. To test that the ordering of the label types are statistically significant (e.g., that CurbRamp labeling time is significantly lower than Obstacle labeling time, etc), we do a post-hoc Tukey's HSD test. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a table below.
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
@@ -2467,6 +2473,8 @@ coeff.recall.prob <-
          label.type = 'Problem',
          accuracy.type = 'recall',
          LRT = lrt.behavior.recall.prob$LRT,
+         df = lrt.behavior.recall.prob$Df,
+         n = nobs(behavior.recall.prob.model),
          p = lrt.behavior.recall.prob$`Pr(Chi)`)
 
 behavior.recall.all.model <-
@@ -2482,6 +2490,8 @@ coeff.recall.all <-
          label.type = 'All',
          accuracy.type = 'recall',
          LRT = lrt.behavior.recall.all$LRT,
+         df = lrt.behavior.recall.all$Df,
+         n = nobs(behavior.recall.all.model),
          p = lrt.behavior.recall.all$`Pr(Chi)`)
 
 behavior.prec.prob.model <-
@@ -2497,6 +2507,8 @@ coeff.precision.prob <-
          label.type = 'Problem',
          accuracy.type = 'precision',
          LRT = lrt.behavior.prec.prob$LRT,
+         df = lrt.behavior.prec.prob$Df,
+         n = nobs(behavior.prec.prob.model),
          p = lrt.behavior.prec.prob$`Pr(Chi)`)
 
 behavior.prec.all.model <-
@@ -2512,6 +2524,8 @@ coeff.precision.all <-
          label.type = 'All',
          accuracy.type = 'precision',
          LRT = lrt.behavior.prec.all$LRT,
+         df = lrt.behavior.prec.all$Df,
+         n = nobs(behavior.prec.all.model),
          p = lrt.behavior.prec.all$`Pr(Chi)`)
 
 # Create nice looking table with important stats from each of the models/tests above.
@@ -2523,7 +2537,7 @@ all.coeffs <-
                                  TRUE                    ~ 'NA'),
          p.value = p.num.to.p.str.with.sig.code(p)) %>%
   rename(estimate = Estimate, std.err = Std..Error) %>%
-  select(accuracy.type, label.type, param, association, estimate, std.err, p.value, LRT)
+  select(accuracy.type, label.type, param, association, estimate, std.err, p.value, LRT, df, n)
 
 kable(all.coeffs, digits = 3, align = 'l')
 ```
@@ -2597,7 +2611,7 @@ lrt.severity.1 <- drop1(severity.model.1, test = 'Chisq')
 
 Below is a table showing the average recall across all users for labels that had severity <=3 (in the ground truth) and labels that had severity >=4, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = `r format(lrt.severity.1['included.severity','LRT'], digits = 5)`, `r print.p.value(lrt.severity.1['included.severity','Pr(Chi)'])`).
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (`r print.lrt.results(lrt.severity.1, severity.model.1, 'included.severity')`).
 
 ```{r turk.high.severity.analysis.1, echo=FALSE, fig.width=8, fig.height=6}
 kable(
@@ -2665,7 +2679,7 @@ lrt.severity.2 <- drop1(severity.model.2, test = 'Chisq')
 
 Below is a table showing the average recall across all users for labels that had severity <=2 (in the ground truth) and labels that had severity >=3, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = `r format(lrt.severity.2['included.severity','LRT'], digits = 5)`, `r print.p.value(lrt.severity.2['included.severity','Pr(Chi)'])`).
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant ((`r print.lrt.results(lrt.severity.2, severity.model.2, 'included.severity')`).
 
 ```{r turk.high.severity.analysis.2, echo=FALSE, fig.width=8, fig.height=6}
 kable(

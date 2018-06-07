@@ -311,7 +311,7 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 
 NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
 
-Recall, all label types: Likelihood ratio = 63.925, p &lt; 0.001.
+Recall, all label types: likelihood ratio = 63.925, df = 4, n = 264, p &lt; 0.001.
 
 | worker.type | test       | p.value    | z.value | recall |
 |:------------|:-----------|:-----------|:--------|:-------|
@@ -324,7 +324,7 @@ Recall, all label types: Likelihood ratio = 63.925, p &lt; 0.001.
 | anon        | &lt; turk3 | 0.278      | 1.681   | 0.519  |
 | anon        | &lt; turk1 | 0.010 \*   | 3.081   | 0.519  |
 
-Precision, all label types: Likelihood ratio = 167.44, p &lt; 0.001.
+Precision, all label types: likelihood ratio = 167.44, df = 4, n = 264, p &lt; 0.001
 
 | worker.type | test       | p.value           | z.value | precision |
 |:------------|:-----------|:------------------|:--------|:----------|
@@ -337,7 +337,7 @@ Precision, all label types: Likelihood ratio = 167.44, p &lt; 0.001.
 | reg         | &lt; turk1 | 0.113             | 1.940   | 0.637     |
 | reg         | &lt; anon  | 0.023 \*          | 2.784   | 0.637     |
 
-Recall, Problem type: Likelihood ratio = 110.62, p &lt; 0.001.
+Recall, Problem type: likelihood ratio = 110.62, df = 4, n = 260, p &lt; 0.001
 
 | worker.type | test       | p.value           | z.value | recall |
 |:------------|:-----------|:------------------|:--------|:-------|
@@ -348,7 +348,7 @@ Recall, Problem type: Likelihood ratio = 110.62, p &lt; 0.001.
 | anon        | &lt; turk3 | 0.028 \*          | 2.5986  | 0.418  |
 | turk5       | &lt; turk3 | 0.002 \*\*        | 3.5438  | 0.399  |
 
-Precision, Problem type: Likelihood ratio = 11.415, p = 0.022.
+Precision, Problem type: likelihood ratio = 11.415, df = 4, n = 245, p = 0.022
 
 NOTE: Although anon user have a higher average problem type precision than turk5, the model actually says that turk5 has higher precision (though it is not statistically significant). This is because there is just higher precision across the board on the anon user routes; the mixed effects model takes this into account! More on this below.
 
@@ -410,7 +410,7 @@ NOTE: This is at the street level (not 5 meter level).
 
 We created binomial mixed effects models to determine the relationship between label type and recall/precision. We had label type as the fixed effect and user id nested in route id as random effects. We modeled recall/precision as binomial and used a logistic link function.
 
-Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = 688.06, p &lt; 0.001). We also found label type to have a statistically significant association with precision (likelihood ratio = 1050.1, p &lt; 0.001).
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = 688.06, df = 3, n = 436, p &lt; 0.001). We also found label type to have a statistically significant association with precision (likelihood ratio = 1050.1, df = 3, n = 454, p &lt; 0.001).
 
 To test that the ordering of the label types are statistically significant (e.g., that NoCurbRamp recall is significantly lower than CurbRamp recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall, then precision).
 
@@ -470,7 +470,7 @@ To try and deal with not meeting the normality or heteroscedasticity assumptions
 
 ![](stats_for_paper_files/figure-markdown_github/turk.visual.search.time.lme.test.1-1.png)![](stats_for_paper_files/figure-markdown_github/turk.visual.search.time.lme.test.1-2.png)
 
-Using a likelihood ratio test, we find the contribution by the fixed effect (label type) to be statistically significant (Likelihood ratio = 78.871, p &lt; 0.001), i.e., the association between label type and labeling time is statistically significant. To test that the ordering of the label types are statistically significant (e.g., that CurbRamp labeling time is significantly lower than Obstacle labeling time, etc), we do a post-hoc Tukey's HSD test. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a table below.
+Using a likelihood ratio test, we find the contribution by the fixed effect (label type) to be statistically significant (likelihood ratio = 78.871, df = 3, n = 434, p &lt; 0.001), i.e., the association between label type and labeling time is statistically significant. To test that the ordering of the label types are statistically significant (e.g., that CurbRamp labeling time is significantly lower than Obstacle labeling time, etc), we do a post-hoc Tukey's HSD test. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a table below.
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
@@ -609,20 +609,20 @@ To test for the associations between the user behaviors and accuracy, we created
 
 Below is a table showing the summaries of the models and results of the LRTs. The estimate and standard error columns come from the models (along with the association column, which denotes direction of relationship), and the p value and LRT stat come from the likelihood ratio tests.
 
-| accuracy.type | label.type | param           | association | estimate | std.err | p.value           | LRT    |
-|:--------------|:-----------|:----------------|:------------|:---------|:--------|:------------------|:-------|
-| recall        | All        | label.freq      | +           | 0.302    | 0.094   | 0.002 \*\*        | 9.951  |
-| recall        | All        | audit.speed     | NA          | 0.009    | 0.088   | 0.915             | 0.011  |
-| recall        | All        | viz.search.time | -           | -0.369   | 0.114   | &lt; 0.001 \*\*\* | 11.116 |
-| recall        | Problem    | label.freq      | +           | 0.512    | 0.178   | 0.004 \*\*        | 8.503  |
-| recall        | Problem    | audit.speed     | NA          | 0.074    | 0.169   | 0.664             | 0.188  |
-| recall        | Problem    | viz.search.time | -           | -0.379   | 0.154   | 0.012 \*          | 6.380  |
-| precision     | All        | label.freq      | NA          | -0.120   | 0.075   | 0.111             | 2.536  |
-| precision     | All        | audit.speed     | NA          | -0.007   | 0.081   | 0.933             | 0.007  |
-| precision     | All        | viz.search.time | NA          | -0.053   | 0.111   | 0.632             | 0.230  |
-| precision     | Problem    | label.freq      | NA          | 0.153    | 0.157   | 0.332             | 0.940  |
-| precision     | Problem    | audit.speed     | NA          | 0.263    | 0.172   | 0.127             | 2.329  |
-| precision     | Problem    | viz.search.time | NA          | 0.319    | 0.173   | 0.065             | 3.416  |
+| accuracy.type | label.type | param           | association | estimate | std.err | p.value           | LRT    | df  | n   |
+|:--------------|:-----------|:----------------|:------------|:---------|:--------|:------------------|:-------|:----|:----|
+| recall        | All        | label.freq      | +           | 0.302    | 0.094   | 0.002 \*\*        | 9.951  | 1   | 132 |
+| recall        | All        | audit.speed     | NA          | 0.009    | 0.088   | 0.915             | 0.011  | 1   | 132 |
+| recall        | All        | viz.search.time | -           | -0.369   | 0.114   | &lt; 0.001 \*\*\* | 11.116 | 1   | 132 |
+| recall        | Problem    | label.freq      | +           | 0.512    | 0.178   | 0.004 \*\*        | 8.503  | 1   | 127 |
+| recall        | Problem    | audit.speed     | NA          | 0.074    | 0.169   | 0.664             | 0.188  | 1   | 127 |
+| recall        | Problem    | viz.search.time | -           | -0.379   | 0.154   | 0.012 \*          | 6.380  | 1   | 127 |
+| precision     | All        | label.freq      | NA          | -0.120   | 0.075   | 0.111             | 2.536  | 1   | 132 |
+| precision     | All        | audit.speed     | NA          | -0.007   | 0.081   | 0.933             | 0.007  | 1   | 132 |
+| precision     | All        | viz.search.time | NA          | -0.053   | 0.111   | 0.632             | 0.230  | 1   | 132 |
+| precision     | Problem    | label.freq      | NA          | 0.153    | 0.157   | 0.332             | 0.940  | 1   | 122 |
+| precision     | Problem    | audit.speed     | NA          | 0.263    | 0.172   | 0.127             | 2.329  | 1   | 122 |
+| precision     | Problem    | viz.search.time | NA          | 0.319    | 0.173   | 0.065             | 3.416  | 1   | 122 |
 
 The positive association between labeling frequency and recall is expected, as someone who placed more labels probably correctly found more attributes. The negative association between visual search time and recall is less intuitive, and I don't think we have a solid reason for why this might be the case. It may be that users that take longer to place a label are more distracted, so they are more likely to miss things. Or longer visual search time may mean that they are having a harder time panning with the tool (possibly those using a laptop track pad instead of a mouse), and so they may not want to pan as far.
 
@@ -640,7 +640,7 @@ NOTE: In this section, the data are binary (not ordinal), and is at the street l
 
 Below is a table showing the average recall across all users for labels that had severity &lt;=3 (in the ground truth) and labels that had severity &gt;=4, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = 6.3564, p = 0.012).
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = 6.3564, df = 1, n = 214, p = 0.012).
 
 <table style="width:100%;">
 <colgroup>
@@ -691,7 +691,7 @@ We also created a binomial mixed effects model to determine the relationship bet
 
 Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = 8.438, p = 0.004).
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant ((likelihood ratio = 8.438, df = 1, n = 246, p = 0.004).
 
 <table style="width:100%;">
 <colgroup>
