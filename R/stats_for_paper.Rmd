@@ -428,6 +428,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
 turk.times.path <- '../data/stats_for_paper_times-turk.csv'
 turk.labels.path <- '../data/stats_for_paper_labels-turk.csv'
 turk.labeling.times.path <- '../data/stats_for_paper_labeling_times-turk.csv'
+route.region.path <- '../data/stats_for_paper_route_region.csv'
 if (REFRESH_TURK_STUDY_DATA) {
   reg.labels.turk.study <-
     dbGetQuery(
@@ -653,7 +654,6 @@ if (REFRESH_TURK_STUDY_DATA) {
       ) interactions_with_time_since_entering_pano
       WHERE action = \'LabelingCanvas_FinishLabeling\';'
     )
-  # make sure to not use production-gt database!
   turk.labeling.times.turk.study <-
     dbGetQuery(
       db.connection.turk.study,
@@ -710,6 +710,17 @@ if (REFRESH_TURK_STUDY_DATA) {
       ) interactions_with_time_since_entering_pano
       WHERE action = \'LabelingCanvas_FinishLabeling\';'
       )
+  route.regions <-
+    dbGetQuery(
+      db.connection.turk.study,
+      'SELECT DISTINCT amt_condition_id AS condition_id, region_id
+      FROM amt_condition
+      INNER JOIN amt_volunteer_route
+          ON amt_condition.volunteer_id = amt_volunteer_route.volunteer_id
+      INNER JOIN route
+          ON amt_volunteer_route.route_id = route.route_id
+      WHERE amt_condition_id NOT IN (71, 104, 123, 124, 138)'
+    )
   dbDisconnect(db.connection.turk.study.production)
   dbDisconnect(db.connection.turk.study)
   
@@ -726,17 +737,20 @@ if (REFRESH_TURK_STUDY_DATA) {
   file.copy(turk.labels.path, paste('../data/old/stats_for_paper_labels-turk.csv', now, sep = '_'))
   file.copy(turk.labeling.times.path,
             paste('../data/old/stats_for_paper_labeling_times-turk.csv', now, sep = '_'))
+  file.copy(route.region.path, paste('../data/old/stats_for_paper_route_region.csv', now, sep = '_'))
 
   # Overwrite old data files with new results of queries.
   write.csv(times.turk.study, turk.times.path, row.names = FALSE)
   write.csv(labels.turk.study, turk.labels.path, row.names = FALSE)
   write.csv(labeling.times.turk.study, turk.labeling.times.path, row.names = FALSE)
+  write.csv(route.regions, route.region.path, row.names = FALSE)
 } else {
   times.turk.study <- read.csv(turk.times.path, colClasses = c('character', 'numeric'))
   labels.turk.study <- read.csv(turk.labels.path,
                                 colClasses = c('numeric', 'character', replicate(3, 'numeric')))
   labeling.times.turk.study <- read.csv(turk.labeling.times.path,
                                         colClasses = c('character', 'character', 'numeric'))
+  route.regions <- read.csv(route.region.path, colClasses = c('numeric', 'numeric'))
 }
 
 zoning.classes <- c('numeric', 'numeric', 'numeric', 'factor', 'factor', 'logical')
