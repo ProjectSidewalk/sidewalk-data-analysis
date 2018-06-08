@@ -79,7 +79,7 @@ This is the start of filtering out users with low labeling frequency (also filte
 |:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
 | 85439    | 8508       | 31927      | 18056    | 685       | 1070  | 4693           | 150378 |
 
-There have been a total of 19559 audits by our users across 13020 streets, averaging 1.5 audits per street.
+There have been a total of 19559 audits by our "good" users across 13020 streets, averaging 1.5 audits per street. Of the 5061 streets that have been audited multiple times, there are an average of 2.29 audits per street.
 
 ### Dataset 1st 100% vs full deployment
 

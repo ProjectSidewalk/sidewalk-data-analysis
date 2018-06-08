@@ -972,9 +972,15 @@ kable(
 filtered.audits <- filter(audits, user_id %in% filtered.speeds$user_id, completed == TRUE)
 n.audits <- nrow(filtered.audits)
 n.streets <- n_distinct(filtered.audits$street_edge_id)
+
+streets.with.mult.audits <-
+  filtered.audits %>%
+  group_by(street_edge_id) %>%
+  dplyr::summarise(n.audits = n()) %>%
+  filter(n.audits > 1)
 ```
 
-There have been a total of `r n.audits` audits by our users across `r n.streets` streets, averaging `r format(n.audits/n.streets, digits = 3)` audits per street.
+There have been a total of `r n.audits` audits by our "good" users across `r n.streets` streets, averaging `r format(n.audits/n.streets, digits = 3)` audits per street. Of the `r nrow(streets.with.mult.audits)` streets that have been audited multiple times, there are an average of `r format(sum(streets.with.mult.audits$n.audits) / nrow(streets.with.mult.audits), digits = 3)` audits per street.
 
 
 ### Dataset 1st 100% vs full deployment
