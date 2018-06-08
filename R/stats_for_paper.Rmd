@@ -198,8 +198,10 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       FROM role
       INNER JOIN user_role ON role.role_id = user_role.role_id
       INNER JOIN audit_task ON user_role.user_id = audit_task.user_id
+      INNER JOIN street_edge ON audit_task.street_edge_id = street_edge.street_edge_id
       INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
       WHERE label.deleted = FALSE
+          AND street_edge.deleted = FALSE
           AND user_role.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
           AND gsv_panorama_id NOT IN (SELECT gsv_panorama_id FROM gsv_onboarding_pano)'
       )
@@ -212,19 +214,22 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
                        label_type_id,
                        audit_task.audit_task_id
       FROM audit_task
+      INNER JOIN street_edge
+          ON audit_task.street_edge_id = street_edge.street_edge_id
       INNER JOIN label
           ON audit_task.audit_task_id = label.audit_task_id
       INNER JOIN audit_task_environment
           ON audit_task.audit_task_id = audit_task_environment.audit_task_id
       WHERE label.deleted = FALSE
+          AND street_edge.deleted = FALSE
           AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
           AND gsv_panorama_id NOT IN (SELECT gsv_panorama_id FROM gsv_onboarding_pano)'
       )
   reg.audits <-
     dbGetQuery(
       db.connection.public.deployment,
-      'SELECT audit_task.user_id, role.role, audit_task.audit_task_id,
-              street_edge.street_edge_id,
+      'SELECT audit_task.user_id, role.role, audit_task.task_start, audit_task.completed,
+              audit_task.audit_task_id, street_edge.street_edge_id,
               ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS feet_audited
       FROM street_edge
       INNER JOIN audit_task
@@ -234,23 +239,21 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       INNER JOIN role
           ON user_role.role_id = role.role_id
       WHERE street_edge.deleted = FALSE
-          AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-          AND completed = TRUE'
+          AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
   anon.audits <-
     dbGetQuery(
       db.connection.public.deployment,
-      'SELECT DISTINCT ip_address AS user_id, \'Anonymous\' AS role, audit_task.audit_task_id,
-              street_edge.street_edge_id,
+      'SELECT DISTINCT ip_address AS user_id, \'Anonymous\' AS role, audit_task.task_start,
+              audit_task.completed, audit_task.audit_task_id, street_edge.street_edge_id,
               ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS feet_audited
       FROM street_edge
       INNER JOIN audit_task
-      ON street_edge.street_edge_id = audit_task.street_edge_id
+          ON street_edge.street_edge_id = audit_task.street_edge_id
       INNER JOIN audit_task_environment
-      ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+          ON audit_task.audit_task_id = audit_task_environment.audit_task_id
       WHERE street_edge.deleted = FALSE
-      AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-      AND completed = TRUE'
+          AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
   reg.times <-
     dbGetQuery(
@@ -416,7 +419,9 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   write.csv(sessions, sessions.path, row.names = FALSE)
   write.csv(reg.missions, missions.path, row.names = FALSE)
 } else {
-  audits <- read.csv(audits.path, colClasses = c('character', 'character', replicate(3, 'numeric')))
+  audits <- read.csv(audits.path,
+                     colClasses = c('character', 'character', 'POSIXct',
+                                    'logical', replicate(3, 'numeric')))
   times <- read.csv(times.path, colClasses = c('character', 'numeric'))
   labels <- read.csv(labels.path,
                      colClasses = c('numeric', 'character', 'character', 'numeric', 'numeric'))
@@ -809,31 +814,57 @@ approx.min.per.mission <- Vectorize(
   }
 )
 
+pre.100.labels <-
+  inner_join(labels, audits, by = c('user_id', 'role', 'audit_task_id')) %>%
+  filter(task_start < '2017-12-10 07:44:54.288+00') %>%
+  mutate(dataset = 'first_100%') %>%
+  select(names(labels), dataset)
 label.counts <-
   labels %>%
-  # filter(label_type_id != 7) %>%
-  group_by(user_id) %>%
-  dplyr::summarize(label_count = n_distinct(label_id), role = first(role))
+  mutate(dataset = 'all') %>%
+  bind_rows(pre.100.labels) %>%
+  group_by(user_id, role, audit_task_id, dataset) %>%
+  dplyr::summarize(label_count = n_distinct(label_id))
 
 # Selects distinct on audit_task_id, then sums dist audited.
+pre.100.audits <-
+  audits %>%
+  filter(task_start < '2017-12-10 07:44:54.288+00') %>%
+  mutate(dataset = 'first_100%')
 audit.length <-
   audits %>%
-  group_by(user_id, role) %>%
+  mutate(dataset = 'all') %>%
+  bind_rows(pre.100.audits) %>%
+  group_by(user_id, role, dataset) %>%
   distinct(audit_task_id, .keep_all = TRUE) %>%
-  dplyr::summarise(feet_audited = sum(feet_audited), audit_count = n()) %>%
+  left_join(label.counts, by  = c('user_id', 'role', 'dataset', 'audit_task_id')) %>%
+  replace_na(list(label_count = 0)) %>%
+  dplyr::summarise(label_count = sum(label_count),
+                   feet_audited = sum(feet_audited[completed == TRUE]),
+                   audit_count = length(audit_task_id[completed == TRUE])) %>%
+  replace_na(list(feet_audited = 0)) %>%
   ungroup() %>%
   mutate(miles_audited = feet_audited / 5280) %>%
-  left_join(label.counts, by = c('user_id', 'role')) %>%
-  replace_na(list(label_count = 0)) %>%
-  left_join(sessions, by = 'user_id') %>%
-  mutate(role = factor(role)) %>%
-  mutate(role = recode(role, User = 'Registered', .default = levels(role))) %>%
+  left_join(sessions %>% mutate(dataset = 'all'), by = c('user_id', 'dataset')) %>%
+  mutate(dataset = factor(dataset),
+         role = factor(role),
+         role = recode(role, User = 'Registered', .default = levels(role))) %>%
   mutate(labels_per_100m = 328.084 * label_count / feet_audited)
+
+user.list <-
+  audit.length %>%
+  filter(dataset == 'all', audit_count > 0, label_count > 0) %>%
+  pull(user_id)
+good.user.list <-
+  audit.length %>%
+  filter(dataset == 'all', audit_count > 0, labels_per_100m >= 3.75) %>%
+  pull(user_id)
 
 # Computes approximate missions completed for anon users.
 all.mission.counts <-
   audit.length %>%
-  filter(role == "Anonymous") %>%
+  filter(dataset == 'all',
+         role == "Anonymous") %>%
   mutate(mission_count = approximate.missions.completed(feet_audited)) %>%
   select(user_id, mission_count) %>%
   bind_rows(reg.missions)
@@ -841,6 +872,8 @@ all.mission.counts <-
 # Computes a few metrics based on distance audited, time auditing, and missions completed.
 speeds <-
   audit.length %>%
+  filter(dataset == 'all',
+         user_id %in% user.list) %>%
   left_join(all.mission.counts, by = 'user_id') %>%
   left_join(times, by = 'user_id') %>%
   mutate(meters_audited = feet_audited / 3.28084,
@@ -852,12 +885,13 @@ speeds <-
 filtered.speeds <-
   speeds %>%
   filter(role %in% c('Registered', 'Anonymous', 'Turker'),
+         audit_count > 0,
          labels_per_100m >= 3.75)
 ```
 
 # Public Deployment
 
-NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk.
+NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk. We only consider someone a "user" if they have completed an audit of at least one street and have placed at least one label after the tutorial. Later on, we also filter out users with low labeling frequency.
 
 ## High-level results
 
@@ -926,12 +960,36 @@ kable(
   align = 'l'
 )
 
-filtered.audits <- filter(audits, user_id %in% filtered.speeds$user_id)
+filtered.audits <- filter(audits, user_id %in% filtered.speeds$user_id, completed == TRUE)
 n.audits <- nrow(filtered.audits)
 n.streets <- n_distinct(filtered.audits$street_edge_id)
 ```
 
 There have been a total of `r n.audits` audits by our users across `r n.streets` streets, averaging `r format(n.audits/n.streets, digits = 3)` audits per street.
+
+
+### Dataset 1st 100% vs full deployment
+
+The first table describes the dataset at the point where we hit 100% completion. The second table describes the full dataset. Both include _all_ users, not just "good" users.
+
+```{r public.deployment.first.100, echo=FALSE, warning=FALSE}
+kable(
+  audit.length %>%
+    filter(dataset == 'first_100%') %>%
+    mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
+    summarise_vars('role', c('miles_audited', 'label_count'), funcs = sum, include.n = TRUE),
+  digits = 0,
+  align = 'l'
+)
+kable(
+  audit.length %>%
+    filter(dataset == 'all') %>%
+    mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
+    summarise_vars('role', c('miles_audited', 'label_count'), funcs = sum, include.n = TRUE),
+  digits = 0,
+  align = 'l'
+)
+```
 
 
 ### Data lost due to filtering

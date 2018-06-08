@@ -36,6 +36,7 @@ April 17, 2018</p>
 <li><a href="#top-line-numbers-no-filtering">Top-line numbers (no filtering)</a></li>
 <li><a href="#attribute-counts-by-type">Attribute counts by type</a></li>
 <li><a href="#data-characteristics">Data characteristics</a></li>
+<li><a href="#dataset-1st-100-vs-full-deployment">Dataset 1st 100% vs full deployment</a></li>
 <li><a href="#data-lost-due-to-filtering">Data lost due to filtering</a></li>
 <li><a href="#user-stats-and-tool-usage">User stats and tool usage</a></li>
 </ul></li>
@@ -70,7 +71,7 @@ April 17, 2018</p>
 </ul></li>
 </ul>
 <h1 id="public-deployment">Public Deployment</h1>
-<p>NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk.</p>
+<p>NOTE: Public deployment data includes all data up through March 31st (and part of April 1st). This includes all data through the most recent deployment on mturk. We only consider someone a &quot;user&quot; if they have completed an audit of at least one street and have placed at least one label after the tutorial. Later on, we also filter out users with low labeling frequency.</p>
 <h2 id="high-level-results">High-level results</h2>
 <h3 id="top-line-numbers-no-filtering">Top-line numbers (no filtering)</h3>
 <p>The following are the label counts (not attribute counts) by user group and label type. I removed the tutorial labels from here.</p>
@@ -88,67 +89,67 @@ April 17, 2018</p>
 <tbody>
 <tr class="odd">
 <td align="left">CurbRamp</td>
-<td align="left">10631 (4.4%)</td>
-<td align="left">27168 (11.3%)</td>
-<td align="left">88554 (36.8%)</td>
-<td align="left">18497 (7.7%)</td>
-<td align="left">144850 (60.2%)</td>
+<td align="left">10632 (4.4%)</td>
+<td align="left">27144 (11.3%)</td>
+<td align="left">88554 (36.9%)</td>
+<td align="left">18336 (7.6%)</td>
+<td align="left">144666 (60.3%)</td>
 </tr>
 <tr class="even">
 <td align="left">NoCurbRamp</td>
 <td align="left">1310 (0.5%)</td>
-<td align="left">3256 (1.4%)</td>
+<td align="left">3250 (1.4%)</td>
 <td align="left">13262 (5.5%)</td>
-<td align="left">1160 (0.5%)</td>
-<td align="left">18988 (7.9%)</td>
+<td align="left">1138 (0.5%)</td>
+<td align="left">18960 (7.9%)</td>
 </tr>
 <tr class="odd">
 <td align="left">Obstacle</td>
 <td align="left">1105 (0.5%)</td>
-<td align="left">2829 (1.2%)</td>
+<td align="left">2827 (1.2%)</td>
 <td align="left">16154 (6.7%)</td>
-<td align="left">1517 (0.6%)</td>
-<td align="left">21605 (9.0%)</td>
+<td align="left">1498 (0.6%)</td>
+<td align="left">21584 (9.0%)</td>
 </tr>
 <tr class="even">
 <td align="left">SurfaceProblem</td>
 <td align="left">765 (0.3%)</td>
-<td align="left">1897 (0.8%)</td>
+<td align="left">1896 (0.8%)</td>
 <td align="left">3216 (1.3%)</td>
-<td align="left">2603 (1.1%)</td>
-<td align="left">8481 (3.5%)</td>
+<td align="left">2591 (1.1%)</td>
+<td align="left">8468 (3.5%)</td>
 </tr>
 <tr class="odd">
 <td align="left">NoSidewalk</td>
 <td align="left">1414 (0.6%)</td>
-<td align="left">6216 (2.6%)</td>
+<td align="left">6211 (2.6%)</td>
 <td align="left">28181 (11.7%)</td>
-<td align="left">7998 (3.3%)</td>
-<td align="left">43809 (18.2%)</td>
+<td align="left">7919 (3.3%)</td>
+<td align="left">43725 (18.2%)</td>
 </tr>
 <tr class="even">
 <td align="left">Occlusion</td>
 <td align="left">68 (0.0%)</td>
 <td align="left">310 (0.1%)</td>
 <td align="left">462 (0.2%)</td>
-<td align="left">453 (0.2%)</td>
-<td align="left">1293 (0.5%)</td>
+<td align="left">438 (0.2%)</td>
+<td align="left">1278 (0.5%)</td>
 </tr>
 <tr class="odd">
 <td align="left">Other</td>
 <td align="left">92 (0.0%)</td>
 <td align="left">148 (0.1%)</td>
 <td align="left">1137 (0.5%)</td>
-<td align="left">39 (0.0%)</td>
-<td align="left">1416 (0.6%)</td>
+<td align="left">34 (0.0%)</td>
+<td align="left">1411 (0.6%)</td>
 </tr>
 <tr class="even">
 <td align="left">Total</td>
-<td align="left">15385 (6.4%)</td>
-<td align="left">41824 (17.4%)</td>
-<td align="left">150966 (62.8%)</td>
-<td align="left">32267 (13.4%)</td>
-<td align="left">240442 (100.0%)</td>
+<td align="left">15386 (6.4%)</td>
+<td align="left">41786 (17.4%)</td>
+<td align="left">150966 (62.9%)</td>
+<td align="left">31954 (13.3%)</td>
+<td align="left">240092 (100.0%)</td>
 </tr>
 </tbody>
 </table>
@@ -227,20 +228,94 @@ April 17, 2018</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">85458</td>
-<td align="left">8512</td>
+<td align="left">85439</td>
+<td align="left">8508</td>
 <td align="left">31927</td>
-<td align="left">18058</td>
+<td align="left">18056</td>
 <td align="left">685</td>
 <td align="left">1070</td>
-<td align="left">4694</td>
-<td align="left">150404</td>
+<td align="left">4693</td>
+<td align="left">150378</td>
 </tr>
 </tbody>
 </table>
 <p>There have been a total of 19559 audits by our users across 13020 streets, averaging 1.5 audits per street.</p>
+<h3 id="dataset-1st-100-vs-full-deployment">Dataset 1st 100% vs full deployment</h3>
+<p>The first table describes the dataset at the point where we hit 100% completion. The second table describes the full dataset. Both include <em>all</em> users, not just &quot;good&quot; users.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">role</th>
+<th align="left">n.users</th>
+<th align="left">label_count</th>
+<th align="left">miles_audited</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Researcher</td>
+<td align="left">26</td>
+<td align="left">29121</td>
+<td align="left">224</td>
+</tr>
+<tr class="even">
+<td align="left">Anonymous</td>
+<td align="left">2551</td>
+<td align="left">14866</td>
+<td align="left">199</td>
+</tr>
+<tr class="odd">
+<td align="left">Turker</td>
+<td align="left">62</td>
+<td align="left">85356</td>
+<td align="left">1412</td>
+</tr>
+<tr class="even">
+<td align="left">Registered</td>
+<td align="left">329</td>
+<td align="left">41599</td>
+<td align="left">534</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">role</th>
+<th align="left">n.users</th>
+<th align="left">label_count</th>
+<th align="left">miles_audited</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Researcher</td>
+<td align="left">29</td>
+<td align="left">31954</td>
+<td align="left">239</td>
+</tr>
+<tr class="even">
+<td align="left">Anonymous</td>
+<td align="left">2876</td>
+<td align="left">15657</td>
+<td align="left">205</td>
+</tr>
+<tr class="odd">
+<td align="left">Turker</td>
+<td align="left">277</td>
+<td align="left">150966</td>
+<td align="left">2294</td>
+</tr>
+<tr class="even">
+<td align="left">Registered</td>
+<td align="left">344</td>
+<td align="left">41786</td>
+<td align="left">537</td>
+</tr>
+</tbody>
+</table>
 <h3 id="data-lost-due-to-filtering">Data lost due to filtering</h3>
-<p>There were 958 users who placed 240442 labels pre-filtering. Researchers accounted for 28 of the users (2.92%) and 32267 of the labels (13.4%). Non-researchers with low labeling frequency accounted for 327 of the users (34.1%) and 54887 of the labels (22.8%). This means that we filtered out a total of 355 of the users (37.1%) and 87154 of the labels (36.2%), and are left with 603 of the users (62.9%) and 150404 of the labels (62.6%).</p>
+<p>There were 825 users who placed 240092 labels pre-filtering. Researchers accounted for 28 of the users (3.39%) and 31954 of the labels (13.3%). Non-researchers with low labeling frequency accounted for 194 of the users (23.5%) and 54875 of the labels (22.9%). This means that we filtered out a total of 222 of the users (26.9%) and 86829 of the labels (36.2%), and are left with 603 of the users (73.1%) and 150378 of the labels (62.6%).</p>
 <h3 id="user-stats-and-tool-usage">User stats and tool usage</h3>
 <p>TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).</p>
 <p>Below are the means/medains/sds for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.</p>
@@ -395,11 +470,11 @@ April 17, 2018</p>
 <td align="left">3.352</td>
 <td align="left">14.658</td>
 <td align="left">70.5</td>
-<td align="left">191.218</td>
-<td align="left">731.406</td>
+<td align="left">191.080</td>
+<td align="left">731.413</td>
 <td align="left">6.800</td>
-<td align="left">11.262</td>
-<td align="left">20.334</td>
+<td align="left">11.257</td>
+<td align="left">20.336</td>
 <td align="left">0.540</td>
 <td align="left">2.083</td>
 <td align="left">9.108</td>
@@ -467,7 +542,7 @@ April 17, 2018</p>
 <td align="left">5171</td>
 <td align="left">181</td>
 <td align="left">630</td>
-<td align="left">35949</td>
+<td align="left">35923</td>
 <td align="left">392</td>
 <td align="left">1218</td>
 <td align="left">36.4%</td>
