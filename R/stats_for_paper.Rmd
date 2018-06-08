@@ -194,7 +194,8 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   reg.labels <-
     dbGetQuery(
       db.connection.public.deployment,
-      'SELECT label_id, user_role.user_id, role.role, label_type_id, audit_task.audit_task_id
+      'SELECT label_id, label_type_id, audit_task.audit_task_id, user_role.user_id, role.role,
+              gsv_panorama_id IN (SELECT gsv_panorama_id FROM gsv_onboarding_pano) AS tutorial
       FROM role
       INNER JOIN user_role ON role.role_id = user_role.role_id
       INNER JOIN audit_task ON user_role.user_id = audit_task.user_id
@@ -202,17 +203,20 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       INNER JOIN label ON audit_task.audit_task_id = label.audit_task_id
       WHERE label.deleted = FALSE
           AND street_edge.deleted = FALSE
-          AND user_role.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-          AND gsv_panorama_id NOT IN (SELECT gsv_panorama_id FROM gsv_onboarding_pano)'
+          AND user_role.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
   anon.labels <-
     dbGetQuery(
       db.connection.public.deployment,
       'SELECT DISTINCT label_id,
+                       label_type_id,
+                       audit_task.audit_task_id,
                        ip_address AS user_id,
                        \'Anonymous\' AS role,
-                       label_type_id,
-                       audit_task.audit_task_id
+                       gsv_panorama_id IN
+                       (
+                           SELECT gsv_panorama_id FROM gsv_onboarding_pano
+                       ) AS tutorial
       FROM audit_task
       INNER JOIN street_edge
           ON audit_task.street_edge_id = street_edge.street_edge_id
@@ -222,8 +226,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           ON audit_task.audit_task_id = audit_task_environment.audit_task_id
       WHERE label.deleted = FALSE
           AND street_edge.deleted = FALSE
-          AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-          AND gsv_panorama_id NOT IN (SELECT gsv_panorama_id FROM gsv_onboarding_pano)'
+          AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
   reg.audits <-
     dbGetQuery(
@@ -270,7 +273,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           INNER JOIN audit_task ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
           WHERE action IN (\'ViewControl_MouseDown\', \'LabelingCanvas_MouseDown\')
               AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
-          ) user_audit_times
+      ) user_audit_times
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
       GROUP BY user_audit_times.user_id;'
       )
@@ -424,7 +427,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
                                     'logical', replicate(3, 'numeric')))
   times <- read.csv(times.path, colClasses = c('character', 'numeric'))
   labels <- read.csv(labels.path,
-                     colClasses = c('numeric', 'character', 'character', 'numeric', 'numeric'))
+                     colClasses = c(replicate(3, 'numeric'), 'character', 'character', 'logical'))
   attributes <- read.csv(attributes.path, colClasses = c('character', 'numeric'))
   sessions <- read.csv(sessions.path, colClasses = c('character', 'numeric'))
   reg.missions <- read.csv(missions.path, colClasses = c('character', 'numeric'))
@@ -814,17 +817,23 @@ approx.min.per.mission <- Vectorize(
   }
 )
 
+tutorial.labels <- labels %>% filter(tutorial == TRUE) %>% select(-tutorial)
+non.tutorial.labels <- labels %>% filter(tutorial == FALSE) %>% select(-tutorial)
+
+n.tutorial.labels <- n_distinct(tutorial.labels$label_id)
+n.non.tutorial.labels <- n_distinct(non.tutorial.labels$label_id)
+
 pre.100.labels <-
-  inner_join(labels, audits, by = c('user_id', 'role', 'audit_task_id')) %>%
+  inner_join(non.tutorial.labels, audits, by = c('user_id', 'role', 'audit_task_id')) %>%
   filter(task_start < '2017-12-10 07:44:54.288+00') %>%
   mutate(dataset = 'first_100%') %>%
-  select(names(labels), dataset)
+  select(names(non.tutorial.labels), dataset)
 label.counts <-
-  labels %>%
+  non.tutorial.labels %>%
   mutate(dataset = 'all') %>%
   bind_rows(pre.100.labels) %>%
   group_by(user_id, role, audit_task_id, dataset) %>%
-  dplyr::summarize(label_count = n_distinct(label_id))
+  dplyr::summarize(label_count = n())
 
 # Selects distinct on audit_task_id, then sums dist audited.
 pre.100.audits <-
@@ -897,13 +906,13 @@ NOTE: Public deployment data includes all data up through March 31st (and part o
 
 ### Top-line numbers (no filtering)
 
-The following are the label counts (not attribute counts) by user group and label type. I removed the tutorial labels from here.
+The following are the label counts (not attribute counts) by user group and label type. There are a total of `r n.tutorial.labels + n.non.tutorial.labels` labels, `r n.tutorial.labels` are tutorial labels and `r n.non.tutorial.labels` are non tutorial labels. We consider only non tutorial labels throughout this document.
 
 ```{r public.deployment.how.much.data, echo=FALSE, warning=FALSE}
 ordered.label.type.levs <- c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem', 'NoSidewalk',
                              'Occlusion', 'Other')
 kable(
-  labels %>%
+  non.tutorial.labels %>%
     distinct(label_id, .keep_all = TRUE) %>%
     mutate(label_type = LABEL_TYPE_MAPPING[label_type_id]) %>%
     mutate(label_type = factor(label_type, ordered.label.type.levs)) %>%
@@ -948,7 +957,7 @@ kable(
 This is the start of filtering out users with low labeling frequency (also filtering out researchers).
 
 ```{r public.deployment.data.characteristics, echo=FALSE, warning=FALSE}
-filtered.labels <- filter(labels, user_id %in% filtered.speeds$user_id)
+filtered.labels <- filter(non.tutorial.labels, user_id %in% filtered.speeds$user_id)
 kable(
   filtered.labels %>%
     distinct(label_id, .keep_all = TRUE) %>%
@@ -1019,9 +1028,9 @@ percent.bad.non.researchers <- format(100 * n.bad.non.researchers / n.users.pre.
 percent.filtered.users <- format(100 * n.filtered.users / n.users.pre.filter, digits = 3)
 percent.users.remaining <- format(100 * n.users.remaining / n.users.pre.filter, digits = 3)
 
-n.labels.pre.filter <- n_distinct(labels$label_id)
-n.labels.researcher <- n_distinct(labels[labels$user_id %in% researcher.ids,'label_id'])
-n.labels.bad.non.researcher <- n_distinct(labels[labels$user_id %in% bad.non.researchers.ids,'label_id'])
+n.labels.pre.filter <- n_distinct(non.tutorial.labels$label_id)
+n.labels.researcher <- n_distinct(non.tutorial.labels[non.tutorial.labels$user_id %in% researcher.ids,'label_id'])
+n.labels.bad.non.researcher <- n_distinct(non.tutorial.labels[non.tutorial.labels$user_id %in% bad.non.researchers.ids,'label_id'])
 n.filtered.labels <- n.labels.researcher + n.labels.bad.non.researcher
 n.labels.remaining <- n_distinct(filtered.labels$label_id)
 

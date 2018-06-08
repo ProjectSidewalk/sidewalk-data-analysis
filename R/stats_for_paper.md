@@ -42,7 +42,7 @@ High-level results
 
 ### Top-line numbers (no filtering)
 
-The following are the label counts (not attribute counts) by user group and label type. I removed the tutorial labels from here.
+The following are the label counts (not attribute counts) by user group and label type. There are a total of 251439 labels, 11347 are tutorial labels and 240092 are non tutorial labels. We consider only non tutorial labels throughout this document.
 
 | label\_type    | Anon         | Registered    | Turker         | Researcher    | Total           |
 |:---------------|:-------------|:--------------|:---------------|:--------------|:----------------|
