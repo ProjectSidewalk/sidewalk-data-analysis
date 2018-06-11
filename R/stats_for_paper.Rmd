@@ -190,6 +190,7 @@ labels.path <- '../data/stats_for_paper_labels.csv'
 attributes.path <- '../data/stats_for_paper_attributes.csv'
 sessions.path <- '../data/stats_for_paper_sessions.csv'
 missions.path <- '../data/stats_for_paper_reg_missions.csv'
+tutorials.path <- '../data/stats_for_paper_tutorials.csv'
 if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   reg.labels <-
     dbGetQuery(
@@ -397,6 +398,44 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       INNER JOIN label_type ON global_attribute.label_type_id = label_type.label_type_id
       GROUP BY label_type.label_type'
       )
+  tutorials <-
+    dbGetQuery(
+      db.connection.public.deployment,
+      'SELECT action, ips.audit_task_id, ip_address, timestamp
+      FROM
+      (
+          SELECT DISTINCT audit_task_interaction.audit_task_id, ip_address
+          FROM audit_task_interaction
+          INNER JOIN audit_task
+              ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+          INNER JOIN audit_task_environment
+              ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+          WHERE task_start > \'2017-07-10 00:00:00.000+00\'
+              AND action = \'Onboarding_Start\'
+      ) ips
+      INNER JOIN audit_task_interaction
+          ON ips.audit_task_id = audit_task_interaction.audit_task_id
+      WHERE action IN
+          (
+              \'Onboarding_Start\',
+              \'ModeSwitch_CurbRamp\',
+              \'KeyboardShortcut_Severity_1\',
+              \'ModeSwitch_NoCurbRamp\',
+              \'KeyboardShortcut_Severity_3\',
+              \'ModeSwitch_NoSidewalk\',
+              \'LabelingCanvas_FinishLabeling\',
+              \'ViewControl_DoubleClick\',
+              \'Onboarding_End\',
+              \'ContextMenu_RadioChange\'
+          )
+          AND
+          (
+              action NOT IN (\'ContextMenu_RadioChange\', \'LabelingCanvas_FinishLabeling\')
+              OR (action = \'ContextMenu_RadioChange\' AND note LIKE \'%CurbRamp,RadioValue:1%\')
+              OR (action = \'ContextMenu_RadioChange\' AND note LIKE \'%NoCurbRamp,RadioValue:3%\')
+              OR (action = \'LabelingCanvas_FinishLabeling\' AND note LIKE \'%NoSidewalk%\')
+          );'
+    )
   dbDisconnect(db.connection.public.deployment)
   
   # Combine registered and anonymous user results.
@@ -413,6 +452,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   file.copy(attributes.path, paste('../data/old/stats_for_paper_attributes.csv', now, sep = '_'))
   file.copy(sessions.path, paste('../data/old/stats_for_paper_sessions.csv', now, sep = '_'))
   file.copy(missions.path, paste('../data/old/stats_for_paper_reg_missions.csv', now, sep = '_'))
+  file.copy(tutorials.path, paste('../data/old/stats_for_paper_tutorials.csv', now, sep = '_'))
 
   # Overwrite old data files with new results of queries.
   write.csv(audits, audits.path, row.names = FALSE)
@@ -421,6 +461,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   write.csv(attributes, attributes.path, row.names = FALSE)
   write.csv(sessions, sessions.path, row.names = FALSE)
   write.csv(reg.missions, missions.path, row.names = FALSE)
+  write.csv(tutorials, tutorials.path, row.names = FALSE)
 } else {
   audits <- read.csv(audits.path,
                      colClasses = c('character', 'character', 'POSIXct',
@@ -431,6 +472,8 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   attributes <- read.csv(attributes.path, colClasses = c('character', 'numeric'))
   sessions <- read.csv(sessions.path, colClasses = c('character', 'numeric'))
   reg.missions <- read.csv(missions.path, colClasses = c('character', 'numeric'))
+  tutorials <- read.csv(tutorials.path,
+                        colClasses = c('character', 'numeric', 'character', 'POSIXct'))
 }
 
 turk.times.path <- '../data/stats_for_paper_times-turk.csv'
