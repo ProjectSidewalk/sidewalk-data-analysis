@@ -35,8 +35,8 @@ April 17, 2018</p>
 <ul>
 <li><a href="#top-line-numbers-no-filtering">Top-line numbers (no filtering)</a></li>
 <li><a href="#attribute-counts-by-type">Attribute counts by type</a></li>
-<li><a href="#data-characteristics">Data characteristics</a></li>
 <li><a href="#dataset-1st-100-vs-full-deployment">Dataset 1st 100% vs full deployment</a></li>
+<li><a href="#data-characteristics">Data characteristics</a></li>
 <li><a href="#data-lost-due-to-filtering">Data lost due to filtering</a></li>
 <li><a href="#user-stats-and-tool-usage">User stats and tool usage</a></li>
 </ul></li>
@@ -211,37 +211,8 @@ April 17, 2018</p>
 </tr>
 </tbody>
 </table>
-<h3 id="data-characteristics">Data characteristics</h3>
-<p>This is the start of filtering out users with low labeling frequency (also filtering out researchers).</p>
-<table>
-<thead>
-<tr class="header">
-<th align="left">CurbRamp</th>
-<th align="left">NoCurbRamp</th>
-<th align="left">NoSidewalk</th>
-<th align="left">Obstacle</th>
-<th align="left">Occlusion</th>
-<th align="left">Other</th>
-<th align="left">SurfaceProblem</th>
-<th align="left">Total</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">85439</td>
-<td align="left">8508</td>
-<td align="left">31927</td>
-<td align="left">18056</td>
-<td align="left">685</td>
-<td align="left">1070</td>
-<td align="left">4693</td>
-<td align="left">150378</td>
-</tr>
-</tbody>
-</table>
-<p>There have been a total of 19559 audits by our &quot;good&quot; users across 13020 streets, averaging 1.5 audits per street. Of the 5061 streets that have been audited multiple times, there are an average of 2.29 audits per street.</p>
 <h3 id="dataset-1st-100-vs-full-deployment">Dataset 1st 100% vs full deployment</h3>
-<p>The first table describes the dataset at the point where we hit 100% completion. The second table describes the full dataset. Both include <em>all</em> users, not just &quot;good&quot; users.</p>
+<p>The first table describes the dataset at the point where we hit 100% completion. The second table describes the full dataset. Both include <em>all</em> users, not just &quot;good&quot; users. We define a user to be someone who both completed an audit of at least one street segment <em>and</em> placed at least one label after the tutorial.</p>
 <table>
 <thead>
 <tr class="header">
@@ -314,6 +285,35 @@ April 17, 2018</p>
 </tr>
 </tbody>
 </table>
+<h3 id="data-characteristics">Data characteristics</h3>
+<p>This is the start of filtering out users with low labeling frequency (also filtering out researchers).</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">CurbRamp</th>
+<th align="left">NoCurbRamp</th>
+<th align="left">NoSidewalk</th>
+<th align="left">Obstacle</th>
+<th align="left">Occlusion</th>
+<th align="left">Other</th>
+<th align="left">SurfaceProblem</th>
+<th align="left">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">85439</td>
+<td align="left">8508</td>
+<td align="left">31927</td>
+<td align="left">18056</td>
+<td align="left">685</td>
+<td align="left">1070</td>
+<td align="left">4693</td>
+<td align="left">150378</td>
+</tr>
+</tbody>
+</table>
+<p>There have been a total of 19559 audits by our &quot;good&quot; users across 13020 streets, averaging 1.5 audits per street. Of the 5061 streets that have been audited multiple times, there are an average of 2.29 audits per street.</p>
 <h3 id="data-lost-due-to-filtering">Data lost due to filtering</h3>
 <p>There were 825 users who placed 240092 labels pre-filtering. Researchers accounted for 28 of the users (3.39%) and 31954 of the labels (13.3%). Non-researchers with low labeling frequency accounted for 194 of the users (23.5%) and 54875 of the labels (22.9%). This means that we filtered out a total of 222 of the users (26.9%) and 86829 of the labels (36.2%), and are left with 603 of the users (73.1%) and 150378 of the labels (62.6%).</p>
 <h3 id="user-stats-and-tool-usage">User stats and tool usage</h3>
@@ -427,40 +427,6 @@ April 17, 2018</p>
 <td align="left">1.902</td>
 </tr>
 <tr class="even">
-<td align="left">Turker</td>
-<td align="left">122</td>
-<td align="left">5</td>
-<td align="left">108.254</td>
-<td align="left">419.687</td>
-<td align="left">0.586</td>
-<td align="left">13.408</td>
-<td align="left">52.259</td>
-<td align="left">59.0</td>
-<td align="left">850.984</td>
-<td align="left">2961.015</td>
-<td align="left">8.900</td>
-<td align="left">13.962</td>
-<td align="left">17.996</td>
-<td align="left">0.364</td>
-<td align="left">8.331</td>
-<td align="left">32.472</td>
-<td align="left">26.940</td>
-<td align="left">225.221</td>
-<td align="left">757.025</td>
-<td align="left">26.370</td>
-<td align="left">37.720</td>
-<td align="left">34.596</td>
-<td align="left">4.0</td>
-<td align="left">25.221</td>
-<td align="left">87.298</td>
-<td align="left">23.623</td>
-<td align="left">30.571</td>
-<td align="left">25.034</td>
-<td align="left">1</td>
-<td align="left">3.082</td>
-<td align="left">6.756</td>
-</tr>
-<tr class="odd">
 <td align="left">Registered</td>
 <td align="left">188</td>
 <td align="left">8</td>
@@ -494,6 +460,40 @@ April 17, 2018</p>
 <td align="left">2.101</td>
 <td align="left">3.638</td>
 </tr>
+<tr class="odd">
+<td align="left">Turker</td>
+<td align="left">122</td>
+<td align="left">5</td>
+<td align="left">108.254</td>
+<td align="left">419.687</td>
+<td align="left">0.586</td>
+<td align="left">13.408</td>
+<td align="left">52.259</td>
+<td align="left">59.0</td>
+<td align="left">850.984</td>
+<td align="left">2961.015</td>
+<td align="left">8.900</td>
+<td align="left">13.962</td>
+<td align="left">17.996</td>
+<td align="left">0.364</td>
+<td align="left">8.331</td>
+<td align="left">32.472</td>
+<td align="left">26.940</td>
+<td align="left">225.221</td>
+<td align="left">757.025</td>
+<td align="left">26.370</td>
+<td align="left">37.720</td>
+<td align="left">34.596</td>
+<td align="left">4.0</td>
+<td align="left">25.221</td>
+<td align="left">87.298</td>
+<td align="left">23.623</td>
+<td align="left">30.571</td>
+<td align="left">25.034</td>
+<td align="left">1</td>
+<td align="left">3.082</td>
+<td align="left">6.756</td>
+</tr>
 </tbody>
 </table>
 <table>
@@ -525,18 +525,6 @@ April 17, 2018</p>
 <td align="left">72%</td>
 </tr>
 <tr class="even">
-<td align="left">Turker</td>
-<td align="left">122</td>
-<td align="left">13207</td>
-<td align="left">458</td>
-<td align="left">1636</td>
-<td align="left">103820</td>
-<td align="left">1016</td>
-<td align="left">3077</td>
-<td align="left">94.5%</td>
-<td align="left">23%</td>
-</tr>
-<tr class="odd">
 <td align="left">Registered</td>
 <td align="left">188</td>
 <td align="left">5171</td>
@@ -547,6 +535,18 @@ April 17, 2018</p>
 <td align="left">1218</td>
 <td align="left">36.4%</td>
 <td align="left">38%</td>
+</tr>
+<tr class="odd">
+<td align="left">Turker</td>
+<td align="left">122</td>
+<td align="left">13207</td>
+<td align="left">458</td>
+<td align="left">1636</td>
+<td align="left">103820</td>
+<td align="left">1016</td>
+<td align="left">3077</td>
+<td align="left">94.5%</td>
+<td align="left">23%</td>
 </tr>
 </tbody>
 </table>

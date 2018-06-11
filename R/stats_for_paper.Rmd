@@ -895,7 +895,8 @@ filtered.speeds <-
   speeds %>%
   filter(role %in% c('Registered', 'Anonymous', 'Turker'),
          audit_count > 0,
-         labels_per_100m >= 3.75)
+         labels_per_100m >= 3.75) %>%
+  mutate(role = factor(role, levels = c('Anonymous', 'Registered', 'Turker')))
 ```
 
 # Public Deployment
@@ -952,6 +953,30 @@ kable(
   align = 'l')
 ```
 
+### Dataset 1st 100% vs full deployment
+
+The first table describes the dataset at the point where we hit 100% completion. The second table describes the full dataset. Both include _all_ users, not just "good" users. We define a user to be someone who both completed an audit of at least one street segment _and_ placed at least one label after the tutorial.
+
+```{r public.deployment.first.100, echo=FALSE, warning=FALSE}
+kable(
+  audit.length %>%
+    filter(dataset == 'first_100%') %>%
+    mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
+    summarise_vars('role', c('miles_audited', 'label_count'), funcs = sum, include.n = TRUE),
+  digits = 0,
+  align = 'l'
+)
+kable(
+  audit.length %>%
+    filter(dataset == 'all') %>%
+    mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
+    summarise_vars('role', c('miles_audited', 'label_count'), funcs = sum, include.n = TRUE),
+  digits = 0,
+  align = 'l'
+)
+```
+
+
 ### Data characteristics
 
 This is the start of filtering out users with low labeling frequency (also filtering out researchers).
@@ -981,30 +1006,6 @@ streets.with.mult.audits <-
 ```
 
 There have been a total of `r n.audits` audits by our "good" users across `r n.streets` streets, averaging `r format(n.audits/n.streets, digits = 3)` audits per street. Of the `r nrow(streets.with.mult.audits)` streets that have been audited multiple times, there are an average of `r format(sum(streets.with.mult.audits$n.audits) / nrow(streets.with.mult.audits), digits = 3)` audits per street.
-
-
-### Dataset 1st 100% vs full deployment
-
-The first table describes the dataset at the point where we hit 100% completion. The second table describes the full dataset. Both include _all_ users, not just "good" users.
-
-```{r public.deployment.first.100, echo=FALSE, warning=FALSE}
-kable(
-  audit.length %>%
-    filter(dataset == 'first_100%') %>%
-    mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
-    summarise_vars('role', c('miles_audited', 'label_count'), funcs = sum, include.n = TRUE),
-  digits = 0,
-  align = 'l'
-)
-kable(
-  audit.length %>%
-    filter(dataset == 'all') %>%
-    mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
-    summarise_vars('role', c('miles_audited', 'label_count'), funcs = sum, include.n = TRUE),
-  digits = 0,
-  align = 'l'
-)
-```
 
 
 ### Data lost due to filtering

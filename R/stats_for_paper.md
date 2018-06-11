@@ -7,8 +7,8 @@ April 17, 2018
     -   [High-level results](#high-level-results)
         -   [Top-line numbers (no filtering)](#top-line-numbers-no-filtering)
         -   [Attribute counts by type](#attribute-counts-by-type)
-        -   [Data characteristics](#data-characteristics)
         -   [Dataset 1st 100% vs full deployment](#dataset-1st-100-vs-full-deployment)
+        -   [Data characteristics](#data-characteristics)
         -   [Data lost due to filtering](#data-lost-due-to-filtering)
         -   [User stats and tool usage](#user-stats-and-tool-usage)
     -   [Possible Stories](#possible-stories)
@@ -71,19 +71,9 @@ Here are the counts of attributes by attribute type after single and multi user 
 | Problem        | 23419  | -          |
 | Total          | 102111 | 100.0%     |
 
-### Data characteristics
-
-This is the start of filtering out users with low labeling frequency (also filtering out researchers).
-
-| CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
-|:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
-| 85439    | 8508       | 31927      | 18056    | 685       | 1070  | 4693           | 150378 |
-
-There have been a total of 19559 audits by our "good" users across 13020 streets, averaging 1.5 audits per street. Of the 5061 streets that have been audited multiple times, there are an average of 2.29 audits per street.
-
 ### Dataset 1st 100% vs full deployment
 
-The first table describes the dataset at the point where we hit 100% completion. The second table describes the full dataset. Both include *all* users, not just "good" users.
+The first table describes the dataset at the point where we hit 100% completion. The second table describes the full dataset. Both include *all* users, not just "good" users. We define a user to be someone who both completed an audit of at least one street segment *and* placed at least one label after the tutorial.
 
 | role       | n.users | label\_count | miles\_audited |
 |:-----------|:--------|:-------------|:---------------|
@@ -98,6 +88,16 @@ The first table describes the dataset at the point where we hit 100% completion.
 | Anonymous  | 2876    | 15657        | 205            |
 | Turker     | 277     | 150966       | 2294           |
 | Registered | 344     | 41786        | 537            |
+
+### Data characteristics
+
+This is the start of filtering out users with low labeling frequency (also filtering out researchers).
+
+| CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
+|:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
+| 85439    | 8508       | 31927      | 18056    | 685       | 1070  | 4693           | 150378 |
+
+There have been a total of 19559 audits by our "good" users across 13020 streets, averaging 1.5 audits per street. Of the 5061 streets that have been audited multiple times, there are an average of 2.29 audits per street.
 
 ### Data lost due to filtering
 
@@ -114,14 +114,14 @@ NOTE: A "session" below is defined as a sequence of audit task interactions for 
 | role       | n.users | audit\_count\_md | audit\_count\_mn | audit\_count\_sd | km\_md | km\_mn | km\_sd | label\_count\_md | label\_count\_mn | label\_count\_sd | labels\_per\_100m\_md | labels\_per\_100m\_mn | labels\_per\_100m\_sd | miles\_audited\_md | miles\_audited\_mn | miles\_audited\_sd | minutes\_audited\_md | minutes\_audited\_mn | minutes\_audited\_sd | minutes\_per\_session\_md | minutes\_per\_session\_mn | minutes\_per\_session\_sd | mission\_count\_md | mission\_count\_mn | mission\_count\_sd | m\_per\_min\_md | m\_per\_min\_mn | m\_per\_min\_sd | n\_sessions\_md | n\_sessions\_mn | n\_sessions\_sd |
 |:-----------|:--------|:-----------------|:-----------------|:-----------------|:-------|:-------|:-------|:-----------------|:-----------------|:-----------------|:----------------------|:----------------------|:----------------------|:-------------------|:-------------------|:-------------------|:---------------------|:---------------------|:---------------------|:--------------------------|:--------------------------|:--------------------------|:-------------------|:-------------------|:-------------------|:----------------|:----------------|:----------------|:----------------|:----------------|:----------------|
 | Anonymous  | 293     | 2                | 4.031            | 12.690           | 0.133  | 0.439  | 1.685  | 17.0             | 36.724           | 89.948           | 10.508                | 23.164                | 37.934                | 0.083              | 0.273              | 1.047              | 10.640               | 17.589               | 25.105               | 6.120                     | 9.289                     | 10.913                    | 0.0                | 1.078              | 2.554              | 13.660          | 19.980          | 21.169          | 2               | 2.232           | 1.902           |
-| Turker     | 122     | 5                | 108.254          | 419.687          | 0.586  | 13.408 | 52.259 | 59.0             | 850.984          | 2961.015         | 8.900                 | 13.962                | 17.996                | 0.364              | 8.331              | 32.472             | 26.940               | 225.221              | 757.025              | 26.370                    | 37.720                    | 34.596                    | 4.0                | 25.221             | 87.298             | 23.623          | 30.571          | 25.034          | 1               | 3.082           | 6.756           |
 | Registered | 188     | 8                | 27.505           | 111.245          | 0.869  | 3.352  | 14.658 | 70.5             | 191.080          | 731.413          | 6.800                 | 11.257                | 20.336                | 0.540              | 2.083              | 9.108              | 29.335               | 57.882               | 139.760              | 20.367                    | 28.329                    | 27.346                    | 3.5                | 6.479              | 22.646             | 37.314          | 42.404          | 29.573          | 1               | 2.101           | 3.638           |
+| Turker     | 122     | 5                | 108.254          | 419.687          | 0.586  | 13.408 | 52.259 | 59.0             | 850.984          | 2961.015         | 8.900                 | 13.962                | 17.996                | 0.364              | 8.331              | 32.472             | 26.940               | 225.221              | 757.025              | 26.370                    | 37.720                    | 34.596                    | 4.0                | 25.221             | 87.298             | 23.623          | 30.571          | 25.034          | 1               | 3.082           | 6.756           |
 
 | role       | n.users | audits | hours\_audited | km   | labels | miles | missions | coverage | &gt;1 sess |
 |:-----------|:--------|:-------|:---------------|:-----|:-------|:------|:---------|:---------|:-----------|
 | Anonymous  | 293     | 1181   | 86             | 129  | 10760  | 80    | 316      | 7.4%     | 72%        |
-| Turker     | 122     | 13207  | 458            | 1636 | 103820 | 1016  | 3077     | 94.5%    | 23%        |
 | Registered | 188     | 5171   | 181            | 630  | 35923  | 392   | 1218     | 36.4%    | 38%        |
+| Turker     | 122     | 13207  | 458            | 1636 | 103820 | 1016  | 3077     | 94.5%    | 23%        |
 
 Possible Stories
 ----------------
