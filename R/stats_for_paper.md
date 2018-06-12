@@ -13,6 +13,7 @@ April 17, 2018
         -   [User stats and tool usage](#user-stats-and-tool-usage)
     -   [Possible Stories](#possible-stories)
         -   [Data overlap and agreement between users](#data-overlap-and-agreement-between-users)
+        -   [Tutorial dropoffs](#tutorial-dropoffs)
         -   [Stickyness of tool: user dropoffs](#stickyness-of-tool-user-dropoffs)
 -   [Turk Study](#turk-study)
     -   [High level results](#high-level-results-1)
@@ -131,6 +132,26 @@ Possible Stories
 Among all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement among them? (see comment in Outline document for details on implementation)
 
 A total of 38.9% of streets were audited by multiple users.
+
+### Tutorial dropoffs
+
+Below we look at how users drop off in the tutorial. Because most people going through the tutorial have not yet registered, we simply use IP address as a "user" for the purpose of analyzing the tutorial in particular. We consider only users who clicked on the "Let's get started!" button on the tutorial page as having started the tutorial. To simplify the analysis, we are looking at only tutorial attempts after the small additions we made to the tutorial last summer (so the data starts July 10th, 2017).
+
+The steps in the graph below are as follows:
+
+1.  Clicked "Let's get started!"
+2.  Placed first curb ramp label *and correctly rated severity*
+3.  Placed second curb ramp label and correctly rated severity
+4.  Placed missing curb ramp label and correctly rated severity
+5.  Placed third curb ramp label and correctly rated severity
+6.  Placed fourth curb ramp label and correctly rated severity
+7.  Placed no sidewalk label
+8.  Placed fifth curb ramp label and correctly rated severity
+9.  Took step forward and clicked through all dialog boxes to finish tutorial
+
+Of the 1114 people who started the tutorial, 831 finished the first step (75%), and 575 completed the tutorial (52%).
+
+![](stats_for_paper_files/figure-markdown_github/public.deployment.tutorial.dropoff.plots-1.png)
 
 ### Stickyness of tool: user dropoffs
 

@@ -53,7 +53,9 @@ LABEL_TYPES_TO_ANALYZE = c('All', 'Problem', 'CurbRamp', 'NoCurbRamp', 'Obstacle
 NON_AGGREGATE_TYPES = c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')
 
 # Variables commonly used in plotting
-my.theme.discrete.x <- theme_bw() + theme(panel.grid.major.x = element_blank())
+my.theme.discrete.x <-
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank())
 ACCURACY_BREAKS <- c(0, 0.25, 0.5, 0.75, 1.0)
 
 # Helpful functions
@@ -76,7 +78,23 @@ p.num.to.p.str.with.sig.code <- function(p.value) {
 }
 extract_label_type <- Vectorize(
   function(note.str) {
-  str_extract_all(note.str, '[:alpha:]+')[[1]][2]
+    str_extract_all(note.str, '[:alpha:]+')[[1]][2]
+  }
+)
+extract_label_type_radio_change <- Vectorize(
+  function(note.str, action.str) {
+    if (action.str == 'ContextMenu_RadioChange' | action.str == 'LabelingCanvas_FinishLabeling')
+      str_extract_all(note.str, '[:alpha:]+')[[1]][2]
+    else
+      NA_character_
+  }
+)
+extract_severity_radio_change <- Vectorize(
+  function(note.str, action.str) {
+    if (action.str == 'ContextMenu_RadioChange')
+      str_extract_all(note.str, '[:alnum:]+')[[1]][4]
+    else
+      NA_character_
   }
 )
 print.lrt.results <- function(test, model, fixed.effect) {
@@ -401,7 +419,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   tutorials <-
     dbGetQuery(
       db.connection.public.deployment,
-      'SELECT action, ips.audit_task_id, ip_address, timestamp
+      'SELECT action, ip_address, note, ips.audit_task_id, timestamp
       FROM
       (
           SELECT DISTINCT audit_task_interaction.audit_task_id, ip_address
@@ -418,6 +436,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       WHERE action IN
           (
               \'Onboarding_Start\',
+              \'Onboarding_Transition\',
               \'ModeSwitch_CurbRamp\',
               \'KeyboardShortcut_Severity_1\',
               \'ModeSwitch_NoCurbRamp\',
@@ -473,7 +492,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   sessions <- read.csv(sessions.path, colClasses = c('character', 'numeric'))
   reg.missions <- read.csv(missions.path, colClasses = c('character', 'numeric'))
   tutorials <- read.csv(tutorials.path,
-                        colClasses = c('character', 'numeric', 'character', 'POSIXct'))
+                        colClasses = c(replicate(3, 'character'), 'numeric', 'POSIXct'))
 }
 
 turk.times.path <- '../data/stats_for_paper_times-turk.csv'
@@ -812,6 +831,7 @@ zoning.data <- read.csv('../data/street_zoning_info.csv', colClasses = zoning.cl
 ```{r transforming.data, echo=FALSE, warning=FALSE}
 # Change the _ column names to . separated.
 names(labeling.times.turk.study) <- gsub("\\_", ".", names(labeling.times.turk.study))
+names(tutorials) <- gsub("\\_", ".", names(tutorials))
 
 # Compute median labeling time by label type for each user.
 individual.search.times <-
@@ -1145,6 +1165,194 @@ percent.streets.with.multiple.audits <-
 ```
 
 A total of `r format(percent.streets.with.multiple.audits, digits = 3)`% of streets were audited by multiple users. 
+
+
+### Tutorial dropoffs
+
+```{r public.deployment.tutorial.dropoff, echo=FALSE}
+tutorials.parsed <-
+  tutorials %>%
+  mutate(type = factor(extract_label_type_radio_change(note, action)),
+         sev = extract_severity_radio_change(note, action),
+         action = factor(action),
+         action = fct_recode(action,
+                             'mouse_sev_change' = 'ContextMenu_RadioChange',
+                             'transition' = 'Onboarding_Transition',
+                             'key_sev_1' = 'KeyboardShortcut_Severity_1',
+                             'key_sev_3' = 'KeyboardShortcut_Severity_3',
+                             'nosidewalk' = 'LabelingCanvas_FinishLabeling',
+                             'mode_ramp' = 'ModeSwitch_CurbRamp',
+                             'mode_noramp' = 'ModeSwitch_NoCurbRamp',
+                             'mode_nosidewalk' = 'ModeSwitch_NoSidewalk',
+                             'start' = 'Onboarding_Start',
+                             'end' = 'Onboarding_End',
+                             'step' = 'ViewControl_DoubleClick')) %>%
+  rename(time = timestamp)
+
+tasks.where.tutorial.started <-
+  tutorials.parsed %>%
+  group_by(audit.task.id) %>%
+  dplyr::summarise(has.transition = 'transition' %in% action) %>%
+  filter(has.transition == TRUE) %>%
+  pull(audit.task.id)
+
+suppressWarnings(
+steps.by.ip <-
+  tutorials.parsed %>%
+  filter(audit.task.id %in% tasks.where.tutorial.started) %>%
+  group_by(audit.task.id, ip.address) %>%
+  mutate(cur.time = min(time[action == 'start']),
+         # Step 1: CurbRamp severity 1
+         placed.label = 'mode_ramp' %in% action[time + 1 > cur.time],
+         label.time = if_else(placed.label,
+                              min(time[action == 'mode_ramp' & time + 1 > cur.time]),
+                              as.POSIXct(NA)),
+         rated.sev = 'key_sev_1' %in% action[time + 1 > label.time]
+                      | 'CurbRamp' %in% type[time + 1 > label.time],
+         sev.time = if_else(rated.sev,
+                            min(time[action == 'key_sev_1' & time + 1 > label.time],
+                                time[type == 'CurbRamp' & time + 1 > label.time],
+                                na.rm = TRUE),
+                            as.POSIXct(NA)),
+         steps = if_else(rated.sev, 1, 0),
+         cur.time = if_else(steps == 1, sev.time, cur.time),
+
+         # Step 2: CurbRamp severity 1
+         placed.label = 'mode_ramp' %in% action[time + 1 > cur.time],
+         label.time = if_else(placed.label,
+                              min(time[action == 'mode_ramp' & time + 1 > cur.time]),
+                              as.POSIXct(NA)),
+         rated.sev = 'key_sev_1' %in% action[time + 1 > label.time]
+                      | 'CurbRamp' %in% type[time + 1 > label.time],
+         sev.time = if_else(rated.sev,
+                            min(time[action == 'key_sev_1' & time + 1 > label.time],
+                                time[type == 'CurbRamp' & time + 1 > label.time],
+                                na.rm = TRUE),
+                            as.POSIXct(NA)),
+         steps = if_else(rated.sev, 2, steps),
+         cur.time = if_else(steps == 2, sev.time, cur.time),
+
+         # Step 3: NoCurbRamp severity 3
+         placed.label = 'mode_noramp' %in% action[time + 1 > cur.time],
+         label.time = if_else(placed.label,
+                              min(time[action == 'mode_noramp' & time + 1 > cur.time]),
+                              as.POSIXct(NA)),
+         rated.sev = 'key_sev_3' %in% action[time + 1 > label.time]
+                        | 'NoCurbRamp' %in% type[time + 1 > label.time],
+         sev.time = if_else(rated.sev,
+                            min(time[action == 'key_sev_3' & time + 1 > label.time],
+                                time[type == 'NoCurbRamp' & time + 1 > label.time],
+                                na.rm = TRUE),
+                            as.POSIXct(NA)),
+         steps = if_else(rated.sev, 3, steps),
+         cur.time = if_else(steps == 3, sev.time, cur.time),
+
+         # Step 4: CurbRamp severity 1
+         placed.label = 'mode_ramp' %in% action[time + 1 > cur.time],
+         label.time = if_else(placed.label,
+                              min(time[action == 'mode_ramp' & time + 1 > cur.time]),
+                              as.POSIXct(NA)),
+         rated.sev = 'key_sev_1' %in% action[time + 1 > label.time]
+                      | 'CurbRamp' %in% type[time + 1 > label.time],
+         sev.time = if_else(rated.sev,
+                            min(time[action == 'key_sev_1' & time + 1 > label.time],
+                                time[type == 'CurbRamp' & time + 1 > label.time],
+                                na.rm = TRUE),
+                            as.POSIXct(NA)),
+         steps = if_else(rated.sev, 4, steps),
+         cur.time = if_else(steps == 4, sev.time, cur.time),
+
+         # Step 5: CurbRamp severity 1
+         placed.label = 'mode_ramp' %in% action[time + 1 > cur.time],
+         label.time = if_else(placed.label,
+                              min(time[action == 'mode_ramp' & time + 1 > cur.time]),
+                              as.POSIXct(NA)),
+         rated.sev = 'key_sev_1' %in% action[time + 1 > label.time]
+                      | 'CurbRamp' %in% type[time + 1 > label.time],
+         sev.time = if_else(rated.sev,
+                            min(time[action == 'key_sev_1' & time + 1 > label.time],
+                                time[type == 'CurbRamp' & time + 1 > label.time],
+                                na.rm = TRUE),
+                            as.POSIXct(NA)),
+         steps = if_else(rated.sev, 5, steps),
+         cur.time = if_else(steps == 5, sev.time, cur.time),
+
+         # Step 6: NoSidewalk
+         placed.label = 'nosidewalk' %in% action[time + 1 > cur.time],
+         label.time = if_else(placed.label,
+                              min(time[action == 'nosidewalk' & time + 1 > cur.time]),
+                              as.POSIXct(NA)),
+         steps = if_else(placed.label, 6, steps),
+         cur.time = if_else(steps == 6, label.time, cur.time),
+
+         # Step 7: CurbRamp severity 1
+         placed.label = 'mode_ramp' %in% action[time + 1 > cur.time],
+         label.time = if_else(placed.label,
+                              min(time[action == 'mode_ramp' & time + 1 > cur.time]),
+                              as.POSIXct(NA)),
+         rated.sev = 'key_sev_1' %in% action[time + 1 > label.time]
+                      | 'CurbRamp' %in% type[time + 1 > label.time],
+         sev.time = if_else(rated.sev,
+                            min(time[action == 'key_sev_1' & time + 1 > label.time],
+                                time[type == 'CurbRamp' & time + 1 > label.time],
+                                na.rm = TRUE),
+                            as.POSIXct(NA)),
+         steps = if_else(rated.sev, 7, steps),
+         cur.time = if_else(steps == 7, sev.time, cur.time),
+
+         # Step 8: Step and finish tutorial
+         has.step = 'step' %in% action[time + 1 > cur.time],
+         has.end = 'end' %in% action[time + 1 > cur.time],
+         old.steps = steps,
+         steps = if_else(has.step & has.end, 8, steps)) %>%
+  dplyr::summarise(steps = first(steps)) %>%
+  dplyr::summarise(steps = first(steps),
+                   ip.address = first(ip.address)) %>%
+  group_by(ip.address) %>%
+  dplyr::summarise(steps = max(steps))
+)
+
+get.users.remaining <- Vectorize(
+  function(step) {
+    nrow(steps.by.ip[steps.by.ip$steps >= step,])
+  }
+)
+users.remaining.by.step <-
+  data.frame(step = seq(0, 8)) %>%
+  mutate(users.remaining = get.users.remaining(step))
+
+n.started.tutorial <- users.remaining.by.step[1,'users.remaining']
+n.did.first.step.tutorial <- users.remaining.by.step[2,'users.remaining']
+n.finished.tutorial <- users.remaining.by.step[9,'users.remaining']
+percent.did.first.step.tutorial <- 100 * n.did.first.step.tutorial / n.started.tutorial
+percent.finished.tutorial <- 100 * n.finished.tutorial / n.started.tutorial
+```
+
+Below we look at how users drop off in the tutorial. Because most people going through the tutorial have not yet registered, we simply use IP address as a "user" for the purpose of analyzing the tutorial in particular. We consider only users who clicked on the "Let's get started!" button on the tutorial page as having started the tutorial. To simplify the analysis, we are looking at only tutorial attempts after the small additions we made to the tutorial last summer (so the data starts July 10th, 2017).
+
+The steps in the graph below are as follows:
+
+0. Clicked "Let's get started!"
+1. Placed first curb ramp label _and correctly rated severity_
+2. Placed second curb ramp label and correctly rated severity
+3. Placed missing curb ramp label and correctly rated severity
+4. Placed third curb ramp label and correctly rated severity
+5. Placed fourth curb ramp label and correctly rated severity
+6. Placed no sidewalk label
+7. Placed fifth curb ramp label and correctly rated severity
+8. Took step forward and clicked through all dialog boxes to finish tutorial
+
+Of the `r n.started.tutorial` people who started the tutorial, `r n.did.first.step.tutorial` finished the first step (`r format(percent.did.first.step.tutorial, digits = 0)`%), and `r n.finished.tutorial` completed the tutorial (`r format(percent.finished.tutorial, digits = 0)`%).
+
+```{r public.deployment.tutorial.dropoff.plots, echo=FALSE, fig.width=7, fig.height=4}
+ggplot(aes(x = step, y = users.remaining), data = users.remaining.by.step) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = seq(0, 8), expand = c(0.015, 0)) +
+  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+  theme_bw() +
+  theme(panel.grid.minor.x = element_blank())
+```
 
 
 ### Stickyness of tool: user dropoffs
