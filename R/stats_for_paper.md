@@ -14,7 +14,7 @@ April 17, 2018
     -   [Possible Stories](#possible-stories)
         -   [Data overlap and agreement between users](#data-overlap-and-agreement-between-users)
         -   [Tutorial dropoffs](#tutorial-dropoffs)
-        -   [Stickyness of tool: user dropoffs](#stickyness-of-tool-user-dropoffs)
+        -   [User dropoffs](#user-dropoffs)
 -   [Turk Study](#turk-study)
     -   [High level results](#high-level-results-1)
         -   [Ground truth label counts](#ground-truth-label-counts)
@@ -153,9 +153,7 @@ Of the 1114 people who started the tutorial, 831 finished the first step (75%), 
 
 ![](stats_for_paper_files/figure-markdown_github/public.deployment.tutorial.dropoff.plots-1.png)
 
-### Stickyness of tool: user dropoffs
-
-TODO include taking a step in the tool as the first milestone in the graph below.
+### User dropoffs
 
 Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a user (the 575 IP addresses who finished the tutorial in the previous section are the same 575 IPs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
 
@@ -164,11 +162,11 @@ We also only counted missions completed in the two hours after finishing the tut
 The steps in the graph below are as follows:
 
 1.  Finished tutorial
-2.  TODO: Took a step
+2.  Took a step
 3.  Completed first mission
 4.  Completed second mission
 
-Of the 575 people who finished the tutorial, 276 finished at least one mission afterwards (48%), and 153 completed at least two missions afterwards (27%).
+Of the 575 people who finished the tutorial, 430 took a step (75%), 276 finished at least one mission afterwards (48%), and 153 completed at least two missions afterwards (27%).
 
 ![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)
 
