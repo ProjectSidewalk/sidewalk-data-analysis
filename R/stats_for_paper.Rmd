@@ -1393,13 +1393,25 @@ The steps in the graph below are as follows:
 Of the `r n.started.tutorial` people who started the tutorial, `r n.did.first.step.tutorial` finished the first step (`r format(percent.did.first.step.tutorial, digits = 0)`%), and `r n.finished.tutorial` completed the tutorial (`r format(percent.finished.tutorial, digits = 0)`%).
 
 ```{r public.deployment.tutorial.dropoff.plots, echo=FALSE, fig.width=5, fig.height=3}
+step.labels <- c('Start tutorial',
+                 'First curb ramp',
+                 'Second curb ramp',
+                 'Missing curb ramp',
+                 'Third curb ramp',
+                 'Fourth curb ramp',
+                 'No sidewalk',
+                 'Fifth curb ramp',
+                 'Finish tutorial')
 ggplot(aes(x = step, y = users.remaining), data = users.remaining.tutorial) +
   geom_line() +
   geom_point() +
-  scale_x_continuous(breaks = seq(0, 8), expand = c(0.015, 0)) +
+  scale_x_continuous(breaks = seq(0, 8),
+                     labels = step.labels,
+                     expand = c(0.015, 0)) +
   scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
   theme_bw() +
-  theme(panel.grid.minor.x = element_blank())
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+        panel.grid.minor.x = element_blank())
 ```
 
 
@@ -1427,8 +1439,8 @@ dropoffs.by.ip <-
                                     TRUE                   ~ 0))
 
 users.remaining.dropoffs <-
-  data.frame(steps.complete = seq(0, 3)) %>%
-  mutate(users.remaining = get.users.remaining(dropoffs.by.ip, steps.complete))
+  data.frame(step = seq(0, 3)) %>%
+  mutate(users.remaining = get.users.remaining(dropoffs.by.ip, step))
 
 n.took.step <- users.remaining.dropoffs[2,'users.remaining']
 n.did.one.mission <- users.remaining.dropoffs[3,'users.remaining']
@@ -1452,7 +1464,7 @@ The steps in the graph below are as follows:
 Of the `r n.finished.tutorial` people who finished the tutorial, `r n.took.step` took a step (`r format(percent.took.step, digits = 0)`%), `r n.did.one.mission` finished at least one mission afterwards (`r format(percent.did.one.mission, digits = 0)`%), and `r n.did.two.missions` completed at least two missions afterwards (`r format(percent.did.two.missions, digits = 0)`%).
 
 ```{r public.deployment.user.dropoff.plot, echo=FALSE, fig.width=5, fig.height=3}
-ggplot(aes(x = steps.complete, y = users.remaining), data = users.remaining.dropoffs) +
+ggplot(aes(x = step, y = users.remaining), data = users.remaining.dropoffs) +
   geom_line() +
   geom_point() +
   scale_x_continuous(breaks = seq(0, 3),
