@@ -155,7 +155,22 @@ Of the 1114 people who started the tutorial, 831 finished the first step (75%), 
 
 ### Stickyness of tool: user dropoffs
 
-We want a bar chart here showing, after a user clicks start mapping, what percentage finish the tutorial, what percentage finish a mission, etc.
+TODO include taking a step in the tool as the first milestone in the graph below.
+
+Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a user (the 575 IP addresses who finished the tutorial in the previous section are the same 575 IPs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
+
+We also only counted missions completed in the two hours after finishing the tutorial. There was not a sizeable difference when looking at 1 hour, 2 hours, or 48 hours after finishing the tutorial, so I think that 2 hours works fine.
+
+The steps in the graph below are as follows:
+
+1.  Finished tutorial
+2.  TODO: Took a step
+3.  Completed first mission
+4.  Completed second mission
+
+Of the 575 people who finished the tutorial, 276 finished at least one mission afterwards (48%), and 153 completed at least two missions afterwards (27%).
+
+![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)
 
 Turk Study
 ==========

@@ -209,6 +209,7 @@ attributes.path <- '../data/stats_for_paper_attributes.csv'
 sessions.path <- '../data/stats_for_paper_sessions.csv'
 missions.path <- '../data/stats_for_paper_reg_missions.csv'
 tutorials.path <- '../data/stats_for_paper_tutorials.csv'
+dropoffs.path <- '../data/stats_for_paper_dropoffs.csv'
 if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   reg.labels <-
     dbGetQuery(
@@ -455,6 +456,43 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
               OR (action = \'LabelingCanvas_FinishLabeling\' AND note LIKE \'%NoSidewalk%\')
           );'
     )
+  dropoffs <-
+    dbGetQuery(
+      db.connection.public.deployment,
+      'SELECT DISTINCT ips1.ip_address, action, timestamp
+      FROM
+      (
+          SELECT DISTINCT audit_task_interaction.audit_task_id, ip_address
+          FROM audit_task_interaction
+          INNER JOIN audit_task
+              ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+          INNER JOIN audit_task_environment
+              ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+          WHERE task_start > \'2017-07-10 00:00:00.000+00\'
+              AND action = \'Onboarding_End\'
+      ) ips1
+      INNER JOIN
+      (
+          SELECT DISTINCT audit_task_interaction.audit_task_id, ip_address
+          FROM audit_task_interaction
+          INNER JOIN audit_task
+              ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+          INNER JOIN audit_task_environment
+              ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+          WHERE task_start > \'2017-07-10 00:00:00.000+00\'
+              AND action = \'ViewControl_DoubleClick\'
+      ) ips2
+      ON ips1.audit_task_id = ips2.audit_task_id
+          AND ips1.ip_address = ips2.ip_address
+      INNER JOIN audit_task_environment
+          ON ips2.ip_address = audit_task_environment.ip_address
+      INNER JOIN audit_task
+          ON audit_task_environment.audit_task_id = audit_task.audit_task_id
+      INNER JOIN audit_task_interaction
+          ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+      WHERE task_start > \'2017-07-10 00:00:00.000+00\'
+          AND action IN (\'Onboarding_End\', \'MissionComplete\');'
+    )
   dbDisconnect(db.connection.public.deployment)
   
   # Combine registered and anonymous user results.
@@ -472,6 +510,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   file.copy(sessions.path, paste('../data/old/stats_for_paper_sessions.csv', now, sep = '_'))
   file.copy(missions.path, paste('../data/old/stats_for_paper_reg_missions.csv', now, sep = '_'))
   file.copy(tutorials.path, paste('../data/old/stats_for_paper_tutorials.csv', now, sep = '_'))
+  file.copy(dropoffs.path, paste('../data/old/stats_for_paper_dropoffs.csv', now, sep = '_'))
 
   # Overwrite old data files with new results of queries.
   write.csv(audits, audits.path, row.names = FALSE)
@@ -481,6 +520,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   write.csv(sessions, sessions.path, row.names = FALSE)
   write.csv(reg.missions, missions.path, row.names = FALSE)
   write.csv(tutorials, tutorials.path, row.names = FALSE)
+  write.csv(dropoffs, dropoffs.path, row.names = FALSE)
 } else {
   audits <- read.csv(audits.path,
                      colClasses = c('character', 'character', 'POSIXct',
@@ -493,6 +533,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   reg.missions <- read.csv(missions.path, colClasses = c('character', 'numeric'))
   tutorials <- read.csv(tutorials.path,
                         colClasses = c(replicate(3, 'character'), 'numeric', 'POSIXct'))
+  dropoffs <- read.csv(dropoffs.path, colClasses = c('character', 'character', 'POSIXct'))
 }
 
 turk.times.path <- '../data/stats_for_paper_times-turk.csv'
@@ -832,6 +873,7 @@ zoning.data <- read.csv('../data/street_zoning_info.csv', colClasses = zoning.cl
 # Change the _ column names to . separated.
 names(labeling.times.turk.study) <- gsub("\\_", ".", names(labeling.times.turk.study))
 names(tutorials) <- gsub("\\_", ".", names(tutorials))
+names(dropoffs) <- gsub("\\_", ".", names(dropoffs))
 
 # Compute median labeling time by label type for each user.
 individual.search.times <-
@@ -1304,17 +1346,22 @@ steps.by.ip <-
          has.step = 'step' %in% action[time + 1 > cur.time],
          has.end = 'end' %in% action[time + 1 > cur.time],
          old.steps = steps,
-         steps = if_else(has.step & has.end, 8, steps)) %>%
-  dplyr::summarise(steps = first(steps)) %>%
+         steps = if_else(has.step & has.end, 8, steps),
+         end.time = if_else(has.step & has.end,
+                            min(time[action == 'end' & time + 1 > cur.time]),
+                            cur.time)) %>%
   dplyr::summarise(steps = first(steps),
-                   ip.address = first(ip.address)) %>%
+                   end.time = first(end.time)) %>%
+  dplyr::summarise_at(vars(steps, ip.address, end.time), first) %>%
   group_by(ip.address) %>%
-  dplyr::summarise(steps = max(steps))
+  dplyr::summarise(steps.complete = max(steps),
+                   audit.task.id = first(audit.task.id[steps == max(steps)]),
+                   end.timestamp = first(end.time[steps == max(steps)]))
 )
 
 get.users.remaining <- Vectorize(
   function(step) {
-    nrow(steps.by.ip[steps.by.ip$steps >= step,])
+    nrow(steps.by.ip[steps.by.ip$steps.complete >= step,])
   }
 )
 users.remaining.by.step <-
@@ -1344,7 +1391,7 @@ The steps in the graph below are as follows:
 
 Of the `r n.started.tutorial` people who started the tutorial, `r n.did.first.step.tutorial` finished the first step (`r format(percent.did.first.step.tutorial, digits = 0)`%), and `r n.finished.tutorial` completed the tutorial (`r format(percent.finished.tutorial, digits = 0)`%).
 
-```{r public.deployment.tutorial.dropoff.plots, echo=FALSE, fig.width=7, fig.height=4}
+```{r public.deployment.tutorial.dropoff.plots, echo=FALSE, fig.width=5, fig.height=3}
 ggplot(aes(x = step, y = users.remaining), data = users.remaining.by.step) +
   geom_line() +
   geom_point() +
@@ -1357,7 +1404,62 @@ ggplot(aes(x = step, y = users.remaining), data = users.remaining.by.step) +
 
 ### Stickyness of tool: user dropoffs
 
-We want a bar chart here showing, after a user clicks start mapping, what percentage finish the tutorial, what percentage finish a mission, etc.
+```{r public.deployment.user.dropoff, echo=FALSE}
+# Takes users who have completed the tuturial (using same IPs from tutorial dropoff analysis), and
+# counts how many missions they completed in the 2 hours after finishing the tutorial.
+missions.by.ip <-
+  dropoffs %>%
+  filter(action == 'MissionComplete') %>%
+  inner_join(steps.by.ip, by = 'ip.address') %>%
+  filter(steps.complete == 8) %>%
+  group_by(ip.address) %>%
+  filter(difftime(timestamp, end.timestamp) > 0,
+         difftime(timestamp, end.timestamp, units = 'hours') < 0.5) %>%
+  dplyr::summarise(missions.complete = n()) %>%
+  right_join(steps.by.ip, by = 'ip.address') %>%
+  filter(steps.complete == 8) %>%
+  replace_na(list(missions.complete = 0)) %>%
+  mutate(missions.complete = pmin(2, missions.complete))
+
+get.users.remaining.drop <- Vectorize(
+  function(missions) {
+    nrow(missions.by.ip[missions.by.ip$missions.complete >= missions,])
+  }
+)
+users.remaining.by.mission <-
+  data.frame(missions.complete = seq(0, 2)) %>%
+  mutate(users.remaining = get.users.remaining.drop(missions.complete))
+
+n.did.one.mission <- users.remaining.by.mission[2,'users.remaining']
+n.did.two.missions <- users.remaining.by.mission[3,'users.remaining']
+percent.did.one.mission <- 100 * n.did.one.mission / n.finished.tutorial
+percent.did.two.missions <- 100 * n.did.two.missions / n.finished.tutorial
+```
+
+TODO include taking a step in the tool as the first milestone in the graph below.
+
+Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a user (the `r n.finished.tutorial` IP addresses who finished the tutorial in the previous section are the same `r n.finished.tutorial` IPs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
+
+We also only counted missions completed in the two hours after finishing the tutorial. There was not a sizeable difference when looking at 1 hour, 2 hours, or 48 hours after finishing the tutorial, so I think that 2 hours works fine.
+
+The steps in the graph below are as follows:
+
+0. Finished tutorial
+1. TODO: Took a step
+2. Completed first mission
+3. Completed second mission
+
+Of the `r n.finished.tutorial` people who finished the tutorial, `r n.did.one.mission` finished at least one mission afterwards (`r format(percent.did.one.mission, digits = 0)`%), and `r n.did.two.missions` completed at least two missions afterwards (`r format(percent.did.two.missions, digits = 0)`%).
+
+```{r public.deployment.user.dropoff.plot, echo=FALSE, fig.width=5, fig.height=3}
+ggplot(aes(x = missions.complete, y = users.remaining), data = users.remaining.by.mission) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = seq(0, 2), labels = c('0', '1', '>=2'), expand = c(0.015, 0)) +
+  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+  theme_bw() +
+  theme(panel.grid.minor.x = element_blank())
+```
 
 
 # Turk Study
