@@ -1350,9 +1350,8 @@ steps.by.ip <-
          end.time = if_else(has.step & has.end,
                             min(time[action == 'end' & time + 1 > cur.time]),
                             cur.time)) %>%
-  dplyr::summarise(steps = first(steps),
-                   end.time = first(end.time)) %>%
-  dplyr::summarise_at(vars(steps, ip.address, end.time), first) %>%
+  summarise_at(vars(steps, end.time), first) %>%
+  summarise_at(vars(steps, ip.address, end.time), first) %>%
   group_by(ip.address) %>%
   dplyr::summarise(steps.complete = max(steps),
                    audit.task.id = first(audit.task.id[steps == max(steps)]),
@@ -1422,18 +1421,24 @@ ggplot(aes(x = step, y = users.remaining), data = users.remaining.tutorial) +
 # counts how many missions they completed in the 2 hours after finishing the tutorial.
 dropoffs.by.ip <-
   dropoffs %>%
-  filter(action != 'Onboarding_End') %>%
+  filter(action == 'MissionComplete') %>%
+  mutate(timestamp = as.POSIXct(round(timestamp, units = 'mins'))) %>%
+  distinct() %>%
+  rbind(filter(dropoffs, action == 'PanoId_Changed')) %>%
   inner_join(steps.by.ip, by = 'ip.address') %>%
   filter(steps.complete == 8) %>%
   group_by(ip.address) %>%
-  filter(difftime(timestamp, end.timestamp) > 0,
+  filter((action == 'MissionComplete' & difftime(timestamp, end.timestamp) > 0)
+         | (action == 'PanoId_Changed' & difftime(timestamp, end.timestamp, units = 'secs') > -1),
          difftime(timestamp, end.timestamp, units = 'hours') < 2) %>%
   dplyr::summarise(missions.complete = sum(action == 'MissionComplete'),
                    panos.changed = sum(action == 'PanoId_Changed')) %>%
   right_join(steps.by.ip, by = 'ip.address') %>%
   filter(steps.complete == 8) %>%
   replace_na(list(missions.complete = 0, panos.changed = 0)) %>%
-  mutate(steps.complete = case_when(missions.complete >= 8 ~ 9,
+  mutate(steps.complete = case_when(missions.complete >= 10 ~ 11,
+                                    missions.complete == 9 ~ 10,
+                                    missions.complete == 8 ~ 9,
                                     missions.complete == 7 ~ 8,
                                     missions.complete == 6 ~ 7,
                                     missions.complete == 5 ~ 6,
@@ -1445,17 +1450,17 @@ dropoffs.by.ip <-
                                     TRUE                   ~ 0))
 
 users.remaining.dropoffs <-
-  data.frame(step = seq(0, 9)) %>%
+  data.frame(step = seq(0, 11)) %>%
   mutate(users.remaining = get.users.remaining(dropoffs.by.ip, step))
 
 n.took.step <- users.remaining.dropoffs[2,'users.remaining']
 n.did.one.mission <- users.remaining.dropoffs[3,'users.remaining']
 n.did.two.missions <- users.remaining.dropoffs[4,'users.remaining']
-n.did.eight.missions <- users.remaining.dropoffs[4,'users.remaining']
+n.did.ten.missions <- users.remaining.dropoffs[12,'users.remaining']
 percent.took.step <- 100 * n.took.step / n.finished.tutorial
 percent.did.one.mission <- 100 * n.did.one.mission / n.finished.tutorial
 percent.did.two.missions <- 100 * n.did.two.missions / n.finished.tutorial
-percent.did.eight.missions <- 100 * n.did.eight.missions / n.finished.tutorial
+percent.did.ten.missions <- 100 * n.did.ten.missions / n.finished.tutorial
 ```
 
 Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a user (the `r n.finished.tutorial` IP addresses who finished the tutorial in the previous section are the same `r n.finished.tutorial` IPs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
@@ -1468,8 +1473,9 @@ The steps in the graph below are as follows:
 1. Took a step
 2. Completed first mission
 3. Completed second mission
+4. And so on...
 
-Of the `r n.finished.tutorial` people who finished the tutorial, `r n.took.step` took a step (`r format(percent.took.step, digits = 0)`%), `r n.did.one.mission` finished at least one mission afterwards (`r format(percent.did.one.mission, digits = 0)`%), `r n.did.two.missions` completed at least two missions afterwards (`r format(percent.did.two.missions, digits = 0)`%), and `r n.did.eight.missions` did at least eight missions afterwards (`r format(percent.did.eight.missions, digits = 0)`%).
+Of the `r n.finished.tutorial` people who finished the tutorial, `r n.took.step` took a step (`r format(percent.took.step, digits = 0)`%), `r n.did.one.mission` finished at least one mission afterwards (`r format(percent.did.one.mission, digits = 0)`%), `r n.did.two.missions` completed at least two missions afterwards (`r format(percent.did.two.missions, digits = 0)`%), and `r n.did.ten.missions` did at least 10 missions afterwards (`r format(percent.did.ten.missions, digits = 0)`%).
 
 ```{r public.deployment.user.dropoff.plot, echo=FALSE, fig.width=5, fig.height=3}
 dropoff.labels <- c('Finish tutorial',
@@ -1481,11 +1487,13 @@ dropoff.labels <- c('Finish tutorial',
                     '5 missions',
                     '6 missions',
                     '7 missions',
-                    '8 missions')
+                    '8 missions',
+                    '9 missions',
+                    '10 missions')
 ggplot(aes(x = step, y = users.remaining), data = users.remaining.dropoffs) +
   geom_line() +
   geom_point() +
-  scale_x_continuous(breaks = seq(0, 9),
+  scale_x_continuous(breaks = seq(0, 11),
                      labels = dropoff.labels,
                      expand = c(0.015, 0)) +
   scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +

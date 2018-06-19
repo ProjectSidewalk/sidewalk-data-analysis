@@ -165,8 +165,9 @@ The steps in the graph below are as follows:
 2.  Took a step
 3.  Completed first mission
 4.  Completed second mission
+5.  And so on...
 
-Of the 575 people who finished the tutorial, 436 took a step (76%), 284 finished at least one mission afterwards (49%), 164 completed at least two missions afterwards (29%), and 164 did at least eight missions afterwards (29%).
+Of the 575 people who finished the tutorial, 444 took a step (77%), 284 finished at least one mission afterwards (49%), 163 completed at least two missions afterwards (28%), and 22 did at least 10 missions afterwards (4%).
 
 ![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)
 
