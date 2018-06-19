@@ -1452,14 +1452,19 @@ steps.by.user <-
 )
 
 get.users.remaining <- Vectorize(
-  function(data, step) {
-    nrow(data[data$steps.complete >= step,])
+  function(data, step, is.turk = NA) {
+    if (is.na(is.turk)) nrow(data[data$steps.complete >= step,])
+    else nrow(filter(data, steps.complete >= step, is.turker == is.turk))
   },
-  vectorize.args = c('step')
+  vectorize.args = c('step', 'is.turk')
 )
 users.remaining.tutorial <-
   data.frame(step = seq(0, 8)) %>%
   mutate(users.remaining = get.users.remaining(steps.by.user, step))
+users.remaining.tutorial.split <-
+  data.frame(step = rep(seq(0, 8), 2),
+             is.turker = c(rep(TRUE, 9), rep(FALSE, 9))) %>%
+  mutate(users.remaining = get.users.remaining(steps.by.user, step, is.turker))
 
 n.started.tutorial <- users.remaining.tutorial[1,'users.remaining']
 n.did.first.step.tutorial <- users.remaining.tutorial[2,'users.remaining']
@@ -1484,6 +1489,8 @@ The steps in the graph below are as follows:
 
 Of the `r n.started.tutorial` people who started the tutorial, `r n.did.first.step.tutorial` finished the first step (`r format(percent.did.first.step.tutorial, digits = 0)`%), and `r n.finished.tutorial` completed the tutorial (`r format(percent.finished.tutorial, digits = 0)`%).
 
+The first graph shows both volunteers and turkers together, and the second shows them split.
+
 ```{r public.deployment.tutorial.dropoff.plots, echo=FALSE, fig.width=5, fig.height=3}
 step.labels <- c('Start tutorial',
                  'First curb ramp',
@@ -1497,6 +1504,16 @@ step.labels <- c('Start tutorial',
 ggplot(aes(x = step, y = users.remaining), data = users.remaining.tutorial) +
   geom_line() +
   geom_point() +
+  scale_x_continuous(breaks = seq(0, 8),
+                     labels = step.labels,
+                     expand = c(0.015, 0)) +
+  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+        panel.grid.minor.x = element_blank())
+ggplot(aes(x = step, y = users.remaining), data = users.remaining.tutorial.split) +
+  geom_line(aes(colour = is.turker)) +
+  geom_point(aes(colour = is.turker)) +
   scale_x_continuous(breaks = seq(0, 8),
                      labels = step.labels,
                      expand = c(0.015, 0)) +
@@ -1546,6 +1563,10 @@ dropoffs.by.user <-
 users.remaining.dropoffs <-
   data.frame(step = seq(0, 11)) %>%
   mutate(users.remaining = get.users.remaining(dropoffs.by.user, step))
+users.remaining.dropoffs.split <-
+  data.frame(step = rep(seq(0, 11), 2),
+             is.turker = c(rep(TRUE, 12), rep(FALSE, 12))) %>%
+  mutate(users.remaining = get.users.remaining(dropoffs.by.user, step, is.turker))
 
 n.took.step <- users.remaining.dropoffs[2,'users.remaining']
 n.did.one.mission <- users.remaining.dropoffs[3,'users.remaining']
@@ -1571,6 +1592,8 @@ The steps in the graph below are as follows:
 
 Of the `r n.finished.tutorial` people who finished the tutorial, `r n.took.step` took a step (`r format(percent.took.step, digits = 0)`%), `r n.did.one.mission` finished at least one mission afterwards (`r format(percent.did.one.mission, digits = 0)`%), `r n.did.two.missions` completed at least two missions afterwards (`r format(percent.did.two.missions, digits = 0)`%), and `r n.did.ten.missions` did at least 10 missions afterwards (`r format(percent.did.ten.missions, digits = 0)`%).
 
+The first graph shows both volunteers and turkers together, and the second shows them split.
+
 ```{r public.deployment.user.dropoff.plot, echo=FALSE, fig.width=5, fig.height=3}
 dropoff.labels <- c('Finish tutorial',
                     'Take step',
@@ -1587,6 +1610,16 @@ dropoff.labels <- c('Finish tutorial',
 ggplot(aes(x = step, y = users.remaining), data = users.remaining.dropoffs) +
   geom_line() +
   geom_point() +
+  scale_x_continuous(breaks = seq(0, 11),
+                     labels = dropoff.labels,
+                     expand = c(0.015, 0)) +
+  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  theme(panel.grid.minor.x = element_blank())
+ggplot(aes(x = step, y = users.remaining), data = users.remaining.dropoffs.split) +
+  geom_line(aes(colour = is.turker)) +
+  geom_point(aes(colour = is.turker)) +
   scale_x_continuous(breaks = seq(0, 11),
                      labels = dropoff.labels,
                      expand = c(0.015, 0)) +

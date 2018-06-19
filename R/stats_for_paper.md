@@ -151,7 +151,9 @@ The steps in the graph below are as follows:
 
 Of the 1118 people who started the tutorial, 833 finished the first step (75%), and 576 completed the tutorial (52%).
 
-![](stats_for_paper_files/figure-markdown_github/public.deployment.tutorial.dropoff.plots-1.png)
+The first graph shows both volunteers and turkers together, and the second shows them split.
+
+![](stats_for_paper_files/figure-markdown_github/public.deployment.tutorial.dropoff.plots-1.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.tutorial.dropoff.plots-2.png)
 
 ### User dropoffs
 
@@ -169,7 +171,9 @@ The steps in the graph below are as follows:
 
 Of the 576 people who finished the tutorial, 445 took a step (77%), 285 finished at least one mission afterwards (49%), 164 completed at least two missions afterwards (28%), and 24 did at least 10 missions afterwards (4%).
 
-![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)
+The first graph shows both volunteers and turkers together, and the second shows them split.
+
+![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-2.png)
 
 Turk Study
 ==========
