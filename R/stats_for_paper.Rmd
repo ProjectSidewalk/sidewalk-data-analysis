@@ -417,19 +417,19 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       INNER JOIN label_type ON global_attribute.label_type_id = label_type.label_type_id
       GROUP BY label_type.label_type'
       )
-  tutorials <-
+  turk.tutorials <-
     dbGetQuery(
       db.connection.public.deployment,
-      'SELECT action, ip_address, note, ips.audit_task_id, timestamp
+      'SELECT action, user_id, note, ips.audit_task_id, timestamp, TRUE AS is_turker
       FROM
       (
-          SELECT DISTINCT audit_task_interaction.audit_task_id, ip_address
+          SELECT DISTINCT audit_task_interaction.audit_task_id, user_role.user_id
           FROM audit_task_interaction
-          INNER JOIN audit_task
-              ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
-          INNER JOIN audit_task_environment
-              ON audit_task.audit_task_id = audit_task_environment.audit_task_id
-          WHERE task_start > \'2017-07-10 00:00:00.000+00\'
+          INNER JOIN audit_task ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+          INNER JOIN user_role ON audit_task.user_id = user_role.user_id
+          INNER JOIN role ON user_role.role_id = role.role_id
+          WHERE role.role = \'Turker\'
+              AND task_start > \'2017-07-10 00:00:00.000+00\'
               AND action = \'Onboarding_Start\'
       ) ips
       INNER JOIN audit_task_interaction
@@ -456,36 +456,125 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
               OR (action = \'LabelingCanvas_FinishLabeling\' AND note LIKE \'%NoSidewalk%\')
           );'
     )
-  dropoffs <-
+  volunteer.tutorials <-
     dbGetQuery(
       db.connection.public.deployment,
-      'SELECT DISTINCT ips1.ip_address, action, timestamp
+      'SELECT action, user_id, note, ips.audit_task_id, timestamp, FALSE AS is_turker
       FROM
       (
-          SELECT DISTINCT audit_task_interaction.audit_task_id, ip_address
+          SELECT DISTINCT audit_task_interaction.audit_task_id, ip_address AS user_id
           FROM audit_task_interaction
           INNER JOIN audit_task
               ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+          INNER JOIN user_role
+              ON audit_task.user_id = user_role.user_id
+          INNER JOIN role
+              ON user_role.role_id = role.role_id
           INNER JOIN audit_task_environment
               ON audit_task.audit_task_id = audit_task_environment.audit_task_id
-          WHERE task_start > \'2017-07-10 00:00:00.000+00\'
+          WHERE role.role <> \'Turker\'
+              AND task_start > \'2017-07-10 00:00:00.000+00\'
+              AND action = \'Onboarding_Start\'
+      ) ips
+      INNER JOIN audit_task_interaction
+          ON ips.audit_task_id = audit_task_interaction.audit_task_id
+      WHERE action IN
+          (
+              \'Onboarding_Start\',
+              \'Onboarding_Transition\',
+              \'ModeSwitch_CurbRamp\',
+              \'KeyboardShortcut_Severity_1\',
+              \'ModeSwitch_NoCurbRamp\',
+              \'KeyboardShortcut_Severity_3\',
+              \'ModeSwitch_NoSidewalk\',
+              \'LabelingCanvas_FinishLabeling\',
+              \'ViewControl_DoubleClick\',
+              \'Onboarding_End\',
+              \'ContextMenu_RadioChange\'
+          )
+          AND
+          (
+              action NOT IN (\'ContextMenu_RadioChange\', \'LabelingCanvas_FinishLabeling\')
+              OR (action = \'ContextMenu_RadioChange\' AND note LIKE \'%CurbRamp,RadioValue:1%\')
+              OR (action = \'ContextMenu_RadioChange\' AND note LIKE \'%NoCurbRamp,RadioValue:3%\')
+              OR (action = \'LabelingCanvas_FinishLabeling\' AND note LIKE \'%NoSidewalk%\')
+          );'
+    )
+  turk.dropoffs <-
+    dbGetQuery(
+      db.connection.public.deployment,
+      'SELECT DISTINCT ips1.user_id, action, timestamp, TRUE AS is_turker
+      FROM
+      (
+          SELECT DISTINCT audit_task.audit_task_id, user_role.user_id
+          FROM audit_task_interaction
+          INNER JOIN audit_task ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+          INNER JOIN user_role ON audit_task.user_id = user_role.user_id
+          INNER JOIN role ON user_role.role_id = role.role_id
+          WHERE role.role = \'Turker\'
+              AND task_start > \'2017-07-10 00:00:00.000+00\'
               AND action = \'Onboarding_End\'
       ) ips1
       INNER JOIN
       (
-          SELECT DISTINCT audit_task_interaction.audit_task_id, ip_address
+          SELECT DISTINCT audit_task.audit_task_id, user_role.user_id
           FROM audit_task_interaction
-          INNER JOIN audit_task
-              ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
-          INNER JOIN audit_task_environment
-              ON audit_task.audit_task_id = audit_task_environment.audit_task_id
-          WHERE task_start > \'2017-07-10 00:00:00.000+00\'
+          INNER JOIN audit_task ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+          INNER JOIN user_role ON audit_task.user_id = user_role.user_id
+          INNER JOIN role ON user_role.role_id = role.role_id
+          WHERE role.role = \'Turker\'
+              AND task_start > \'2017-07-10 00:00:00.000+00\'
               AND action = \'ViewControl_DoubleClick\'
       ) ips2
       ON ips1.audit_task_id = ips2.audit_task_id
-          AND ips1.ip_address = ips2.ip_address
+          AND ips1.user_id = ips2.user_id
+      INNER JOIN audit_task
+          ON ips2.user_id = audit_task.user_id
+      INNER JOIN audit_task_interaction
+          ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
+      WHERE task_start > \'2017-07-10 00:00:00.000+00\'
+          AND action IN (\'Onboarding_End\', \'MissionComplete\', \'PanoId_Changed\');'
+    )
+  volunteer.dropoffs <-
+    dbGetQuery(
+      db.connection.public.deployment,
+      'SELECT DISTINCT ips1.user_id, action, timestamp, FALSE AS is_turker
+      FROM
+      (
+          SELECT DISTINCT audit_task_interaction.audit_task_id, ip_address AS user_id
+          FROM audit_task_interaction
+          INNER JOIN audit_task
+              ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+          INNER JOIN user_role
+              ON audit_task.user_id = user_role.user_id
+          INNER JOIN role
+              ON user_role.role_id = role.role_id
+          INNER JOIN audit_task_environment
+              ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+          WHERE role.role <> \'Turker\'
+              AND task_start > \'2017-07-10 00:00:00.000+00\'
+              AND action = \'Onboarding_End\'
+      ) ips1
+      INNER JOIN
+      (
+          SELECT DISTINCT audit_task_interaction.audit_task_id, ip_address AS user_id
+          FROM audit_task_interaction
+          INNER JOIN audit_task
+              ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+          INNER JOIN user_role
+              ON audit_task.user_id = user_role.user_id
+          INNER JOIN role
+              ON user_role.role_id = role.role_id
+          INNER JOIN audit_task_environment
+              ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+          WHERE role.role <> \'Turker\'
+              AND task_start > \'2017-07-10 00:00:00.000+00\'
+              AND action = \'ViewControl_DoubleClick\'
+      ) ips2
+      ON ips1.audit_task_id = ips2.audit_task_id
+          AND ips1.user_id = ips2.user_id
       INNER JOIN audit_task_environment
-          ON ips2.ip_address = audit_task_environment.ip_address
+          ON ips2.user_id = audit_task_environment.ip_address
       INNER JOIN audit_task
           ON audit_task_environment.audit_task_id = audit_task.audit_task_id
       INNER JOIN audit_task_interaction
@@ -500,6 +589,8 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   times <- bind_rows(reg.times, anon.times)
   labels <- bind_rows(reg.labels, anon.labels)
   sessions <- bind_rows(reg.sessions, anon.sessions)
+  tutorials <- bind_rows(turk.tutorials, volunteer.tutorials)
+  dropoffs <- bind_rows(turk.dropoffs, volunteer.dropoffs)
 
   # Copy the old data files over with timestamp in case we want to look back at them.
   now <- gsub(' ', '_', Sys.time())
@@ -532,8 +623,9 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   sessions <- read.csv(sessions.path, colClasses = c('character', 'numeric'))
   reg.missions <- read.csv(missions.path, colClasses = c('character', 'numeric'))
   tutorials <- read.csv(tutorials.path,
-                        colClasses = c(replicate(3, 'character'), 'numeric', 'POSIXct'))
-  dropoffs <- read.csv(dropoffs.path, colClasses = c('character', 'character', 'POSIXct'))
+                        colClasses = c(replicate(3, 'character'), 'numeric', 'POSIXct', 'logical'))
+  dropoffs <- read.csv(dropoffs.path,
+                       colClasses = c('character', 'character', 'POSIXct', 'logical'))
 }
 
 turk.times.path <- '../data/stats_for_paper_times-turk.csv'
@@ -1239,10 +1331,10 @@ tasks.where.tutorial.started <-
   pull(audit.task.id)
 
 suppressWarnings(
-steps.by.ip <-
+steps.by.user <-
   tutorials.parsed %>%
   filter(audit.task.id %in% tasks.where.tutorial.started) %>%
-  group_by(audit.task.id, ip.address) %>%
+  group_by(audit.task.id, user.id) %>%
   mutate(cur.time = min(time[action == 'start']),
          # Step 1: CurbRamp severity 1
          placed.label = 'mode_ramp' %in% action[time + 1 > cur.time],
@@ -1350,12 +1442,13 @@ steps.by.ip <-
          end.time = if_else(has.step & has.end,
                             min(time[action == 'end' & time + 1 > cur.time]),
                             cur.time)) %>%
-  summarise_at(vars(steps, end.time), first) %>%
-  summarise_at(vars(steps, ip.address, end.time), first) %>%
-  group_by(ip.address) %>%
+  summarise_at(vars(steps, end.time, is.turker), first) %>%
+  summarise_at(vars(steps, user.id, end.time, is.turker), first) %>%
+  group_by(user.id) %>%
   dplyr::summarise(steps.complete = max(steps),
                    audit.task.id = first(audit.task.id[steps == max(steps)]),
-                   end.timestamp = first(end.time[steps == max(steps)]))
+                   end.timestamp = first(end.time[steps == max(steps)]),
+                   is.turker = first(is.turker[steps == max(steps)]))
 )
 
 get.users.remaining <- Vectorize(
@@ -1366,7 +1459,7 @@ get.users.remaining <- Vectorize(
 )
 users.remaining.tutorial <-
   data.frame(step = seq(0, 8)) %>%
-  mutate(users.remaining = get.users.remaining(steps.by.ip, step))
+  mutate(users.remaining = get.users.remaining(steps.by.user, step))
 
 n.started.tutorial <- users.remaining.tutorial[1,'users.remaining']
 n.did.first.step.tutorial <- users.remaining.tutorial[2,'users.remaining']
@@ -1375,7 +1468,7 @@ percent.did.first.step.tutorial <- 100 * n.did.first.step.tutorial / n.started.t
 percent.finished.tutorial <- 100 * n.finished.tutorial / n.started.tutorial
 ```
 
-Below we look at how users drop off in the tutorial. Because most people going through the tutorial have not yet registered, we simply use IP address as a "user" for the purpose of analyzing the tutorial in particular. We consider only users who clicked on the "Let's get started!" button on the tutorial page as having started the tutorial. To simplify the analysis, we are looking at only tutorial attempts after the small additions we made to the tutorial last summer (so the data starts July 10th, 2017).
+Below we look at how users drop off in the tutorial. Because most volunteers going through the tutorial have not yet registered, we simply use IP address as a "user" for the purpose of analyzing the tutorial in particular; however, turkers are automatically logged in immediately, so we use turker id for them. We consider only users who clicked on the "Let's get started!" button on the tutorial page as having started the tutorial. To simplify the analysis, we are looking at only tutorial attempts after the small additions we made to the tutorial last summer (so the data starts July 10th, 2017).
 
 The steps in the graph below are as follows:
 
@@ -1419,21 +1512,22 @@ ggplot(aes(x = step, y = users.remaining), data = users.remaining.tutorial) +
 ```{r public.deployment.user.dropoff, echo=FALSE}
 # Takes users who have completed the tuturial (using same IPs from tutorial dropoff analysis), and
 # counts how many missions they completed in the 2 hours after finishing the tutorial.
-dropoffs.by.ip <-
+dropoffs.by.user <-
   dropoffs %>%
   filter(action == 'MissionComplete') %>%
   mutate(timestamp = as.POSIXct(round(timestamp, units = 'mins'))) %>%
   distinct() %>%
   rbind(filter(dropoffs, action == 'PanoId_Changed')) %>%
-  inner_join(steps.by.ip, by = 'ip.address') %>%
+  inner_join(steps.by.user, by = c('user.id', 'is.turker')) %>%
   filter(steps.complete == 8) %>%
-  group_by(ip.address) %>%
+  group_by(user.id) %>%
   filter((action == 'MissionComplete' & difftime(timestamp, end.timestamp) > 0)
          | (action == 'PanoId_Changed' & difftime(timestamp, end.timestamp, units = 'secs') > -1),
          difftime(timestamp, end.timestamp, units = 'hours') < 2) %>%
   dplyr::summarise(missions.complete = sum(action == 'MissionComplete'),
-                   panos.changed = sum(action == 'PanoId_Changed')) %>%
-  right_join(steps.by.ip, by = 'ip.address') %>%
+                   panos.changed = sum(action == 'PanoId_Changed'),
+                   is.turker = first(is.turker)) %>%
+  right_join(steps.by.user, by = c('user.id', 'is.turker')) %>%
   filter(steps.complete == 8) %>%
   replace_na(list(missions.complete = 0, panos.changed = 0)) %>%
   mutate(steps.complete = case_when(missions.complete >= 10 ~ 11,
@@ -1451,7 +1545,7 @@ dropoffs.by.ip <-
 
 users.remaining.dropoffs <-
   data.frame(step = seq(0, 11)) %>%
-  mutate(users.remaining = get.users.remaining(dropoffs.by.ip, step))
+  mutate(users.remaining = get.users.remaining(dropoffs.by.user, step))
 
 n.took.step <- users.remaining.dropoffs[2,'users.remaining']
 n.did.one.mission <- users.remaining.dropoffs[3,'users.remaining']
@@ -1463,7 +1557,7 @@ percent.did.two.missions <- 100 * n.did.two.missions / n.finished.tutorial
 percent.did.ten.missions <- 100 * n.did.ten.missions / n.finished.tutorial
 ```
 
-Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a user (the `r n.finished.tutorial` IP addresses who finished the tutorial in the previous section are the same `r n.finished.tutorial` IPs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
+Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a volunteer user and turker id to differentiate between turkers (the `r n.finished.tutorial` IP addresses and turker ids who finished the tutorial in the previous section are the same `r n.finished.tutorial` IPs/IDs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
 
 We also only counted missions completed in the two hours after finishing the tutorial. There was not a sizeable difference when looking at 1 hour, 2 hours, or 48 hours after finishing the tutorial, so I think that 2 hours works fine.
 

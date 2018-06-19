@@ -135,7 +135,7 @@ A total of 38.9% of streets were audited by multiple users.
 
 ### Tutorial dropoffs
 
-Below we look at how users drop off in the tutorial. Because most people going through the tutorial have not yet registered, we simply use IP address as a "user" for the purpose of analyzing the tutorial in particular. We consider only users who clicked on the "Let's get started!" button on the tutorial page as having started the tutorial. To simplify the analysis, we are looking at only tutorial attempts after the small additions we made to the tutorial last summer (so the data starts July 10th, 2017).
+Below we look at how users drop off in the tutorial. Because most volunteers going through the tutorial have not yet registered, we simply use IP address as a "user" for the purpose of analyzing the tutorial in particular; however, turkers are automatically logged in immediately, so we use turker id for them. We consider only users who clicked on the "Let's get started!" button on the tutorial page as having started the tutorial. To simplify the analysis, we are looking at only tutorial attempts after the small additions we made to the tutorial last summer (so the data starts July 10th, 2017).
 
 The steps in the graph below are as follows:
 
@@ -149,13 +149,13 @@ The steps in the graph below are as follows:
 8.  Placed fifth curb ramp label and correctly rated severity
 9.  Took step forward and clicked through all dialog boxes to finish tutorial
 
-Of the 1114 people who started the tutorial, 831 finished the first step (75%), and 575 completed the tutorial (52%).
+Of the 1118 people who started the tutorial, 833 finished the first step (75%), and 576 completed the tutorial (52%).
 
 ![](stats_for_paper_files/figure-markdown_github/public.deployment.tutorial.dropoff.plots-1.png)
 
 ### User dropoffs
 
-Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a user (the 575 IP addresses who finished the tutorial in the previous section are the same 575 IPs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
+Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a volunteer user and turker id to differentiate between turkers (the 576 IP addresses and turker ids who finished the tutorial in the previous section are the same 576 IPs/IDs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
 
 We also only counted missions completed in the two hours after finishing the tutorial. There was not a sizeable difference when looking at 1 hour, 2 hours, or 48 hours after finishing the tutorial, so I think that 2 hours works fine.
 
@@ -167,7 +167,7 @@ The steps in the graph below are as follows:
 4.  Completed second mission
 5.  And so on...
 
-Of the 575 people who finished the tutorial, 444 took a step (77%), 284 finished at least one mission afterwards (49%), 163 completed at least two missions afterwards (28%), and 22 did at least 10 missions afterwards (4%).
+Of the 576 people who finished the tutorial, 445 took a step (77%), 285 finished at least one mission afterwards (49%), 164 completed at least two missions afterwards (28%), and 24 did at least 10 missions afterwards (4%).
 
 ![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)
 
