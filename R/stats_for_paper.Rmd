@@ -404,6 +404,8 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           SELECT "user".user_id, COUNT(mission_user_id)
           FROM "user"
           INNER JOIN mission_user ON "user".user_id = mission_user.user_id
+          INNER JOIN mission ON mission_user.mission_id = mission.mission_id
+          WHERE mission.label <> \'onboarding\'
           GROUP BY "user".user_id
       ) nonzero_counts
           ON nonzero_counts.user_id = "user".user_id
