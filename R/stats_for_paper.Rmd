@@ -16,6 +16,7 @@ knitr::opts_chunk$set(echo = TRUE)
 options(knitr.kable.NA = '-')
 
 library(knitr)
+library(conflicted)
 library(RPostgreSQL)
 library(multcomp) # experimenting with stuff (glht), might remove later
 library(nlme)
@@ -61,7 +62,8 @@ ACCURACY_BREAKS <- c(0, 0.25, 0.5, 0.75, 1.0)
 # Helpful functions
 '%not-in%' <- function(x,y)!('%in%'(x,y))
 print.p.value <- function(p) {
-  if_else(p < 0.001, 'p < 0.001', paste0('p = ', format(round(p, digits = 3), scientific = FALSE)))
+  if_else(p < 0.001, 'p < 0.001', paste0('p = ', base::format(round(p, digits = 3),
+                                                              scientific = FALSE)))
 }
 p.num.to.p.str.with.sig.code <- function(p.value) {
   sig.code <- case_when(
@@ -72,7 +74,7 @@ p.num.to.p.str.with.sig.code <- function(p.value) {
   formatted.p.value <- if_else(
     p.value < 0.001,
     '< 0.001',
-    format(round(p.value, digits = 3), scientific = FALSE)
+    base::format(round(p.value, digits = 3), scientific = FALSE)
   )
   paste(formatted.p.value, sig.code)
 }
@@ -99,7 +101,7 @@ extract_severity_radio_change <- Vectorize(
 )
 print.lrt.results <- function(test, model, fixed.effect) {
   if ('Pr(Chi)' %in% names(test)) p.col <- 'Pr(Chi)' else p.col <- 'Pr(>Chi)'
-  paste0('likelihood ratio = ', format(test[fixed.effect,'LRT'], digits = 5),
+  paste0('likelihood ratio = ', base::format(test[fixed.effect,'LRT'], digits = 5),
          ', df = ', test[fixed.effect,'Df'],
          ', n = ', nobs(model),
          ', ', print.p.value(test[fixed.effect, p.col]))
@@ -112,7 +114,7 @@ format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, orderin
     test.data %>%
     mutate(!!fixed.var := as.character(!!sym(fixed.var))) %>%
     group_by(!!sym(fixed.var)) %>%
-    dplyr::summarize_at(vars(outcome.var), mean)
+    dplyr::summarize_at(dplyr::vars(outcome.var), mean)
 
   if (is.null(ordering)) {
     ordering <-
@@ -137,16 +139,16 @@ format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, orderin
            second.index = match(second.type, ordering),
            test = paste(ordering.sign, second.type),
            p.value = p.num.to.p.str.with.sig.code(p),
-           z.value = format(abs(z.value), digits = 4, scientific = FALSE))
+           z.value = base::format(abs(z.value), digits = 4, scientific = FALSE))
 
   indices.to.start <-
     tukey.with.vars.split %>%
-    filter(p < 0.05 | second.index == 1) %>%
+    dplyr::filter(p < 0.05 | second.index == 1) %>%
     group_by(first.index) %>%
     dplyr::summarise(start.second.index = max(second.index))
 
   inner_join(tukey.with.vars.split, indices.to.start, by = 'first.index') %>%
-    filter(second.index >= start.second.index) %>%
+    dplyr::filter(second.index >= start.second.index) %>%
     right_join(outcome.by.type, by = c('first.type' = fixed.var)) %>%
     mutate(!!fixed.var := factor(first.type, levels = ordering)) %>%
     arrange(!!sym(fixed.var), desc(second.index)) %>%
@@ -167,7 +169,7 @@ summarise_vars <- function(data, group, var.names = NULL, col.start = NULL, col.
   } else if (is.null(var.names)) {
     summarised <- data %>% group_by(!!sym(group)) %>% summarise_all(funcs, na.rm = TRUE)
   } else {
-    summarised <- data %>% group_by(!!sym(group)) %>% summarise_at(vars(var.names), funcs, na.rm = TRUE)
+    summarised <- data %>% group_by(!!sym(group)) %>% summarise_at(dplyr::vars(var.names), funcs, na.rm = TRUE)
   }
 
   if (include.n) {
@@ -175,10 +177,12 @@ summarise_vars <- function(data, group, var.names = NULL, col.start = NULL, col.
       group_by(!!sym(group)) %>%
       dplyr::summarise(n.users = n()) %>%
       inner_join(summarised, by = group) %>%
-      select(group, n.users, 2 + order(colnames(.)[colnames(.) %not-in% c(group, 'n.users')]))
+      dplyr::select(group,
+                    n.users,
+                    2 + order(colnames(.)[colnames(.) %not-in% c(group, 'n.users')]))
   } else {
     summarised %>%
-      select(group, 1 + order(colnames(.)[colnames(.) != group]))
+      dplyr::select(group, 1 + order(colnames(.)[colnames(.) != group]))
   }
 }
 ```
@@ -974,11 +978,11 @@ individual.search.times <-
   labeling.times.turk.study %>%
   mutate(label.type = factor(extract_label_type(note))) %>%
   mutate(label.type = fct_recode(label.type, 'SurfaceProb' = 'SurfaceProblem')) %>%
-  filter(label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
+  dplyr::filter(label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
   dplyr::select(-note)
 individual.search.times.prob <-
   individual.search.times %>%
-  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
+  dplyr::filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProb')) %>%
   mutate(label.type = factor('Problem'))
 individual.search.times.all <-
   individual.search.times %>%
@@ -1016,17 +1020,17 @@ approx.min.per.mission <- Vectorize(
   }
 )
 
-tutorial.labels <- labels %>% filter(tutorial == TRUE) %>% select(-tutorial)
-non.tutorial.labels <- labels %>% filter(tutorial == FALSE) %>% select(-tutorial)
+tutorial.labels <- labels %>% dplyr::filter(tutorial == TRUE) %>% dplyr::select(-tutorial)
+non.tutorial.labels <- labels %>% dplyr::filter(tutorial == FALSE) %>% dplyr::select(-tutorial)
 
 n.tutorial.labels <- n_distinct(tutorial.labels$label_id)
 n.non.tutorial.labels <- n_distinct(non.tutorial.labels$label_id)
 
 pre.100.labels <-
   inner_join(non.tutorial.labels, audits, by = c('user_id', 'role', 'audit_task_id')) %>%
-  filter(task_start < '2017-12-10 07:44:54.288+00') %>%
+  dplyr::filter(task_start < '2017-12-10 07:44:54.288+00') %>%
   mutate(dataset = 'first_100%') %>%
-  select(names(non.tutorial.labels), dataset)
+  dplyr::select(names(non.tutorial.labels), dataset)
 label.counts <-
   non.tutorial.labels %>%
   mutate(dataset = 'all') %>%
@@ -1037,7 +1041,7 @@ label.counts <-
 # Selects distinct on audit_task_id, then sums dist audited.
 pre.100.audits <-
   audits %>%
-  filter(task_start < '2017-12-10 07:44:54.288+00') %>%
+  dplyr::filter(task_start < '2017-12-10 07:44:54.288+00') %>%
   mutate(dataset = 'first_100%')
 audit.length <-
   audits %>%
@@ -1061,27 +1065,27 @@ audit.length <-
 
 user.list <-
   audit.length %>%
-  filter(dataset == 'all', audit_count > 0, label_count > 0) %>%
+  dplyr::filter(dataset == 'all', audit_count > 0, label_count > 0) %>%
   pull(user_id)
 good.user.list <-
   audit.length %>%
-  filter(dataset == 'all', audit_count > 0, labels_per_100m >= 3.75) %>%
+  dplyr::filter(dataset == 'all', audit_count > 0, labels_per_100m >= 3.75) %>%
   pull(user_id)
 
 # Computes approximate missions completed for anon users.
 all.mission.counts <-
   audit.length %>%
-  filter(dataset == 'all',
-         role == "Anonymous") %>%
+  dplyr::filter(dataset == 'all',
+                role == "Anonymous") %>%
   mutate(mission_count = approximate.missions.completed(feet_audited)) %>%
-  select(user_id, mission_count) %>%
+  dplyr::select(user_id, mission_count) %>%
   bind_rows(reg.missions)
 
 # Computes a few metrics based on distance audited, time auditing, and missions completed.
 speeds <-
   audit.length %>%
-  filter(dataset == 'all',
-         user_id %in% user.list) %>%
+  dplyr::filter(dataset == 'all',
+                user_id %in% user.list) %>%
   left_join(all.mission.counts, by = 'user_id') %>%
   left_join(times, by = 'user_id') %>%
   mutate(meters_audited = feet_audited / 3.28084,
@@ -1092,9 +1096,9 @@ speeds <-
 
 filtered.speeds <-
   speeds %>%
-  filter(role %in% c('Registered', 'Anonymous', 'Turker'),
-         audit_count > 0,
-         labels_per_100m >= 3.75) %>%
+  dplyr::filter(role %in% c('Registered', 'Anonymous', 'Turker'),
+                audit_count > 0,
+                labels_per_100m >= 3.75) %>%
   mutate(role = factor(role, levels = c('Anonymous', 'Registered', 'Turker')))
 ```
 
@@ -1122,7 +1126,7 @@ kable(
                                 `Turker` = 'Turker',
                                 `Administrator` = 'Researcher',
                                 `Owner` = 'Researcher')) %>%
-    select(label_type, role) %>%
+    dplyr::select(label_type, role) %>%
     tabyl(label_type, role) %>%
     adorn_totals(where = c('row', 'col')) %>%
     adorn_percentages(denominator = 'all') %>%
@@ -1139,14 +1143,15 @@ Here are the counts of attributes by attribute type after single and multi user 
 ```{r public.deployment.attributes, echo=FALSE, warning=FALSE}
 ordered.attribute.type.levs <- c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem',
                                  'NoSidewalk', 'Occlusion', 'Other', 'Problem', 'Total')
-total.attributes <- attributes %>% filter(label_type != 'Problem') %>% pull(count) %>% sum
+total.attributes <- attributes %>% dplyr::filter(label_type != 'Problem') %>% pull(count) %>% sum
 kable(
   attributes %>%
     rbind(data.frame(label_type = c('Total'), count = c(total.attributes))) %>%
     mutate(attribute.type = factor(label_type, ordered.attribute.type.levs)) %>%
-    select(attribute.type, count) %>%
+    dplyr::select(attribute.type, count) %>%
     mutate(percentage = if_else(attribute.type != 'Problem',
-                                paste0(format(100 * count / total.attributes, digits = 1), '%'),
+                                paste0(base::format(100 * count / total.attributes, digits = 1),
+                                       '%'),
                                 '-')) %>%
     arrange(attribute.type),
   align = 'l')
@@ -1159,7 +1164,7 @@ The first table describes the dataset at the point where we hit 100% completion.
 ```{r public.deployment.first.100, echo=FALSE, warning=FALSE}
 kable(
   audit.length %>%
-    filter(dataset == 'first_100%') %>%
+    dplyr::filter(dataset == 'first_100%') %>%
     mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
     summarise_vars('role', c('miles_audited', 'label_count'), funcs = sum, include.n = TRUE),
   digits = 0,
@@ -1167,7 +1172,7 @@ kable(
 )
 kable(
   audit.length %>%
-    filter(dataset == 'all') %>%
+    dplyr::filter(dataset == 'all') %>%
     mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
     summarise_vars('role', c('miles_audited', 'label_count'), funcs = sum, include.n = TRUE),
   digits = 0,
@@ -1181,19 +1186,19 @@ kable(
 This is the start of filtering out users with low labeling frequency (also filtering out researchers).
 
 ```{r public.deployment.data.characteristics, echo=FALSE, warning=FALSE}
-filtered.labels <- filter(non.tutorial.labels, user_id %in% filtered.speeds$user_id)
+filtered.labels <- dplyr::filter(non.tutorial.labels, user_id %in% filtered.speeds$user_id)
 kable(
   filtered.labels %>%
     distinct(label_id, .keep_all = TRUE) %>%
     count(label_type_id) %>%
     mutate(label_type = LABEL_TYPE_MAPPING[label_type_id]) %>%
-    select(label_type, n) %>%
+    dplyr::select(label_type, n) %>%
     bind_rows(list(label_type = 'Total', n = n_distinct(filtered.labels$label_id))) %>%
     spread(label_type, n),
   align = 'l'
 )
 
-filtered.audits <- filter(audits, user_id %in% filtered.speeds$user_id, completed == TRUE)
+filtered.audits <- dplyr::filter(audits, user_id %in% filtered.speeds$user_id, completed == TRUE)
 n.audits <- nrow(filtered.audits)
 n.streets <- n_distinct(filtered.audits$street_edge_id)
 
@@ -1201,10 +1206,10 @@ streets.with.mult.audits <-
   filtered.audits %>%
   group_by(street_edge_id) %>%
   dplyr::summarise(n.audits = n()) %>%
-  filter(n.audits > 1)
+  dplyr::filter(n.audits > 1)
 ```
 
-There have been a total of `r n.audits` audits by our "good" users across `r n.streets` streets, averaging `r format(n.audits/n.streets, digits = 3)` audits per street. Of the `r nrow(streets.with.mult.audits)` streets that have been audited multiple times, there are an average of `r format(sum(streets.with.mult.audits$n.audits) / nrow(streets.with.mult.audits), digits = 3)` audits per street.
+There have been a total of `r n.audits` audits by our "good" users across `r n.streets` streets, averaging `r base::format(n.audits/n.streets, digits = 3)` audits per street. Of the `r nrow(streets.with.mult.audits)` streets that have been audited multiple times, there are an average of `r base::format(sum(streets.with.mult.audits$n.audits) / nrow(streets.with.mult.audits), digits = 3)` audits per street.
 
 
 ### Data lost due to filtering
@@ -1212,41 +1217,41 @@ There have been a total of `r n.audits` audits by our "good" users across `r n.s
 ```{r public.deployment.data.lost, echo=FALSE, warning=FALSE}
 researcher.ids <-
   speeds %>%
-  filter(role %in% c('Researcher', 'Administrator', 'Owner')) %>%
+  dplyr::filter(role %in% c('Researcher', 'Administrator', 'Owner')) %>%
   distinct(user_id) %>%
   pull()
 
-bad.non.researchers.ids <-
+bad.non.research.ids <-
   speeds %>%
-  filter(role %in% c('Registered', 'Anonymous', 'Turker'),
-         labels_per_100m < 3.75) %>%
+  dplyr::filter(role %in% c('Registered', 'Anonymous', 'Turker'),
+                labels_per_100m < 3.75) %>%
   distinct(user_id) %>%
   pull()
 
 n.users.pre.filter <- n_distinct(speeds$user_id)
 n.researchers <- length(researcher.ids)
-n.bad.non.researchers <- length(bad.non.researchers.ids)
-n.filtered.users <- n.researchers + n.bad.non.researchers
+n.bad.non.research <- length(bad.non.research.ids)
+n.filtered.users <- n.researchers + n.bad.non.research
 n.users.remaining <- n_distinct(filtered.speeds$user_id)
 
-percent.researchers <- format(100 * n.researchers / n.users.pre.filter, digits = 3)
-percent.bad.non.researchers <- format(100 * n.bad.non.researchers / n.users.pre.filter, digits = 3)
-percent.filtered.users <- format(100 * n.filtered.users / n.users.pre.filter, digits = 3)
-percent.users.remaining <- format(100 * n.users.remaining / n.users.pre.filter, digits = 3)
+percent.researchers <- base::format(100 * n.researchers / n.users.pre.filter, digits = 3)
+percent.bad.non.research <- base::format(100 * n.bad.non.research / n.users.pre.filter, digits = 3)
+percent.filtered.users <- base::format(100 * n.filtered.users / n.users.pre.filter, digits = 3)
+percent.users.remaining <- base::format(100 * n.users.remaining / n.users.pre.filter, digits = 3)
 
 n.labels.pre.filter <- n_distinct(non.tutorial.labels$label_id)
 n.labels.researcher <- n_distinct(non.tutorial.labels[non.tutorial.labels$user_id %in% researcher.ids,'label_id'])
-n.labels.bad.non.researcher <- n_distinct(non.tutorial.labels[non.tutorial.labels$user_id %in% bad.non.researchers.ids,'label_id'])
-n.filtered.labels <- n.labels.researcher + n.labels.bad.non.researcher
+n.labels.bad.non.research <- n_distinct(non.tutorial.labels[non.tutorial.labels$user_id %in% bad.non.research.ids,'label_id'])
+n.filtered.labels <- n.labels.researcher + n.labels.bad.non.research
 n.labels.remaining <- n_distinct(filtered.labels$label_id)
 
-percent.labels.researcher <- format(100 * n.labels.researcher / n.labels.pre.filter, digits = 3)
-percent.labels.bad.non.researcher <- format(100 * n.labels.bad.non.researcher / n.labels.pre.filter, digits = 3)
-percent.filtered.labels <- format(100 * n.filtered.labels / n.labels.pre.filter, digits = 3)
-percent.labels.remaining <- format(100 * n.labels.remaining / n.labels.pre.filter, digits = 3)
+percent.labels.researcher <- base::format(100 * n.labels.researcher / n.labels.pre.filter, digits = 3)
+percent.labels.bad.non.research <- base::format(100 * n.labels.bad.non.research / n.labels.pre.filter, digits = 3)
+percent.filtered.labels <- base::format(100 * n.filtered.labels / n.labels.pre.filter, digits = 3)
+percent.labels.remaining <- base::format(100 * n.labels.remaining / n.labels.pre.filter, digits = 3)
 ```
 
-There were `r n.users.pre.filter` users who placed `r n.labels.pre.filter` labels pre-filtering. Researchers accounted for `r n.researchers` of the users (`r percent.researchers`%) and `r n.labels.researcher` of the labels (`r percent.labels.researcher`%). Non-researchers with low labeling frequency accounted for `r n.bad.non.researchers` of the users (`r percent.bad.non.researchers`%) and `r n.labels.bad.non.researcher` of the labels (`r percent.labels.bad.non.researcher`%). This means that we filtered out a total of `r n.filtered.users` of the users (`r percent.filtered.users`%) and `r n.filtered.labels` of the labels (`r percent.filtered.labels`%), and are left with `r n.users.remaining` of the users (`r percent.users.remaining`%) and `r n.labels.remaining` of the labels (`r percent.labels.remaining`%).
+There were `r n.users.pre.filter` users who placed `r n.labels.pre.filter` labels pre-filtering. Researchers accounted for `r n.researchers` of the users (`r percent.researchers`%) and `r n.labels.researcher` of the labels (`r percent.labels.researcher`%). Non-researchers with low labeling frequency accounted for `r n.bad.non.research` of the users (`r percent.bad.non.research`%) and `r n.labels.bad.non.research` of the labels (`r percent.labels.bad.non.research`%). This means that we filtered out a total of `r n.filtered.users` of the users (`r percent.filtered.users`%) and `r n.filtered.labels` of the labels (`r percent.filtered.labels`%), and are left with `r n.users.remaining` of the users (`r percent.users.remaining`%) and `r n.labels.remaining` of the labels (`r percent.labels.remaining`%).
 
 
 ### User stats and tool usage
@@ -1261,7 +1266,7 @@ NOTE: A "session" below is defined as a sequence of audit task interactions for 
 kable(
   filtered.speeds %>%
     mutate(km = meters_audited / 1000) %>%
-    select(-meters_audited, -feet_audited, -mins_per_mission, -hours_audited) %>%
+    dplyr::select(-meters_audited, -feet_audited, -mins_per_mission, -hours_audited) %>%
     summarise_vars('role', include.n = TRUE),
   digits = 3,
   align = 'l'
@@ -1274,11 +1279,11 @@ kable(
            audits = audit_count,
            labels = label_count,
            missions = mission_count) %>%
-    select(role, miles, km, missions, audits, hours_audited, labels, mult_sess) %>%
+    dplyr::select(role, miles, km, missions, audits, hours_audited, labels, mult_sess) %>%
     summarise_vars('role', funcs = sum, include.n = TRUE) %>%
-    mutate(coverage = paste0(format(100 * miles / TOTAL_STREET_DIST_MILES, digits = 2), '%'),
-           '>1 sess' = paste0(format(100 * mult_sess / n.users, digits = 2), '%')) %>%
-    select(-mult_sess),
+    mutate(coverage = paste0(base::format(100 * miles / TOTAL_STREET_DIST_MILES, digits = 2), '%'),
+           '>1 sess' = paste0(base::format(100 * mult_sess / n.users, digits = 2), '%')) %>%
+    dplyr::select(-mult_sess),
   align = 'l',
   digits = 0
   )
@@ -1296,11 +1301,11 @@ percent.streets.with.multiple.audits <-
   filtered.audits %>%
   group_by(street_edge_id) %>%
   dplyr::summarise(n.audits = n()) %>%
-  filter(n.audits > 1) %>%
+  dplyr::filter(n.audits > 1) %>%
   nrow() * 100 / n.streets
 ```
 
-A total of `r format(percent.streets.with.multiple.audits, digits = 3)`% of streets were audited by multiple users. 
+A total of `r base::format(percent.streets.with.multiple.audits, digits = 3)`% of streets were audited by multiple users. 
 
 
 ### Tutorial dropoffs
@@ -1329,13 +1334,13 @@ tasks.where.tutorial.started <-
   tutorials.parsed %>%
   group_by(audit.task.id) %>%
   dplyr::summarise(has.transition = 'transition' %in% action) %>%
-  filter(has.transition == TRUE) %>%
+  dplyr::filter(has.transition == TRUE) %>%
   pull(audit.task.id)
 
 suppressWarnings(
 steps.by.user <-
   tutorials.parsed %>%
-  filter(audit.task.id %in% tasks.where.tutorial.started) %>%
+  dplyr::filter(audit.task.id %in% tasks.where.tutorial.started) %>%
   group_by(audit.task.id, user.id) %>%
   mutate(cur.time = min(time[action == 'start']),
          # Step 1: CurbRamp severity 1
@@ -1444,8 +1449,8 @@ steps.by.user <-
          end.time = if_else(has.step & has.end,
                             min(time[action == 'end' & time + 1 > cur.time]),
                             cur.time)) %>%
-  summarise_at(vars(steps, end.time, is.turker), first) %>%
-  summarise_at(vars(steps, user.id, end.time, is.turker), first) %>%
+  summarise_at(dplyr::vars(steps, end.time, is.turker), first) %>%
+  summarise_at(dplyr::vars(steps, user.id, end.time, is.turker), first) %>%
   group_by(user.id) %>%
   dplyr::summarise(steps.complete = max(steps),
                    audit.task.id = first(audit.task.id[steps == max(steps)]),
@@ -1456,7 +1461,7 @@ steps.by.user <-
 get.users.remaining <- Vectorize(
   function(data, step, is.turk = NA) {
     if (is.na(is.turk)) nrow(data[data$steps.complete >= step,])
-    else nrow(filter(data, steps.complete >= step, is.turker == is.turk))
+    else nrow(dplyr::filter(data, steps.complete >= step, is.turker == is.turk))
   },
   vectorize.args = c('step', 'is.turk')
 )
@@ -1489,7 +1494,7 @@ The steps in the graph below are as follows:
 7. Placed fifth curb ramp label and correctly rated severity
 8. Took step forward and clicked through all dialog boxes to finish tutorial
 
-Of the `r n.started.tutorial` people who started the tutorial, `r n.did.first.step.tutorial` finished the first step (`r format(percent.did.first.step.tutorial, digits = 0)`%), and `r n.finished.tutorial` completed the tutorial (`r format(percent.finished.tutorial, digits = 0)`%).
+Of the `r n.started.tutorial` people who started the tutorial, `r n.did.first.step.tutorial` finished the first step (`r base::format(percent.did.first.step.tutorial, digits = 0)`%), and `r n.finished.tutorial` completed the tutorial (`r base::format(percent.finished.tutorial, digits = 0)`%).
 
 The first graph shows both volunteers and turkers together, and the second shows them split.
 
@@ -1533,21 +1538,22 @@ ggplot(aes(x = step, y = users.remaining), data = users.remaining.tutorial.split
 # counts how many missions they completed in the 2 hours after finishing the tutorial.
 dropoffs.by.user <-
   dropoffs %>%
-  filter(action == 'MissionComplete') %>%
+  dplyr::filter(action == 'MissionComplete') %>%
   mutate(timestamp = as.POSIXct(round(timestamp, units = 'mins'))) %>%
   distinct() %>%
-  rbind(filter(dropoffs, action == 'PanoId_Changed')) %>%
+  rbind(dplyr::filter(dropoffs, action == 'PanoId_Changed')) %>%
   inner_join(steps.by.user, by = c('user.id', 'is.turker')) %>%
-  filter(steps.complete == 8) %>%
+  dplyr::filter(steps.complete == 8) %>%
   group_by(user.id) %>%
-  filter((action == 'MissionComplete' & difftime(timestamp, end.timestamp) > 0)
-         | (action == 'PanoId_Changed' & difftime(timestamp, end.timestamp, units = 'secs') > -1),
+  dplyr::filter((action == 'MissionComplete' & difftime(timestamp, end.timestamp) > 0)
+                | (action == 'PanoId_Changed' & difftime(timestamp, end.timestamp,
+                                                         units = 'secs') > -1),
          difftime(timestamp, end.timestamp, units = 'hours') < 2) %>%
   dplyr::summarise(missions.complete = sum(action == 'MissionComplete'),
                    panos.changed = sum(action == 'PanoId_Changed'),
                    is.turker = first(is.turker)) %>%
   right_join(steps.by.user, by = c('user.id', 'is.turker')) %>%
-  filter(steps.complete == 8) %>%
+  dplyr::filter(steps.complete == 8) %>%
   replace_na(list(missions.complete = 0, panos.changed = 0)) %>%
   mutate(steps.complete = case_when(missions.complete >= 10 ~ 11,
                                     missions.complete == 9 ~ 10,
@@ -1592,7 +1598,7 @@ The steps in the graph below are as follows:
 3. Completed second mission
 4. And so on...
 
-Of the `r n.finished.tutorial` people who finished the tutorial, `r n.took.step` took a step (`r format(percent.took.step, digits = 0)`%), `r n.did.one.mission` finished at least one mission afterwards (`r format(percent.did.one.mission, digits = 0)`%), `r n.did.two.missions` completed at least two missions afterwards (`r format(percent.did.two.missions, digits = 0)`%), and `r n.did.ten.missions` did at least 10 missions afterwards (`r format(percent.did.ten.missions, digits = 0)`%).
+Of the `r n.finished.tutorial` people who finished the tutorial, `r n.took.step` took a step (`r base::format(percent.took.step, digits = 0)`%), `r n.did.one.mission` finished at least one mission afterwards (`r base::format(percent.did.one.mission, digits = 0)`%), `r n.did.two.missions` completed at least two missions afterwards (`r base::format(percent.did.two.missions, digits = 0)`%), and `r n.did.ten.missions` did at least 10 missions afterwards (`r base::format(percent.did.ten.missions, digits = 0)`%).
 
 The first graph shows both volunteers and turkers together, and the second shows them split.
 
@@ -1656,9 +1662,9 @@ clean.agreement.data <-
          data.type = if_else(data.type %in% c('prob.binary', 'binary'),
                              'binary',
                              'ordinal')) %>%
-  filter(level == 'street',
-         data.type == 'binary',
-         label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb', 'Problem')) %>%
+  dplyr::filter(level == 'street',
+                data.type == 'binary',
+                label.type %in% c(NON_AGGREGATE_TYPES, 'Problem')) %>%
   mutate(data.type = factor(data.type),
          level = factor(level),
          label.type = factor(label.type, label.type.levels.in.order))
@@ -1683,7 +1689,7 @@ accuracy.data <- rbind(volunteer.data, turker.data)
 # First summing over curb ramp, missing curb ramp, obstacle, and surface problem...
 all.types.data <-
   accuracy.data %>%
-  filter(label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem')) %>%
+  dplyr::filter(label.type %in% c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem')) %>%
   group_by(condition.id, worker1, worker2, worker3, worker4, worker5, n.workers, worker.thresh,
            binary, included.severity, granularity, is.turker) %>%
   dplyr::summarize(label.type = 'All',
@@ -1696,7 +1702,7 @@ all.types.data <-
 # Then summing over just missing curb ramp, obstacle, and surface problem...
 problem.types.data <-
   accuracy.data %>%
-  filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProblem')) %>%
+  dplyr::filter(label.type %in% c('NoCurbRamp', 'Obstacle', 'SurfaceProblem')) %>%
   group_by(condition.id, worker1, worker2, worker3, worker4, worker5, n.workers, worker.thresh,
            binary, included.severity, granularity, is.turker) %>%
   dplyr::summarize(label.type = 'AllProb',
@@ -1722,7 +1728,7 @@ label.types <- c('All', 'Problem', 'CurbRamp', 'NoCurbRamp', 'Obstacle', 'Surfac
 data.filtered.label.type <-
   data.with.agg.types %>%
   mutate(label.type = if_else(label.type == 'SurfaceProblem', 'SurfaceProb', label.type)) %>%
-  filter(label.type %in% label.types) %>%
+  dplyr::filter(label.type %in% label.types) %>%
   mutate(label.type = factor(label.type, levels = label.types, labels = label.types))
 
 # More setup: remove binary analysis (except street level), add is.anon.route column, add
@@ -1750,7 +1756,7 @@ fix.anon.names <- Vectorize(
   
 data.with.raw.accuracy <-
   data.filtered.label.type %>%
-  filter(granularity != '10_meter') %>%
+  dplyr::filter(granularity != '10_meter') %>%
   mutate(is.anon.route = condition.id > 121) %>%
   mutate(worker.type = factor(get.worker.type(n.workers, worker.thresh, is.turker, is.anon.route),
                               levels = c('anon', 'reg', 'turk1', 'turk3', 'turk5', 'turk0'))) %>%
@@ -1759,7 +1765,7 @@ data.with.raw.accuracy <-
   mutate(granularity = factor(granularity,
                               levels = c('street', '5_meter'),
                               labels = c('street', '5_meter'))) %>%
-  filter(label.type != 'NoSidewalk' | (granularity == 'street' & binary == TRUE))
+  dplyr::filter(label.type != 'NoSidewalk' | (granularity == 'street' & binary == TRUE))
 ```
 
 
@@ -1768,28 +1774,36 @@ data.with.raw.accuracy <-
 ```{r turk.high.level.results, echo=FALSE, include=FALSE}
 unique.turkers <-
   data.with.raw.accuracy %>%
-  filter(worker.type == 'turk5',
-         binary == FALSE,
-         included.severity == 'all',
-         granularity == 'street',
-         label.type == 'CurbRamp') %>%
-  select(worker1, worker2, worker3, worker4, worker5) %>%
+  dplyr::filter(worker.type == 'turk5',
+                binary == FALSE,
+                included.severity == 'all',
+                granularity == 'street',
+                label.type == 'CurbRamp') %>%
+  dplyr::select(worker1, worker2, worker3, worker4, worker5) %>%
   gather(worker.index, turker.id) %>%
-  select(turker.id)
+  dplyr::select(turker.id)
 
 n.turkers <- nrow(unique.turkers)
-n.reg <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, !is.anon.route) %>% select(worker1))
-n.anon <- n_distinct(data.with.raw.accuracy %>% filter(!is.turker, is.anon.route) %>% select(worker1))
+n.reg <-
+  data.with.raw.accuracy %>%
+  dplyr::filter(!is.turker, !is.anon.route) %>%
+  dplyr::select(worker1) %>%
+  n_distinct()
+n.anon <-
+  data.with.raw.accuracy %>%
+  dplyr::filter(!is.turker, is.anon.route) %>%
+  dplyr::select(worker1) %>%
+  n_distinct()
 
 aggregate.accuracy.data <-
   data.with.raw.accuracy %>%
-  filter(n.workers == 1,
-         binary == TRUE,
-         included.severity == 'all',
-         label.type %in% c('All', 'Problem')) %>%
-  select_at(vars(label.type, granularity, recall, precision, f.measure)) %>%
+  dplyr::filter(n.workers == 1,
+                binary == TRUE,
+                included.severity == 'all',
+                label.type %in% c('All', 'Problem')) %>%
+  select_at(dplyr::vars(label.type, granularity, recall, precision, f.measure)) %>%
   group_by(label.type, granularity) %>%
-  summarize_at(vars(recall, precision, f.measure), mean, na.rm = TRUE) %>%
+  summarize_at(dplyr::vars(recall, precision, f.measure), mean, na.rm = TRUE) %>%
   ungroup()
 
 # We filter down to the data we care about, then in the group_by we get down to 2 entries per group;
@@ -1802,10 +1816,10 @@ aggregate.accuracy.data <-
 # So we use an if_else to set to NA if both are NA, and take the some o/w.
 turk.study.summary.stats <-
   data.with.raw.accuracy %>%
-  filter(worker.type != 'turk0',
-         binary == TRUE,
-         included.severity == 'all',
-         label.type %in% c('All', 'Problem')) %>%
+  dplyr::filter(worker.type != 'turk0',
+                binary == TRUE,
+                included.severity == 'all',
+                label.type %in% c('All', 'Problem')) %>%
   group_by(condition.id, worker1, is.anon.route, worker.type, granularity) %>%
   mutate(all.recall = if_else(label.type == 'All', recall, NaN),
          all.precision = if_else(label.type == 'All', precision, NaN),
@@ -1813,18 +1827,19 @@ turk.study.summary.stats <-
          prob.recall = if_else(label.type == 'Problem', recall, NaN),
          prob.precision = if_else(label.type == 'Problem', precision, NaN),
          prob.f.measure = if_else(label.type == 'Problem', f.measure, NaN)) %>%
-  summarize_at(vars(all.recall:prob.f.measure),
+  summarize_at(dplyr::vars(all.recall:prob.f.measure),
                function(x) { if_else(length(na.omit(x)) > 0, sum(x, na.rm = TRUE), NaN) }) %>%
   ungroup()
 
 turk.study.summary.stats.with.labels <-
   turk.study.summary.stats %>%
-  filter(worker.type %in% c('anon', 'reg', 'turk1')) %>%
+  dplyr::filter(worker.type %in% c('anon', 'reg', 'turk1')) %>%
   left_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
-  group_by_at(vars(worker1:prob.f.measure)) %>%
+  group_by_at(dplyr::vars(worker1:prob.f.measure)) %>%
   dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
   left_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
-  left_join(user.search.times %>% filter(label.type == 'All'), by = c('worker1' = 'user.id')) %>%
+  left_join(user.search.times %>% dplyr::filter(label.type == 'All'),
+            by = c('worker1' = 'user.id')) %>%
   mutate(n.missions = if_else(is.anon.route, 2, 3),
          distance.feet = if_else(is.anon.route, 2000, 4000),
          distance.meters = distance.feet / 3.28084,
@@ -1837,28 +1852,28 @@ Below is a table showing number of ground truth labels by user group and by labe
 
 ```{r turk.showing.stats.gt, echo=FALSE}
 # GT label counts by label type and route.
-gt.count.by.route.and.label.type <-
+gt.count.by.route.and.lab.type <-
   data.with.raw.accuracy %>%
-  filter(worker.type %in% c('anon', 'reg'),
-         binary == FALSE,
-         included.severity == 'all',
-         granularity == 'street') %>%
+  dplyr::filter(worker.type %in% c('anon', 'reg'),
+                binary == FALSE,
+                included.severity == 'all',
+                granularity == 'street') %>%
   group_by(condition.id, label.type) %>%
   summarize(gt.labels = sum(true.pos, false.neg)) %>%
   ungroup()
 
 gt.count.by.label.type <-
-  gt.count.by.route.and.label.type %>%
+  gt.count.by.route.and.lab.type %>%
   group_by(label.type) %>%
-  summarise_at(vars(gt.labels), sum)
+  summarise_at(dplyr::vars(gt.labels), sum)
 
 gt.count.data <-
   data.with.raw.accuracy %>%
-  filter(worker.type %in% c('anon', 'reg'),
-         binary == FALSE,
-         included.severity == 'all',
-         granularity == 'street',
-         label.type != 'AllProb') %>%
+  dplyr::filter(worker.type %in% c('anon', 'reg'),
+                binary == FALSE,
+                included.severity == 'all',
+                granularity == 'street',
+                label.type != 'AllProb') %>%
   group_by(worker.type, label.type) %>%
   summarize(gt.labels = sum(true.pos, false.neg)) %>%
   ungroup() %>%
@@ -1870,11 +1885,11 @@ gt.count.totals <-
   summarize(gt.labels = sum(gt.labels)) %>%
   mutate(worker.type = 'total')
 
-n.gt <- gt.count.totals %>% filter(label.type == 'All') %>% select(gt.labels) %>% as.numeric()
+n.gt <- gt.count.totals %>% dplyr::filter(label.type == 'All') %>% pull(gt.labels)
 
 gt.count.percentages <-
   gt.count.totals %>%
-  mutate(gt.labels = paste0(format(100 * gt.labels / n.gt, digits = 2), '%'),
+  mutate(gt.labels = paste0(base::format(100 * gt.labels / n.gt, digits = 2), '%'),
          worker.type = '% of total')
   
 table.levels <- c('anon', 'reg', 'total', '% of total')
@@ -1903,8 +1918,8 @@ Mean accuracy across all users - street level:
 ```{r turk.showing.stats.2, echo=FALSE}
 kable(
   aggregate.accuracy.data %>%
-    filter(granularity == 'street') %>%
-    select(-granularity),
+    dplyr::filter(granularity == 'street') %>%
+    dplyr::select(-granularity),
   format = 'markdown',
   digits = 3,
   align = 'l'
@@ -1916,8 +1931,8 @@ Mean accuracy across all users - 5 meter level:
 ```{r turk.showing.stats.3, echo=FALSE}
 kable(
   aggregate.accuracy.data %>%
-    filter(granularity == '5_meter') %>%
-    select(-granularity),
+    dplyr::filter(granularity == '5_meter') %>%
+    dplyr::select(-granularity),
   digits = 3,
   align = 'l'
   )
@@ -1929,33 +1944,33 @@ kable(
 ```{r turk.voting.method.setup, echo=FALSE}
 voting.method.data <-
   data.with.raw.accuracy %>%
-  filter(label.type %in% c('All', 'Problem'),
-         n.workers == 5 | worker.type == 'reg',
-         binary == TRUE,
-         granularity == 'street',
-         label.type == 'Problem',
-         included.severity == 'all',
-         worker.thresh %in% c(1,3)) %>%
+  dplyr::filter(label.type %in% c('All', 'Problem'),
+                n.workers == 5 | worker.type == 'reg',
+                binary == TRUE,
+                granularity == 'street',
+                label.type == 'Problem',
+                included.severity == 'all',
+                worker.thresh %in% c(1,3)) %>%
   mutate(voting.method = factor(if_else(worker.thresh == 1,
                                         'at.least.one',
                                         'majority.vote'))) %>%
   group_by(worker.type, voting.method, label.type, granularity) %>%
-  dplyr::summarize_at(vars(recall, precision), mean, na.rm = TRUE) %>%
+  dplyr::summarize_at(dplyr::vars(recall, precision), mean, na.rm = TRUE) %>%
   ungroup()
 
 # Get registered user recall to compare to
 reg.recall <-
   voting.method.data %>%
-  filter(worker.type == 'reg') %>%
-  select(recall) %>%
+  dplyr::filter(worker.type == 'reg') %>%
+  dplyr::select(recall) %>%
   as.numeric() %>%
-  format(digits = 2)
+  base::format(digits = 2)
 reg.precision <-
   voting.method.data %>%
-  filter(worker.type == 'reg') %>%
-  select(precision) %>%
+  dplyr::filter(worker.type == 'reg') %>%
+  dplyr::select(precision) %>%
   as.numeric() %>%
-  format(digits = 2)
+  base::format(digits = 2)
 ```
 
 
@@ -1972,8 +1987,8 @@ NOTE: In this section we are looking at _problem vs no problem_, the data are bi
 ```{r turk.voting.method.analysis, echo=FALSE}
 kable(
   voting.method.data %>%
-    filter(worker.type != 'reg') %>%
-    select(voting.method, recall, precision),
+    dplyr::filter(worker.type != 'reg') %>%
+    dplyr::select(voting.method, recall, precision),
   digits = 3,
   align = 'l'
 )
@@ -1989,7 +2004,7 @@ NOTE: In this table, we are only considering single users auditing (i.e., no mul
 ```{r turk.showing.stats.6, echo=FALSE}
 kable(
   turk.study.summary.stats.with.labels %>%
-    filter(granularity == 'street') %>%  # granularity doesn't affect these stats
+    dplyr::filter(granularity == 'street') %>%  # granularity doesn't affect these stats
     rename(m.p.min = meters.per.min, sec.p.label = seconds.to.label) %>%
     summarise_vars('worker.type',
                    var.names = c('labels.per.100m', 'm.p.min', 'minutes_audited', 'sec.p.label'),
@@ -2007,7 +2022,7 @@ NOTE: In this table, we are only considering single users auditing (i.e., no mul
 ```{r turk.showing.stats.7, echo=FALSE}
 kable(
   turk.study.summary.stats.with.labels %>%
-    filter(granularity == 'street') %>%  # granularity doesn't affect these stats
+    dplyr::filter(granularity == 'street') %>%  # granularity doesn't affect these stats
     mutate(distance.miles = distance.feet / 5280,
            distance.km = distance.feet / 3280.84) %>%
     summarise_vars('worker.type',
@@ -2051,10 +2066,10 @@ Below is a table showing label type accuracy at the two granularity levels, foll
 ```{r turk.granularity.analysis, echo=FALSE, fig.width=7.5, fig.height=4.5}
 granularity.analysis.data <-
   data.with.raw.accuracy %>%
-  filter(included.severity == 'all',
-         binary == TRUE,
-         n.workers == 1,
-         label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
+  dplyr::filter(included.severity == 'all',
+                binary == TRUE,
+                n.workers == 1,
+                label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
 granularity.analysis.summary <-
@@ -2073,7 +2088,7 @@ kable(
   granularity.analysis.summary %>%
     mutate(mean.accuracy = mean.accuracy.value,
            median.accuracy = median.accuracy.value) %>%
-    select(accuracy.type, label.type, granularity, mean.accuracy, median.accuracy, sd, se) %>%
+    dplyr::select(accuracy.type, label.type, granularity, mean.accuracy, median.accuracy, sd, se) %>%
     arrange(accuracy.type),
   digits = 3,
   align = 'l'
@@ -2082,7 +2097,7 @@ kable(
 # Make the set of labels that give the number of observations for each sub-graph.
 granularity.analysis.labels <-
   granularity.analysis.data %>%
-  filter(granularity == 'street', accuracy.type == 'recall') %>%
+  dplyr::filter(granularity == 'street', accuracy.type == 'recall') %>%
   group_by(label.type) %>%
   dplyr::summarise(n.users = sum(!is.na(accuracy.value))) %>%
   inner_join(gt.count.by.label.type, by = 'label.type') %>%
@@ -2155,8 +2170,8 @@ turk.showing.stats.4.and.5 <-
 
 kable(
   turk.showing.stats.4.and.5 %>%
-    filter(granularity == 'street') %>%
-    select(-granularity),
+    dplyr::filter(granularity == 'street') %>%
+    dplyr::select(-granularity),
   digits = 3,
   align = 'l'
   )
@@ -2167,8 +2182,8 @@ Mean/median/sd accuracy by user group - 5 meter level:
 ```{r turk.showing.stats.5, echo=FALSE}
 kable(
   turk.showing.stats.4.and.5 %>%
-    filter(granularity == '5_meter') %>%
-    select(-granularity),
+    dplyr::filter(granularity == '5_meter') %>%
+    dplyr::select(-granularity),
   digits = 3,
   align = 'l'
   )
@@ -2185,38 +2200,40 @@ We created binomial mixed effects models to determine the relationship between u
 # TODO include the fact that the single turker is included in turk3, etc as a random effect
 user.group.test.data <-
   data.with.raw.accuracy %>%
-  filter(worker.type != 'turk0',
-         n.workers == 1 || (n.workers == 3 && worker.thresh = 2) || (n.workers == 5 && worker.thresh == 3),
-         granularity == 'street',
-         binary == TRUE,
-         included.severity == 'all',
-         label.type %in% c('All', 'Problem')) %>%
+  dplyr::filter(worker.type != 'turk0',
+                n.workers == 1
+                || (n.workers == 3 && worker.thresh = 2)
+                || (n.workers == 5 && worker.thresh == 3),
+                granularity == 'street',
+                binary == TRUE,
+                included.severity == 'all',
+                label.type %in% c('All', 'Problem')) %>%
   mutate(label.type = factor(label.type),
          condition.id = factor(condition.id),
          worker.type = factor(worker.type))
 
 user.group.test.data.recall.all <-
   user.group.test.data %>%
-  filter(label.type == 'All') %>%
-  select(condition.id, worker.type, true.pos, false.neg, recall) %>%
+  dplyr::filter(label.type == 'All') %>%
+  dplyr::select(condition.id, worker.type, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 user.group.test.data.prec.all <-
   user.group.test.data %>%
-  filter(label.type == 'All') %>%
-  select(condition.id, worker.type, true.pos, false.pos, precision) %>%
+  dplyr::filter(label.type == 'All') %>%
+  dplyr::select(condition.id, worker.type, true.pos, false.pos, precision) %>%
   na.omit() %>%
   droplevels()
 user.group.test.data.recall.prob <-
   user.group.test.data %>%
-  filter(label.type == 'Problem') %>%
-  select(condition.id, worker.type, true.pos, false.neg, recall) %>%
+  dplyr::filter(label.type == 'Problem') %>%
+  dplyr::select(condition.id, worker.type, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 user.group.test.data.prec.prob <-
   user.group.test.data %>%
-  filter(label.type == 'Problem') %>%
-  select(condition.id, worker.type, true.pos, false.pos, precision) %>%
+  dplyr::filter(label.type == 'Problem') %>%
+  dplyr::select(condition.id, worker.type, true.pos, false.pos, precision) %>%
   na.omit() %>%
   droplevels()
 
@@ -2265,8 +2282,9 @@ Recall, all label types: `r print.lrt.results(lrt.user.group.recall.all, user.gr
 
 ```{r turk.user.group.recall.all.tukey, echo=FALSE}
 # Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
-tukey.user.group.recall.all <- summary(glht(user.group.recall.all.model, linfct = mcp(worker.type = 'Tukey')),
-                             test = adjusted('holm'))
+tukey.user.group.recall.all <- base::summary(glht(user.group.recall.all.model,
+                                                  linfct = mcp(worker.type = 'Tukey')),
+                                             test = adjusted('holm'))
 tukey.user.group.recall.all.clean <- format.tukey.table(tukey.user.group.recall.all,
                                                   'recall',
                                                   'worker.type',
@@ -2278,8 +2296,9 @@ kable(tukey.user.group.recall.all.clean, digits = 3, align = 'l')
 Precision, all label types: `r print.lrt.results(lrt.user.group.prec.all, user.group.prec.all.model, 'worker.type')`
 
 ```{r turk.user.group.prec.all.tukey, echo=FALSE}
-tukey.user.group.prec.all <- summary(glht(user.group.prec.all.model, linfct = mcp(worker.type = 'Tukey')),
-                           test = adjusted('holm'))
+tukey.user.group.prec.all <- base::summary(glht(user.group.prec.all.model,
+                                                linfct = mcp(worker.type = 'Tukey')),
+                                           test = adjusted('holm'))
 tukey.user.group.prec.all.clean <- format.tukey.table(tukey.user.group.prec.all,
                                             'precision',
                                             'worker.type',
@@ -2291,8 +2310,9 @@ kable(tukey.user.group.prec.all.clean, digits = 3, align = 'l')
 Recall, Problem type: `r print.lrt.results(lrt.user.group.recall.prob, user.group.recall.prob.model, 'worker.type')`
 
 ```{r turk.user.group.recall.prob.tukey, echo=FALSE}
-tukey.user.group.recall.prob <- summary(glht(user.group.recall.prob.model, linfct = mcp(worker.type = 'Tukey')),
-                             test = adjusted('holm'))
+tukey.user.group.recall.prob <- base::summary(glht(user.group.recall.prob.model,
+                                                   linfct = mcp(worker.type = 'Tukey')),
+                                              test = adjusted('holm'))
 tukey.user.group.recall.prob.clean <- format.tukey.table(tukey.user.group.recall.prob,
                                                   'recall',
                                                   'worker.type',
@@ -2306,8 +2326,9 @@ Precision, Problem type: `r print.lrt.results(lrt.user.group.prec.prob, user.gro
 NOTE: Although anon user have a higher average problem type precision than turk5, the model actually says that turk5 has higher precision (though it is not statistically significant). This is because there is just higher precision across the board on the anon user routes; the mixed effects model takes this into account! More on this below.
 
 ```{r turk.user.group.prec.prob.tukey, echo=FALSE}
-tukey.user.group.prec.prob <- summary(glht(user.group.prec.prob.model, linfct = mcp(worker.type = 'Tukey')),
-                           test = adjusted('holm'))
+tukey.user.group.prec.prob <- base::summary(glht(user.group.prec.prob.model,
+                                                 linfct = mcp(worker.type = 'Tukey')),
+                                            test = adjusted('holm'))
 tukey.user.group.prec.prob.clean <- format.tukey.table(tukey.user.group.prec.prob,
                                             'precision',
                                             'worker.type',
@@ -2321,7 +2342,7 @@ kable(tukey.user.group.prec.prob.clean, digits = 3, align = 'l')
 problem.prec.anon.routes.table <-
   kable(
     user.group.test.data %>%
-      filter(label.type == 'Problem', is.anon.route == TRUE) %>%
+      dplyr::filter(label.type == 'Problem', is.anon.route == TRUE) %>%
       group_by(worker.type) %>%
       dplyr::summarise(problem.precision.on.anon.routes = mean(precision, na.rm = TRUE)),
     digits = 3,
@@ -2344,11 +2365,14 @@ Mean/median/sd accuracy by label type - street level:
 ```{r turk.showing.stats.by.label.type.1, echo=FALSE}
 turk.showing.stats.by.label.type <-
   data.with.raw.accuracy %>%
-  filter(binary == TRUE, n.workers == 1, included.severity == 'all', label.type != 'AllProb')
+  dplyr::filter(binary == TRUE,
+                n.workers == 1,
+                included.severity == 'all',
+                label.type != 'AllProb')
 
 kable(
   turk.showing.stats.by.label.type %>%
-    filter(granularity == 'street') %>%
+    dplyr::filter(granularity == 'street') %>%
     rename(prec = precision, f = f.measure) %>%
     summarise_vars('label.type', c('recall', 'prec', 'f')),
   digits = 3,
@@ -2361,7 +2385,7 @@ Mean/median/sd accuracy by label type - 5 meter level:
 ```{r turk.showing.stats.by.label.type.2, echo=FALSE}
 kable(
   turk.showing.stats.by.label.type %>%
-    filter(granularity == '5_meter') %>%
+    dplyr::filter(granularity == '5_meter') %>%
     rename(prec = precision, f = f.measure) %>%
     summarise_vars('label.type', c('recall', 'prec', 'f')),
   digits = 3,
@@ -2379,20 +2403,20 @@ We created binomial mixed effects models to determine the relationship between l
 ```{r turk.label.type.accuracy.glmm, echo=FALSE}
 type.test.data <-
   turk.showing.stats.by.label.type %>%
-  filter(granularity == 'street',
-         label.type %in% NON_AGGREGATE_TYPES) %>%
+  dplyr::filter(granularity == 'street',
+                label.type %in% NON_AGGREGATE_TYPES) %>%
   mutate(label.type = factor(label.type),
          user.id = factor(worker1),
          condition.id = factor(condition.id))
 
 type.test.data.recall <-
   type.test.data %>%
-  select(condition.id, user.id, label.type, true.pos, false.neg, recall) %>%
+  dplyr::select(condition.id, user.id, label.type, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 type.test.data.prec <-
   type.test.data %>%
-  select(condition.id, user.id, label.type, true.pos, false.pos, precision) %>%
+  dplyr::select(condition.id, user.id, label.type, true.pos, false.pos, precision) %>%
   na.omit() %>%
   droplevels()
 
@@ -2403,8 +2427,8 @@ type.recall.model <- glmer(recall ~ label.type + (1 | condition.id / user.id),
                            control = glmerControl(optimizer = "bobyqa",
                                                   optCtrl = list(maxfun = 100000)))
 lrt.type.recall <- drop1(type.recall.model, test = 'Chisq')
-tukey.type.recall <- summary(glht(type.recall.model, linfct = mcp(label.type = 'Tukey')),
-                             test = adjusted('holm'))
+tukey.type.recall <- base::summary(glht(type.recall.model, linfct = mcp(label.type = 'Tukey')),
+                                   test = adjusted('holm'))
 
 
 type.prec.model <- glmer(precision ~ label.type + (1 | condition.id / user.id),
@@ -2414,8 +2438,8 @@ type.prec.model <- glmer(precision ~ label.type + (1 | condition.id / user.id),
                          control = glmerControl(optimizer = "bobyqa",
                                                 optCtrl = list(maxfun = 100000)))
 lrt.type.prec <- drop1(type.prec.model, test = 'Chisq')
-tukey.type.prec <- summary(glht(type.prec.model, linfct = mcp(label.type = 'Tukey')),
-                           test = adjusted('holm'))
+tukey.type.prec <- base::summary(glht(type.prec.model, linfct = mcp(label.type = 'Tukey')),
+                                 test = adjusted('holm'))
 ```
 
 Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (`r print.lrt.results(lrt.type.recall, type.recall.model, 'label.type')`). We also found label type to have a statistically significant association with precision (`r print.lrt.results(lrt.type.prec, type.prec.model, 'label.type')`).
@@ -2458,7 +2482,7 @@ Time to place a label is defined as follows:
 ```{r turk.label.difficulty.analysis, echo=FALSE}
 accuracy.by.label.type <-
   turk.showing.stats.by.label.type %>%
-  filter(granularity == 'street') %>%
+  dplyr::filter(granularity == 'street') %>%
   group_by(label.type) %>%
   dplyr::summarize(mean_recall = mean(recall, na.rm = TRUE),
                    mean_precision = mean(precision, na.rm = TRUE)) %>%
@@ -2468,8 +2492,8 @@ distinct.workers <- data.with.raw.accuracy %>% distinct(worker1) %>% pull()
 
 ave.labeling.time.by.type.and.user <-
   user.search.times %>%
-  filter(user.id %in% distinct.workers,
-         label.type %not-in% c('All', 'Problem')) %>%
+  dplyr::filter(user.id %in% distinct.workers,
+                label.type %not-in% c('All', 'Problem')) %>%
   droplevels() %>%
   mutate(log.seconds.to.label = log(seconds.to.label))
 
@@ -2509,15 +2533,15 @@ _The Assumptions_: Our two assumptions are that the residuals of the fit are nor
 # Very helpful site that brought me from thinking in terms of repeated measures ANOVA to mixed model
 # https://m-clark.github.io/docs/mixedModels/anovamixed.html
 # Here is what the analysis would have looked like for rANOVA (you can see the similar F-scores):
-# summary(aov(seconds.to.label ~ label.type + Error(user.id),
-#             data = ave.labeling.time.by.type.and.user))
+# base::summary(aov(seconds.to.label ~ label.type + Error(user.id),
+#                   data = ave.labeling.time.by.type.and.user))
 
 pre.test.data <- turk.showing.stats.by.label.type %>%
-  filter(granularity == 'street') %>%
-  filter(label.type %in% NON_AGGREGATE_TYPES) %>%
+  dplyr::filter(granularity == 'street',
+                label.type %in% NON_AGGREGATE_TYPES) %>%
   mutate(label.type = factor(label.type), # drop unused levels
          condition.id = factor(condition.id)) %>%
-  select(condition.id, worker1, recall, precision, label.type) %>%
+  dplyr::select(condition.id, worker1, recall, precision, label.type) %>%
   inner_join(ave.labeling.time.by.type.and.user,
              by = c('worker1' = 'user.id', 'label.type' = 'label.type')) %>%
   rename(user.id = worker1) %>%
@@ -2525,7 +2549,7 @@ pre.test.data <- turk.showing.stats.by.label.type %>%
 
 labeling.time.test.data <-
   pre.test.data %>%
-  select(user.id, condition.id, label.type, seconds.to.label, log.seconds.to.label) %>%
+  dplyr::select(user.id, condition.id, label.type, seconds.to.label, log.seconds.to.label) %>%
   na.omit() %>%
   droplevels()
 
@@ -2573,9 +2597,9 @@ Using a likelihood ratio test, we find the contribution by the fixed effect (lab
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
 ```{r turk.visual.search.time.lme.test.2, echo=FALSE}
-tukey.log.labeling.time <- summary(glht(log.labeling.time.model,
-                                        linfct = mcp(label.type = 'Tukey')),
-                                   test = adjusted('holm'))
+tukey.log.labeling.time <- base::summary(glht(log.labeling.time.model,
+                                              linfct = mcp(label.type = 'Tukey')),
+                                         test = adjusted('holm'))
 
 # Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
 tukey.log.labeling.time.clean <- format.tukey.table(tukey.log.labeling.time,
@@ -2661,7 +2685,7 @@ recode.density <- function(zone.type) {
 # Get predominant zone type for each condition.
 get.zone.for.conditions <- function(data, recode.func) {
   data %>%
-    select(condition.id, is.anon.route) %>%
+    dplyr::select(condition.id, is.anon.route) %>%
     distinct() %>%
     inner_join(zoning.data, by = 'condition.id') %>%
     mutate(zone.type = recode.func(zone_type)) %>%
@@ -2681,7 +2705,7 @@ get.zone.distro <- function(data, recode.func) {
     ungroup() %>%
     complete(zone.type, fill = list(n.routes = 0)) %>%
     mutate(percent.of.routes = 100 * n.routes / sum(n.routes)) %>%
-    select(volunteer.type, zone.type, percent.of.routes) %>%
+    dplyr::select(volunteer.type, zone.type, percent.of.routes) %>%
     rbind(all.dc.zoning.data %>% mutate(zone.type = recode.func(zone.type))) %>%
     group_by(volunteer.type, zone.type) %>%
     dplyr::summarise(percent.of.routes = sum(percent.of.routes)) %>%
@@ -2691,13 +2715,13 @@ get.zone.distro <- function(data, recode.func) {
 get.gt.count.distro <- function(data, recode.func) {
   data %>%
     mutate(meters = if_else(is.anon.route, 609.6, 1219.2)) %>%
-    inner_join(gt.count.by.route.and.label.type %>% filter(label.type %in% NON_AGGREGATE_TYPES),
+    inner_join(dplyr::filter(gt.count.by.route.and.lab.type, label.type %in% NON_AGGREGATE_TYPES),
                by = 'condition.id') %>%
     group_by(label.type, zone.type) %>%
-    summarise_at(vars(gt.labels, meters), sum) %>%
+    summarise_at(dplyr::vars(gt.labels, meters), sum) %>%
     ungroup() %>%
     mutate(gt.labels.per.100m = 100 * gt.labels / meters) %>%
-    select(label.type, zone.type, gt.labels, gt.labels.per.100m)
+    dplyr::select(label.type, zone.type, gt.labels, gt.labels.per.100m)
 }
 
 plot.gt.dist.for.zone.type <- function(data, n.data, l.data) {
@@ -2798,11 +2822,11 @@ The only noticeable difference I see right away is particularly high recall and 
 zone.type.analysis.data.semantic <-
   data.with.raw.accuracy %>%
   inner_join(conditions.w.semantic.zone, by = 'condition.id') %>%
-  filter(binary == TRUE,
-         granularity == 'street',
-         included.severity == 'all',
-         n.workers == 1,
-         label.type %in% c('All', 'Problem')) %>%
+  dplyr::filter(binary == TRUE,
+                granularity == 'street',
+                included.severity == 'all',
+                n.workers == 1,
+                label.type %in% c('All', 'Problem')) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
 x.labels.with.n.semantic <-
@@ -2812,7 +2836,7 @@ x.labels.with.n.semantic <-
   pull(lab)
 
 # Create the trellis boxplots.
-ggplot(data = zone.type.analysis.data.semantic %>% filter(label.type == 'All'),
+ggplot(data = zone.type.analysis.data.semantic %>% dplyr::filter(label.type == 'All'),
        aes(x = zone.type, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
@@ -2823,7 +2847,7 @@ ggplot(data = zone.type.analysis.data.semantic %>% filter(label.type == 'All'),
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 
-ggplot(data = zone.type.analysis.data.semantic %>% filter(label.type == 'Problem'),
+ggplot(data = zone.type.analysis.data.semantic %>% dplyr::filter(label.type == 'Problem'),
        aes(x = zone.type, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
@@ -2871,8 +2895,10 @@ kable(
 # Setup needed for paragraph below.
 n.residential.routes.by.density <-
   conditions.w.density.zone %>%
-  inner_join(conditions.w.semantic.zone, by = 'condition.id', suffix = c('.density', '.semantic')) %>%
-  filter(zone.type.semantic %in% c('Residential House', 'Residential Apt')) %>%
+  inner_join(conditions.w.semantic.zone,
+             by = 'condition.id',
+             suffix = c('.density', '.semantic')) %>%
+  dplyr::filter(zone.type.semantic %in% c('Residential House', 'Residential Apt')) %>%
   count(zone.type.density)
 residential.route.count.lookup.density <- setNames(n.residential.routes.by.density$n,
                                                    n.residential.routes.by.density$zone.type.density)
@@ -2887,7 +2913,7 @@ percentage.residential.lookup <-
            n.routes.by.zone.type.density$zone.type)
 ```
 
-Since there are many residential routes in each group, the number of residential routes is of interest. Of the `r unname(route.count.zone.lookup.density['Low-Moderate Density'])` low-moderate density routes, `r unname(residential.route.count.lookup.density['Low-Moderate Density'])` were residential (`r format(unname(percentage.residential.lookup['Low-Moderate Density']), digits = 4)`%). And of the `r unname(route.count.zone.lookup.density['Medium-High Density'])` medium-high density routes, `r unname(residential.route.count.lookup.density['Medium-High Density'])` were residential (`r format(unname(percentage.residential.lookup['Medium-High Density']), digits = 4)`%).
+Since there are many residential routes in each group, the number of residential routes is of interest. Of the `r unname(route.count.zone.lookup.density['Low-Moderate Density'])` low-moderate density routes, `r unname(residential.route.count.lookup.density['Low-Moderate Density'])` were residential (`r base::format(unname(percentage.residential.lookup['Low-Moderate Density']), digits = 4)`%). And of the `r unname(route.count.zone.lookup.density['Medium-High Density'])` medium-high density routes, `r unname(residential.route.count.lookup.density['Medium-High Density'])` were residential (`r base::format(unname(percentage.residential.lookup['Medium-High Density']), digits = 4)`%).
 
 
 Below, we look at the distribution of the label type densities in the ground truth, by zone type. The types of density appear to have similar distributions of label types.
@@ -2924,11 +2950,11 @@ There does not appear to be a significant difference in accuracy between the den
 zone.type.analysis.data.density <-
   data.with.raw.accuracy %>%
   inner_join(conditions.w.density.zone, by = 'condition.id') %>%
-  filter(binary == TRUE,
-         granularity == 'street',
-         included.severity == 'all',
-         n.workers == 1,
-         label.type %in% c('All', 'Problem')) %>%
+  dplyr::filter(binary == TRUE,
+                granularity == 'street',
+                included.severity == 'all',
+                n.workers == 1,
+                label.type %in% c('All', 'Problem')) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
 # Table with mean/median/sd
@@ -2949,7 +2975,7 @@ x.labels.with.n.density <-
   pull(lab)
 
 # Create the trellis boxplots.
-ggplot(data = zone.type.analysis.data.density %>% filter(label.type == 'All'),
+ggplot(data = zone.type.analysis.data.density %>% dplyr::filter(label.type == 'All'),
        aes(x = zone.type, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
@@ -2960,7 +2986,7 @@ ggplot(data = zone.type.analysis.data.density %>% filter(label.type == 'All'),
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   scale_y_continuous(expand = c(0.01, 0)) # removes weird white space at bottom of plot
 
-ggplot(data = zone.type.analysis.data.density %>% filter(label.type == 'Problem'),
+ggplot(data = zone.type.analysis.data.density %>% dplyr::filter(label.type == 'Problem'),
        aes(x = zone.type, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
@@ -2986,15 +3012,15 @@ NOTE: In this section, the data are binary (not ordinal), at the street level gr
 # auditing times, and visual search times.
 behavior.test.data.unscaled <-
   data.with.raw.accuracy %>%
-  filter(worker.type %in% c('anon', 'reg', 'turk1'),
-         binary == TRUE,
-         included.severity == 'all',
-         granularity == 'street',
-         label.type %in% c('All', 'Problem')) %>%
+  dplyr::filter(worker.type %in% c('anon', 'reg', 'turk1'),
+                binary == TRUE,
+                included.severity == 'all',
+                granularity == 'street',
+                label.type %in% c('All', 'Problem')) %>%
   dplyr::select(condition.id, worker1, label.type, true.pos:recall, is.anon.route) %>%
   droplevels() %>%
   inner_join(labels.turk.study, by = c('worker1' = 'user_id', 'condition.id' = 'condition_id')) %>%
-  group_by_at(vars(condition.id:is.anon.route)) %>%
+  group_by_at(dplyr::vars(condition.id:is.anon.route)) %>%
   dplyr::summarise(n.labels = n_distinct(label_id, na.rm = TRUE)) %>%
   ungroup() %>%
   inner_join(times.turk.study, by = c('worker1' = 'user_id')) %>%
@@ -3003,7 +3029,9 @@ behavior.test.data.unscaled <-
          labels.per.100m = 100 * n.labels / distance.meters,
          meters.per.min = distance.meters / minutes_audited,
          user.id = worker1) %>%
-  inner_join(user.search.times %>% filter(label.type %in% c('All', 'Problem')) %>% droplevels(),
+  inner_join(user.search.times %>%
+               dplyr::filter(label.type %in% c('All', 'Problem')) %>%
+               droplevels(),
              by = c('user.id', 'label.type')) %>%
   gather(key = accuracy.type, value = accuracy.value, recall, precision, factor_key = TRUE) %>%
   mutate(user.id = factor(worker1),
@@ -3019,34 +3047,34 @@ behavior.test.data <-
 # Subset the data for each individual model
 behavior.test.data.recall.prob <-
   behavior.test.data %>%
-  filter(label.type == 'Problem',
-         accuracy.type == 'recall') %>%
+  dplyr::filter(label.type == 'Problem',
+                accuracy.type == 'recall') %>%
   rename(recall = accuracy.value) %>%
-  select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.neg, recall) %>%
+  dplyr::select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 behavior.test.data.recall.all <-
   behavior.test.data %>%
-  filter(label.type == 'All',
-         accuracy.type == 'recall') %>%
+  dplyr::filter(label.type == 'All',
+                accuracy.type == 'recall') %>%
   rename(recall = accuracy.value) %>%
-  select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.neg, recall) %>%
+  dplyr::select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 behavior.test.data.prec.prob <-
   behavior.test.data %>%
-  filter(label.type == 'Problem',
-         accuracy.type == 'precision') %>%
+  dplyr::filter(label.type == 'Problem',
+                accuracy.type == 'precision') %>%
   rename(precision = accuracy.value) %>%
-  select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.pos, precision) %>%
+  dplyr::select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.pos, precision) %>%
   na.omit() %>%
   droplevels()
 behavior.test.data.prec.all <-
   behavior.test.data %>%
-  filter(label.type == 'All',
-         accuracy.type == 'precision') %>%
+  dplyr::filter(label.type == 'All',
+                accuracy.type == 'precision') %>%
   rename(precision = accuracy.value) %>%
-  select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.pos, precision) %>%
+  dplyr::select(condition.id, user.id, viz.search.time:audit.speed, true.pos, false.pos, precision) %>%
   na.omit() %>%
   droplevels()
 ```
@@ -3097,8 +3125,8 @@ behavior.recall.prob.model <-
         control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)))
 lrt.behavior.recall.prob <- drop1(behavior.recall.prob.model, test = 'Chisq')
 coeff.recall.prob <-
-  data.frame(summary(behavior.recall.prob.model)$coefficients) %>%
-  mutate(param = dimnames(summary(behavior.recall.prob.model)$coefficients)[[1]],
+  data.frame(base::summary(behavior.recall.prob.model)$coefficients) %>%
+  mutate(param = dimnames(base::summary(behavior.recall.prob.model)$coefficients)[[1]],
          label.type = 'Problem',
          accuracy.type = 'recall',
          LRT = lrt.behavior.recall.prob$LRT,
@@ -3114,8 +3142,8 @@ behavior.recall.all.model <-
         control = glmerControl(optimizer = "Nelder_Mead", optCtrl = list(maxfun = 100000)))
 lrt.behavior.recall.all <- drop1(behavior.recall.all.model, test = 'Chisq')
 coeff.recall.all <-
-  data.frame(summary(behavior.recall.all.model)$coefficients) %>%
-  mutate(param = dimnames(summary(behavior.recall.all.model)$coefficients)[[1]],
+  data.frame(base::summary(behavior.recall.all.model)$coefficients) %>%
+  mutate(param = dimnames(base::summary(behavior.recall.all.model)$coefficients)[[1]],
          label.type = 'All',
          accuracy.type = 'recall',
          LRT = lrt.behavior.recall.all$LRT,
@@ -3131,8 +3159,8 @@ behavior.prec.prob.model <-
         control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)))
 lrt.behavior.prec.prob <- drop1(behavior.prec.prob.model, test = 'Chisq')
 coeff.precision.prob <-
-  data.frame(summary(behavior.prec.prob.model)$coefficients) %>%
-  mutate(param = dimnames(summary(behavior.prec.prob.model)$coefficients)[[1]],
+  data.frame(base::summary(behavior.prec.prob.model)$coefficients) %>%
+  mutate(param = dimnames(base::summary(behavior.prec.prob.model)$coefficients)[[1]],
          label.type = 'Problem',
          accuracy.type = 'precision',
          LRT = lrt.behavior.prec.prob$LRT,
@@ -3148,8 +3176,8 @@ behavior.prec.all.model <-
         control = glmerControl(optimizer = "bobyqa", optCtrl = list(maxfun = 100000)))
 lrt.behavior.prec.all <- drop1(behavior.prec.all.model, test = 'Chisq')
 coeff.precision.all <-
-  data.frame(summary(behavior.prec.all.model)$coefficients) %>%
-  mutate(param = dimnames(summary(behavior.prec.all.model)$coefficients)[[1]],
+  data.frame(base::summary(behavior.prec.all.model)$coefficients) %>%
+  mutate(param = dimnames(base::summary(behavior.prec.all.model)$coefficients)[[1]],
          label.type = 'All',
          accuracy.type = 'precision',
          LRT = lrt.behavior.prec.all$LRT,
@@ -3160,13 +3188,13 @@ coeff.precision.all <-
 # Create nice looking table with important stats from each of the models/tests above.
 all.coeffs <-
   rbind(coeff.recall.all, coeff.recall.prob, coeff.precision.all, coeff.precision.prob) %>%
-  filter(param != '(Intercept)') %>%
+  dplyr::filter(param != '(Intercept)') %>%
   mutate(association = case_when(Estimate > 0 & p < 0.05 ~ '+',
                                  Estimate < 0 & p < 0.05 ~ '-',
                                  TRUE                    ~ 'NA'),
          p.value = p.num.to.p.str.with.sig.code(p)) %>%
   rename(estimate = Estimate, std.err = Std..Error) %>%
-  select(accuracy.type, label.type, param, association, estimate, std.err, p.value, LRT, df, n)
+  dplyr::select(accuracy.type, label.type, param, association, estimate, std.err, p.value, LRT, df, n)
 
 kable(all.coeffs, digits = 3, align = 'l')
 ```
@@ -3194,10 +3222,10 @@ NOTE: In this section, the data are binary (not ordinal), and is at the street l
 ```{r turk.high.severity.setup.1, echo=FALSE}
 low.severity.check.data.1 <-
   data.with.raw.accuracy %>%
-  filter(included.severity %in% c('all', '<=3', '>=4'),
-         label.type == 'Problem',
-         worker.type %in% c('reg', 'anon', 'turk1'),
-         granularity == 'street') %>%
+  dplyr::filter(included.severity %in% c('all', '<=3', '>=4'),
+                label.type == 'Problem',
+                worker.type %in% c('reg', 'anon', 'turk1'),
+                granularity == 'street') %>%
   droplevels %>%
   mutate(included.severity = factor(included.severity,
                                     labels = c('all', '<=3', '>=4'),
@@ -3205,7 +3233,7 @@ low.severity.check.data.1 <-
 
 recall.by.severity.1 <-
   low.severity.check.data.1 %>%
-  filter(binary == TRUE) %>%
+  dplyr::filter(binary == TRUE) %>%
   group_by(included.severity) %>%
   summarize(n.users = sum(!is.na(recall)),
             mean.recall = mean(recall, na.rm = TRUE),
@@ -3214,17 +3242,17 @@ recall.by.severity.1 <-
 
 gt.counts.by.severity.1 <-
   low.severity.check.data.1 %>%
-  filter(worker.type == 'turk1',
-         binary == FALSE) %>%
+  dplyr::filter(worker.type == 'turk1',
+                binary == FALSE) %>%
   group_by(included.severity) %>%
   summarize(gt.problem.labels = sum(true.pos, false.neg))
 
 severity.test.data.1 <-
   low.severity.check.data.1 %>%
-  filter(binary == TRUE, included.severity != 'all') %>%
+  dplyr::filter(binary == TRUE, included.severity != 'all') %>%
   mutate(user.id = factor(worker1),
          condition.id = factor(condition.id)) %>%
-  select(user.id, condition.id, included.severity, true.pos, false.neg, recall) %>%
+  dplyr::select(user.id, condition.id, included.severity, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 
@@ -3255,10 +3283,10 @@ kable(
 ```{r turk.high.severity.setup.2, echo=FALSE}
 low.severity.check.data.2 <-
   data.with.raw.accuracy %>%
-  filter(included.severity %in% c('all', '<=2', '>=3'),
-         label.type == 'Problem',
-         worker.type %in% c('reg', 'anon', 'turk1'),
-         granularity == 'street') %>%
+  dplyr::filter(included.severity %in% c('all', '<=2', '>=3'),
+                label.type == 'Problem',
+                worker.type %in% c('reg', 'anon', 'turk1'),
+                granularity == 'street') %>%
   droplevels %>%
   mutate(included.severity = factor(included.severity,
                                     labels = c('all', '<=2', '>=3'),
@@ -3266,7 +3294,7 @@ low.severity.check.data.2 <-
 
 recall.by.severity.2 <-
   low.severity.check.data.2 %>%
-  filter(binary == TRUE) %>%
+  dplyr::filter(binary == TRUE) %>%
   group_by(included.severity) %>%
   summarize(n.users = sum(!is.na(recall)),
             mean.recall = mean(recall, na.rm = TRUE),
@@ -3275,17 +3303,17 @@ recall.by.severity.2 <-
 
 gt.counts.by.severity.2 <-
   low.severity.check.data.2 %>%
-  filter(worker.type == 'turk1',
-         binary == FALSE) %>%
+  dplyr::filter(worker.type == 'turk1',
+                binary == FALSE) %>%
   group_by(included.severity) %>%
   summarize(gt.problem.labels = sum(true.pos, false.neg))
 
 severity.test.data.2 <-
   low.severity.check.data.2 %>%
-  filter(binary == TRUE, included.severity != 'all') %>%
+  dplyr::filter(binary == TRUE, included.severity != 'all') %>%
   mutate(user.id = factor(worker1),
          condition.id = factor(condition.id)) %>%
-  select(user.id, condition.id, included.severity, true.pos, false.neg, recall) %>%
+  dplyr::select(user.id, condition.id, included.severity, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 
@@ -3340,9 +3368,9 @@ NOTE: The red dots on the graphs are means.
 ```{r turk.issues.per.seg.analysis, echo=FALSE, fig.width=8, fig.height=4}
 issues.per.seg.analysis.data <-
   data.with.raw.accuracy %>%
-  filter(included.severity == 'all',
-         n.workers == 1,
-         label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
+  dplyr::filter(included.severity == 'all',
+                n.workers == 1,
+                label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
   mutate(issues.per.segment = factor(if_else(binary, 'binary', 'ordinal'))) %>%
   gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
 
@@ -3358,25 +3386,25 @@ issues.per.seg.analysis.labels <-
   ungroup()
 
 # Create the trellis boxplots.
-ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == '5_meter'),
+ggplot(data = issues.per.seg.analysis.data %>% dplyr::filter(granularity == '5_meter'),
        aes(x = issues.per.segment, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
   scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.15)) +
   geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
-  geom_text(data = issues.per.seg.analysis.labels %>% filter(granularity == '5_meter'),
+  geom_text(data = issues.per.seg.analysis.labels %>% dplyr::filter(granularity == '5_meter'),
              mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
   facet_grid(accuracy.type ~ label.type) +
   ggtitle('5 Meter-Level Analysis of Issues per Segment') +
   my.theme.discrete.x
 
-ggplot(data = issues.per.seg.analysis.data %>% filter(granularity == 'street'),
+ggplot(data = issues.per.seg.analysis.data %>% dplyr::filter(granularity == 'street'),
        aes(x = issues.per.segment, y = accuracy.value)) +
   geom_boxplot() +
   stat_summary(fun.y = mean, geom = 'point', color = 'red', size = 1) +
   scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.15)) +
   geom_hline(aes(yintercept = 1.0), linetype = 'dotted') +
-  geom_text(data = issues.per.seg.analysis.labels %>% filter(granularity == 'street'),
+  geom_text(data = issues.per.seg.analysis.labels %>% dplyr::filter(granularity == 'street'),
              mapping = aes(x = -Inf, y = 1.13, hjust = 'inward', label = n_label), size = 3.5) +
   facet_grid(accuracy.type ~ label.type) +
   ggtitle('Street-Level Analysis of Issues per Segment') +
