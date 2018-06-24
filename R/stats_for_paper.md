@@ -149,7 +149,7 @@ The steps in the graph below are as follows:
 8.  Placed fifth curb ramp label and correctly rated severity
 9.  Took step forward and clicked through all dialog boxes to finish tutorial
 
-Of the 1118 people who started the tutorial, 833 finished the first step (75%), and 576 completed the tutorial (52%).
+Of the 1112 people who started the tutorial, 827 finished the first step (74%), and 570 completed the tutorial (51%).
 
 The first graph shows both volunteers and turkers together, and the second shows them split.
 
@@ -157,7 +157,7 @@ The first graph shows both volunteers and turkers together, and the second shows
 
 ### User dropoffs
 
-Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a volunteer user and turker id to differentiate between turkers (the 576 IP addresses and turker ids who finished the tutorial in the previous section are the same 576 IPs/IDs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
+Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a volunteer user and turker id to differentiate between turkers (the 570 IP addresses and turker ids who finished the tutorial in the previous section are the same 570 IPs/IDs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
 
 We also only counted missions completed in the two hours after finishing the tutorial. There was not a sizeable difference when looking at 1 hour, 2 hours, or 48 hours after finishing the tutorial, so I think that 2 hours works fine.
 
@@ -169,7 +169,7 @@ The steps in the graph below are as follows:
 4.  Completed second mission
 5.  And so on...
 
-Of the 576 people who finished the tutorial, 445 took a step (77%), 285 finished at least one mission afterwards (49%), 164 completed at least two missions afterwards (28%), and 24 did at least 10 missions afterwards (4%).
+Of the 570 people who finished the tutorial, 440 took a step (77%), 281 finished at least one mission afterwards (49%), 162 completed at least two missions afterwards (28%), and 23 did at least 10 missions afterwards (4%).
 
 The first graph shows both volunteers and turkers together, and the second shows them split.
 
