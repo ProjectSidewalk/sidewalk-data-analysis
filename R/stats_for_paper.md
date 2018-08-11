@@ -78,17 +78,17 @@ The first table describes the dataset at the point where we hit 100% completion.
 
 | role       | n.users | label\_count | miles\_audited |
 |:-----------|:--------|:-------------|:---------------|
-| Researcher | 26      | 29121        | 224            |
+| Researcher | 26      | 29107        | 224            |
 | Anonymous  | 2551    | 14866        | 199            |
-| Turker     | 62      | 85356        | 1412           |
-| Registered | 329     | 41599        | 534            |
+| Turker     | 62      | 78168        | 1223           |
+| Registered | 326     | 41537        | 534            |
 
 | role       | n.users | label\_count | miles\_audited |
 |:-----------|:--------|:-------------|:---------------|
-| Researcher | 29      | 31954        | 239            |
+| Researcher | 29      | 31954        | 240            |
 | Anonymous  | 2876    | 15657        | 205            |
 | Turker     | 277     | 150966       | 2294           |
-| Registered | 344     | 41786        | 537            |
+| Registered | 355     | 41786        | 538            |
 
 ### Data characteristics
 
@@ -102,7 +102,7 @@ There have been a total of 19559 audits by our "good" users across 13020 streets
 
 ### Data lost due to filtering
 
-There were 825 users who placed 240092 labels pre-filtering. Researchers accounted for 28 of the users (3.39%) and 31954 of the labels (13.3%). Non-researchers with low labeling frequency accounted for 194 of the users (23.5%) and 54875 of the labels (22.9%). This means that we filtered out a total of 222 of the users (26.9%) and 86829 of the labels (36.2%), and are left with 603 of the users (73.1%) and 150378 of the labels (62.6%).
+There were 826 users who placed 240092 labels pre-filtering. Researchers accounted for 28 of the users (3.39%) and 31954 of the labels (13.3%). Non-researchers with low labeling frequency accounted for 195 of the users (23.6%) and 54876 of the labels (22.9%). This means that we filtered out a total of 223 of the users (27%) and 86830 of the labels (36.2%), and are left with 603 of the users (73%) and 150378 of the labels (62.6%).
 
 ### User stats and tool usage
 
@@ -169,7 +169,7 @@ The steps in the graph below are as follows:
 4.  Completed second mission
 5.  And so on...
 
-Of the 570 people who finished the tutorial, 440 took a step (77%), 281 finished at least one mission afterwards (49%), 162 completed at least two missions afterwards (28%), and 23 did at least 10 missions afterwards (4%).
+Of the 570 people who finished the tutorial, 480 took a step (84%), 329 finished at least one mission afterwards (58%), 197 completed at least two missions afterwards (35%), and 28 did at least 10 missions afterwards (5%).
 
 The first graph shows both volunteers and turkers together, and the second shows them split.
 

@@ -50,6 +50,8 @@ LABEL_TYPE_MAPPING <- c(
 TOTAL_STREET_DIST_METERS <- 1730179
 TOTAL_STREET_DIST_MILES <- TOTAL_STREET_DIST_METERS / 1609.34
 
+FIRST_100_END_TIMESTAMP <- '2017-12-10 07:45:44.674+00'
+
 LABEL_TYPES_TO_ANALYZE = c('All', 'Problem', 'CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')
 NON_AGGREGATE_TYPES = c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProb')
 
@@ -255,7 +257,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   reg.audits <-
     dbGetQuery(
       db.connection.public.deployment,
-      'SELECT audit_task.user_id, role.role, audit_task.task_start, audit_task.completed,
+      'SELECT audit_task.user_id, role.role, audit_task.task_end, audit_task.completed,
               audit_task.audit_task_id, street_edge.street_edge_id,
               ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS feet_audited
       FROM street_edge
@@ -271,7 +273,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   anon.audits <-
     dbGetQuery(
       db.connection.public.deployment,
-      'SELECT DISTINCT ip_address AS user_id, \'Anonymous\' AS role, audit_task.task_start,
+      'SELECT DISTINCT ip_address AS user_id, \'Anonymous\' AS role, audit_task.task_end,
               audit_task.completed, audit_task.audit_task_id, street_edge.street_edge_id,
               ST_LENGTH(ST_TRANSFORM(geom,26918)) * 3.28084 AS feet_audited
       FROM street_edge
@@ -435,7 +437,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           INNER JOIN user_role ON audit_task.user_id = user_role.user_id
           INNER JOIN role ON user_role.role_id = role.role_id
           WHERE role.role = \'Turker\'
-              AND task_start > \'2017-07-10 00:00:00.000+00\'
+              AND task_end > \'2017-07-10 00:00:00.000+00\'
               AND action = \'Onboarding_Start\'
       ) ips
       INNER JOIN audit_task_interaction
@@ -479,7 +481,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           INNER JOIN audit_task_environment
               ON audit_task.audit_task_id = audit_task_environment.audit_task_id
           WHERE role.role = \'User\'
-              AND task_start > \'2017-07-10 00:00:00.000+00\'
+              AND task_end > \'2017-07-10 00:00:00.000+00\'
               AND action = \'Onboarding_Start\'
       ) ips
       INNER JOIN audit_task_interaction
@@ -518,7 +520,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           INNER JOIN user_role ON audit_task.user_id = user_role.user_id
           INNER JOIN role ON user_role.role_id = role.role_id
           WHERE role.role = \'Turker\'
-              AND task_start > \'2017-07-10 00:00:00.000+00\'
+              AND task_end > \'2017-07-10 00:00:00.000+00\'
               AND action = \'Onboarding_End\'
       ) ips1
       INNER JOIN
@@ -529,7 +531,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           INNER JOIN user_role ON audit_task.user_id = user_role.user_id
           INNER JOIN role ON user_role.role_id = role.role_id
           WHERE role.role = \'Turker\'
-              AND task_start > \'2017-07-10 00:00:00.000+00\'
+              AND task_end > \'2017-07-10 00:00:00.000+00\'
               AND action = \'ViewControl_DoubleClick\'
       ) ips2
       ON ips1.audit_task_id = ips2.audit_task_id
@@ -538,7 +540,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           ON ips2.user_id = audit_task.user_id
       INNER JOIN audit_task_interaction
           ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
-      WHERE task_start > \'2017-07-10 00:00:00.000+00\'
+      WHERE task_end > \'2017-07-10 00:00:00.000+00\'
           AND action IN (\'Onboarding_End\', \'MissionComplete\', \'PanoId_Changed\');'
     )
   volunteer.dropoffs <-
@@ -558,7 +560,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           INNER JOIN audit_task_environment
               ON audit_task.audit_task_id = audit_task_environment.audit_task_id
           WHERE role.role = \'User\'
-              AND task_start > \'2017-07-10 00:00:00.000+00\'
+              AND task_end > \'2017-07-10 00:00:00.000+00\'
               AND action = \'Onboarding_End\'
       ) ips1
       INNER JOIN
@@ -574,7 +576,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           INNER JOIN audit_task_environment
               ON audit_task.audit_task_id = audit_task_environment.audit_task_id
           WHERE role.role <> \'Turker\'
-              AND task_start > \'2017-07-10 00:00:00.000+00\'
+              AND task_end > \'2017-07-10 00:00:00.000+00\'
               AND action = \'ViewControl_DoubleClick\'
       ) ips2
       ON ips1.audit_task_id = ips2.audit_task_id
@@ -585,7 +587,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           ON audit_task_environment.audit_task_id = audit_task.audit_task_id
       INNER JOIN audit_task_interaction
           ON audit_task.audit_task_id = audit_task_interaction.audit_task_id
-      WHERE task_start > \'2017-07-10 00:00:00.000+00\'
+      WHERE task_end > \'2017-07-10 00:00:00.000+00\'
           AND action IN (\'Onboarding_End\', \'MissionComplete\', \'PanoId_Changed\');'
     )
   dbDisconnect(db.connection.public.deployment)
@@ -1028,7 +1030,7 @@ n.non.tutorial.labels <- n_distinct(non.tutorial.labels$label_id)
 
 pre.100.labels <-
   inner_join(non.tutorial.labels, audits, by = c('user_id', 'role', 'audit_task_id')) %>%
-  dplyr::filter(task_start < '2017-12-10 07:44:54.288+00') %>%
+  dplyr::filter(task_end < FIRST_100_END_TIMESTAMP) %>%
   mutate(dataset = 'first_100%') %>%
   dplyr::select(names(non.tutorial.labels), dataset)
 label.counts <-
@@ -1041,7 +1043,7 @@ label.counts <-
 # Selects distinct on audit_task_id, then sums dist audited.
 pre.100.audits <-
   audits %>%
-  dplyr::filter(task_start < '2017-12-10 07:44:54.288+00') %>%
+  dplyr::filter(task_end < FIRST_100_END_TIMESTAMP) %>%
   mutate(dataset = 'first_100%')
 audit.length <-
   audits %>%
