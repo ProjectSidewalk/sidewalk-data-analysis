@@ -1316,6 +1316,33 @@ NOTE: there are graphs that combine the tutorial and post-tutorial dropoff graph
 
 #### Tutorial dropoffs
 
+```{r public.deployment.user.dropoff.graph.funcs, echo=FALSE}
+plot.dropoffs <- function(users.remaining.data, dropoff.step.labels) {
+  ggplot(aes(x = step, y = users.remaining), data = users.remaining.data) +
+    geom_line() +
+    geom_point() +
+    scale_x_continuous(breaks = seq(0, length(dropoff.step.labels) - 1),
+                       labels = dropoff.step.labels,
+                       expand = c(0.015, 0)) +
+    scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+    theme(panel.grid.minor.x = element_blank())
+}
+plot.dropoffs.split <- function(users.remaining.split.data, dropoff.step.labels) {
+  ggplot(aes(x = step, y = users.remaining), data = users.remaining.split.data) +
+    geom_line(aes(colour = is.turker)) +
+    geom_point(aes(colour = is.turker)) +
+    scale_x_continuous(breaks = seq(0, length(dropoff.step.labels) - 1),
+                       labels = dropoff.step.labels,
+                       expand = c(0.015, 0)) +
+    scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+    theme(panel.grid.minor.x = element_blank())
+}
+```
+
 ```{r public.deployment.tutorial.dropoff, echo=FALSE}
 tutorials.parsed <-
   tutorials %>%
@@ -1514,26 +1541,8 @@ step.labels <- c('Start tutorial',
                  'No sidewalk',
                  'Fifth curb ramp',
                  'Finish tutorial')
-ggplot(aes(x = step, y = users.remaining), data = users.remaining.tutorial) +
-  geom_line() +
-  geom_point() +
-  scale_x_continuous(breaks = seq(0, 8),
-                     labels = step.labels,
-                     expand = c(0.015, 0)) +
-  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-        panel.grid.minor.x = element_blank())
-ggplot(aes(x = step, y = users.remaining), data = users.remaining.tutorial.split) +
-  geom_line(aes(colour = is.turker)) +
-  geom_point(aes(colour = is.turker)) +
-  scale_x_continuous(breaks = seq(0, 8),
-                     labels = step.labels,
-                     expand = c(0.015, 0)) +
-  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
-        panel.grid.minor.x = element_blank())
+plot.dropoffs(users.remaining.tutorial, step.labels)
+plot.dropoffs.split(users.remaining.tutorial.split, step.labels)
 ```
 
 
@@ -1621,26 +1630,8 @@ dropoff.labels <- c('Finish tutorial',
                     '8 missions',
                     '9 missions',
                     '10 missions')
-ggplot(aes(x = step, y = users.remaining), data = users.remaining.post.tutorial) +
-  geom_line() +
-  geom_point() +
-  scale_x_continuous(breaks = seq(0, 11),
-                     labels = dropoff.labels,
-                     expand = c(0.015, 0)) +
-  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  theme(panel.grid.minor.x = element_blank())
-ggplot(aes(x = step, y = users.remaining), data = users.remaining.post.tutorial.split) +
-  geom_line(aes(colour = is.turker)) +
-  geom_point(aes(colour = is.turker)) +
-  scale_x_continuous(breaks = seq(0, 11),
-                     labels = dropoff.labels,
-                     expand = c(0.015, 0)) +
-  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  theme(panel.grid.minor.x = element_blank())
+plot.dropoffs(users.remaining.post.tutorial, dropoff.labels)
+plot.dropoffs.split(users.remaining.post.tutorial.split, dropoff.labels)
 ```
 
 
@@ -1664,28 +1655,8 @@ users.remaining.all.split <-
 
 combined.dropoff.labels <- c(step.labels, dropoff.labels[2:length(dropoff.labels)])
 
-# Create identical graphs to previous two sections.
-# TODO create functions to generate each of these graphs to remove duplicate code.
-ggplot(aes(x = step, y = users.remaining), data = users.remaining.all) +
-  geom_line() +
-  geom_point() +
-  scale_x_continuous(breaks = seq(0, 19),
-                     labels = combined.dropoff.labels,
-                     expand = c(0.015, 0)) +
-  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  theme(panel.grid.minor.x = element_blank())
-ggplot(aes(x = step, y = users.remaining), data = users.remaining.all.split) +
-  geom_line(aes(colour = is.turker)) +
-  geom_point(aes(colour = is.turker)) +
-  scale_x_continuous(breaks = seq(0, 19),
-                     labels = combined.dropoff.labels,
-                     expand = c(0.015, 0)) +
-  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-  theme(panel.grid.minor.x = element_blank())
+plot.dropoffs(users.remaining.all, combined.dropoff.labels)
+plot.dropoffs.split(users.remaining.all.split, combined.dropoff.labels)
 ```
 
 
