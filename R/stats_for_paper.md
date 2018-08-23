@@ -13,7 +13,6 @@ April 17, 2018
         -   [User stats and tool usage](#user-stats-and-tool-usage)
     -   [Possible Stories](#possible-stories)
         -   [Data overlap and agreement between users](#data-overlap-and-agreement-between-users)
-        -   [Tutorial dropoffs](#tutorial-dropoffs)
         -   [User dropoffs](#user-dropoffs)
 -   [Turk Study](#turk-study)
     -   [High level results](#high-level-results-1)
@@ -108,7 +107,7 @@ There were 826 users who placed 240092 labels pre-filtering. Researchers account
 
 TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
 
-Below are the means/medains/sds for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
+Below are the means/medians/sds for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
 
@@ -133,7 +132,11 @@ Among all the data collected in DC, how much of DC is labeled by multiple users 
 
 A total of 38.9% of streets were audited by multiple users.
 
-### Tutorial dropoffs
+### User dropoffs
+
+NOTE: there are graphs that combine the tutorial and post-tutorial dropoff graphs at the end of this section.
+
+#### Tutorial dropoffs
 
 Below we look at how users drop off in the tutorial. Because most volunteers going through the tutorial have not yet registered, we simply use IP address as a "user" for the purpose of analyzing the tutorial in particular; however, turkers are automatically logged in immediately, so we use turker id for them. We consider only users who clicked on the "Let's get started!" button on the tutorial page as having started the tutorial. To simplify the analysis, we are looking at only tutorial attempts after the small additions we made to the tutorial last summer (so the data starts July 10th, 2017).
 
@@ -155,7 +158,7 @@ The first graph shows both volunteers and turkers together, and the second shows
 
 ![](stats_for_paper_files/figure-markdown_github/public.deployment.tutorial.dropoff.plots-1.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.tutorial.dropoff.plots-2.png)
 
-### User dropoffs
+#### Post tutorial dropoffs
 
 Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a volunteer user and turker id to differentiate between turkers (the 570 IP addresses and turker ids who finished the tutorial in the previous section are the same 570 IPs/IDs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
 
@@ -172,6 +175,12 @@ The steps in the graph below are as follows:
 Of the 570 people who finished the tutorial, 480 took a step (84%), 329 finished at least one mission afterwards (58%), 197 completed at least two missions afterwards (35%), and 28 did at least 10 missions afterwards (5%).
 
 The first graph shows both volunteers and turkers together, and the second shows them split.
+
+![](stats_for_paper_files/figure-markdown_github/public.deployment.post.tutorial.dropoff.plot-1.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.post.tutorial.dropoff.plot-2.png)
+
+#### Tutorial and post tutorial dropoffs
+
+Below are simply concatenations of the graphs from each of the two sub-sections above.
 
 ![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-2.png)
 
@@ -523,7 +532,7 @@ For some background on linear mixed-effect models, the reference I found most he
 
 *The Model*: To determine the association between visual search time and label type, we use a linear mixed-effects model where our outcome variable is visual search time, we have label type as a fixed effect, and we have user id nested in route id as random effects. We model the random effects as intercepts, meaning that we assume different baseline visual search times for each user and route, but expect the differences in visual search times between label types to be similar across users/routes.
 
-*The Assumptions*: Our two assumptions are that the residuals of the fit are normally distributed (normality) and have constant variance across the range of fitted values (heteroscedasticity). To check for normality, we first use the Shapiro-Wilk test. In this test, the null hypothesis is that the residuals are normally distributed; if we *fail* to reject the null, then we meet our assumption that the residuals are normally distributed. This test has a high type 1 error rate (often says that data are *not* normally distributed when they really *are*), but it is good to check the test because it is a quick and easy way to say the data are normal if the test succeeds. If we fail the test, we check a histogram of the residuals to see if they are normally distributed. For heteroscedasticity, we make a scatterplot with the standardized residuals on the y-axis, and fitted visual search times on the x-axis. If the variance in the residuals (y-axis) is constant across the fitted values (x-axis), this constitutes "constant variance", and so we would meet the heteroscedasticity assumption.
+*The Assumptions*: Our two assumptions are that the residuals of the fit are normally distributed (normality) and have constant variance across the range of fitted values (heteroscedasticity). To check for normality, we first use the Shapiro-Wilk test. In this test, the null hypothesis is that the residuals are normally distributed; if we *fail* to reject the null, then we meet our assumption that the residuals are normally distributed. This test has a high type 1 error rate (often says that data are *not* normally distributed when they really *are*), but it is good to check the test because it is a quick and easy way to say the data are normal if the test succeeds. If we fail the test, we check a histogram of the residuals to see if they are normally distributed. For heteroscedasticity, we make a scatter plot with the standardized residuals on the y-axis, and fitted visual search times on the x-axis. If the variance in the residuals (y-axis) is constant across the fitted values (x-axis), this constitutes "constant variance", and so we would meet the heteroscedasticity assumption.
 
 Using the Shapiro-Wilk test, we reject the null (p &lt; 0.001), meaning we have not proven that the residuals are normally distributed. The histogram on the left of the residuals looks relatively normal, but there are some outliers, and it has a long-ish right tail. More importantly, we really do not seem to meet the heteroscedasticity assumption, given how the variance seems much larger for longer labeling times in the qq plot on the right.
 
@@ -588,7 +597,7 @@ As a reminder, the grouping is defined as follows:
 
 Here is the zone type distribution for the mturk study. We assigned each street in DC a zone type based on the zone in which one of its endpoints is located. We then assigned a zone type to each route as the plurality zone type among the streets on that route. The graph below compares the zone type distributions of the anon user routes, registered user routes, and all of DC for reference.
 
-NOTE: For regsitered and anon user routes below, it is the percentage of *routes* marked as that zone type. But for All DC Streets, it is the percentage of *streets* in DC, since we don't have a set of "routes" that makes up DC.
+NOTE: For registered and anon user routes below, it is the percentage of *routes* marked as that zone type. But for All DC Streets, it is the percentage of *streets* in DC, since we don't have a set of "routes" that makes up DC.
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution.semantic-1.png)
 
@@ -629,7 +638,7 @@ As a reminder, the grouping is defined as follows:
 
 Here is the zone type distribution for the mturk study. We assigned each street in DC a zone type based on the zone in which one of its endpoints is located. We then assigned a zone type to each route as the plurality zone type among the streets on that route. The graph below compares the zone type distributions of the anon user routes, registered user routes, and all of DC for reference.
 
-NOTE: For regsitered and anon user routes below, it is the percentage of *routes* marked as that zone type. But for All DC Streets, it is the percentage of *streets* in DC, since we don't have a set of "routes" that makes up DC.
+NOTE: For registered and anon user routes below, it is the percentage of *routes* marked as that zone type. But for All DC Streets, it is the percentage of *streets* in DC, since we don't have a set of "routes" that makes up DC.
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.distribution.density-1.png)
 
@@ -704,7 +713,7 @@ The positive association between labeling frequency and recall is expected, as s
 
 The negative association between auditing speed and All type recall is also expected, as auditing more quickly will probably end up with fewer correct attributes being found. Similarly, the negative association b/w auditing speed and Problem type precision might make sense (auditing more quickly, less likely to over-label).
 
-The associations that we do not have immediate explanations for are the negative assocation b/w visual search time and All type recall and the negative association b/w visual search time and Problem type precision.
+The associations that we do not have immediate explanations for are the negative association b/w visual search time and All type recall and the negative association b/w visual search time and Problem type precision.
 
 ### User group: Reg vs anon vs turk1 vs turk3 vs turk5
 

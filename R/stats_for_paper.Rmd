@@ -1260,7 +1260,7 @@ There were `r n.users.pre.filter` users who placed `r n.labels.pre.filter` label
 
 TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
 
-Below are the means/medains/sds for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
+Below are the means/medians/sds for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
 
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
 
@@ -1310,7 +1310,11 @@ percent.streets.with.multiple.audits <-
 A total of `r base::format(percent.streets.with.multiple.audits, digits = 3)`% of streets were audited by multiple users. 
 
 
-### Tutorial dropoffs
+### User dropoffs
+
+NOTE: there are graphs that combine the tutorial and post-tutorial dropoff graphs at the end of this section.
+
+#### Tutorial dropoffs
 
 ```{r public.deployment.tutorial.dropoff, echo=FALSE}
 tutorials.parsed <-
@@ -1533,9 +1537,9 @@ ggplot(aes(x = step, y = users.remaining), data = users.remaining.tutorial.split
 ```
 
 
-### User dropoffs
+#### Post tutorial dropoffs
 
-```{r public.deployment.user.dropoff, echo=FALSE}
+```{r public.deployment.post.tutorial.dropoff, echo=FALSE}
 # Takes users who have completed the tuturial (using same IPs from tutorial dropoff analysis), and
 # counts how many missions they completed in the 2 hours after finishing the tutorial.
 dropoffs.by.user <-
@@ -1570,18 +1574,18 @@ dropoffs.by.user <-
                                     panos.changed >= 2     ~ 1,
                                     TRUE                   ~ 0))
 
-users.remaining.dropoffs <-
+users.remaining.post.tutorial <-
   data.frame(step = seq(0, 11)) %>%
   mutate(users.remaining = get.users.remaining(dropoffs.by.user, step))
-users.remaining.dropoffs.split <-
+users.remaining.post.tutorial.split <-
   data.frame(step = rep(seq(0, 11), 2),
              is.turker = c(rep(TRUE, 12), rep(FALSE, 12))) %>%
   mutate(users.remaining = get.users.remaining(dropoffs.by.user, step, is.turker))
 
-n.took.step <- users.remaining.dropoffs[2,'users.remaining']
-n.did.one.mission <- users.remaining.dropoffs[3,'users.remaining']
-n.did.two.missions <- users.remaining.dropoffs[4,'users.remaining']
-n.did.ten.missions <- users.remaining.dropoffs[12,'users.remaining']
+n.took.step <- users.remaining.post.tutorial[2,'users.remaining']
+n.did.one.mission <- users.remaining.post.tutorial[3,'users.remaining']
+n.did.two.missions <- users.remaining.post.tutorial[4,'users.remaining']
+n.did.ten.missions <- users.remaining.post.tutorial[12,'users.remaining']
 percent.took.step <- 100 * n.took.step / n.finished.tutorial
 percent.did.one.mission <- 100 * n.did.one.mission / n.finished.tutorial
 percent.did.two.missions <- 100 * n.did.two.missions / n.finished.tutorial
@@ -1604,7 +1608,7 @@ Of the `r n.finished.tutorial` people who finished the tutorial, `r n.took.step`
 
 The first graph shows both volunteers and turkers together, and the second shows them split.
 
-```{r public.deployment.user.dropoff.plot, echo=FALSE, fig.width=5, fig.height=3}
+```{r public.deployment.post.tutorial.dropoff.plot, echo=FALSE, fig.width=5, fig.height=3}
 dropoff.labels <- c('Finish tutorial',
                     'Take step',
                     '1 mission',
@@ -1617,7 +1621,7 @@ dropoff.labels <- c('Finish tutorial',
                     '8 missions',
                     '9 missions',
                     '10 missions')
-ggplot(aes(x = step, y = users.remaining), data = users.remaining.dropoffs) +
+ggplot(aes(x = step, y = users.remaining), data = users.remaining.post.tutorial) +
   geom_line() +
   geom_point() +
   scale_x_continuous(breaks = seq(0, 11),
@@ -1627,11 +1631,56 @@ ggplot(aes(x = step, y = users.remaining), data = users.remaining.dropoffs) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
   theme(panel.grid.minor.x = element_blank())
-ggplot(aes(x = step, y = users.remaining), data = users.remaining.dropoffs.split) +
+ggplot(aes(x = step, y = users.remaining), data = users.remaining.post.tutorial.split) +
   geom_line(aes(colour = is.turker)) +
   geom_point(aes(colour = is.turker)) +
   scale_x_continuous(breaks = seq(0, 11),
                      labels = dropoff.labels,
+                     expand = c(0.015, 0)) +
+  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  theme(panel.grid.minor.x = element_blank())
+```
+
+
+#### Tutorial and post tutorial dropoffs
+
+Below are simply concatenations of the graphs from each of the two sub-sections above.
+
+
+```{r public.deployment.user.dropoff.plot, echo=FALSE, fig.width=6, fig.height=3}
+# Combine the datasets from the two previous sub-sections.
+users.remaining.all <-
+  users.remaining.post.tutorial %>%
+  mutate(step = step + 8) %>%
+  dplyr::filter(step > 8) %>%
+  bind_rows(users.remaining.tutorial)
+users.remaining.all.split <-
+  users.remaining.post.tutorial.split %>%
+  mutate(step = step + 8) %>%
+  dplyr::filter(step > 8) %>%
+  bind_rows(users.remaining.tutorial.split)
+
+combined.dropoff.labels <- c(step.labels, dropoff.labels[2:length(dropoff.labels)])
+
+# Create identical graphs to previous two sections.
+# TODO create functions to generate each of these graphs to remove duplicate code.
+ggplot(aes(x = step, y = users.remaining), data = users.remaining.all) +
+  geom_line() +
+  geom_point() +
+  scale_x_continuous(breaks = seq(0, 19),
+                     labels = combined.dropoff.labels,
+                     expand = c(0.015, 0)) +
+  scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
+  theme(panel.grid.minor.x = element_blank())
+ggplot(aes(x = step, y = users.remaining), data = users.remaining.all.split) +
+  geom_line(aes(colour = is.turker)) +
+  geom_point(aes(colour = is.turker)) +
+  scale_x_continuous(breaks = seq(0, 19),
+                     labels = combined.dropoff.labels,
                      expand = c(0.015, 0)) +
   scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
   theme_bw() +
@@ -2529,7 +2578,7 @@ For some background on linear mixed-effect models, the reference I found most he
 
 _The Model_: To determine the association between visual search time and label type, we use a linear mixed-effects model where our outcome variable is visual search time, we have label type as a fixed effect, and we have user id nested in route id as random effects. We model the random effects as intercepts, meaning that we assume different baseline visual search times for each user and route, but expect the differences in visual search times between label types to be similar across users/routes.
 
-_The Assumptions_: Our two assumptions are that the residuals of the fit are normally distributed (normality) and have constant variance across the range of fitted values (heteroscedasticity). To check for normality, we first use the Shapiro-Wilk test. In this test, the null hypothesis is that the residuals are normally distributed; if we _fail_ to reject the null, then we meet our assumption that the residuals are normally distributed. This test has a high type 1 error rate (often says that data are _not_ normally distributed when they really _are_), but it is good to check the test because it is a quick and easy way to say the data are normal if the test succeeds. If we fail the test, we check a histogram of the residuals to see if they are normally distributed. For heteroscedasticity, we make a scatterplot with the standardized residuals on the y-axis, and fitted visual search times on the x-axis. If the variance in the residuals (y-axis) is constant across the fitted values (x-axis), this constitutes "constant variance", and so we would meet the heteroscedasticity assumption.
+_The Assumptions_: Our two assumptions are that the residuals of the fit are normally distributed (normality) and have constant variance across the range of fitted values (heteroscedasticity). To check for normality, we first use the Shapiro-Wilk test. In this test, the null hypothesis is that the residuals are normally distributed; if we _fail_ to reject the null, then we meet our assumption that the residuals are normally distributed. This test has a high type 1 error rate (often says that data are _not_ normally distributed when they really _are_), but it is good to check the test because it is a quick and easy way to say the data are normal if the test succeeds. If we fail the test, we check a histogram of the residuals to see if they are normally distributed. For heteroscedasticity, we make a scatter plot with the standardized residuals on the y-axis, and fitted visual search times on the x-axis. If the variance in the residuals (y-axis) is constant across the fitted values (x-axis), this constitutes "constant variance", and so we would meet the heteroscedasticity assumption.
 
 ```{r turk.visual.search.time.lme.assumption.1, echo=FALSE}
 # Very helpful site that brought me from thinking in terms of repeated measures ANOVA to mixed model
@@ -2759,7 +2808,7 @@ As a reminder, the grouping is defined as follows:
 
 Here is the zone type distribution for the mturk study. We assigned each street in DC a zone type based on the zone in which one of its endpoints is located. We then assigned a zone type to each route as the plurality zone type among the streets on that route. The graph below compares the zone type distributions of the anon user routes, registered user routes, and all of DC for reference.
 
-NOTE: For regsitered and anon user routes below, it is the percentage of _routes_ marked as that zone type. But for All DC Streets, it is the percentage of _streets_ in DC, since we don't have a set of "routes" that makes up DC.
+NOTE: For registered and anon user routes below, it is the percentage of _routes_ marked as that zone type. But for All DC Streets, it is the percentage of _streets_ in DC, since we don't have a set of "routes" that makes up DC.
 
 ```{r turk.zone.type.distribution.semantic, echo=FALSE, fig.width=4, fig.height=3}
 conditions.w.semantic.zone <- get.zone.for.conditions(data.with.raw.accuracy, recode.semantic)
@@ -2872,7 +2921,7 @@ As a reminder, the grouping is defined as follows:
 
 Here is the zone type distribution for the mturk study. We assigned each street in DC a zone type based on the zone in which one of its endpoints is located. We then assigned a zone type to each route as the plurality zone type among the streets on that route. The graph below compares the zone type distributions of the anon user routes, registered user routes, and all of DC for reference.
 
-NOTE: For regsitered and anon user routes below, it is the percentage of _routes_ marked as that zone type. But for All DC Streets, it is the percentage of _streets_ in DC, since we don't have a set of "routes" that makes up DC.
+NOTE: For registered and anon user routes below, it is the percentage of _routes_ marked as that zone type. But for All DC Streets, it is the percentage of _streets_ in DC, since we don't have a set of "routes" that makes up DC.
 
 ```{r turk.zone.type.distribution.density, echo=FALSE, fig.width=4, fig.height=3}
 conditions.w.density.zone <- get.zone.for.conditions(data.with.raw.accuracy, recode.density)
@@ -3205,7 +3254,7 @@ The positive association between labeling frequency and recall is expected, as s
 
 The negative association between auditing speed and All type recall is also expected, as auditing more quickly will probably end up with fewer correct attributes being found. Similarly, the negative association b/w auditing speed and Problem type precision might make sense (auditing more quickly, less likely to over-label).
 
-The associations that we do not have immediate explanations for are the negative assocation b/w visual search time and All type recall and the negative association b/w visual search time and Problem type precision.
+The associations that we do not have immediate explanations for are the negative association b/w visual search time and All type recall and the negative association b/w visual search time and Problem type precision.
 
 
 ### User group: Reg vs anon vs turk1 vs turk3 vs turk5
