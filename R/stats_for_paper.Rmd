@@ -1911,7 +1911,7 @@ A total of `r n.turkers` turkers, `r n.reg` registered users, and `r n.anon` ano
 
 ### Aggregate accuracy
 
-Below are two tables (street level, then 5 meter level) showing mean accuracy across all users when aggregating over all label types, and for problem vs no problem. We see that the accuracies are comparable at the street level, but accuracy is much higher for curb ramps than problems at the 5 meter level.
+Below are two tables (street level, then 5 meter level) showing mean accuracy across all users when aggregating over all label types, and for problem vs no problem. We see that the All/Problem accuracies are comparable at the street level, but accuracy is much higher for curb ramps than problems at the 5 meter level (which makes Problem have a much lower accuracy than All).
 
 NOTE: In these two tables, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
@@ -1947,7 +1947,7 @@ kable(
 voting.method.data <-
   data.with.raw.accuracy %>%
   dplyr::filter(label.type %in% c('All', 'Problem'),
-                n.workers == 5 | worker.type == 'reg',
+                n.workers == 5 | worker.type == 'turk1',
                 binary == TRUE,
                 granularity == 'street',
                 label.type == 'Problem',
@@ -1960,16 +1960,16 @@ voting.method.data <-
   dplyr::summarize_at(dplyr::vars(recall, precision), mean, na.rm = TRUE) %>%
   ungroup()
 
-# Get registered user recall to compare to
-reg.recall <-
+# Get individual turker recall to compare to
+turk.recall <-
   voting.method.data %>%
-  dplyr::filter(worker.type == 'reg') %>%
+  dplyr::filter(worker.type == 'turk1') %>%
   dplyr::select(recall) %>%
   as.numeric() %>%
   base::format(digits = 2)
-reg.precision <-
+turk.precision <-
   voting.method.data %>%
-  dplyr::filter(worker.type == 'reg') %>%
+  dplyr::filter(worker.type == 'turk1') %>%
   dplyr::select(precision) %>%
   as.numeric() %>%
   base::format(digits = 2)
@@ -1978,7 +1978,7 @@ reg.precision <-
 
 Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
 
-For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was `r reg.recall` and their precision was `r reg.precision`.
+For reference, individual turkers tended to have the best performance among our user groups, and their recall for problem vs no problem was `r turk.recall` and their precision was `r turk.precision`.
 
 NOTE: In this section we are looking at _problem vs no problem_, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
 
@@ -1989,7 +1989,7 @@ NOTE: In this section we are looking at _problem vs no problem_, the data are bi
 ```{r turk.voting.method.analysis, echo=FALSE}
 kable(
   voting.method.data %>%
-    dplyr::filter(worker.type != 'reg') %>%
+    dplyr::filter(worker.type != 'turk1') %>%
     dplyr::select(voting.method, recall, precision),
   digits = 3,
   align = 'l'
@@ -3108,7 +3108,7 @@ ggplot(behavior.test.data.unscaled, aes(x = seconds.to.label, y = accuracy.value
   facet_grid(accuracy.type ~ label.type)
 ```
 
-From these graphs, the potential associations I was seeing (before running the tests) were a possible positive association between labeling frequency and recall (both Problem and All types) and a possible negative association between visual search time and recall (both Problem and All types). In fact, these are the four cases where we find statistically significant results.
+From these graphs, the potential associations I was seeing (before running the tests) were a possible positive association between labeling frequency and recall (both Problem and All types) and a possible negative association between auditing speed and recall (both Problem and All types). In fact, three of those four are cases where we find statistically significant results.
 
 To test for the associations between the user behaviors and accuracy, we created 4 binomial mixed effect models (one for accuracy type, precision and recall; and label type, All and Problem). We had the 3 user behaviors as individual fixed effects (labeling frequency, audit speed, and visual search time), which we scaled and centered so that estimates and standard errors between the predictors is easier. We used user id nested in route id as the random effects. We modeled recall and precision as binomial and used the standard logistic link function. We performed likelihood ratio tests (LRTs) to determine the significance of the predictors.
 
@@ -3201,7 +3201,11 @@ all.coeffs <-
 kable(all.coeffs, digits = 3, align = 'l')
 ```
 
-The positive association between labeling frequency and recall is expected, as someone who placed more labels probably correctly found more attributes. The negative association between visual search time and recall is less intuitive, and I don't think we have a solid reason for why this might be the case. It may be that users that take longer to place a label are more distracted, so they are more likely to miss things. Or longer visual search time may mean that they are having a harder time panning with the tool (possibly those using a laptop track pad instead of a mouse), and so they may not want to pan as far.
+The positive association between labeling frequency and recall is expected, as someone who placed more labels probably correctly found more attributes. Similarly the negative association between labeling frequency and All type precision is expected (more labels means more incorrect labels).
+
+The negative association between auditing speed and All type recall is also expected, as auditing more quickly will probably end up with fewer correct attributes being found. Similarly, the negative association b/w auditing speed and Problem type precision might make sense (auditing more quickly, less likely to over-label).
+
+The associations that we do not have immediate explanations for are the negative assocation b/w visual search time and All type recall and the negative association b/w visual search time and Problem type precision.
 
 
 ### User group: Reg vs anon vs turk1 vs turk3 vs turk5

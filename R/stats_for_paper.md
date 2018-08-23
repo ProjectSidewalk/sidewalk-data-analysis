@@ -200,7 +200,7 @@ A total of 330 turkers, 50 registered users, and 16 anonymous users were part of
 
 ### Aggregate accuracy
 
-Below are two tables (street level, then 5 meter level) showing mean accuracy across all users when aggregating over all label types, and for problem vs no problem. We see that the accuracies are comparable at the street level, but accuracy is much higher for curb ramps than problems at the 5 meter level.
+Below are two tables (street level, then 5 meter level) showing mean accuracy across all users when aggregating over all label types, and for problem vs no problem. We see that the All/Problem accuracies are comparable at the street level, but accuracy is much higher for curb ramps than problems at the 5 meter level (which makes Problem have a much lower accuracy than All).
 
 NOTE: In these two tables, the data is binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
@@ -208,21 +208,21 @@ Mean accuracy across all users - street level:
 
 | label.type | recall | precision | f.measure |
 |:-----------|:-------|:----------|:----------|
-| All        | 0.688  | 0.675     | 0.662     |
-| Problem    | 0.639  | 0.693     | 0.649     |
+| All        | 0.631  | 0.707     | 0.647     |
+| Problem    | 0.577  | 0.707     | 0.602     |
 
 Mean accuracy across all users - 5 meter level:
 
 | label.type | recall | precision | f.measure |
 |:-----------|:-------|:----------|:----------|
-| All        | 0.502  | 0.465     | 0.455     |
-| Problem    | 0.228  | 0.273     | 0.229     |
+| All        | 0.445  | 0.490     | 0.445     |
+| Problem    | 0.181  | 0.285     | 0.223     |
 
 ### Voting: Improved recall when at least one turker marks
 
 Since dealing with false positives is pretty easy (relative to walking through GSV), the most important thing for us is to maximize recall. So how does recall look if we consider a label placed by at least one turker as a potential attribute (i.e., we use the "at least one" voting method)?
 
-For reference, registered users tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.73 and their precision was 0.62.
+For reference, individual turkers tended to have the best performance among our user groups, and their recall for problem vs no problem was 0.66 and their precision was 0.71.
 
 NOTE: In this section we are looking at *problem vs no problem*, the data are binary (not ordinal), the data are at the street level (not 5 meter level), and we are looking at 5 clustered turkers with the "at least one" voting method.
 
@@ -232,7 +232,7 @@ NOTE: In this section we are looking at *problem vs no problem*, the data are bi
 
 | voting.method | recall | precision |
 |:--------------|:-------|:----------|
-| majority.vote | 0.399  | 0.790     |
+| majority.vote | 0.425  | 0.819     |
 | at.least.one  | 0.962  | 0.643     |
 
 ### Descriptive stats for users
@@ -284,30 +284,30 @@ Below is a table showing label type accuracy at the two granularity levels, foll
 
 | accuracy.type | label.type  | granularity | mean.accuracy | median.accuracy | sd    | se    |
 |:--------------|:------------|:------------|:--------------|:----------------|:------|:------|
-| recall        | All         | street      | 0.688         | 0.714           | 0.196 | 0.017 |
-| recall        | All         | 5\_meter    | 0.502         | 0.543           | 0.224 | 0.019 |
-| recall        | Problem     | street      | 0.639         | 0.714           | 0.323 | 0.028 |
-| recall        | Problem     | 5\_meter    | 0.228         | 0.200           | 0.195 | 0.017 |
-| recall        | CurbRamp    | street      | 0.902         | 1.000           | 0.210 | 0.018 |
-| recall        | CurbRamp    | 5\_meter    | 0.716         | 0.789           | 0.254 | 0.022 |
-| recall        | NoCurbRamp  | street      | 0.762         | 1.000           | 0.406 | 0.052 |
-| recall        | NoCurbRamp  | 5\_meter    | 0.548         | 0.633           | 0.450 | 0.058 |
-| recall        | Obstacle    | street      | 0.486         | 0.500           | 0.379 | 0.035 |
-| recall        | Obstacle    | 5\_meter    | 0.210         | 0.143           | 0.256 | 0.024 |
-| recall        | SurfaceProb | street      | 0.344         | 0.333           | 0.329 | 0.029 |
-| recall        | SurfaceProb | 5\_meter    | 0.129         | 0.034           | 0.214 | 0.019 |
-| precision     | All         | street      | 0.675         | 0.674           | 0.172 | 0.015 |
-| precision     | All         | 5\_meter    | 0.465         | 0.472           | 0.181 | 0.016 |
-| precision     | Problem     | street      | 0.693         | 0.714           | 0.284 | 0.026 |
-| precision     | Problem     | 5\_meter    | 0.273         | 0.250           | 0.221 | 0.020 |
-| precision     | CurbRamp    | street      | 0.950         | 1.000           | 0.074 | 0.006 |
-| precision     | CurbRamp    | 5\_meter    | 0.638         | 0.667           | 0.199 | 0.017 |
-| precision     | NoCurbRamp  | street      | 0.179         | 0.000           | 0.279 | 0.026 |
-| precision     | NoCurbRamp  | 5\_meter    | 0.108         | 0.000           | 0.223 | 0.021 |
-| precision     | Obstacle    | street      | 0.447         | 0.500           | 0.365 | 0.035 |
-| precision     | Obstacle    | 5\_meter    | 0.174         | 0.087           | 0.220 | 0.021 |
-| precision     | SurfaceProb | street      | 0.715         | 0.817           | 0.339 | 0.035 |
-| precision     | SurfaceProb | 5\_meter    | 0.343         | 0.268           | 0.333 | 0.034 |
+| recall        | All         | street      | 0.631         | 0.651           | 0.216 | 0.019 |
+| recall        | All         | 5\_meter    | 0.445         | 0.466           | 0.226 | 0.020 |
+| recall        | Problem     | street      | 0.577         | 0.600           | 0.312 | 0.027 |
+| recall        | Problem     | 5\_meter    | 0.181         | 0.131           | 0.175 | 0.015 |
+| recall        | CurbRamp    | street      | 0.860         | 1.000           | 0.257 | 0.022 |
+| recall        | CurbRamp    | 5\_meter    | 0.645         | 0.722           | 0.272 | 0.024 |
+| recall        | NoCurbRamp  | street      | 0.693         | 1.000           | 0.435 | 0.056 |
+| recall        | NoCurbRamp  | 5\_meter    | 0.498         | 0.500           | 0.441 | 0.057 |
+| recall        | Obstacle    | street      | 0.399         | 0.450           | 0.369 | 0.035 |
+| recall        | Obstacle    | 5\_meter    | 0.161         | 0.000           | 0.228 | 0.021 |
+| recall        | SurfaceProb | street      | 0.271         | 0.200           | 0.305 | 0.027 |
+| recall        | SurfaceProb | 5\_meter    | 0.096         | 0.000           | 0.193 | 0.017 |
+| precision     | All         | street      | 0.707         | 0.714           | 0.172 | 0.015 |
+| precision     | All         | 5\_meter    | 0.490         | 0.500           | 0.199 | 0.017 |
+| precision     | Problem     | street      | 0.707         | 0.750           | 0.286 | 0.025 |
+| precision     | Problem     | 5\_meter    | 0.285         | 0.250           | 0.258 | 0.023 |
+| precision     | CurbRamp    | street      | 0.954         | 1.000           | 0.075 | 0.007 |
+| precision     | CurbRamp    | 5\_meter    | 0.646         | 0.684           | 0.218 | 0.019 |
+| precision     | NoCurbRamp  | street      | 0.205         | 0.000           | 0.317 | 0.030 |
+| precision     | NoCurbRamp  | 5\_meter    | 0.135         | 0.000           | 0.271 | 0.026 |
+| precision     | Obstacle    | street      | 0.475         | 0.500           | 0.374 | 0.038 |
+| precision     | Obstacle    | 5\_meter    | 0.182         | 0.091           | 0.235 | 0.024 |
+| precision     | SurfaceProb | street      | 0.726         | 1.000           | 0.354 | 0.039 |
+| precision     | SurfaceProb | 5\_meter    | 0.342         | 0.250           | 0.354 | 0.039 |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
 
@@ -339,21 +339,21 @@ Mean/median/sd accuracy by user group - street level:
 
 | user.type | all.rec.mn | all.rec.md | all.rec.sd | all.prec.mn | all.prec.md | all.prec.sd | all.f.mn | all.f.md | all.f.sd | prob.rec.mn | prob.rec.md | prob.rec.sd | prob.prec.mn | prob.prec.md | prob.prec.sd | prob.f.mn | prob.f.md | prob.f.sd |
 |:----------|:-----------|:-----------|:-----------|:------------|:------------|:------------|:---------|:---------|:---------|:------------|:------------|:------------|:-------------|:-------------|:-------------|:----------|:----------|:----------|
-| anon      | 0.519      | 0.523      | 0.204      | 0.743       | 0.780       | 0.283       | 0.638    | 0.667    | 0.151    | 0.418       | 0.292       | 0.363       | 0.910        | 1.000        | 0.189        | 0.623     | 0.500     | 0.230     |
-| reg       | 0.756      | 0.771      | 0.162      | 0.637       | 0.636       | 0.124       | 0.675    | 0.667    | 0.106    | 0.728       | 0.800       | 0.278       | 0.617        | 0.667        | 0.290        | 0.652     | 0.727     | 0.229     |
-| turk1     | 0.678      | 0.707      | 0.194      | 0.688       | 0.700       | 0.164       | 0.658    | 0.648    | 0.140    | 0.626       | 0.667       | 0.322       | 0.713        | 0.750        | 0.273        | 0.652     | 0.667     | 0.227     |
-| turk3     | 0.621      | 0.620      | 0.153      | 0.810       | 0.815       | 0.155       | 0.686    | 0.700    | 0.112    | 0.556       | 0.571       | 0.304       | 0.762        | 0.800        | 0.287        | 0.642     | 0.667     | 0.207     |
-| turk5     | 0.594      | 0.571      | 0.139      | 0.878       | 0.917       | 0.142       | 0.696    | 0.698    | 0.110    | 0.399       | 0.333       | 0.294       | 0.790        | 1.000        | 0.291        | 0.570     | 0.500     | 0.209     |
+| anon      | 0.488      | 0.523      | 0.242      | 0.745       | 0.833       | 0.293       | 0.642    | 0.686    | 0.156    | 0.394       | 0.250       | 0.346       | 0.879        | 1.000        | 0.214        | 0.551     | 0.500     | 0.240     |
+| reg       | 0.614      | 0.651      | 0.215      | 0.722       | 0.728       | 0.131       | 0.635    | 0.677    | 0.161    | 0.529       | 0.500       | 0.293       | 0.661        | 0.714        | 0.289        | 0.560     | 0.571     | 0.221     |
+| turk1     | 0.678      | 0.707      | 0.194      | 0.688       | 0.700       | 0.164       | 0.658    | 0.648    | 0.140    | 0.658       | 0.700       | 0.294       | 0.708        | 0.750        | 0.288        | 0.644     | 0.667     | 0.233     |
+| turk3     | 0.621      | 0.620      | 0.153      | 0.810       | 0.815       | 0.155       | 0.686    | 0.700    | 0.112    | 0.554       | 0.571       | 0.303       | 0.762        | 0.800        | 0.287        | 0.641     | 0.667     | 0.206     |
+| turk5     | 0.595      | 0.571      | 0.140      | 0.874       | 0.913       | 0.139       | 0.695    | 0.698    | 0.110    | 0.425       | 0.375       | 0.270       | 0.819        | 1.000        | 0.237        | 0.558     | 0.500     | 0.202     |
 
 Mean/median/sd accuracy by user group - 5 meter level:
 
 | user.type | all.rec.mn | all.rec.md | all.rec.sd | all.prec.mn | all.prec.md | all.prec.sd | all.f.mn | all.f.md | all.f.sd | prob.rec.mn | prob.rec.md | prob.rec.sd | prob.prec.mn | prob.prec.md | prob.prec.sd | prob.f.mn | prob.f.md | prob.f.sd |
 |:----------|:-----------|:-----------|:-----------|:------------|:------------|:------------|:---------|:---------|:---------|:------------|:------------|:------------|:-------------|:-------------|:-------------|:----------|:----------|:----------|
-| anon      | 0.390      | 0.415      | 0.245      | 0.580       | 0.664       | 0.269       | 0.480    | 0.552    | 0.225    | 0.091       | 0.066       | 0.099       | 0.418        | 0.417        | 0.332        | 0.179     | 0.154     | 0.108     |
-| reg       | 0.567      | 0.589      | 0.190      | 0.427       | 0.420       | 0.129       | 0.464    | 0.460    | 0.122    | 0.271       | 0.250       | 0.191       | 0.217        | 0.229        | 0.128        | 0.228     | 0.231     | 0.086     |
-| turk1     | 0.481      | 0.490      | 0.231      | 0.466       | 0.489       | 0.180       | 0.443    | 0.471    | 0.179    | 0.230       | 0.200       | 0.202       | 0.291        | 0.267        | 0.242        | 0.239     | 0.211     | 0.137     |
-| turk3     | 0.502      | 0.509      | 0.195      | 0.645       | 0.667       | 0.176       | 0.540    | 0.559    | 0.161    | 0.153       | 0.125       | 0.136       | 0.312        | 0.286        | 0.257        | 0.225     | 0.205     | 0.113     |
-| turk5     | 0.506      | 0.504      | 0.172      | 0.713       | 0.750       | 0.175       | 0.573    | 0.584    | 0.150    | 0.104       | 0.081       | 0.109       | 0.402        | 0.333        | 0.331        | 0.205     | 0.182     | 0.114     |
+| anon      | 0.375      | 0.415      | 0.262      | 0.587       | 0.680       | 0.277       | 0.491    | 0.568    | 0.229    | 0.104       | 0.079       | 0.099       | 0.514        | 0.500        | 0.377        | 0.192     | 0.156     | 0.109     |
+| reg       | 0.421      | 0.430      | 0.203      | 0.493       | 0.525       | 0.192       | 0.434    | 0.455    | 0.167    | 0.137       | 0.125       | 0.136       | 0.225        | 0.200        | 0.199        | 0.214     | 0.186     | 0.101     |
+| turk1     | 0.481      | 0.490      | 0.231      | 0.466       | 0.489       | 0.180       | 0.443    | 0.471    | 0.179    | 0.232       | 0.200       | 0.200       | 0.285        | 0.272        | 0.248        | 0.235     | 0.211     | 0.135     |
+| turk3     | 0.502      | 0.509      | 0.195      | 0.646       | 0.667       | 0.177       | 0.541    | 0.559    | 0.161    | 0.148       | 0.125       | 0.134       | 0.311        | 0.333        | 0.255        | 0.225     | 0.203     | 0.116     |
+| turk5     | 0.507      | 0.504      | 0.172      | 0.714       | 0.756       | 0.176       | 0.575    | 0.584    | 0.151    | 0.108       | 0.091       | 0.106       | 0.423        | 0.333        | 0.333        | 0.205     | 0.167     | 0.115     |
 
 #### Statistical significance
 
@@ -369,69 +369,74 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 
 NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
 
-Recall, all label types: likelihood ratio = 63.925, df = 4, n = 264, p &lt; 0.001.
+Recall, all label types: likelihood ratio = 23.057, df = 4, n = 264, p &lt; 0.001.
 
 | worker.type | test       | p.value    | z.value | recall |
 |:------------|:-----------|:-----------|:--------|:-------|
-| reg         | -          | -          | -       | 0.756  |
-| turk1       | &lt; reg   | 0.002 \*\* | 3.662   | 0.678  |
-| turk3       | &lt; turk1 | 0.032 \*   | 2.655   | 0.621  |
-| turk5       | &lt; turk3 | 0.503      | 1.025   | 0.594  |
-| turk5       | &lt; turk1 | 0.002 \*\* | 3.674   | 0.594  |
-| anon        | &lt; turk5 | 0.503      | 1.147   | 0.519  |
-| anon        | &lt; turk3 | 0.278      | 1.681   | 0.519  |
-| anon        | &lt; turk1 | 0.010 \*   | 3.081   | 0.519  |
+| turk1       | -          | -          | -       | 0.678  |
+| turk3       | &lt; turk1 | 0.056      | 2.6493  | 0.621  |
+| reg         | &lt; turk3 | 1.000      | 0.5899  | 0.614  |
+| reg         | &lt; turk1 | 0.017 \*   | 3.0746  | 0.614  |
+| turk5       | &lt; reg   | 1.000      | 0.3255  | 0.595  |
+| turk5       | &lt; turk3 | 0.986      | 0.9770  | 0.595  |
+| turk5       | &lt; turk1 | 0.003 \*\* | 3.6205  | 0.595  |
+| anon        | &lt; turk5 | 0.283      | 1.8226  | 0.488  |
+| anon        | &lt; reg   | 0.283      | 1.9071  | 0.488  |
+| anon        | &lt; turk3 | 0.119      | 2.3305  | 0.488  |
+| anon        | &lt; turk1 | 0.002 \*\* | 3.7237  | 0.488  |
 
-Precision, all label types: likelihood ratio = 167.44, df = 4, n = 264, p &lt; 0.001
+Precision, all label types: likelihood ratio = 108.36, df = 4, n = 263, p &lt; 0.001
 
 | worker.type | test       | p.value           | z.value | precision |
 |:------------|:-----------|:------------------|:--------|:----------|
-| turk5       | -          | -                 | -       | 0.878     |
-| turk3       | &lt; turk5 | &lt; 0.001 \*\*\* | 3.891   | 0.810     |
-| anon        | &lt; turk3 | 0.489             | 0.692   | 0.743     |
-| anon        | &lt; turk5 | 0.023 \*          | 2.839   | 0.743     |
-| turk1       | &lt; anon  | 0.113             | 2.078   | 0.688     |
-| turk1       | &lt; turk3 | &lt; 0.001 \*\*\* | 6.050   | 0.688     |
-| reg         | &lt; turk1 | 0.113             | 1.940   | 0.637     |
-| reg         | &lt; anon  | 0.023 \*          | 2.784   | 0.637     |
+| turk5       | -          | -                 | -       | 0.874     |
+| turk3       | &lt; turk5 | 0.001 \*\*        | 3.7143  | 0.810     |
+| anon        | &lt; turk3 | 0.612             | 0.7921  | 0.745     |
+| anon        | &lt; turk5 | 0.029 \*          | 2.7554  | 0.745     |
+| reg         | &lt; anon  | 0.612             | 1.0234  | 0.722     |
+| reg         | &lt; turk3 | &lt; 0.001 \*\*\* | 3.8108  | 0.722     |
+| turk1       | &lt; reg   | 0.253             | 1.7959  | 0.688     |
+| turk1       | &lt; anon  | 0.253             | 1.8573  | 0.688     |
+| turk1       | &lt; turk3 | &lt; 0.001 \*\*\* | 6.0213  | 0.688     |
 
-Recall, Problem type: likelihood ratio = 110.62, df = 4, n = 260, p &lt; 0.001
+Recall, Problem type: likelihood ratio = 47.022, df = 4, n = 260, p &lt; 0.001
 
-| worker.type | test       | p.value           | z.value | recall |
-|:------------|:-----------|:------------------|:--------|:-------|
-| reg         | -          | -                 | -       | 0.728  |
-| turk1       | &lt; reg   | &lt; 0.001 \*\*\* | 4.4683  | 0.626  |
-| turk3       | &lt; turk1 | 0.041 \*          | 2.3198  | 0.556  |
-| anon        | &lt; turk5 | 0.445             | 0.7641  | 0.418  |
-| anon        | &lt; turk3 | 0.028 \*          | 2.5986  | 0.418  |
-| turk5       | &lt; turk3 | 0.002 \*\*        | 3.5438  | 0.399  |
+| worker.type | test       | p.value    | z.value | recall |
+|:------------|:-----------|:-----------|:--------|:-------|
+| turk1       | -          | -          | -       | 0.658  |
+| turk3       | &lt; reg   | 0.481      | 1.120   | 0.554  |
+| turk3       | &lt; turk1 | 0.006 \*\* | 3.355   | 0.554  |
+| reg         | &lt; turk1 | 0.123      | 2.043   | 0.529  |
+| turk5       | &lt; reg   | 0.002 \*\* | 3.684   | 0.425  |
+| anon        | &lt; turk5 | 0.481      | 1.174   | 0.394  |
+| anon        | &lt; reg   | 0.012 \*   | 3.082   | 0.394  |
 
-Precision, Problem type: likelihood ratio = 11.415, df = 4, n = 245, p = 0.022
+Precision, Problem type: likelihood ratio = 8.3102, df = 4, n = 252, p = 0.081
 
 NOTE: Although anon user have a higher average problem type precision than turk5, the model actually says that turk5 has higher precision (though it is not statistically significant). This is because there is just higher precision across the board on the anon user routes; the mixed effects model takes this into account! More on this below.
 
-| worker.type | test       | p.value  | z.value | precision |
-|:------------|:-----------|:---------|:--------|:----------|
-| turk5       | -          | -        | -       | 0.790     |
-| anon        | &lt; turk5 | 1.000    | 0.09283 | 0.910     |
-| turk3       | &lt; anon  | 1.000    | 0.17250 | 0.762     |
-| turk3       | &lt; turk5 | 1.000    | 0.57950 | 0.762     |
-| turk1       | &lt; turk3 | 0.876    | 1.53363 | 0.713     |
-| turk1       | &lt; anon  | 1.000    | 0.75589 | 0.713     |
-| turk1       | &lt; turk5 | 0.419    | 1.93987 | 0.713     |
-| reg         | &lt; turk1 | 1.000    | 1.15151 | 0.617     |
-| reg         | &lt; turk3 | 0.088    | 2.58328 | 0.617     |
-| reg         | &lt; anon  | 1.000    | 1.13327 | 0.617     |
-| reg         | &lt; turk5 | 0.044 \* | 2.85118 | 0.617     |
+| worker.type | test       | p.value | z.value | precision |
+|:------------|:-----------|:--------|:--------|:----------|
+| turk5       | -          | -       | -       | 0.819     |
+| anon        | &lt; turk3 | 1.000   | 0.19702 | 0.879     |
+| anon        | &lt; turk5 | 1.000   | 0.66753 | 0.879     |
+| turk3       | &lt; turk5 | 1.000   | 0.98643 | 0.762     |
+| turk1       | &lt; turk3 | 0.865   | 1.60644 | 0.708     |
+| turk1       | &lt; anon  | 1.000   | 0.45078 | 0.708     |
+| turk1       | &lt; turk5 | 0.143   | 2.45078 | 0.708     |
+| reg         | &lt; turk1 | 1.000   | 0.07277 | 0.661     |
+| reg         | &lt; turk3 | 0.897   | 1.52165 | 0.661     |
+| reg         | &lt; anon  | 1.000   | 0.46253 | 0.661     |
+| reg         | &lt; turk5 | 0.175   | 2.33597 | 0.661     |
 
 One interesting thing I am seeing is anon users have a much higher average precision for the Problem type than other user groups, but the difference is not statistically significant. It turns out that on routes audited by anonymous users, turkers *also* had much higher Problem type precision than for registered user routes. This can be seen in the following table:
 
 | worker.type | problem.precision.on.anon.routes |
 |:------------|:---------------------------------|
-| anon        | 0.910                            |
-| turk1       | 0.836                            |
+| anon        | 0.879                            |
+| turk1       | 0.862                            |
 | turk3       | 0.894                            |
-| turk5       | 0.940                            |
+| turk5       | 0.922                            |
 
 ### Accuracy by label type
 
@@ -443,24 +448,24 @@ Mean/median/sd accuracy by label type - street level:
 
 | label.type  | f\_md | f\_mn | f\_sd | prec\_md | prec\_mn | prec\_sd | recall\_md | recall\_mn | recall\_sd |
 |:------------|:------|:------|:------|:---------|:---------|:---------|:-----------|:-----------|:-----------|
-| All         | 0.667 | 0.662 | 0.129 | 0.674    | 0.675    | 0.172    | 0.714      | 0.688      | 0.196      |
-| Problem     | 0.667 | 0.649 | 0.226 | 0.714    | 0.693    | 0.284    | 0.714      | 0.639      | 0.323      |
-| CurbRamp    | 0.958 | 0.918 | 0.132 | 1.000    | 0.950    | 0.074    | 1.000      | 0.902      | 0.210      |
-| NoCurbRamp  | 0.500 | 0.542 | 0.227 | 0.000    | 0.179    | 0.279    | 1.000      | 0.762      | 0.406      |
-| Obstacle    | 0.545 | 0.581 | 0.211 | 0.500    | 0.447    | 0.365    | 0.500      | 0.486      | 0.379      |
-| SurfaceProb | 0.500 | 0.555 | 0.214 | 0.817    | 0.715    | 0.339    | 0.333      | 0.344      | 0.329      |
-| NoSidewalk  | 0.667 | 0.751 | 0.201 | 0.958    | 0.716    | 0.355    | 0.600      | 0.557      | 0.420      |
+| All         | 0.667 | 0.647 | 0.149 | 0.714    | 0.707    | 0.172    | 0.651      | 0.631      | 0.216      |
+| Problem     | 0.600 | 0.602 | 0.231 | 0.750    | 0.707    | 0.286    | 0.600      | 0.577      | 0.312      |
+| CurbRamp    | 0.952 | 0.892 | 0.177 | 1.000    | 0.954    | 0.075    | 1.000      | 0.860      | 0.257      |
+| NoCurbRamp  | 0.500 | 0.587 | 0.256 | 0.000    | 0.205    | 0.317    | 1.000      | 0.693      | 0.435      |
+| Obstacle    | 0.500 | 0.564 | 0.190 | 0.500    | 0.475    | 0.374    | 0.450      | 0.399      | 0.369      |
+| SurfaceProb | 0.500 | 0.531 | 0.209 | 1.000    | 0.726    | 0.354    | 0.200      | 0.271      | 0.305      |
+| NoSidewalk  | 0.667 | 0.729 | 0.198 | 1.000    | 0.739    | 0.356    | 0.500      | 0.474      | 0.412      |
 
 Mean/median/sd accuracy by label type - 5 meter level:
 
 | label.type  | f\_md | f\_mn | f\_sd | prec\_md | prec\_mn | prec\_sd | recall\_md | recall\_mn | recall\_sd |
 |:------------|:------|:------|:------|:---------|:---------|:---------|:-----------|:-----------|:-----------|
-| All         | 0.468 | 0.455 | 0.165 | 0.472    | 0.465    | 0.181    | 0.543      | 0.502      | 0.224      |
-| Problem     | 0.222 | 0.229 | 0.116 | 0.250    | 0.273    | 0.221    | 0.200      | 0.228      | 0.195      |
-| CurbRamp    | 0.689 | 0.642 | 0.188 | 0.667    | 0.638    | 0.199    | 0.789      | 0.716      | 0.254      |
-| NoCurbRamp  | 0.400 | 0.401 | 0.244 | 0.000    | 0.108    | 0.223    | 0.633      | 0.548      | 0.450      |
-| Obstacle    | 0.267 | 0.279 | 0.134 | 0.087    | 0.174    | 0.220    | 0.143      | 0.210      | 0.256      |
-| SurfaceProb | 0.214 | 0.265 | 0.199 | 0.268    | 0.343    | 0.333    | 0.034      | 0.129      | 0.214      |
+| All         | 0.463 | 0.445 | 0.180 | 0.500    | 0.490    | 0.199    | 0.466      | 0.445      | 0.226      |
+| Problem     | 0.200 | 0.223 | 0.121 | 0.250    | 0.285    | 0.258    | 0.131      | 0.181      | 0.175      |
+| CurbRamp    | 0.667 | 0.627 | 0.204 | 0.684    | 0.646    | 0.218    | 0.722      | 0.645      | 0.272      |
+| NoCurbRamp  | 0.400 | 0.463 | 0.288 | 0.000    | 0.135    | 0.271    | 0.500      | 0.498      | 0.441      |
+| Obstacle    | 0.250 | 0.275 | 0.131 | 0.091    | 0.182    | 0.235    | 0.000      | 0.161      | 0.228      |
+| SurfaceProb | 0.182 | 0.258 | 0.210 | 0.250    | 0.342    | 0.354    | 0.000      | 0.096      | 0.193      |
 
 #### Statistical significance
 
@@ -468,7 +473,7 @@ NOTE: This is at the street level (not 5 meter level).
 
 We created binomial mixed effects models to determine the relationship between label type and recall/precision. We had label type as the fixed effect and user id nested in route id as random effects. We modeled recall/precision as binomial and used a logistic link function.
 
-Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = 688.06, df = 3, n = 436, p &lt; 0.001). We also found label type to have a statistically significant association with precision (likelihood ratio = 1050.1, df = 3, n = 454, p &lt; 0.001).
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = 750.31, df = 3, n = 436, p &lt; 0.001). We also found label type to have a statistically significant association with precision (likelihood ratio = 874.12, df = 3, n = 423, p &lt; 0.001).
 
 To test that the ordering of the label types are statistically significant (e.g., that NoCurbRamp recall is significantly lower than CurbRamp recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall, then precision).
 
@@ -476,17 +481,17 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 
 | label.type  | test            | p.value           | z.value | recall |
 |:------------|:----------------|:------------------|:--------|:-------|
-| CurbRamp    | -               | -                 | -       | 0.902  |
-| NoCurbRamp  | &lt; CurbRamp   | &lt; 0.001 \*\*\* | 3.758   | 0.762  |
-| Obstacle    | &lt; NoCurbRamp | &lt; 0.001 \*\*\* | 5.233   | 0.486  |
-| SurfaceProb | &lt; Obstacle   | &lt; 0.001 \*\*\* | 5.234   | 0.344  |
+| CurbRamp    | -               | -                 | -       | 0.860  |
+| NoCurbRamp  | &lt; CurbRamp   | &lt; 0.001 \*\*\* | 4.171   | 0.693  |
+| Obstacle    | &lt; NoCurbRamp | &lt; 0.001 \*\*\* | 5.419   | 0.399  |
+| SurfaceProb | &lt; Obstacle   | &lt; 0.001 \*\*\* | 5.234   | 0.271  |
 
 | label.type  | test             | p.value           | z.value | precision |
 |:------------|:-----------------|:------------------|:--------|:----------|
-| CurbRamp    | -                | -                 | -       | 0.950     |
-| SurfaceProb | &lt; CurbRamp    | &lt; 0.001 \*\*\* | 11.397  | 0.715     |
-| Obstacle    | &lt; SurfaceProb | &lt; 0.001 \*\*\* | 6.037   | 0.447     |
-| NoCurbRamp  | &lt; Obstacle    | &lt; 0.001 \*\*\* | 7.854   | 0.179     |
+| CurbRamp    | -                | -                 | -       | 0.954     |
+| SurfaceProb | &lt; CurbRamp    | &lt; 0.001 \*\*\* | 10.621  | 0.726     |
+| Obstacle    | &lt; SurfaceProb | &lt; 0.001 \*\*\* | 4.615   | 0.475     |
+| NoCurbRamp  | &lt; Obstacle    | &lt; 0.001 \*\*\* | 7.116   | 0.205     |
 
 ### Visual search time: Time to label by type
 
@@ -503,10 +508,10 @@ Time to place a label is defined as follows:
 
 | label.type  | median.s.to.label | mean.sec.to.label | sd.s.to.label | mean\_recall | mean\_precision |
 |:------------|:------------------|:------------------|:--------------|:-------------|:----------------|
-| CurbRamp    | 6.89              | 8.14              | 5.29          | 0.90         | 0.95            |
-| Obstacle    | 8.21              | 10.10             | 7.54          | 0.49         | 0.45            |
-| NoCurbRamp  | 9.46              | 12.78             | 10.20         | 0.76         | 0.18            |
-| SurfaceProb | 10.92             | 13.77             | 8.41          | 0.34         | 0.72            |
+| CurbRamp    | 6.89              | 8.14              | 5.29          | 0.86         | 0.95            |
+| Obstacle    | 8.21              | 10.10             | 7.54          | 0.40         | 0.47            |
+| NoCurbRamp  | 9.46              | 12.78             | 10.20         | 0.69         | 0.20            |
+| SurfaceProb | 10.92             | 13.77             | 8.41          | 0.27         | 0.73            |
 
 Now we want to check if label types have a statistically significant difference in visual search time. We also want to see if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since each user's labeling time is recorded *for each label type*, our next idea would be to run a Repeated Measures ANOVA.
 
@@ -653,14 +658,14 @@ There does not appear to be a significant difference in accuracy between the den
 
 | accuracy.type | label.type | zone.type            | mean.accuracy | median.accuracy | sd    |
 |:--------------|:-----------|:---------------------|:--------------|:----------------|:------|
-| recall        | All        | Medium-High Density  | 0.718         | 0.737           | 0.183 |
-| recall        | All        | Low-Moderate Density | 0.672         | 0.704           | 0.202 |
-| recall        | Problem    | Medium-High Density  | 0.705         | 0.750           | 0.300 |
-| recall        | Problem    | Low-Moderate Density | 0.603         | 0.667           | 0.332 |
-| precision     | All        | Medium-High Density  | 0.651         | 0.636           | 0.141 |
-| precision     | All        | Low-Moderate Density | 0.688         | 0.700           | 0.185 |
-| precision     | Problem    | Medium-High Density  | 0.697         | 0.750           | 0.273 |
-| precision     | Problem    | Low-Moderate Density | 0.691         | 0.714           | 0.292 |
+| recall        | All        | Medium-High Density  | 0.660         | 0.675           | 0.189 |
+| recall        | All        | Low-Moderate Density | 0.615         | 0.636           | 0.228 |
+| recall        | Problem    | Medium-High Density  | 0.662         | 0.683           | 0.287 |
+| recall        | Problem    | Low-Moderate Density | 0.530         | 0.500           | 0.317 |
+| precision     | All        | Medium-High Density  | 0.679         | 0.667           | 0.143 |
+| precision     | All        | Low-Moderate Density | 0.723         | 0.750           | 0.185 |
+| precision     | Problem    | Medium-High Density  | 0.719         | 0.750           | 0.276 |
+| precision     | Problem    | Low-Moderate Density | 0.700         | 0.750           | 0.293 |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis.density-1.png)![](stats_for_paper_files/figure-markdown_github/turk.zone.type.analysis.density-2.png)
 
@@ -674,7 +679,7 @@ First, let's take a look at the relationships between the variables.
 
 ![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.graphs-1.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.graphs-2.png)![](stats_for_paper_files/figure-markdown_github/turk.user.behavior.graphs-3.png)
 
-From these graphs, the potential associations I was seeing (before running the tests) were a possible positive association between labeling frequency and recall (both Problem and All types) and a possible negative association between visual search time and recall (both Problem and All types). In fact, these are the four cases where we find statistically significant results.
+From these graphs, the potential associations I was seeing (before running the tests) were a possible positive association between labeling frequency and recall (both Problem and All types) and a possible negative association between auditing speed and recall (both Problem and All types). In fact, three of those four are cases where we find statistically significant results.
 
 To test for the associations between the user behaviors and accuracy, we created 4 binomial mixed effect models (one for accuracy type, precision and recall; and label type, All and Problem). We had the 3 user behaviors as individual fixed effects (labeling frequency, audit speed, and visual search time), which we scaled and centered so that estimates and standard errors between the predictors is easier. We used user id nested in route id as the random effects. We modeled recall and precision as binomial and used the standard logistic link function. We performed likelihood ratio tests (LRTs) to determine the significance of the predictors.
 
@@ -682,20 +687,24 @@ Below is a table showing the summaries of the models and results of the LRTs. Th
 
 | accuracy.type | label.type | param           | association | estimate | std.err | p.value           | LRT    | df  | n   |
 |:--------------|:-----------|:----------------|:------------|:---------|:--------|:------------------|:-------|:----|:----|
-| recall        | All        | label.freq      | +           | 0.302    | 0.094   | 0.002 \*\*        | 9.951  | 1   | 132 |
-| recall        | All        | audit.speed     | NA          | 0.009    | 0.088   | 0.915             | 0.011  | 1   | 132 |
-| recall        | All        | viz.search.time | -           | -0.369   | 0.114   | &lt; 0.001 \*\*\* | 11.116 | 1   | 132 |
-| recall        | Problem    | label.freq      | +           | 0.512    | 0.178   | 0.004 \*\*        | 8.503  | 1   | 127 |
-| recall        | Problem    | audit.speed     | NA          | 0.074    | 0.169   | 0.664             | 0.188  | 1   | 127 |
-| recall        | Problem    | viz.search.time | -           | -0.379   | 0.154   | 0.012 \*          | 6.380  | 1   | 127 |
-| precision     | All        | label.freq      | NA          | -0.120   | 0.075   | 0.111             | 2.536  | 1   | 132 |
-| precision     | All        | audit.speed     | NA          | -0.007   | 0.081   | 0.933             | 0.007  | 1   | 132 |
-| precision     | All        | viz.search.time | NA          | -0.053   | 0.111   | 0.632             | 0.230  | 1   | 132 |
-| precision     | Problem    | label.freq      | NA          | 0.153    | 0.157   | 0.332             | 0.940  | 1   | 122 |
-| precision     | Problem    | audit.speed     | NA          | 0.263    | 0.172   | 0.127             | 2.329  | 1   | 122 |
-| precision     | Problem    | viz.search.time | NA          | 0.319    | 0.173   | 0.065             | 3.416  | 1   | 122 |
+| recall        | All        | label.freq      | +           | 0.403    | 0.098   | &lt; 0.001 \*\*\* | 17.030 | 1   | 132 |
+| recall        | All        | audit.speed     | -           | -0.272   | 0.091   | 0.002 \*\*        | 9.222  | 1   | 132 |
+| recall        | All        | viz.search.time | -           | -0.346   | 0.116   | 0.002 \*\*        | 9.505  | 1   | 132 |
+| recall        | Problem    | label.freq      | +           | 0.601    | 0.141   | &lt; 0.001 \*\*\* | 18.433 | 1   | 127 |
+| recall        | Problem    | audit.speed     | NA          | -0.162   | 0.131   | 0.209             | 1.576  | 1   | 127 |
+| recall        | Problem    | viz.search.time | NA          | -0.129   | 0.116   | 0.261             | 1.265  | 1   | 127 |
+| precision     | All        | label.freq      | -           | -0.233   | 0.077   | 0.003 \*\*        | 8.545  | 1   | 131 |
+| precision     | All        | audit.speed     | NA          | 0.014    | 0.095   | 0.882             | 0.022  | 1   | 131 |
+| precision     | All        | viz.search.time | -           | -0.258   | 0.113   | 0.024 \*          | 5.122  | 1   | 131 |
+| precision     | Problem    | label.freq      | NA          | 0.174    | 0.163   | 0.282             | 1.159  | 1   | 128 |
+| precision     | Problem    | audit.speed     | +           | 0.417    | 0.205   | 0.034 \*          | 4.473  | 1   | 128 |
+| precision     | Problem    | viz.search.time | NA          | 0.316    | 0.180   | 0.071             | 3.266  | 1   | 128 |
 
-The positive association between labeling frequency and recall is expected, as someone who placed more labels probably correctly found more attributes. The negative association between visual search time and recall is less intuitive, and I don't think we have a solid reason for why this might be the case. It may be that users that take longer to place a label are more distracted, so they are more likely to miss things. Or longer visual search time may mean that they are having a harder time panning with the tool (possibly those using a laptop track pad instead of a mouse), and so they may not want to pan as far.
+The positive association between labeling frequency and recall is expected, as someone who placed more labels probably correctly found more attributes. Similarly the negative association between labeling frequency and All type precision is expected (more labels means more incorrect labels).
+
+The negative association between auditing speed and All type recall is also expected, as auditing more quickly will probably end up with fewer correct attributes being found. Similarly, the negative association b/w auditing speed and Problem type precision might make sense (auditing more quickly, less likely to over-label).
+
+The associations that we do not have immediate explanations for are the negative assocation b/w visual search time and All type recall and the negative association b/w visual search time and Problem type precision.
 
 ### User group: Reg vs anon vs turk1 vs turk3 vs turk5
 
@@ -711,7 +720,7 @@ NOTE: In this section, the data are binary (not ordinal), and is at the street l
 
 Below is a table showing the average recall across all users for labels that had severity &lt;=3 (in the ground truth) and labels that had severity &gt;=4, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = 6.3564, df = 1, n = 214, p = 0.012).
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = 9.3761, df = 1, n = 214, p = 0.002).
 
 <table style="width:100%;">
 <colgroup>
@@ -737,32 +746,32 @@ We also created a binomial mixed effects model to determine the relationship bet
 <td align="left">all</td>
 <td align="left">1405</td>
 <td align="left">130</td>
-<td align="left">0.639</td>
-<td align="left">0.714</td>
-<td align="left">0.323</td>
+<td align="left">0.577</td>
+<td align="left">0.6</td>
+<td align="left">0.312</td>
 </tr>
 <tr class="even">
 <td align="left">&lt;=3</td>
 <td align="left">1247</td>
 <td align="left">130</td>
-<td align="left">0.639</td>
-<td align="left">0.714</td>
-<td align="left">0.329</td>
+<td align="left">0.572</td>
+<td align="left">0.6</td>
+<td align="left">0.321</td>
 </tr>
 <tr class="odd">
 <td align="left">&gt;=4</td>
 <td align="left">158</td>
 <td align="left">84</td>
-<td align="left">0.720</td>
-<td align="left">1.000</td>
-<td align="left">0.398</td>
+<td align="left">0.675</td>
+<td align="left">1.0</td>
+<td align="left">0.397</td>
 </tr>
 </tbody>
 </table>
 
 Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant ((likelihood ratio = 8.438, df = 1, n = 246, p = 0.004).
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant ((likelihood ratio = 10.596, df = 1, n = 246, p = 0.001).
 
 <table style="width:100%;">
 <colgroup>
@@ -788,25 +797,25 @@ We also created a binomial mixed effects model to determine the relationship bet
 <td align="left">all</td>
 <td align="left">1405</td>
 <td align="left">130</td>
-<td align="left">0.639</td>
-<td align="left">0.714</td>
-<td align="left">0.323</td>
+<td align="left">0.577</td>
+<td align="left">0.600</td>
+<td align="left">0.312</td>
 </tr>
 <tr class="even">
 <td align="left">&lt;=2</td>
 <td align="left">1053</td>
 <td align="left">130</td>
-<td align="left">0.637</td>
-<td align="left">0.707</td>
-<td align="left">0.330</td>
+<td align="left">0.570</td>
+<td align="left">0.563</td>
+<td align="left">0.323</td>
 </tr>
 <tr class="odd">
 <td align="left">&gt;=3</td>
 <td align="left">352</td>
 <td align="left">116</td>
-<td align="left">0.746</td>
-<td align="left">1.000</td>
-<td align="left">0.353</td>
+<td align="left">0.698</td>
+<td align="left">0.833</td>
+<td align="left">0.355</td>
 </tr>
 </tbody>
 </table>
