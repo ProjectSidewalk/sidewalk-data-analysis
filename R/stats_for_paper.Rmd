@@ -2216,7 +2216,7 @@ kable(
 
 NOTE: This is at the street level (not 5 meter level).
 
-We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision as binomial and used a logistic link function.
+We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
 ```{r turk.user.group.accuracy.glmm, echo=FALSE}
 # TODO include the fact that the single turker is included in turk3, etc as a random effect
@@ -2420,7 +2420,7 @@ kable(
 
 NOTE: This is at the street level (not 5 meter level).
 
-We created binomial mixed effects models to determine the relationship between label type and recall/precision. We had label type as the fixed effect and user id nested in route id as random effects. We modeled recall/precision as binomial and used a logistic link function.
+We created binomial mixed effects models to determine the relationship between label type and recall/precision. We had label type as the fixed effect and user id nested in route id as random effects. We modeled recall/precision as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
 ```{r turk.label.type.accuracy.glmm, echo=FALSE}
 type.test.data <-
@@ -2539,17 +2539,7 @@ n.ramp.users <- sum(ave.labeling.time.by.type.and.user$label.type == 'CurbRamp')
 n.surface.prob.users <- sum(ave.labeling.time.by.type.and.user$label.type == 'NoCurbRamp')
 ```
 
-Now we want to check if label types have a statistically significant difference in visual search time. We also want to see if this ordering is statistically significant. We would normally do an ANOVA followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Since each user's labeling time is recorded _for each label type_, our next idea would be to run a Repeated Measures ANOVA.
-
-However, rANOVA would require us to throw out data for any user who did not place a label of each label type. We have `r n.ramp.users` users with labeling time values for curb ramps, but only `r n.surface.prob.users` users have data for surface problems. This would mean throwing away a large amount of data, giving us less power and possibly biasing the results. Thus, we turn to our next option: linear mixed-effect models.
-
-Another reason for using a linear mixed-effect model is because we want to take into account the differences between users, the differences between routes, and the fact that the user factor is nested in the route factor (each user appears in only one route).
-
-For some background on linear mixed-effect models, the reference I found most helpful was this one: https://stats.idre.ucla.edu/other/mult-pkg/introduction-to-linear-mixed-models/.
-
-_The Model_: To determine the association between visual search time and label type, we use a linear mixed-effects model where our outcome variable is visual search time, we have label type as a fixed effect, and we have user id nested in route id as random effects. We model the random effects as intercepts, meaning that we assume different baseline visual search times for each user and route, but expect the differences in visual search times between label types to be similar across users/routes.
-
-_The Assumptions_: Our two assumptions are that the residuals of the fit are normally distributed (normality) and have constant variance across the range of fitted values (heteroscedasticity). To check for normality, we first use the Shapiro-Wilk test. In this test, the null hypothesis is that the residuals are normally distributed; if we _fail_ to reject the null, then we meet our assumption that the residuals are normally distributed. This test has a high type 1 error rate (often says that data are _not_ normally distributed when they really _are_), but it is good to check the test because it is a quick and easy way to say the data are normal if the test succeeds. If we fail the test, we check a histogram of the residuals to see if they are normally distributed. For heteroscedasticity, we make a scatter plot with the standardized residuals on the y-axis, and fitted visual search times on the x-axis. If the variance in the residuals (y-axis) is constant across the fitted values (x-axis), this constitutes "constant variance", and so we would meet the heteroscedasticity assumption.
+We created a linear mixed effects models to determine the relationship between label type and visual search time. We had label type as the fixed effect and user id nested in route id as random effects. We modeled the log of the visual search time as linear and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
 ```{r turk.visual.search.time.lme.assumption.1, echo=FALSE}
 # Very helpful site that brought me from thinking in terms of repeated measures ANOVA to mixed model
@@ -2586,7 +2576,8 @@ labeling.time.model <- lme(fixed = seconds.to.label ~ label.type,
 labeling.time.shapiro <- shapiro.test(residuals(labeling.time.model))
 ```
 
-Using the Shapiro-Wilk test, we reject the null (`r print.p.value(labeling.time.shapiro$p.value)`), meaning we have not proven that the residuals are normally distributed. The histogram on the left of the residuals looks relatively normal, but there are some outliers, and it has a long-ish right tail. More importantly, we really do not seem to meet the heteroscedasticity assumption, given how the variance seems much larger for longer labeling times in the qq plot on the right.
+
+Quick aside to discuss why we are using log-transformed visual search time: Our two assumptions are normality and heteroscedasticity of the residuals of the fit. Using the Shapiro-Wilk test, we reject the null (`r print.p.value(labeling.time.shapiro$p.value)`), meaning we have not proven that the residuals are normally distributed. The histogram on the left of the residuals looks relatively normal, but there are some outliers, and it has a long-ish right tail. More importantly, we really do not seem to meet the heteroscedasticity assumption, given how the variance seems much larger for longer labeling times in the qq plot on the right.
 
 ```{r turk.visual.search.time.lme.assumption.2, echo=FALSE, fig.width=3.5, fig.height=3.5}
 ggplot(aes(x = residuals.labeling.time.model.),
@@ -2601,7 +2592,7 @@ log.labeling.time.model <- update(labeling.time.model, fixed = log.seconds.to.la
 log.labeling.time.shapiro <- shapiro.test(residuals(log.labeling.time.model))
 ```
 
-To try and deal with not meeting the normality or heteroscedasticity assumptions, we perform a log transform on our outcome variable (labeling time). After the transformation, we still fail the Shapiro-Wilk test (`r print.p.value(log.labeling.time.shapiro$p.value)`), but the histogram on the left looks clearly normal, and the residuals on the right seem to have nearly constant variance. Thus, we meet the assumptions necessary to use this model after the transformation.
+To try and deal with not meeting the normality or heteroscedasticity assumptions, we perform a log transform on our outcome variable (visual search time). After the transformation, we still fail the Shapiro-Wilk test (`r print.p.value(log.labeling.time.shapiro$p.value)`), but the histogram on the left looks clearly normal, and the residuals on the right seem to have nearly constant variance. Thus, we meet the assumptions necessary to use this model after the transformation.
 
 ```{r turk.visual.search.time.lme.test.1, echo=FALSE, fig.width=3.5, fig.height=3.5}
 ggplot(aes(x = residuals.log.labeling.time.model.),
@@ -3130,7 +3121,7 @@ ggplot(behavior.test.data.unscaled, aes(x = seconds.to.label, y = accuracy.value
 
 From these graphs, the potential associations I was seeing (before running the tests) were a possible positive association between labeling frequency and recall (both Problem and All types) and a possible negative association between auditing speed and recall (both Problem and All types). In fact, three of those four are cases where we find statistically significant results.
 
-To test for the associations between the user behaviors and accuracy, we created 4 binomial mixed effect models (one for accuracy type, precision and recall; and label type, All and Problem). We had the 3 user behaviors as individual fixed effects (labeling frequency, audit speed, and visual search time), which we scaled and centered so that estimates and standard errors between the predictors is easier. We used user id nested in route id as the random effects. We modeled recall and precision as binomial and used the standard logistic link function. We performed likelihood ratio tests (LRTs) to determine the significance of the predictors.
+To test for the associations between the user behaviors and accuracy, we created 4 binomial mixed effect models (one for accuracy type, precision and recall; and label type, All and Problem). We had the 3 user behaviors as individual fixed effects (labeling frequency, audit speed, and visual search time), which we scaled and centered so that estimates and standard errors between the predictors is easier. We used user id nested in route id as the random effects. We modeled recall and precision as binomial and used the standard logistic link function. We performed likelihood ratio tests (LRTs) to determine the significance of the predictors. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
 Below is a table showing the summaries of the models and results of the LRTs. The estimate and standard error columns come from the models (along with the association column, which denotes direction of relationship), and the p value and LRT stat come from the likelihood ratio tests.
 
@@ -3294,7 +3285,7 @@ lrt.severity.1 <- drop1(severity.model.1, test = 'Chisq')
 
 Below is a table showing the average recall across all users for labels that had severity <=3 (in the ground truth) and labels that had severity >=4, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (`r print.lrt.results(lrt.severity.1, severity.model.1, 'included.severity')`).
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (`r print.lrt.results(lrt.severity.1, severity.model.1, 'included.severity')`). You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
 ```{r turk.high.severity.analysis.1, echo=FALSE, fig.width=8, fig.height=6}
 kable(
@@ -3436,3 +3427,33 @@ ggplot(data = issues.per.seg.analysis.data %>% dplyr::filter(granularity == 'str
   ggtitle('Street-Level Analysis of Issues per Segment') +
   my.theme.discrete.x
 ```
+
+## Rationale and description of mixed effect models
+
+For some background on linear mixed-effect models, the reference I found most helpful was this one: https://stats.idre.ucla.edu/other/mult-pkg/introduction-to-linear-mixed-models/.
+
+#### Why we are using them
+
+A common question we are asking throughout this document is if some categorical variable (label type, user group, etc) has an effect on accuracy (or some other numeric variable, like visual search time), and if so, which categories have higher/lower accuracies than the others. Note that these are two different questions: is there a statistically significant effect overall, and what parts of the ordering of the categories is statistically significant.
+
+The default analysis we would do in this situation is to do an ANOVA to test the overall significance, followed by Tukey's HSD post-hoc analysis to see if ordering is significant. Although we do fail most of the assumptions of these tests, that is not the main reason that we look to mixed effect models. We fail in different ways in different situations, so describing the failing of the assumptions is something that I will omit here.
+
+The main reason that we want to use mixed effect models is that it allows us to take into account differences between users, the differences between routes, and the fact that the individual only audited a single route. Which route we are looking at has a significant influence on the accuracy of the users who audited that route, but the route ID is not a variable that is interesting to look at in relation to accuracy (the _type_ of route is interesting to look at, but not the route ID). As such, we need a way to account for the route ID in our analyses.
+
+A similar problem exists for individual users. When we are looking at how accuracy is different for different label types, each user has an accuracy number for each label type. But users have different "baseline" accuracy levels, similar to how routes have "baseline" accuracy levels. We would like to account for those baseline levels in our analyses, and only look at how label type, for example, causes a *change from the baseline*.
+
+#### Example text
+
+We created a \<linear|binomial|poisson - depending on outcome variable\> mixed effects models to determine the relationship between \<independent variable\> and \<outcome variable\>. We had \<independent variable\> as the fixed effect and user id nested in route id as random effects. We modeled \<outcome variable\> as \<linear|binomial|poisson\> and used a logistic link function.
+
+Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (\<independent variable\>) to have a statistically significant association with \<outcome variable\> (likelihood ratio = A, df = B, n = C, p < 0.001).
+
+To test that the ordering of the \<categorical independent variable\> is statistically significant (e.g., that NoCurbRamp recall is significantly lower than CurbRamp recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each \<categorical independent variable\>, which lets us determine what parts of the ordering are significant. The results of which are shown in a table below.
+
+#### Assumptions
+
+We won't need to go into the assumptions in the paper (people don't generally go into the assumptions for ANOVA, and we are already doing something better than that). But for those who are wondering, here is some text on the assumptions.
+
+Our two assumptions are that the residuals of the fit are normally distributed (normality) and have constant variance across the range of fitted values (heteroscedasticity). To check for normality, we first use the Shapiro-Wilk test. In this test, the null hypothesis is that the residuals are normally distributed; if we fail to reject the null, then we meet our assumption that the residuals are normally distributed. This test has a high type 1 error rate (often says that data are not normally distributed when they really are), but it is good to check the test because it is a quick and easy way to say the data are normal if the test succeeds. If we fail the test, we check a histogram of the residuals to see if they are normally distributed. For heteroscedasticity, we make a scatter plot with the standardized residuals on the y-axis, and fitted visual search times on the x-axis. If the variance in the residuals (y-axis) is constant across the fitted values (x-axis), this constitutes "constant variance", and so we would meet the heteroscedasticity assumption.
+
+Often we can deal with not meeting these assumptions by transforming our data. In fact, I think in at one of our analyses we do a log-transform which helps with failing to meet the heteroscedasticity assumption.
