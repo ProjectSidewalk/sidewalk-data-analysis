@@ -1383,46 +1383,46 @@ Below are trimmed down tables; non-filtered followed by filtered.
 ```{r public.deployment.showing.stats.trimmed, echo=FALSE, warning=FALSE}
 important.average.stats <-
   nonfiltered.speeds %>%
-  mutate(km = meters_audited / 1000) %>%
-  rename(meters_per_min = m_per_min) %>%
-  dplyr::select(role, minutes_audited, meters_per_min, minutes_per_session) %>%
+  mutate(miles = feet_audited / 5280,
+         miles_per_hr = 60 * miles / minutes_audited) %>%
+  dplyr::select(role, minutes_audited, miles_per_hr, labels_per_100m) %>%
   summarise_vars('role', funcs = funs(md = median), include.n = TRUE)
 kable(
   nonfiltered.speeds %>%
-    mutate(km = meters_audited / 1000,
-           mult_sess = as.numeric(n_sessions > 1)) %>%
+    mutate(mult_sess = as.numeric(n_sessions > 1),
+           miles = feet_audited / 5280) %>%
     rename(audits = audit_count,
            labels = label_count,
            missions = mission_count) %>%
-    dplyr::select(role, km, missions, audits, labels, mult_sess) %>%
+    dplyr::select(role, miles, missions, audits, labels, mult_sess) %>%
     summarise_vars('role', funcs = sum, include.n = TRUE) %>%
     mutate('>1 sess' = paste0(base::format(100 * mult_sess / n.users, digits = 2), '%')) %>%
     dplyr::select(-mult_sess) %>%
     inner_join(important.average.stats, by = c('role', 'n.users')),
   align = 'l',
-  digits = 0
+  digits = 2
 )
 
 important.average.stats.filtered <-
   filtered.speeds.with.researchers %>%
-  mutate(km = meters_audited / 1000) %>%
-  rename(meters_per_min = m_per_min) %>%
-  dplyr::select(role, minutes_audited, meters_per_min, minutes_per_session) %>%
+  mutate(miles = feet_audited / 5280,
+         miles_per_hr = 60 * miles / minutes_audited) %>%
+  dplyr::select(role, minutes_audited, miles_per_hr, labels_per_100m) %>%
   summarise_vars('role', funcs = funs(md = median), include.n = TRUE)
 kable(
   filtered.speeds.with.researchers %>%
-    mutate(km = meters_audited / 1000,
-           mult_sess = as.numeric(n_sessions > 1)) %>%
+    mutate(mult_sess = as.numeric(n_sessions > 1),
+           miles = feet_audited / 5280) %>%
     rename(audits = audit_count,
            labels = label_count,
            missions = mission_count) %>%
-    dplyr::select(role, km, missions, audits, labels, mult_sess) %>%
+    dplyr::select(role, miles, missions, audits, labels, mult_sess) %>%
     summarise_vars('role', funcs = sum, include.n = TRUE) %>%
     mutate('>1 sess' = paste0(base::format(100 * mult_sess / n.users, digits = 2), '%')) %>%
     dplyr::select(-mult_sess) %>%
     inner_join(important.average.stats.filtered, by = c('role', 'n.users')),
   align = 'l',
-  digits = 0
+  digits = 2
 )
 ```
 
