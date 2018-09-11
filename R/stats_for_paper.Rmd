@@ -1038,7 +1038,8 @@ label.counts <-
   mutate(dataset = 'all') %>%
   bind_rows(pre.100.labels) %>%
   group_by(user_id, role, audit_task_id, dataset) %>%
-  dplyr::summarize(label_count = n())
+  dplyr::summarize(label_count = n(),
+                   problem_label_count = sum(label_type_id %in% 2:4))
 
 # Selects distinct on audit_task_id, then sums dist audited.
 pre.100.audits <-
@@ -1052,8 +1053,9 @@ audit.length <-
   group_by(user_id, role, dataset) %>%
   distinct(audit_task_id, .keep_all = TRUE) %>%
   left_join(label.counts, by  = c('user_id', 'role', 'dataset', 'audit_task_id')) %>%
-  replace_na(list(label_count = 0)) %>%
+  replace_na(list(label_count = 0, problem_label_count = 0)) %>%
   dplyr::summarise(label_count = sum(label_count),
+                   problem_label_count = sum(problem_label_count),
                    feet_audited = sum(feet_audited[completed == TRUE]),
                    audit_count = length(audit_task_id[completed == TRUE])) %>%
   replace_na(list(feet_audited = 0)) %>%
@@ -1063,7 +1065,8 @@ audit.length <-
   mutate(dataset = factor(dataset),
          role = factor(role),
          role = recode(role, User = 'Registered', .default = levels(role))) %>%
-  mutate(labels_per_100m = 328.084 * label_count / feet_audited)
+  mutate(labels_per_100m = 328.084 * label_count / feet_audited,
+         problem_labels_per_100m = 328.084 * problem_label_count / feet_audited)
 
 user.list <-
   audit.length %>%
@@ -1385,7 +1388,7 @@ important.average.stats <-
   nonfiltered.speeds %>%
   mutate(miles = feet_audited / 5280,
          miles_per_hr = 60 * miles / minutes_audited) %>%
-  dplyr::select(role, minutes_audited, miles_per_hr, labels_per_100m) %>%
+  dplyr::select(role, minutes_audited, miles_per_hr, labels_per_100m, problem_labels_per_100m) %>%
   summarise_vars('role', funcs = funs(md = median), include.n = TRUE)
 kable(
   nonfiltered.speeds %>%
@@ -1407,7 +1410,7 @@ important.average.stats.filtered <-
   filtered.speeds.with.researchers %>%
   mutate(miles = feet_audited / 5280,
          miles_per_hr = 60 * miles / minutes_audited) %>%
-  dplyr::select(role, minutes_audited, miles_per_hr, labels_per_100m) %>%
+  dplyr::select(role, minutes_audited, miles_per_hr, labels_per_100m, problem_labels_per_100m) %>%
   summarise_vars('role', funcs = funs(md = median), include.n = TRUE)
 kable(
   filtered.speeds.with.researchers %>%
