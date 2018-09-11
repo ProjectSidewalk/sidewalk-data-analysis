@@ -10,6 +10,7 @@ April 17, 2018
         -   [Dataset 1st 100% vs full deployment](#dataset-1st-100-vs-full-deployment)
         -   [Data characteristics](#data-characteristics)
         -   [Data lost due to filtering](#data-lost-due-to-filtering)
+        -   [Label counts by label type and user group (filtered)](#label-counts-by-label-type-and-user-group-filtered)
         -   [User stats and tool usage](#user-stats-and-tool-usage)
     -   [Possible Stories](#possible-stories)
         -   [Data overlap and agreement between users](#data-overlap-and-agreement-between-users)
@@ -46,18 +47,18 @@ High-level results
 
 ### Top-line numbers (no filtering)
 
-The following are the label counts (not attribute counts) by user group and label type. There are a total of 251439 labels, 11347 are tutorial labels and 240092 are non tutorial labels. We consider only non tutorial labels throughout this document.
+The following are the label counts (not attribute counts) by user group and label type. There are a total of 251438 labels, 11347 are tutorial labels and 240091 are non tutorial labels. We consider only non tutorial labels throughout this document.
 
 | label\_type    | Anon         | Registered    | Turker         | Researcher    | Total           |
 |:---------------|:-------------|:--------------|:---------------|:--------------|:----------------|
-| CurbRamp       | 10632 (4.4%) | 27144 (11.3%) | 88554 (36.9%)  | 18336 (7.6%)  | 144666 (60.3%)  |
+| CurbRamp       | 10631 (4.4%) | 27144 (11.3%) | 88554 (36.9%)  | 18336 (7.6%)  | 144665 (60.3%)  |
 | NoCurbRamp     | 1310 (0.5%)  | 3250 (1.4%)   | 13262 (5.5%)   | 1138 (0.5%)   | 18960 (7.9%)    |
 | Obstacle       | 1105 (0.5%)  | 2827 (1.2%)   | 16154 (6.7%)   | 1498 (0.6%)   | 21584 (9.0%)    |
 | SurfaceProblem | 765 (0.3%)   | 1896 (0.8%)   | 3216 (1.3%)    | 2591 (1.1%)   | 8468 (3.5%)     |
 | NoSidewalk     | 1414 (0.6%)  | 6211 (2.6%)   | 28181 (11.7%)  | 7919 (3.3%)   | 43725 (18.2%)   |
 | Occlusion      | 68 (0.0%)    | 310 (0.1%)    | 462 (0.2%)     | 438 (0.2%)    | 1278 (0.5%)     |
 | Other          | 92 (0.0%)    | 148 (0.1%)    | 1137 (0.5%)    | 34 (0.0%)     | 1411 (0.6%)     |
-| Total          | 15386 (6.4%) | 41786 (17.4%) | 150966 (62.9%) | 31954 (13.3%) | 240092 (100.0%) |
+| Total          | 15385 (6.4%) | 41786 (17.4%) | 150966 (62.9%) | 31954 (13.3%) | 240091 (100.0%) |
 
 ### Attribute counts by type
 
@@ -65,15 +66,15 @@ Here are the counts of attributes by attribute type after single and multi user 
 
 | attribute.type | count  | percentage |
 |:---------------|:-------|:-----------|
-| CurbRamp       | 50652  | 49.6%      |
-| NoCurbRamp     | 7897   | 7.7%       |
-| Obstacle       | 12913  | 12.6%      |
-| SurfaceProblem | 5643   | 5.5%       |
-| NoSidewalk     | 23159  | 22.7%      |
-| Occlusion      | 933    | 0.9%       |
-| Other          | 914    | 0.9%       |
-| Problem        | 23419  | -          |
-| Total          | 102111 | 100.0%     |
+| CurbRamp       | 51098  | 49.6%      |
+| NoCurbRamp     | 7941   | 7.7%       |
+| Obstacle       | 12993  | 12.6%      |
+| SurfaceProblem | 5647   | 5.5%       |
+| NoSidewalk     | 23468  | 22.8%      |
+| Occlusion      | 953    | 0.9%       |
+| Other          | 928    | 0.9%       |
+| Problem        | 23603  | -          |
+| Total          | 103028 | 100.0%     |
 
 ### Dataset 1st 100% vs full deployment
 
@@ -88,10 +89,10 @@ The first table describes the dataset at the point where we hit 100% completion.
 
 | role       | n.users | label\_count | miles\_audited |
 |:-----------|:--------|:-------------|:---------------|
-| Researcher | 29      | 31954        | 240            |
-| Anonymous  | 2876    | 15657        | 205            |
+| Researcher | 29      | 31954        | 239            |
+| Anonymous  | 2875    | 15656        | 205            |
 | Turker     | 277     | 150966       | 2294           |
-| Registered | 355     | 41786        | 538            |
+| Registered | 344     | 41786        | 537            |
 
 ### Data characteristics
 
@@ -101,11 +102,24 @@ This is the start of filtering out users with low labeling frequency (also filte
 |:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
 | 85439    | 8508       | 31927      | 18056    | 685       | 1070  | 4693           | 150378 |
 
-There have been a total of 19559 audits by our "good" users across 13020 streets, averaging 1.5 audits per street. Of the 5061 streets that have been audited multiple times, there are an average of 2.29 audits per street.
+There have been a total of 19559 audits by our "good" users (27279 including researchers) across 13020 streets (14037 including researchers), averaging 1.5 audits per street. Of the 5061 streets that have been audited multiple times, there are an average of 2.29 audits per street.
 
 ### Data lost due to filtering
 
-There were 826 users who placed 240092 labels pre-filtering. Researchers accounted for 28 of the users (3.39%) and 31954 of the labels (13.3%). Non-researchers with low labeling frequency accounted for 195 of the users (23.6%) and 54876 of the labels (22.9%). This means that we filtered out a total of 223 of the users (27%) and 86830 of the labels (36.2%), and are left with 603 of the users (73%) and 150378 of the labels (62.6%).
+There were 825 users who placed 240091 labels pre-filtering. Researchers accounted for 28 of the users (3.39%) and 31954 of the labels (13.3%). Non-researchers with low labeling frequency accounted for 194 of the users (23.5%) and 54875 of the labels (22.9%). This means that we filtered out a total of 222 of the users (26.9%) and 86829 of the labels (36.2%), and are left with 603 of the users (73.1%) and 150378 of the labels (62.6%).
+
+### Label counts by label type and user group (filtered)
+
+| label\_type    | Anon         | Registered    | Turker         | Total           |
+|:---------------|:-------------|:--------------|:---------------|:----------------|
+| CurbRamp       | 7376 (4.9%)  | 23102 (15.4%) | 54961 (36.5%)  | 85439 (56.8%)   |
+| NoCurbRamp     | 836 (0.6%)   | 2741 (1.8%)   | 4931 (3.3%)    | 8508 (5.7%)     |
+| Obstacle       | 824 (0.5%)   | 2506 (1.7%)   | 14726 (9.8%)   | 18056 (12.0%)   |
+| SurfaceProblem | 522 (0.3%)   | 1577 (1.0%)   | 2594 (1.7%)    | 4693 (3.1%)     |
+| NoSidewalk     | 994 (0.7%)   | 5581 (3.7%)   | 25352 (16.9%)  | 31927 (21.2%)   |
+| Occlusion      | 41 (0.0%)    | 288 (0.2%)    | 356 (0.2%)     | 685 (0.5%)      |
+| Other          | 42 (0.0%)    | 128 (0.1%)    | 900 (0.6%)     | 1070 (0.7%)     |
+| Total          | 10635 (7.1%) | 35923 (23.9%) | 103820 (69.0%) | 150378 (100.0%) |
 
 ### User stats and tool usage
 
@@ -156,7 +170,7 @@ The steps in the graph below are as follows:
 8.  Placed fifth curb ramp label and correctly rated severity
 9.  Took step forward and clicked through all dialog boxes to finish tutorial
 
-Of the 1112 people who started the tutorial, 827 finished the first step (74%), and 570 completed the tutorial (51%).
+Of the 1110 people who started the tutorial, 825 finished the first step (74%), and 568 completed the tutorial (51%).
 
 The first graph shows both volunteers and turkers together, and the second shows them split.
 
@@ -164,7 +178,7 @@ The first graph shows both volunteers and turkers together, and the second shows
 
 #### Post tutorial dropoffs
 
-Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a volunteer user and turker id to differentiate between turkers (the 570 IP addresses and turker ids who finished the tutorial in the previous section are the same 570 IPs/IDs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
+Below we look at how users drop off after finishing the tutorial. For consistency with the tutorial analysis, we use IP address to denote a volunteer user and turker id to differentiate between turkers (the 568 IP addresses and turker ids who finished the tutorial in the previous section are the same 568 IPs/IDs that we are looking at below). As such, we are looking at only those who finished the tutorial after July 10th, 2017.
 
 We also only counted missions completed in the two hours after finishing the tutorial. There was not a sizeable difference when looking at 1 hour, 2 hours, or 48 hours after finishing the tutorial, so I think that 2 hours works fine.
 
@@ -176,7 +190,7 @@ The steps in the graph below are as follows:
 4.  Completed second mission
 5.  And so on...
 
-Of the 570 people who finished the tutorial, 480 took a step (84%), 329 finished at least one mission afterwards (58%), 197 completed at least two missions afterwards (35%), and 28 did at least 10 missions afterwards (5%).
+Of the 568 people who finished the tutorial, 479 took a step (84%), 328 finished at least one mission afterwards (58%), 196 completed at least two missions afterwards (35%), and 28 did at least 10 missions afterwards (5%).
 
 The first graph shows both volunteers and turkers together, and the second shows them split.
 

@@ -1201,8 +1201,11 @@ kable(
 )
 
 filtered.audits <- dplyr::filter(audits, user_id %in% filtered.speeds$user_id, completed == TRUE)
+good.user.audits <- dplyr::filter(audits, user_id %in% good.user.list)
 n.audits <- nrow(filtered.audits)
+n.audits.with.researchers <- nrow(good.user.audits)
 n.streets <- n_distinct(filtered.audits$street_edge_id)
+n.streets.with.researchers <- n_distinct(good.user.audits$street_edge_id)
 
 streets.with.mult.audits <-
   filtered.audits %>%
@@ -1211,7 +1214,7 @@ streets.with.mult.audits <-
   dplyr::filter(n.audits > 1)
 ```
 
-There have been a total of `r n.audits` audits by our "good" users across `r n.streets` streets, averaging `r base::format(n.audits/n.streets, digits = 3)` audits per street. Of the `r nrow(streets.with.mult.audits)` streets that have been audited multiple times, there are an average of `r base::format(sum(streets.with.mult.audits$n.audits) / nrow(streets.with.mult.audits), digits = 3)` audits per street.
+There have been a total of `r n.audits` audits by our "good" users (`r n.audits.with.researchers` including researchers) across `r n.streets` streets (`r n.streets.with.researchers` including researchers), averaging `r base::format(n.audits/n.streets, digits = 3)` audits per street. Of the `r nrow(streets.with.mult.audits)` streets that have been audited multiple times, there are an average of `r base::format(sum(streets.with.mult.audits$n.audits) / nrow(streets.with.mult.audits), digits = 3)` audits per street.
 
 
 ### Data lost due to filtering
@@ -1255,6 +1258,32 @@ percent.labels.remaining <- base::format(100 * n.labels.remaining / n.labels.pre
 
 There were `r n.users.pre.filter` users who placed `r n.labels.pre.filter` labels pre-filtering. Researchers accounted for `r n.researchers` of the users (`r percent.researchers`%) and `r n.labels.researcher` of the labels (`r percent.labels.researcher`%). Non-researchers with low labeling frequency accounted for `r n.bad.non.research` of the users (`r percent.bad.non.research`%) and `r n.labels.bad.non.research` of the labels (`r percent.labels.bad.non.research`%). This means that we filtered out a total of `r n.filtered.users` of the users (`r percent.filtered.users`%) and `r n.filtered.labels` of the labels (`r percent.filtered.labels`%), and are left with `r n.users.remaining` of the users (`r percent.users.remaining`%) and `r n.labels.remaining` of the labels (`r percent.labels.remaining`%).
 
+
+### Label counts by label type and user group (filtered)
+
+```{r public.deployment.filtered.label.counts, echo=FALSE, warning=FALSE}
+ordered.label.type.levs <- c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem', 'NoSidewalk',
+                             'Occlusion', 'Other')
+kable(
+  filtered.labels %>%
+    distinct(label_id, .keep_all = TRUE) %>%
+    mutate(label_type = LABEL_TYPE_MAPPING[label_type_id]) %>%
+    mutate(label_type = factor(label_type, ordered.label.type.levs)) %>%
+    mutate(role = recode_factor(role,
+                                `Anonymous` = 'Anon',
+                                `User` = 'Registered',
+                                `Turker` = 'Turker',
+                                `Administrator` = 'Researcher',
+                                `Owner` = 'Researcher')) %>%
+    dplyr::select(label_type, role) %>%
+    tabyl(label_type, role) %>%
+    adorn_totals(where = c('row', 'col')) %>%
+    adorn_percentages(denominator = 'all') %>%
+    adorn_pct_formatting() %>%
+    adorn_ns(position = 'front'),
+  align = 'l'
+)
+```
 
 ### User stats and tool usage
 
