@@ -6,11 +6,11 @@ April 17, 2018
 -   [Public Deployment](#public-deployment)
     -   [High-level results](#high-level-results)
         -   [Top-line numbers (no filtering)](#top-line-numbers-no-filtering)
+        -   [Top-line numbers (with filtering)](#top-line-numbers-with-filtering)
         -   [Attribute counts by type](#attribute-counts-by-type)
         -   [Dataset 1st 100% vs full deployment](#dataset-1st-100-vs-full-deployment)
         -   [Data characteristics](#data-characteristics)
         -   [Data lost due to filtering](#data-lost-due-to-filtering)
-        -   [Label counts by label type and user group (filtered)](#label-counts-by-label-type-and-user-group-filtered)
         -   [User stats and tool usage](#user-stats-and-tool-usage)
     -   [Possible Stories](#possible-stories)
         -   [Data overlap and agreement between users](#data-overlap-and-agreement-between-users)
@@ -49,20 +49,35 @@ High-level results
 
 The following are the label counts (not attribute counts) by user group and label type. There are a total of 251438 labels, 11347 are tutorial labels and 240091 are non tutorial labels. We consider only non tutorial labels throughout this document.
 
-| label\_type    | Anon         | Registered    | Turker         | Researcher    | Total           |
-|:---------------|:-------------|:--------------|:---------------|:--------------|:----------------|
-| CurbRamp       | 10631 (4.4%) | 27144 (11.3%) | 88554 (36.9%)  | 18336 (7.6%)  | 144665 (60.3%)  |
-| NoCurbRamp     | 1310 (0.5%)  | 3250 (1.4%)   | 13262 (5.5%)   | 1138 (0.5%)   | 18960 (7.9%)    |
-| Obstacle       | 1105 (0.5%)  | 2827 (1.2%)   | 16154 (6.7%)   | 1498 (0.6%)   | 21584 (9.0%)    |
-| SurfaceProblem | 765 (0.3%)   | 1896 (0.8%)   | 3216 (1.3%)    | 2591 (1.1%)   | 8468 (3.5%)     |
-| NoSidewalk     | 1414 (0.6%)  | 6211 (2.6%)   | 28181 (11.7%)  | 7919 (3.3%)   | 43725 (18.2%)   |
-| Occlusion      | 68 (0.0%)    | 310 (0.1%)    | 462 (0.2%)     | 438 (0.2%)    | 1278 (0.5%)     |
-| Other          | 92 (0.0%)    | 148 (0.1%)    | 1137 (0.5%)    | 34 (0.0%)     | 1411 (0.6%)     |
-| Total          | 15385 (6.4%) | 41786 (17.4%) | 150966 (62.9%) | 31954 (13.3%) | 240091 (100.0%) |
+| label\_type    | Anon (384)   | Registered (243) | Turker (170)   | Researcher (28) | Total           |
+|:---------------|:-------------|:-----------------|:---------------|:----------------|:----------------|
+| CurbRamp       | 10631 (4.4%) | 27144 (11.3%)    | 88554 (36.9%)  | 18336 (7.6%)    | 144665 (60.3%)  |
+| NoCurbRamp     | 1310 (0.5%)  | 3250 (1.4%)      | 13262 (5.5%)   | 1138 (0.5%)     | 18960 (7.9%)    |
+| Obstacle       | 1105 (0.5%)  | 2827 (1.2%)      | 16154 (6.7%)   | 1498 (0.6%)     | 21584 (9.0%)    |
+| SurfaceProblem | 765 (0.3%)   | 1896 (0.8%)      | 3216 (1.3%)    | 2591 (1.1%)     | 8468 (3.5%)     |
+| NoSidewalk     | 1414 (0.6%)  | 6211 (2.6%)      | 28181 (11.7%)  | 7919 (3.3%)     | 43725 (18.2%)   |
+| Occlusion      | 68 (0.0%)    | 310 (0.1%)       | 462 (0.2%)     | 438 (0.2%)      | 1278 (0.5%)     |
+| Other          | 92 (0.0%)    | 148 (0.1%)       | 1137 (0.5%)    | 34 (0.0%)       | 1411 (0.6%)     |
+| Total          | 15385 (6.4%) | 41786 (17.4%)    | 150966 (62.9%) | 31954 (13.3%)   | 240091 (100.0%) |
+
+### Top-line numbers (with filtering)
+
+| label\_type    | Anon (293)   | Registered (188) | Turker (122)   | Researcher (21) | Total           |
+|:---------------|:-------------|:-----------------|:---------------|:----------------|:----------------|
+| CurbRamp       | 7376 (4.1%)  | 23102 (12.8%)    | 54961 (30.4%)  | 17297 (9.6%)    | 102736 (56.8%)  |
+| NoCurbRamp     | 836 (0.5%)   | 2741 (1.5%)      | 4931 (2.7%)    | 1066 (0.6%)     | 9574 (5.3%)     |
+| Obstacle       | 824 (0.5%)   | 2506 (1.4%)      | 14726 (8.1%)   | 1461 (0.8%)     | 19517 (10.8%)   |
+| SurfaceProblem | 522 (0.3%)   | 1577 (0.9%)      | 2594 (1.4%)    | 2525 (1.4%)     | 7218 (4.0%)     |
+| NoSidewalk     | 994 (0.5%)   | 5581 (3.1%)      | 25352 (14.0%)  | 7686 (4.2%)     | 39613 (21.9%)   |
+| Occlusion      | 41 (0.0%)    | 288 (0.2%)       | 356 (0.2%)     | 424 (0.2%)      | 1109 (0.6%)     |
+| Other          | 42 (0.0%)    | 128 (0.1%)       | 900 (0.5%)     | 29 (0.0%)       | 1099 (0.6%)     |
+| Total          | 10635 (5.9%) | 35923 (19.9%)    | 103820 (57.4%) | 30488 (16.9%)   | 180866 (100.0%) |
 
 ### Attribute counts by type
 
 Here are the counts of attributes by attribute type after single and multi user clustering.
+
+NOTE: Clustering only uses the filtered data! Only those who meet the labeling frequency threshold.
 
 | attribute.type | count  | percentage |
 |:---------------|:-------|:-----------|
@@ -96,30 +111,17 @@ The first table describes the dataset at the point where we hit 100% completion.
 
 ### Data characteristics
 
-This is the start of filtering out users with low labeling frequency (also filtering out researchers).
+This is the start of filtering out users with low labeling frequency.
 
 | CurbRamp | NoCurbRamp | NoSidewalk | Obstacle | Occlusion | Other | SurfaceProblem | Total  |
 |:---------|:-----------|:-----------|:---------|:----------|:------|:---------------|:-------|
-| 85439    | 8508       | 31927      | 18056    | 685       | 1070  | 4693           | 150378 |
+| 102736   | 9574       | 39613      | 19517    | 1109      | 1099  | 7218           | 180866 |
 
-There have been a total of 19559 audits by our "good" users (27279 including researchers) across 13020 streets (14037 including researchers), averaging 1.5 audits per street. Of the 5061 streets that have been audited multiple times, there are an average of 2.29 audits per street.
+There have been a total of 22276 audits by our "good" users across 14037 streets, averaging 1.59 audits per street. Of the 6053 streets that have been audited multiple times, there are an average of 2.36 audits per street.
 
 ### Data lost due to filtering
 
-There were 825 users who placed 240091 labels pre-filtering. Researchers accounted for 28 of the users (3.39%) and 31954 of the labels (13.3%). Non-researchers with low labeling frequency accounted for 194 of the users (23.5%) and 54875 of the labels (22.9%). This means that we filtered out a total of 222 of the users (26.9%) and 86829 of the labels (36.2%), and are left with 603 of the users (73.1%) and 150378 of the labels (62.6%).
-
-### Label counts by label type and user group (filtered)
-
-| label\_type    | Anon         | Registered    | Turker         | Total           |
-|:---------------|:-------------|:--------------|:---------------|:----------------|
-| CurbRamp       | 7376 (4.9%)  | 23102 (15.4%) | 54961 (36.5%)  | 85439 (56.8%)   |
-| NoCurbRamp     | 836 (0.6%)   | 2741 (1.8%)   | 4931 (3.3%)    | 8508 (5.7%)     |
-| Obstacle       | 824 (0.5%)   | 2506 (1.7%)   | 14726 (9.8%)   | 18056 (12.0%)   |
-| SurfaceProblem | 522 (0.3%)   | 1577 (1.0%)   | 2594 (1.7%)    | 4693 (3.1%)     |
-| NoSidewalk     | 994 (0.7%)   | 5581 (3.7%)   | 25352 (16.9%)  | 31927 (21.2%)   |
-| Occlusion      | 41 (0.0%)    | 288 (0.2%)    | 356 (0.2%)     | 685 (0.5%)      |
-| Other          | 42 (0.0%)    | 128 (0.1%)    | 900 (0.6%)     | 1070 (0.7%)     |
-| Total          | 10635 (7.1%) | 35923 (23.9%) | 103820 (69.0%) | 150378 (100.0%) |
+There were 825 users who placed 240091 labels pre-filtering. Those with low labeling frequency accounted for 201 of the users (24.4%) and 56341 of the labels (23.5%). This means that we are left with 624 of the users (75.6%) and 180866 of the labels (75.3%).
 
 ### User stats and tool usage
 
@@ -170,7 +172,7 @@ Possible Stories
 
 Among all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement among them? (see comment in Outline document for details on implementation)
 
-A total of 38.9% of streets were audited by multiple users.
+A total of 43.1% of streets were audited by multiple users.
 
 ### User dropoffs
 

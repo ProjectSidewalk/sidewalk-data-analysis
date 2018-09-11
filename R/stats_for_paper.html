@@ -34,11 +34,11 @@ April 17, 2018</p>
 <li><a href="#high-level-results">High-level results</a>
 <ul>
 <li><a href="#top-line-numbers-no-filtering">Top-line numbers (no filtering)</a></li>
+<li><a href="#top-line-numbers-with-filtering">Top-line numbers (with filtering)</a></li>
 <li><a href="#attribute-counts-by-type">Attribute counts by type</a></li>
 <li><a href="#dataset-1st-100-vs-full-deployment">Dataset 1st 100% vs full deployment</a></li>
 <li><a href="#data-characteristics">Data characteristics</a></li>
 <li><a href="#data-lost-due-to-filtering">Data lost due to filtering</a></li>
-<li><a href="#label-counts-by-label-type-and-user-group-filtered">Label counts by label type and user group (filtered)</a></li>
 <li><a href="#user-stats-and-tool-usage">User stats and tool usage</a></li>
 </ul></li>
 <li><a href="#possible-stories">Possible Stories</a>
@@ -86,10 +86,10 @@ April 17, 2018</p>
 <thead>
 <tr class="header">
 <th align="left">label_type</th>
-<th align="left">Anon</th>
-<th align="left">Registered</th>
-<th align="left">Turker</th>
-<th align="left">Researcher</th>
+<th align="left">Anon (384)</th>
+<th align="left">Registered (243)</th>
+<th align="left">Turker (170)</th>
+<th align="left">Researcher (28)</th>
 <th align="left">Total</th>
 </tr>
 </thead>
@@ -160,8 +160,88 @@ April 17, 2018</p>
 </tr>
 </tbody>
 </table>
+<h3 id="top-line-numbers-with-filtering">Top-line numbers (with filtering)</h3>
+<table>
+<thead>
+<tr class="header">
+<th align="left">label_type</th>
+<th align="left">Anon (293)</th>
+<th align="left">Registered (188)</th>
+<th align="left">Turker (122)</th>
+<th align="left">Researcher (21)</th>
+<th align="left">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">CurbRamp</td>
+<td align="left">7376 (4.1%)</td>
+<td align="left">23102 (12.8%)</td>
+<td align="left">54961 (30.4%)</td>
+<td align="left">17297 (9.6%)</td>
+<td align="left">102736 (56.8%)</td>
+</tr>
+<tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">836 (0.5%)</td>
+<td align="left">2741 (1.5%)</td>
+<td align="left">4931 (2.7%)</td>
+<td align="left">1066 (0.6%)</td>
+<td align="left">9574 (5.3%)</td>
+</tr>
+<tr class="odd">
+<td align="left">Obstacle</td>
+<td align="left">824 (0.5%)</td>
+<td align="left">2506 (1.4%)</td>
+<td align="left">14726 (8.1%)</td>
+<td align="left">1461 (0.8%)</td>
+<td align="left">19517 (10.8%)</td>
+</tr>
+<tr class="even">
+<td align="left">SurfaceProblem</td>
+<td align="left">522 (0.3%)</td>
+<td align="left">1577 (0.9%)</td>
+<td align="left">2594 (1.4%)</td>
+<td align="left">2525 (1.4%)</td>
+<td align="left">7218 (4.0%)</td>
+</tr>
+<tr class="odd">
+<td align="left">NoSidewalk</td>
+<td align="left">994 (0.5%)</td>
+<td align="left">5581 (3.1%)</td>
+<td align="left">25352 (14.0%)</td>
+<td align="left">7686 (4.2%)</td>
+<td align="left">39613 (21.9%)</td>
+</tr>
+<tr class="even">
+<td align="left">Occlusion</td>
+<td align="left">41 (0.0%)</td>
+<td align="left">288 (0.2%)</td>
+<td align="left">356 (0.2%)</td>
+<td align="left">424 (0.2%)</td>
+<td align="left">1109 (0.6%)</td>
+</tr>
+<tr class="odd">
+<td align="left">Other</td>
+<td align="left">42 (0.0%)</td>
+<td align="left">128 (0.1%)</td>
+<td align="left">900 (0.5%)</td>
+<td align="left">29 (0.0%)</td>
+<td align="left">1099 (0.6%)</td>
+</tr>
+<tr class="even">
+<td align="left">Total</td>
+<td align="left">10635 (5.9%)</td>
+<td align="left">35923 (19.9%)</td>
+<td align="left">103820 (57.4%)</td>
+<td align="left">30488 (16.9%)</td>
+<td align="left">180866 (100.0%)</td>
+</tr>
+</tbody>
+</table>
 <h3 id="attribute-counts-by-type">Attribute counts by type</h3>
 <p>Here are the counts of attributes by attribute type after single and multi user clustering.</p>
+<p>NOTE: Clustering only uses the filtered data! Only those who meet the labeling frequency threshold.</p>
 <table>
 <thead>
 <tr class="header">
@@ -293,7 +373,7 @@ April 17, 2018</p>
 </tbody>
 </table>
 <h3 id="data-characteristics">Data characteristics</h3>
-<p>This is the start of filtering out users with low labeling frequency (also filtering out researchers).</p>
+<p>This is the start of filtering out users with low labeling frequency.</p>
 <table>
 <thead>
 <tr class="header">
@@ -309,90 +389,20 @@ April 17, 2018</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">85439</td>
-<td align="left">8508</td>
-<td align="left">31927</td>
-<td align="left">18056</td>
-<td align="left">685</td>
-<td align="left">1070</td>
-<td align="left">4693</td>
-<td align="left">150378</td>
+<td align="left">102736</td>
+<td align="left">9574</td>
+<td align="left">39613</td>
+<td align="left">19517</td>
+<td align="left">1109</td>
+<td align="left">1099</td>
+<td align="left">7218</td>
+<td align="left">180866</td>
 </tr>
 </tbody>
 </table>
-<p>There have been a total of 19559 audits by our &quot;good&quot; users (27279 including researchers) across 13020 streets (14037 including researchers), averaging 1.5 audits per street. Of the 5061 streets that have been audited multiple times, there are an average of 2.29 audits per street.</p>
+<p>There have been a total of 22276 audits by our &quot;good&quot; users across 14037 streets, averaging 1.59 audits per street. Of the 6053 streets that have been audited multiple times, there are an average of 2.36 audits per street.</p>
 <h3 id="data-lost-due-to-filtering">Data lost due to filtering</h3>
-<p>There were 825 users who placed 240091 labels pre-filtering. Researchers accounted for 28 of the users (3.39%) and 31954 of the labels (13.3%). Non-researchers with low labeling frequency accounted for 194 of the users (23.5%) and 54875 of the labels (22.9%). This means that we filtered out a total of 222 of the users (26.9%) and 86829 of the labels (36.2%), and are left with 603 of the users (73.1%) and 150378 of the labels (62.6%).</p>
-<h3 id="label-counts-by-label-type-and-user-group-filtered">Label counts by label type and user group (filtered)</h3>
-<table>
-<thead>
-<tr class="header">
-<th align="left">label_type</th>
-<th align="left">Anon</th>
-<th align="left">Registered</th>
-<th align="left">Turker</th>
-<th align="left">Total</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">CurbRamp</td>
-<td align="left">7376 (4.9%)</td>
-<td align="left">23102 (15.4%)</td>
-<td align="left">54961 (36.5%)</td>
-<td align="left">85439 (56.8%)</td>
-</tr>
-<tr class="even">
-<td align="left">NoCurbRamp</td>
-<td align="left">836 (0.6%)</td>
-<td align="left">2741 (1.8%)</td>
-<td align="left">4931 (3.3%)</td>
-<td align="left">8508 (5.7%)</td>
-</tr>
-<tr class="odd">
-<td align="left">Obstacle</td>
-<td align="left">824 (0.5%)</td>
-<td align="left">2506 (1.7%)</td>
-<td align="left">14726 (9.8%)</td>
-<td align="left">18056 (12.0%)</td>
-</tr>
-<tr class="even">
-<td align="left">SurfaceProblem</td>
-<td align="left">522 (0.3%)</td>
-<td align="left">1577 (1.0%)</td>
-<td align="left">2594 (1.7%)</td>
-<td align="left">4693 (3.1%)</td>
-</tr>
-<tr class="odd">
-<td align="left">NoSidewalk</td>
-<td align="left">994 (0.7%)</td>
-<td align="left">5581 (3.7%)</td>
-<td align="left">25352 (16.9%)</td>
-<td align="left">31927 (21.2%)</td>
-</tr>
-<tr class="even">
-<td align="left">Occlusion</td>
-<td align="left">41 (0.0%)</td>
-<td align="left">288 (0.2%)</td>
-<td align="left">356 (0.2%)</td>
-<td align="left">685 (0.5%)</td>
-</tr>
-<tr class="odd">
-<td align="left">Other</td>
-<td align="left">42 (0.0%)</td>
-<td align="left">128 (0.1%)</td>
-<td align="left">900 (0.6%)</td>
-<td align="left">1070 (0.7%)</td>
-</tr>
-<tr class="even">
-<td align="left">Total</td>
-<td align="left">10635 (7.1%)</td>
-<td align="left">35923 (23.9%)</td>
-<td align="left">103820 (69.0%)</td>
-<td align="left">150378 (100.0%)</td>
-</tr>
-</tbody>
-</table>
+<p>There were 825 users who placed 240091 labels pre-filtering. Those with low labeling frequency accounted for 201 of the users (24.4%) and 56341 of the labels (23.5%). This means that we are left with 624 of the users (75.6%) and 180866 of the labels (75.3%).</p>
 <h3 id="user-stats-and-tool-usage">User stats and tool usage</h3>
 <p>TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).</p>
 <p>Below are the means/medians/sds for a few metrics (followed by sums), split by user group.</p>
@@ -955,7 +965,7 @@ April 17, 2018</p>
 <h2 id="possible-stories">Possible Stories</h2>
 <h3 id="data-overlap-and-agreement-between-users">Data overlap and agreement between users</h3>
 <p>Among all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement among them? (see comment in Outline document for details on implementation)</p>
-<p>A total of 38.9% of streets were audited by multiple users.</p>
+<p>A total of 43.1% of streets were audited by multiple users.</p>
 <h3 id="user-dropoffs">User dropoffs</h3>
 <p>NOTE: there are graphs that combine the tutorial and post-tutorial dropoff graphs at the end of this section.</p>
 <h4 id="tutorial-dropoffs">Tutorial dropoffs</h4>
