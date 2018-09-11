@@ -1298,8 +1298,15 @@ NOTE: A "session" below is defined as a sequence of audit task interactions for 
 Filtered dataset:
 
 ```{r public.deployment.showing.stats.filtered, echo=FALSE, warning=FALSE}
+filtered.speeds.with.researchers <-
+  speeds %>%
+  dplyr::filter(audit_count > 0,
+                labels_per_100m >= 3.75) %>%
+  mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
+  mutate(role = factor(role, levels = c('Anonymous', 'Registered', 'Turker', 'Researcher')))
+
 kable(
-  filtered.speeds %>%
+  filtered.speeds.with.researchers %>%
     mutate(km = meters_audited / 1000) %>%
     dplyr::select(-meters_audited, -feet_audited, -mins_per_mission, -hours_audited) %>%
     summarise_vars('role', include.n = TRUE),
@@ -1307,7 +1314,7 @@ kable(
   align = 'l'
   )
 kable(
-  filtered.speeds %>%
+  filtered.speeds.with.researchers %>%
     mutate(km = meters_audited / 1000,
            mult_sess = as.numeric(n_sessions > 1)) %>%
     rename(miles = miles_audited,
@@ -1329,8 +1336,9 @@ Non filtered dataset:
 ```{r public.deployment.showing.stats.nonfiltered, echo=FALSE, warning=FALSE}
 nonfiltered.speeds <-
   speeds %>%
-  dplyr::filter(role %in% c('Registered', 'Anonymous', 'Turker'), user_id %in% user.list) %>%
-  mutate(role = factor(role, levels = c('Anonymous', 'Registered', 'Turker')))
+  dplyr::filter(user_id %in% user.list) %>%
+  mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
+  mutate(role = factor(role, levels = c('Anonymous', 'Registered', 'Turker', 'Researcher')))
 
 kable(
   nonfiltered.speeds %>%
