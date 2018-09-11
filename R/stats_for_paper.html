@@ -406,8 +406,285 @@ April 17, 2018</p>
 <h3 id="user-stats-and-tool-usage">User stats and tool usage</h3>
 <p>TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).</p>
 <p>Below are the means/medians/sds for a few metrics (followed by sums), split by user group.</p>
-<p>In the first two tables, we have the &quot;filtered&quot; dataset, i.e., the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters. The last two tables only have the requirement that a user completed at least one audit task and placed at least one label after the tutorial.</p>
+<p>In the first 2 tables, we have the non-filtered data: this includes all users that audited at least one street and placed at least one label after the tutorial. The latter 2 tables include the filtered dataset: users were only included if they audited at least one street and had a labeling frequency of at least 3.75 labels per 100 meters.</p>
 <p>NOTE: A &quot;session&quot; below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.</p>
+<p>Non filtered dataset:</p>
+<table style="width:100%;">
+<colgroup>
+<col width="2%"></col>
+<col width="1%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="1%"></col>
+<col width="1%"></col>
+<col width="1%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="4%"></col>
+<col width="4%"></col>
+<col width="4%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="3%"></col>
+<col width="2%"></col>
+<col width="2%"></col>
+<col width="2%"></col>
+<col width="2%"></col>
+<col width="2%"></col>
+<col width="2%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">role</th>
+<th align="left">n.users</th>
+<th align="left">audit_count_md</th>
+<th align="left">audit_count_mn</th>
+<th align="left">audit_count_sd</th>
+<th align="left">km_md</th>
+<th align="left">km_mn</th>
+<th align="left">km_sd</th>
+<th align="left">label_count_md</th>
+<th align="left">label_count_mn</th>
+<th align="left">label_count_sd</th>
+<th align="left">labels_per_100m_md</th>
+<th align="left">labels_per_100m_mn</th>
+<th align="left">labels_per_100m_sd</th>
+<th align="left">miles_audited_md</th>
+<th align="left">miles_audited_mn</th>
+<th align="left">miles_audited_sd</th>
+<th align="left">minutes_audited_md</th>
+<th align="left">minutes_audited_mn</th>
+<th align="left">minutes_audited_sd</th>
+<th align="left">minutes_per_session_md</th>
+<th align="left">minutes_per_session_mn</th>
+<th align="left">minutes_per_session_sd</th>
+<th align="left">mission_count_md</th>
+<th align="left">mission_count_mn</th>
+<th align="left">mission_count_sd</th>
+<th align="left">m_per_min_md</th>
+<th align="left">m_per_min_mn</th>
+<th align="left">m_per_min_sd</th>
+<th align="left">n_sessions_md</th>
+<th align="left">n_sessions_mn</th>
+<th align="left">n_sessions_sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Anonymous</td>
+<td align="left">384</td>
+<td align="left">2.0</td>
+<td align="left">5.581</td>
+<td align="left">15.166</td>
+<td align="left">0.154</td>
+<td align="left">0.652</td>
+<td align="left">2.023</td>
+<td align="left">15.0</td>
+<td align="left">33.724</td>
+<td align="left">82.977</td>
+<td align="left">8.012</td>
+<td align="left">18.152</td>
+<td align="left">34.329</td>
+<td align="left">0.096</td>
+<td align="left">0.405</td>
+<td align="left">1.257</td>
+<td align="left">10.345</td>
+<td align="left">18.294</td>
+<td align="left">26.087</td>
+<td align="left">5.673</td>
+<td align="left">9.535</td>
+<td align="left">12.888</td>
+<td align="left">1.0</td>
+<td align="left">1.500</td>
+<td align="left">3.067</td>
+<td align="left">17.166</td>
+<td align="left">32.801</td>
+<td align="left">67.070</td>
+<td align="left">2</td>
+<td align="left">2.297</td>
+<td align="left">2.014</td>
+</tr>
+<tr class="even">
+<td align="left">Registered</td>
+<td align="left">243</td>
+<td align="left">9.0</td>
+<td align="left">28.868</td>
+<td align="left">100.621</td>
+<td align="left">1.195</td>
+<td align="left">3.547</td>
+<td align="left">13.211</td>
+<td align="left">65.0</td>
+<td align="left">171.144</td>
+<td align="left">651.312</td>
+<td align="left">5.841</td>
+<td align="left">9.135</td>
+<td align="left">18.311</td>
+<td align="left">0.742</td>
+<td align="left">2.204</td>
+<td align="left">8.209</td>
+<td align="left">29.350</td>
+<td align="left">55.830</td>
+<td align="left">126.900</td>
+<td align="left">20.025</td>
+<td align="left">28.333</td>
+<td align="left">27.290</td>
+<td align="left">3.0</td>
+<td align="left">5.786</td>
+<td align="left">20.348</td>
+<td align="left">46.120</td>
+<td align="left">51.679</td>
+<td align="left">35.371</td>
+<td align="left">1</td>
+<td align="left">2.037</td>
+<td align="left">3.272</td>
+</tr>
+<tr class="odd">
+<td align="left">Turker</td>
+<td align="left">170</td>
+<td align="left">9.0</td>
+<td align="left">169.835</td>
+<td align="left">477.006</td>
+<td align="left">1.146</td>
+<td align="left">21.290</td>
+<td align="left">60.188</td>
+<td align="left">59.0</td>
+<td align="left">887.335</td>
+<td align="left">2671.343</td>
+<td align="left">7.081</td>
+<td align="left">10.597</td>
+<td align="left">16.161</td>
+<td align="left">0.712</td>
+<td align="left">13.229</td>
+<td align="left">37.399</td>
+<td align="left">35.120</td>
+<td align="left">266.196</td>
+<td align="left">712.553</td>
+<td align="left">32.768</td>
+<td align="left">51.187</td>
+<td align="left">58.217</td>
+<td align="left">4.0</td>
+<td align="left">35.394</td>
+<td align="left">94.915</td>
+<td align="left">30.752</td>
+<td align="left">45.060</td>
+<td align="left">41.123</td>
+<td align="left">1</td>
+<td align="left">3.229</td>
+<td align="left">6.231</td>
+</tr>
+<tr class="even">
+<td align="left">Researcher</td>
+<td align="left">28</td>
+<td align="left">16.5</td>
+<td align="left">108.893</td>
+<td align="left">245.085</td>
+<td align="left">2.321</td>
+<td align="left">13.711</td>
+<td align="left">31.206</td>
+<td align="left">122.5</td>
+<td align="left">1141.214</td>
+<td align="left">3212.718</td>
+<td align="left">6.005</td>
+<td align="left">6.487</td>
+<td align="left">3.054</td>
+<td align="left">1.442</td>
+<td align="left">8.519</td>
+<td align="left">19.391</td>
+<td align="left">36.500</td>
+<td align="left">195.805</td>
+<td align="left">438.638</td>
+<td align="left">7.585</td>
+<td align="left">14.216</td>
+<td align="left">13.265</td>
+<td align="left">4.5</td>
+<td align="left">24.643</td>
+<td align="left">53.024</td>
+<td align="left">53.529</td>
+<td align="left">74.048</td>
+<td align="left">52.979</td>
+<td align="left">2</td>
+<td align="left">16.143</td>
+<td align="left">31.226</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">role</th>
+<th align="left">n.users</th>
+<th align="left">audits</th>
+<th align="left">hours_audited</th>
+<th align="left">km</th>
+<th align="left">labels</th>
+<th align="left">miles</th>
+<th align="left">missions</th>
+<th align="left">coverage</th>
+<th align="left">&gt;1 sess</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Anonymous</td>
+<td align="left">384</td>
+<td align="left">2143</td>
+<td align="left">117</td>
+<td align="left">250</td>
+<td align="left">12950</td>
+<td align="left">156</td>
+<td align="left">576</td>
+<td align="left">14%</td>
+<td align="left">75%</td>
+</tr>
+<tr class="even">
+<td align="left">Registered</td>
+<td align="left">243</td>
+<td align="left">7015</td>
+<td align="left">226</td>
+<td align="left">862</td>
+<td align="left">41588</td>
+<td align="left">536</td>
+<td align="left">1406</td>
+<td align="left">50%</td>
+<td align="left">38%</td>
+</tr>
+<tr class="odd">
+<td align="left">Turker</td>
+<td align="left">170</td>
+<td align="left">28872</td>
+<td align="left">754</td>
+<td align="left">3619</td>
+<td align="left">150847</td>
+<td align="left">2249</td>
+<td align="left">6017</td>
+<td align="left">209%</td>
+<td align="left">29%</td>
+</tr>
+<tr class="even">
+<td align="left">Researcher</td>
+<td align="left">28</td>
+<td align="left">3049</td>
+<td align="left">91</td>
+<td align="left">384</td>
+<td align="left">31954</td>
+<td align="left">239</td>
+<td align="left">690</td>
+<td align="left">22%</td>
+<td align="left">68%</td>
+</tr>
+</tbody>
+</table>
 <p>Filtered dataset:</p>
 <table style="width:100%;">
 <colgroup>
@@ -685,230 +962,32 @@ April 17, 2018</p>
 </tr>
 </tbody>
 </table>
-<p>Non filtered dataset:</p>
-<table style="width:100%;">
+<p>Below are trimmed down tables; non-filtered followed by filtered.</p>
+<table>
 <colgroup>
-<col width="2%"></col>
-<col width="1%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="1%"></col>
-<col width="1%"></col>
-<col width="1%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
+<col width="8%"></col>
+<col width="6%"></col>
+<col width="6%"></col>
 <col width="4%"></col>
-<col width="4%"></col>
-<col width="4%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="3%"></col>
-<col width="2%"></col>
-<col width="2%"></col>
-<col width="2%"></col>
-<col width="2%"></col>
-<col width="2%"></col>
-<col width="2%"></col>
+<col width="6%"></col>
+<col width="7%"></col>
+<col width="8%"></col>
+<col width="15%"></col>
+<col width="15%"></col>
+<col width="19%"></col>
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">role</th>
 <th align="left">n.users</th>
-<th align="left">audit_count_md</th>
-<th align="left">audit_count_mn</th>
-<th align="left">audit_count_sd</th>
-<th align="left">km_md</th>
-<th align="left">km_mn</th>
-<th align="left">km_sd</th>
-<th align="left">label_count_md</th>
-<th align="left">label_count_mn</th>
-<th align="left">label_count_sd</th>
-<th align="left">labels_per_100m_md</th>
-<th align="left">labels_per_100m_mn</th>
-<th align="left">labels_per_100m_sd</th>
-<th align="left">miles_audited_md</th>
-<th align="left">miles_audited_mn</th>
-<th align="left">miles_audited_sd</th>
-<th align="left">minutes_audited_md</th>
-<th align="left">minutes_audited_mn</th>
-<th align="left">minutes_audited_sd</th>
-<th align="left">minutes_per_session_md</th>
-<th align="left">minutes_per_session_mn</th>
-<th align="left">minutes_per_session_sd</th>
-<th align="left">mission_count_md</th>
-<th align="left">mission_count_mn</th>
-<th align="left">mission_count_sd</th>
-<th align="left">m_per_min_md</th>
-<th align="left">m_per_min_mn</th>
-<th align="left">m_per_min_sd</th>
-<th align="left">n_sessions_md</th>
-<th align="left">n_sessions_mn</th>
-<th align="left">n_sessions_sd</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Anonymous</td>
-<td align="left">384</td>
-<td align="left">2.0</td>
-<td align="left">5.581</td>
-<td align="left">15.166</td>
-<td align="left">0.154</td>
-<td align="left">0.652</td>
-<td align="left">2.023</td>
-<td align="left">15.0</td>
-<td align="left">33.724</td>
-<td align="left">82.977</td>
-<td align="left">8.012</td>
-<td align="left">18.152</td>
-<td align="left">34.329</td>
-<td align="left">0.096</td>
-<td align="left">0.405</td>
-<td align="left">1.257</td>
-<td align="left">10.345</td>
-<td align="left">18.294</td>
-<td align="left">26.087</td>
-<td align="left">5.673</td>
-<td align="left">9.535</td>
-<td align="left">12.888</td>
-<td align="left">1.0</td>
-<td align="left">1.500</td>
-<td align="left">3.067</td>
-<td align="left">17.166</td>
-<td align="left">32.801</td>
-<td align="left">67.070</td>
-<td align="left">2</td>
-<td align="left">2.297</td>
-<td align="left">2.014</td>
-</tr>
-<tr class="even">
-<td align="left">Registered</td>
-<td align="left">243</td>
-<td align="left">9.0</td>
-<td align="left">28.868</td>
-<td align="left">100.621</td>
-<td align="left">1.195</td>
-<td align="left">3.547</td>
-<td align="left">13.211</td>
-<td align="left">65.0</td>
-<td align="left">171.144</td>
-<td align="left">651.312</td>
-<td align="left">5.841</td>
-<td align="left">9.135</td>
-<td align="left">18.311</td>
-<td align="left">0.742</td>
-<td align="left">2.204</td>
-<td align="left">8.209</td>
-<td align="left">29.350</td>
-<td align="left">55.830</td>
-<td align="left">126.900</td>
-<td align="left">20.025</td>
-<td align="left">28.333</td>
-<td align="left">27.290</td>
-<td align="left">3.0</td>
-<td align="left">5.786</td>
-<td align="left">20.348</td>
-<td align="left">46.120</td>
-<td align="left">51.679</td>
-<td align="left">35.371</td>
-<td align="left">1</td>
-<td align="left">2.037</td>
-<td align="left">3.272</td>
-</tr>
-<tr class="odd">
-<td align="left">Turker</td>
-<td align="left">170</td>
-<td align="left">9.0</td>
-<td align="left">169.835</td>
-<td align="left">477.006</td>
-<td align="left">1.146</td>
-<td align="left">21.290</td>
-<td align="left">60.188</td>
-<td align="left">59.0</td>
-<td align="left">887.335</td>
-<td align="left">2671.343</td>
-<td align="left">7.081</td>
-<td align="left">10.597</td>
-<td align="left">16.161</td>
-<td align="left">0.712</td>
-<td align="left">13.229</td>
-<td align="left">37.399</td>
-<td align="left">35.120</td>
-<td align="left">266.196</td>
-<td align="left">712.553</td>
-<td align="left">32.768</td>
-<td align="left">51.187</td>
-<td align="left">58.217</td>
-<td align="left">4.0</td>
-<td align="left">35.394</td>
-<td align="left">94.915</td>
-<td align="left">30.752</td>
-<td align="left">45.060</td>
-<td align="left">41.123</td>
-<td align="left">1</td>
-<td align="left">3.229</td>
-<td align="left">6.231</td>
-</tr>
-<tr class="even">
-<td align="left">Researcher</td>
-<td align="left">28</td>
-<td align="left">16.5</td>
-<td align="left">108.893</td>
-<td align="left">245.085</td>
-<td align="left">2.321</td>
-<td align="left">13.711</td>
-<td align="left">31.206</td>
-<td align="left">122.5</td>
-<td align="left">1141.214</td>
-<td align="left">3212.718</td>
-<td align="left">6.005</td>
-<td align="left">6.487</td>
-<td align="left">3.054</td>
-<td align="left">1.442</td>
-<td align="left">8.519</td>
-<td align="left">19.391</td>
-<td align="left">36.500</td>
-<td align="left">195.805</td>
-<td align="left">438.638</td>
-<td align="left">7.585</td>
-<td align="left">14.216</td>
-<td align="left">13.265</td>
-<td align="left">4.5</td>
-<td align="left">24.643</td>
-<td align="left">53.024</td>
-<td align="left">53.529</td>
-<td align="left">74.048</td>
-<td align="left">52.979</td>
-<td align="left">2</td>
-<td align="left">16.143</td>
-<td align="left">31.226</td>
-</tr>
-</tbody>
-</table>
-<table>
-<thead>
-<tr class="header">
-<th align="left">role</th>
-<th align="left">n.users</th>
 <th align="left">audits</th>
-<th align="left">hours_audited</th>
 <th align="left">km</th>
 <th align="left">labels</th>
-<th align="left">miles</th>
 <th align="left">missions</th>
-<th align="left">coverage</th>
 <th align="left">&gt;1 sess</th>
+<th align="left">meters_per_min_md</th>
+<th align="left">minutes_audited_md</th>
+<th align="left">minutes_per_session_md</th>
 </tr>
 </thead>
 <tbody>
@@ -916,49 +995,127 @@ April 17, 2018</p>
 <td align="left">Anonymous</td>
 <td align="left">384</td>
 <td align="left">2143</td>
-<td align="left">117</td>
 <td align="left">250</td>
 <td align="left">12950</td>
-<td align="left">156</td>
 <td align="left">576</td>
-<td align="left">14%</td>
 <td align="left">75%</td>
+<td align="left">17</td>
+<td align="left">10</td>
+<td align="left">6</td>
 </tr>
 <tr class="even">
 <td align="left">Registered</td>
 <td align="left">243</td>
 <td align="left">7015</td>
-<td align="left">226</td>
 <td align="left">862</td>
 <td align="left">41588</td>
-<td align="left">536</td>
 <td align="left">1406</td>
-<td align="left">50%</td>
 <td align="left">38%</td>
+<td align="left">46</td>
+<td align="left">29</td>
+<td align="left">20</td>
 </tr>
 <tr class="odd">
 <td align="left">Turker</td>
 <td align="left">170</td>
 <td align="left">28872</td>
-<td align="left">754</td>
 <td align="left">3619</td>
 <td align="left">150847</td>
-<td align="left">2249</td>
 <td align="left">6017</td>
-<td align="left">209%</td>
 <td align="left">29%</td>
+<td align="left">31</td>
+<td align="left">35</td>
+<td align="left">33</td>
 </tr>
 <tr class="even">
 <td align="left">Researcher</td>
 <td align="left">28</td>
 <td align="left">3049</td>
-<td align="left">91</td>
 <td align="left">384</td>
 <td align="left">31954</td>
-<td align="left">239</td>
 <td align="left">690</td>
-<td align="left">22%</td>
 <td align="left">68%</td>
+<td align="left">54</td>
+<td align="left">36</td>
+<td align="left">8</td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col width="8%"></col>
+<col width="6%"></col>
+<col width="6%"></col>
+<col width="4%"></col>
+<col width="6%"></col>
+<col width="7%"></col>
+<col width="8%"></col>
+<col width="15%"></col>
+<col width="15%"></col>
+<col width="19%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">role</th>
+<th align="left">n.users</th>
+<th align="left">audits</th>
+<th align="left">km</th>
+<th align="left">labels</th>
+<th align="left">missions</th>
+<th align="left">&gt;1 sess</th>
+<th align="left">meters_per_min_md</th>
+<th align="left">minutes_audited_md</th>
+<th align="left">minutes_per_session_md</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Anonymous</td>
+<td align="left">293</td>
+<td align="left">1181</td>
+<td align="left">129</td>
+<td align="left">10760</td>
+<td align="left">316</td>
+<td align="left">72%</td>
+<td align="left">14</td>
+<td align="left">11</td>
+<td align="left">6</td>
+</tr>
+<tr class="even">
+<td align="left">Registered</td>
+<td align="left">188</td>
+<td align="left">5171</td>
+<td align="left">630</td>
+<td align="left">35923</td>
+<td align="left">1044</td>
+<td align="left">38%</td>
+<td align="left">37</td>
+<td align="left">29</td>
+<td align="left">20</td>
+</tr>
+<tr class="odd">
+<td align="left">Turker</td>
+<td align="left">122</td>
+<td align="left">13207</td>
+<td align="left">1636</td>
+<td align="left">103820</td>
+<td align="left">2953</td>
+<td align="left">23%</td>
+<td align="left">24</td>
+<td align="left">27</td>
+<td align="left">26</td>
+</tr>
+<tr class="even">
+<td align="left">Researcher</td>
+<td align="left">21</td>
+<td align="left">2717</td>
+<td align="left">341</td>
+<td align="left">30488</td>
+<td align="left">604</td>
+<td align="left">71%</td>
+<td align="left">51</td>
+<td align="left">34</td>
+<td align="left">8</td>
 </tr>
 </tbody>
 </table>

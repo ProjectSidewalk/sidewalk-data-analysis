@@ -129,9 +129,25 @@ TODO: Missions started vs missions completed (not sure we can do this; I expect 
 
 Below are the means/medians/sds for a few metrics (followed by sums), split by user group.
 
-In the first two tables, we have the "filtered" dataset, i.e., the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters. The last two tables only have the requirement that a user completed at least one audit task and placed at least one label after the tutorial.
+In the first 2 tables, we have the non-filtered data: this includes all users that audited at least one street and placed at least one label after the tutorial. The latter 2 tables include the filtered dataset: users were only included if they audited at least one street and had a labeling frequency of at least 3.75 labels per 100 meters.
 
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
+
+Non filtered dataset:
+
+| role       | n.users | audit\_count\_md | audit\_count\_mn | audit\_count\_sd | km\_md | km\_mn | km\_sd | label\_count\_md | label\_count\_mn | label\_count\_sd | labels\_per\_100m\_md | labels\_per\_100m\_mn | labels\_per\_100m\_sd | miles\_audited\_md | miles\_audited\_mn | miles\_audited\_sd | minutes\_audited\_md | minutes\_audited\_mn | minutes\_audited\_sd | minutes\_per\_session\_md | minutes\_per\_session\_mn | minutes\_per\_session\_sd | mission\_count\_md | mission\_count\_mn | mission\_count\_sd | m\_per\_min\_md | m\_per\_min\_mn | m\_per\_min\_sd | n\_sessions\_md | n\_sessions\_mn | n\_sessions\_sd |
+|:-----------|:--------|:-----------------|:-----------------|:-----------------|:-------|:-------|:-------|:-----------------|:-----------------|:-----------------|:----------------------|:----------------------|:----------------------|:-------------------|:-------------------|:-------------------|:---------------------|:---------------------|:---------------------|:--------------------------|:--------------------------|:--------------------------|:-------------------|:-------------------|:-------------------|:----------------|:----------------|:----------------|:----------------|:----------------|:----------------|
+| Anonymous  | 384     | 2.0              | 5.581            | 15.166           | 0.154  | 0.652  | 2.023  | 15.0             | 33.724           | 82.977           | 8.012                 | 18.152                | 34.329                | 0.096              | 0.405              | 1.257              | 10.345               | 18.294               | 26.087               | 5.673                     | 9.535                     | 12.888                    | 1.0                | 1.500              | 3.067              | 17.166          | 32.801          | 67.070          | 2               | 2.297           | 2.014           |
+| Registered | 243     | 9.0              | 28.868           | 100.621          | 1.195  | 3.547  | 13.211 | 65.0             | 171.144          | 651.312          | 5.841                 | 9.135                 | 18.311                | 0.742              | 2.204              | 8.209              | 29.350               | 55.830               | 126.900              | 20.025                    | 28.333                    | 27.290                    | 3.0                | 5.786              | 20.348             | 46.120          | 51.679          | 35.371          | 1               | 2.037           | 3.272           |
+| Turker     | 170     | 9.0              | 169.835          | 477.006          | 1.146  | 21.290 | 60.188 | 59.0             | 887.335          | 2671.343         | 7.081                 | 10.597                | 16.161                | 0.712              | 13.229             | 37.399             | 35.120               | 266.196              | 712.553              | 32.768                    | 51.187                    | 58.217                    | 4.0                | 35.394             | 94.915             | 30.752          | 45.060          | 41.123          | 1               | 3.229           | 6.231           |
+| Researcher | 28      | 16.5             | 108.893          | 245.085          | 2.321  | 13.711 | 31.206 | 122.5            | 1141.214         | 3212.718         | 6.005                 | 6.487                 | 3.054                 | 1.442              | 8.519              | 19.391             | 36.500               | 195.805              | 438.638              | 7.585                     | 14.216                    | 13.265                    | 4.5                | 24.643             | 53.024             | 53.529          | 74.048          | 52.979          | 2               | 16.143          | 31.226          |
+
+| role       | n.users | audits | hours\_audited | km   | labels | miles | missions | coverage | &gt;1 sess |
+|:-----------|:--------|:-------|:---------------|:-----|:-------|:------|:---------|:---------|:-----------|
+| Anonymous  | 384     | 2143   | 117            | 250  | 12950  | 156   | 576      | 14%      | 75%        |
+| Registered | 243     | 7015   | 226            | 862  | 41588  | 536   | 1406     | 50%      | 38%        |
+| Turker     | 170     | 28872  | 754            | 3619 | 150847 | 2249  | 6017     | 209%     | 29%        |
+| Researcher | 28      | 3049   | 91             | 384  | 31954  | 239   | 690      | 22%      | 68%        |
 
 Filtered dataset:
 
@@ -149,21 +165,21 @@ Filtered dataset:
 | Turker     | 122     | 13207  | 458            | 1636 | 103820 | 1016  | 2953     | 94.5%    | 23%        |
 | Researcher | 21      | 2717   | 82             | 341  | 30488  | 212   | 604      | 19.7%    | 71%        |
 
-Non filtered dataset:
+Below are trimmed down tables; non-filtered followed by filtered.
 
-| role       | n.users | audit\_count\_md | audit\_count\_mn | audit\_count\_sd | km\_md | km\_mn | km\_sd | label\_count\_md | label\_count\_mn | label\_count\_sd | labels\_per\_100m\_md | labels\_per\_100m\_mn | labels\_per\_100m\_sd | miles\_audited\_md | miles\_audited\_mn | miles\_audited\_sd | minutes\_audited\_md | minutes\_audited\_mn | minutes\_audited\_sd | minutes\_per\_session\_md | minutes\_per\_session\_mn | minutes\_per\_session\_sd | mission\_count\_md | mission\_count\_mn | mission\_count\_sd | m\_per\_min\_md | m\_per\_min\_mn | m\_per\_min\_sd | n\_sessions\_md | n\_sessions\_mn | n\_sessions\_sd |
-|:-----------|:--------|:-----------------|:-----------------|:-----------------|:-------|:-------|:-------|:-----------------|:-----------------|:-----------------|:----------------------|:----------------------|:----------------------|:-------------------|:-------------------|:-------------------|:---------------------|:---------------------|:---------------------|:--------------------------|:--------------------------|:--------------------------|:-------------------|:-------------------|:-------------------|:----------------|:----------------|:----------------|:----------------|:----------------|:----------------|
-| Anonymous  | 384     | 2.0              | 5.581            | 15.166           | 0.154  | 0.652  | 2.023  | 15.0             | 33.724           | 82.977           | 8.012                 | 18.152                | 34.329                | 0.096              | 0.405              | 1.257              | 10.345               | 18.294               | 26.087               | 5.673                     | 9.535                     | 12.888                    | 1.0                | 1.500              | 3.067              | 17.166          | 32.801          | 67.070          | 2               | 2.297           | 2.014           |
-| Registered | 243     | 9.0              | 28.868           | 100.621          | 1.195  | 3.547  | 13.211 | 65.0             | 171.144          | 651.312          | 5.841                 | 9.135                 | 18.311                | 0.742              | 2.204              | 8.209              | 29.350               | 55.830               | 126.900              | 20.025                    | 28.333                    | 27.290                    | 3.0                | 5.786              | 20.348             | 46.120          | 51.679          | 35.371          | 1               | 2.037           | 3.272           |
-| Turker     | 170     | 9.0              | 169.835          | 477.006          | 1.146  | 21.290 | 60.188 | 59.0             | 887.335          | 2671.343         | 7.081                 | 10.597                | 16.161                | 0.712              | 13.229             | 37.399             | 35.120               | 266.196              | 712.553              | 32.768                    | 51.187                    | 58.217                    | 4.0                | 35.394             | 94.915             | 30.752          | 45.060          | 41.123          | 1               | 3.229           | 6.231           |
-| Researcher | 28      | 16.5             | 108.893          | 245.085          | 2.321  | 13.711 | 31.206 | 122.5            | 1141.214         | 3212.718         | 6.005                 | 6.487                 | 3.054                 | 1.442              | 8.519              | 19.391             | 36.500               | 195.805              | 438.638              | 7.585                     | 14.216                    | 13.265                    | 4.5                | 24.643             | 53.024             | 53.529          | 74.048          | 52.979          | 2               | 16.143          | 31.226          |
+| role       | n.users | audits | km   | labels | missions | &gt;1 sess | meters\_per\_min\_md | minutes\_audited\_md | minutes\_per\_session\_md |
+|:-----------|:--------|:-------|:-----|:-------|:---------|:-----------|:---------------------|:---------------------|:--------------------------|
+| Anonymous  | 384     | 2143   | 250  | 12950  | 576      | 75%        | 17                   | 10                   | 6                         |
+| Registered | 243     | 7015   | 862  | 41588  | 1406     | 38%        | 46                   | 29                   | 20                        |
+| Turker     | 170     | 28872  | 3619 | 150847 | 6017     | 29%        | 31                   | 35                   | 33                        |
+| Researcher | 28      | 3049   | 384  | 31954  | 690      | 68%        | 54                   | 36                   | 8                         |
 
-| role       | n.users | audits | hours\_audited | km   | labels | miles | missions | coverage | &gt;1 sess |
-|:-----------|:--------|:-------|:---------------|:-----|:-------|:------|:---------|:---------|:-----------|
-| Anonymous  | 384     | 2143   | 117            | 250  | 12950  | 156   | 576      | 14%      | 75%        |
-| Registered | 243     | 7015   | 226            | 862  | 41588  | 536   | 1406     | 50%      | 38%        |
-| Turker     | 170     | 28872  | 754            | 3619 | 150847 | 2249  | 6017     | 209%     | 29%        |
-| Researcher | 28      | 3049   | 91             | 384  | 31954  | 239   | 690      | 22%      | 68%        |
+| role       | n.users | audits | km   | labels | missions | &gt;1 sess | meters\_per\_min\_md | minutes\_audited\_md | minutes\_per\_session\_md |
+|:-----------|:--------|:-------|:-----|:-------|:---------|:-----------|:---------------------|:---------------------|:--------------------------|
+| Anonymous  | 293     | 1181   | 129  | 10760  | 316      | 72%        | 14                   | 11                   | 6                         |
+| Registered | 188     | 5171   | 630  | 35923  | 1044     | 38%        | 37                   | 29                   | 20                        |
+| Turker     | 122     | 13207  | 1636 | 103820 | 2953     | 23%        | 24                   | 27                   | 26                        |
+| Researcher | 21      | 2717   | 341  | 30488  | 604      | 71%        | 51                   | 34                   | 8                         |
 
 Possible Stories
 ----------------
