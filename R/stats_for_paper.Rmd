@@ -1166,7 +1166,7 @@ The first table describes the dataset at the point where we hit 100% completion.
 ```{r public.deployment.first.100, echo=FALSE, warning=FALSE}
 kable(
   audit.length %>%
-    dplyr::filter(dataset == 'first_100%') %>%
+    dplyr::filter(dataset == 'first_100%', user_id %in% user.list) %>%
     mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
     summarise_vars('role', c('miles_audited', 'label_count'), funcs = sum, include.n = TRUE),
   digits = 0,
@@ -1174,7 +1174,7 @@ kable(
 )
 kable(
   audit.length %>%
-    dplyr::filter(dataset == 'all') %>%
+    dplyr::filter(dataset == 'all', user_id %in% user.list) %>%
     mutate(role = fct_recode(role, 'Researcher' = 'Administrator', 'Researcher' = 'Owner')) %>%
     summarise_vars('role', c('miles_audited', 'label_count'), funcs = sum, include.n = TRUE),
   digits = 0,
@@ -1289,11 +1289,15 @@ kable(
 
 TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
 
-Below are the means/medians/sds for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
+Below are the means/medians/sds for a few metrics (followed by sums), split by user group.
+
+In the first two tables, we have the "filtered" dataset, i.e., the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters. The last two tables only have the requirement that a user completed at least one audit task and placed at least one label after the tutorial.
 
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
 
-```{r public.deployment.showing.stats, echo=FALSE, warning=FALSE}
+Filtered dataset:
+
+```{r public.deployment.showing.stats.filtered, echo=FALSE, warning=FALSE}
 kable(
   filtered.speeds %>%
     mutate(km = meters_audited / 1000) %>%
@@ -1304,6 +1308,40 @@ kable(
   )
 kable(
   filtered.speeds %>%
+    mutate(km = meters_audited / 1000,
+           mult_sess = as.numeric(n_sessions > 1)) %>%
+    rename(miles = miles_audited,
+           audits = audit_count,
+           labels = label_count,
+           missions = mission_count) %>%
+    dplyr::select(role, miles, km, missions, audits, hours_audited, labels, mult_sess) %>%
+    summarise_vars('role', funcs = sum, include.n = TRUE) %>%
+    mutate(coverage = paste0(base::format(100 * miles / TOTAL_STREET_DIST_MILES, digits = 2), '%'),
+           '>1 sess' = paste0(base::format(100 * mult_sess / n.users, digits = 2), '%')) %>%
+    dplyr::select(-mult_sess),
+  align = 'l',
+  digits = 0
+  )
+```
+
+Non filtered dataset:
+
+```{r public.deployment.showing.stats.nonfiltered, echo=FALSE, warning=FALSE}
+nonfiltered.speeds <-
+  speeds %>%
+  dplyr::filter(role %in% c('Registered', 'Anonymous', 'Turker'), user_id %in% user.list) %>%
+  mutate(role = factor(role, levels = c('Anonymous', 'Registered', 'Turker')))
+
+kable(
+  nonfiltered.speeds %>%
+    mutate(km = meters_audited / 1000) %>%
+    dplyr::select(-meters_audited, -feet_audited, -mins_per_mission, -hours_audited) %>%
+    summarise_vars('role', include.n = TRUE),
+  digits = 3,
+  align = 'l'
+  )
+kable(
+  nonfiltered.speeds %>%
     mutate(km = meters_audited / 1000,
            mult_sess = as.numeric(n_sessions > 1)) %>%
     rename(miles = miles_audited,

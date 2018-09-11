@@ -82,17 +82,17 @@ The first table describes the dataset at the point where we hit 100% completion.
 
 | role       | n.users | label\_count | miles\_audited |
 |:-----------|:--------|:-------------|:---------------|
-| Researcher | 26      | 29107        | 224            |
-| Anonymous  | 2551    | 14866        | 199            |
-| Turker     | 62      | 78168        | 1223           |
-| Registered | 326     | 41537        | 534            |
+| Researcher | 25      | 29107        | 224            |
+| Anonymous  | 349     | 12240        | 150            |
+| Turker     | 43      | 78153        | 1208           |
+| Registered | 234     | 41353        | 533            |
 
 | role       | n.users | label\_count | miles\_audited |
 |:-----------|:--------|:-------------|:---------------|
-| Researcher | 29      | 31954        | 239            |
-| Anonymous  | 2875    | 15656        | 205            |
-| Turker     | 277     | 150966       | 2294           |
-| Registered | 344     | 41786        | 537            |
+| Researcher | 28      | 31954        | 239            |
+| Anonymous  | 384     | 12950        | 156            |
+| Turker     | 170     | 150847       | 2249           |
+| Registered | 243     | 41588        | 536            |
 
 ### Data characteristics
 
@@ -125,9 +125,13 @@ There were 825 users who placed 240091 labels pre-filtering. Researchers account
 
 TODO: Missions started vs missions completed (not sure we can do this; I expect it to be difficult, without much benefit).
 
-Below are the means/medians/sds for a few metrics (followed by sums), split by user group. For all user groups, the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters.
+Below are the means/medians/sds for a few metrics (followed by sums), split by user group.
+
+In the first two tables, we have the "filtered" dataset, i.e., the minimum threshold to be included in this list was that they have completed at least one audit task and that their labeling threshold is above 3.75 labels per 100 meters. The last two tables only have the requirement that a user completed at least one audit task and placed at least one label after the tutorial.
 
 NOTE: A "session" below is defined as a sequence of audit task interactions for a user where the minimum time between consecutive interactions is less than one hour.
+
+Filtered dataset:
 
 | role       | n.users | audit\_count\_md | audit\_count\_mn | audit\_count\_sd | km\_md | km\_mn | km\_sd | label\_count\_md | label\_count\_mn | label\_count\_sd | labels\_per\_100m\_md | labels\_per\_100m\_mn | labels\_per\_100m\_sd | miles\_audited\_md | miles\_audited\_mn | miles\_audited\_sd | minutes\_audited\_md | minutes\_audited\_mn | minutes\_audited\_sd | minutes\_per\_session\_md | minutes\_per\_session\_mn | minutes\_per\_session\_sd | mission\_count\_md | mission\_count\_mn | mission\_count\_sd | m\_per\_min\_md | m\_per\_min\_mn | m\_per\_min\_sd | n\_sessions\_md | n\_sessions\_mn | n\_sessions\_sd |
 |:-----------|:--------|:-----------------|:-----------------|:-----------------|:-------|:-------|:-------|:-----------------|:-----------------|:-----------------|:----------------------|:----------------------|:----------------------|:-------------------|:-------------------|:-------------------|:---------------------|:---------------------|:---------------------|:--------------------------|:--------------------------|:--------------------------|:-------------------|:-------------------|:-------------------|:----------------|:----------------|:----------------|:----------------|:----------------|:----------------|
@@ -140,6 +144,20 @@ NOTE: A "session" below is defined as a sequence of audit task interactions for 
 | Anonymous  | 293     | 1181   | 86             | 129  | 10760  | 80    | 316      | 7.4%     | 72%        |
 | Registered | 188     | 5171   | 181            | 630  | 35923  | 392   | 1044     | 36.4%    | 38%        |
 | Turker     | 122     | 13207  | 458            | 1636 | 103820 | 1016  | 2953     | 94.5%    | 23%        |
+
+Non filtered dataset:
+
+| role       | n.users | audit\_count\_md | audit\_count\_mn | audit\_count\_sd | km\_md | km\_mn | km\_sd | label\_count\_md | label\_count\_mn | label\_count\_sd | labels\_per\_100m\_md | labels\_per\_100m\_mn | labels\_per\_100m\_sd | miles\_audited\_md | miles\_audited\_mn | miles\_audited\_sd | minutes\_audited\_md | minutes\_audited\_mn | minutes\_audited\_sd | minutes\_per\_session\_md | minutes\_per\_session\_mn | minutes\_per\_session\_sd | mission\_count\_md | mission\_count\_mn | mission\_count\_sd | m\_per\_min\_md | m\_per\_min\_mn | m\_per\_min\_sd | n\_sessions\_md | n\_sessions\_mn | n\_sessions\_sd |
+|:-----------|:--------|:-----------------|:-----------------|:-----------------|:-------|:-------|:-------|:-----------------|:-----------------|:-----------------|:----------------------|:----------------------|:----------------------|:-------------------|:-------------------|:-------------------|:---------------------|:---------------------|:---------------------|:--------------------------|:--------------------------|:--------------------------|:-------------------|:-------------------|:-------------------|:----------------|:----------------|:----------------|:----------------|:----------------|:----------------|
+| Anonymous  | 384     | 2                | 5.581            | 15.166           | 0.154  | 0.652  | 2.023  | 15               | 33.724           | 82.977           | 8.012                 | 18.152                | 34.329                | 0.096              | 0.405              | 1.257              | 10.345               | 18.294               | 26.087               | 5.673                     | 9.535                     | 12.888                    | 1                  | 1.500              | 3.067              | 17.166          | 32.801          | 67.070          | 2               | 2.297           | 2.014           |
+| Registered | 243     | 9                | 28.868           | 100.621          | 1.195  | 3.547  | 13.211 | 65               | 171.144          | 651.312          | 5.841                 | 9.135                 | 18.311                | 0.742              | 2.204              | 8.209              | 29.350               | 55.830               | 126.900              | 20.025                    | 28.333                    | 27.290                    | 3                  | 5.786              | 20.348             | 46.120          | 51.679          | 35.371          | 1               | 2.037           | 3.272           |
+| Turker     | 170     | 9                | 169.835          | 477.006          | 1.146  | 21.290 | 60.188 | 59               | 887.335          | 2671.343         | 7.081                 | 10.597                | 16.161                | 0.712              | 13.229             | 37.399             | 35.120               | 266.196              | 712.553              | 32.768                    | 51.187                    | 58.217                    | 4                  | 35.394             | 94.915             | 30.752          | 45.060          | 41.123          | 1               | 3.229           | 6.231           |
+
+| role       | n.users | audits | hours\_audited | km   | labels | miles | missions | coverage | &gt;1 sess |
+|:-----------|:--------|:-------|:---------------|:-----|:-------|:------|:---------|:---------|:-----------|
+| Anonymous  | 384     | 2143   | 117            | 250  | 12950  | 156   | 576      | 14%      | 75%        |
+| Registered | 243     | 7015   | 226            | 862  | 41588  | 536   | 1406     | 50%      | 38%        |
+| Turker     | 170     | 28872  | 754            | 3619 | 150847 | 2249  | 6017     | 209%     | 29%        |
 
 Possible Stories
 ----------------
