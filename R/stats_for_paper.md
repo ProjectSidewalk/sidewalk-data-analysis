@@ -240,7 +240,7 @@ The first graph shows both volunteers and turkers together, and the second shows
 
 Below are simply concatenations of the graphs from each of the two sub-sections above. These are followed by versions that use percentage of total users remaining instead of counts.
 
-![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-2.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-3.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-4.png)
+![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-2.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-3.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-4.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-5.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-6.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-7.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-8.png)
 
 Turk Study
 ==========

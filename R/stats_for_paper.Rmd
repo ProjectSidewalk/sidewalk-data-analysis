@@ -1454,7 +1454,7 @@ NOTE: there are graphs that combine the tutorial and post-tutorial dropoff graph
 #### Tutorial dropoffs
 
 ```{r public.deployment.user.dropoff.graph.funcs, echo=FALSE}
-plot.dropoffs <- function(users.remaining.data, dropoff.step.labels, use.percentages) {
+plot.dropoffs <- function(users.remaining.data, dropoff.step.labels, use.percentages, add.labels) {
   if (use.percentages) {
     y.lab <- 'Users Remaining (%)'
     max.users <- max(users.remaining.data$users.remaining)
@@ -1475,14 +1475,23 @@ plot.dropoffs <- function(users.remaining.data, dropoff.step.labels, use.percent
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
     theme(panel.grid.minor.x = element_blank())
-  if (use.percentages) {
+  if (use.percentages && add.labels) {
+    partial.plot +
+      scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0), labels = scales::percent) +
+      geom_text(aes(label = scales::percent(users.remaining)),
+                nudge_x = 1, nudge_y = 0.04, check_overlap = TRUE)
+  } else if (use.percentages) {
     partial.plot +
       scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0), labels = scales::percent)
+  } else if (add.labels) {
+    partial.plot +
+      scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+      geom_text(aes(label = users.remaining), nudge_x = 0.45, nudge_y = 35, check_overlap = TRUE)
   } else {
     partial.plot + scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0))
   }
 }
-plot.dropoffs.split <- function(users.remaining.split.data, dropoff.step.labels, use.percentages) {
+plot.dropoffs.split <- function(users.remaining.split.data, dropoff.step.labels, use.percentages, add.labels) {
   if (use.percentages) {
     y.lab <- 'Users Remaining (%)'
     max.users <-
@@ -1510,9 +1519,18 @@ plot.dropoffs.split <- function(users.remaining.split.data, dropoff.step.labels,
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
     theme(panel.grid.minor.x = element_blank(), legend.title = element_blank())
-  if (use.percentages) {
+  if (use.percentages && add.labels) {
+    partial.plot +
+      scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0), labels = scales::percent) +
+      geom_text(aes(label = scales::percent(users.remaining)),
+                nudge_x = 1, nudge_y = 0.04, check_overlap = TRUE)
+  } else if (use.percentages) {
     partial.plot +
       scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0), labels = scales::percent)
+  } else if (add.labels) {
+    partial.plot +
+      scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+      geom_text(aes(label = users.remaining), nudge_x = 0.45, nudge_y = 35)
   } else {
     partial.plot + scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0))
   }
@@ -1717,8 +1735,8 @@ step.labels <- c('Start tutorial',
                  'No sidewalk',
                  'Fifth curb ramp',
                  'Finish tutorial')
-plot.dropoffs(users.remaining.tutorial, step.labels, FALSE)
-plot.dropoffs.split(users.remaining.tutorial.split, step.labels, FALSE)
+plot.dropoffs(users.remaining.tutorial, step.labels, use.percentages = FALSE, add.labels = FALSE)
+plot.dropoffs.split(users.remaining.tutorial.split, step.labels, use.percentages = FALSE, add.labels = FALSE)
 ```
 
 
@@ -1806,8 +1824,14 @@ dropoff.labels <- c('Finish tutorial',
                     '8 missions',
                     '9 missions',
                     '10 missions')
-plot.dropoffs(users.remaining.post.tutorial, dropoff.labels, FALSE)
-plot.dropoffs.split(users.remaining.post.tutorial.split, dropoff.labels, FALSE)
+plot.dropoffs(users.remaining.post.tutorial,
+              dropoff.labels,
+              use.percentages = FALSE,
+              add.labels = FALSE)
+plot.dropoffs.split(users.remaining.post.tutorial.split,
+                    dropoff.labels,
+                    use.percentages = FALSE,
+                    add.labels = FALSE)
 ```
 
 
@@ -1816,7 +1840,7 @@ plot.dropoffs.split(users.remaining.post.tutorial.split, dropoff.labels, FALSE)
 Below are simply concatenations of the graphs from each of the two sub-sections above. These are followed by versions that use percentage of total users remaining instead of counts.
 
 
-```{r public.deployment.user.dropoff.plot, echo=FALSE, fig.width=6, fig.height=3}
+```{r public.deployment.user.dropoff.plot, echo=FALSE, fig.width=8, fig.height=5}
 # Combine the datasets from the two previous sub-sections.
 users.remaining.all <-
   users.remaining.post.tutorial %>%
@@ -1831,10 +1855,14 @@ users.remaining.all.split <-
 
 combined.dropoff.labels <- c(step.labels, dropoff.labels[2:length(dropoff.labels)])
 
-plot.dropoffs(users.remaining.all, combined.dropoff.labels, FALSE)
-plot.dropoffs.split(users.remaining.all.split, combined.dropoff.labels, FALSE)
-plot.dropoffs(users.remaining.all, combined.dropoff.labels, TRUE)
-plot.dropoffs.split(users.remaining.all.split, combined.dropoff.labels, TRUE)
+plot.dropoffs(users.remaining.all, combined.dropoff.labels, use.percentages = FALSE, add.labels = FALSE)
+plot.dropoffs.split(users.remaining.all.split, combined.dropoff.labels, use.percentages = FALSE, add.labels = FALSE)
+plot.dropoffs(users.remaining.all, combined.dropoff.labels, use.percentages = TRUE, add.labels = FALSE)
+plot.dropoffs.split(users.remaining.all.split, combined.dropoff.labels, use.percentages = TRUE, add.labels = FALSE)
+plot.dropoffs(users.remaining.all, combined.dropoff.labels, use.percentages = FALSE, add.labels = TRUE)
+plot.dropoffs.split(users.remaining.all.split, combined.dropoff.labels, use.percentages = FALSE, add.labels = TRUE)
+plot.dropoffs(users.remaining.all, combined.dropoff.labels, use.percentages = TRUE, add.labels = TRUE)
+plot.dropoffs.split(users.remaining.all.split, combined.dropoff.labels, use.percentages = TRUE, add.labels = TRUE)
 ```
 
 
