@@ -631,6 +631,10 @@ However, we are going to look at two different groupings of these zone types, be
     -   Low to Moderate Density = Neighborhood Mixed-Use + Residential + Residential Flat + Unzoned
     -   Medium to High Density = Downtown + Mixed-Use + Industrial + Residential Apt + Special Purpose
 
+Here are the distribution of the streets across DC, registered user routes, and anonymous user routes for zone types and quadrant.
+
+![](stats_for_paper_files/figure-markdown_github/turk.zone.type.bar.graph.1-1.png) ![](stats_for_paper_files/figure-markdown_github/turk.zone.type.bar.graph.2-1.png)
+
 #### Semantic grouping
 
 As a reminder, the grouping is defined as follows:

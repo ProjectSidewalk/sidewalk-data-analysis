@@ -2962,6 +2962,51 @@ plot.gt.dist.for.zone.type <- function(data, n.data, l.data) {
 }
 ```
 
+Here are the distribution of the streets across DC, registered user routes, and anonymous user routes for zone types and quadrant.
+
+```{r turk.zone.type.bar.graphs.setup, echo=FALSE}
+quadrant.distro.data <-
+  read.csv('../data/dc_quadrant_distribution.csv', stringsAsFactors = FALSE) %>%
+  rename('Anonymous Users' = anon_user_quadrant_distrib..,
+         'Registered Users' = registered_user_quadrant_dist..,
+         DC = all_street_quadrant_distribution..) %>%
+  gather(key = 'user_group', value = 'distribution', 'Anonymous Users', 'Registered Users', DC) %>%
+  mutate(user_group = factor(user_group, levels = c('DC', 'Registered Users', 'Anonymous Users')),
+         DC_quadrant = factor(DC_quadrant),
+         distribution = as.numeric(sub('%', '', distribution)) / 100)
+
+zone.distro.data <-
+  read.csv('../data/zone_type_distribution.csv', stringsAsFactors = FALSE) %>%
+  rename('Anonymous Users' = anon_user_zone_distrib..,
+         'Registered Users' = registered_user_zone_dist..,
+         DC = all_street_zone_distribution..) %>%
+  gather(key = 'user_group', value = 'distribution', 'Anonymous Users', 'Registered Users', DC) %>%
+  mutate(user_group = factor(user_group,
+                             levels = c('DC', 'Registered Users', 'Anonymous Users')),
+         DC_zone_type = factor(DC_zone_type),
+         distribution = as.numeric(sub('%', '', distribution)) / 100)
+```
+
+```{r turk.zone.type.bar.graph.1, echo=FALSE, fig.width=5, fig.height=3}
+ggplot(data = quadrant.distro.data, aes(x = DC_quadrant, y = distribution, fill = user_group)) +
+  geom_col(position = 'dodge') +
+  my.theme.discrete.x +
+  theme(legend.title = element_blank()) +
+  xlab('DC Quadrant') +
+  ylab('Share of Streets (%)') +
+  scale_y_continuous(expand = c(0.01, 0), labels = scales::percent)
+```
+```{r turk.zone.type.bar.graph.2, echo=FALSE, fig.width=6, fig.height=5}
+ggplot(data = zone.distro.data, aes(x = DC_zone_type, y = distribution, fill = user_group)) +
+  geom_col(position = 'dodge') +
+  my.theme.discrete.x +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+        legend.title = element_blank()) +
+  xlab('Zone Type') +
+  ylab('Share of Streets (%)') +
+  scale_y_continuous(expand = c(0.01, 0), labels = scales::percent)
+```
+
 #### Semantic grouping
 
 As a reminder, the grouping is defined as follows:
