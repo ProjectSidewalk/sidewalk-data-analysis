@@ -238,9 +238,9 @@ The first graph shows both volunteers and turkers together, and the second shows
 
 #### Tutorial and post tutorial dropoffs
 
-Below are simply concatenations of the graphs from each of the two sub-sections above.
+Below are simply concatenations of the graphs from each of the two sub-sections above. These are followed by versions that use percentage of total users remaining instead of counts.
 
-![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-2.png)
+![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-1.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-2.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-3.png)![](stats_for_paper_files/figure-markdown_github/public.deployment.user.dropoff.plot-4.png)
 
 Turk Study
 ==========

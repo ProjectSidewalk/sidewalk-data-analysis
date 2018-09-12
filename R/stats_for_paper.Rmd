@@ -1454,29 +1454,68 @@ NOTE: there are graphs that combine the tutorial and post-tutorial dropoff graph
 #### Tutorial dropoffs
 
 ```{r public.deployment.user.dropoff.graph.funcs, echo=FALSE}
-plot.dropoffs <- function(users.remaining.data, dropoff.step.labels) {
-  ggplot(aes(x = step, y = users.remaining), data = users.remaining.data) +
+plot.dropoffs <- function(users.remaining.data, dropoff.step.labels, use.percentages) {
+  if (use.percentages) {
+    y.lab <- 'Users Remaining (%)'
+    max.users <- max(users.remaining.data$users.remaining)
+    data <- mutate(users.remaining.data, users.remaining = users.remaining / max.users)
+  } else {
+    y.lab <- 'Users Remaining'
+    data <- users.remaining.data
+  }
+  
+  partial.plot <-
+    ggplot(aes(x = step, y = users.remaining), data = data) +
     geom_line() +
     geom_point() +
     scale_x_continuous(breaks = seq(0, length(dropoff.step.labels) - 1),
                        labels = dropoff.step.labels,
                        expand = c(0.015, 0)) +
-    scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+    labs(x = 'Step', y = y.lab) + 
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
     theme(panel.grid.minor.x = element_blank())
+  if (use.percentages) {
+    partial.plot +
+      scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0), labels = scales::percent)
+  } else {
+    partial.plot + scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0))
+  }
 }
-plot.dropoffs.split <- function(users.remaining.split.data, dropoff.step.labels) {
-  ggplot(aes(x = step, y = users.remaining), data = users.remaining.split.data) +
+plot.dropoffs.split <- function(users.remaining.split.data, dropoff.step.labels, use.percentages) {
+  if (use.percentages) {
+    y.lab <- 'Users Remaining (%)'
+    max.users <-
+      users.remaining.split.data %>%
+      group_by(is.turker) %>%
+      dplyr::summarise(max.remaining = max(users.remaining))
+    data <-
+      users.remaining.split.data %>%
+      inner_join(max.users, by = 'is.turker') %>%
+      mutate(users.remaining = users.remaining / max.remaining)
+  } else {
+    y.lab <- 'Users Remaining'
+    data <- users.remaining.split.data
+  }
+  data <- data %>% mutate(is.turker = factor(is.turker, labels = c('Volunteers', 'Turkers')))
+  
+  partial.plot <-
+    ggplot(aes(x = step, y = users.remaining), data = data) +
     geom_line(aes(colour = is.turker)) +
     geom_point(aes(colour = is.turker)) +
     scale_x_continuous(breaks = seq(0, length(dropoff.step.labels) - 1),
                        labels = dropoff.step.labels,
                        expand = c(0.015, 0)) +
-    scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0)) +
+    labs(x = 'Step', y = y.lab) + 
     theme_bw() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1)) +
-    theme(panel.grid.minor.x = element_blank())
+    theme(panel.grid.minor.x = element_blank(), legend.title = element_blank())
+  if (use.percentages) {
+    partial.plot +
+      scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0), labels = scales::percent)
+  } else {
+    partial.plot + scale_y_continuous(limits = c(0, NA), expand = c(0.015, 0))
+  }
 }
 ```
 
@@ -1678,8 +1717,8 @@ step.labels <- c('Start tutorial',
                  'No sidewalk',
                  'Fifth curb ramp',
                  'Finish tutorial')
-plot.dropoffs(users.remaining.tutorial, step.labels)
-plot.dropoffs.split(users.remaining.tutorial.split, step.labels)
+plot.dropoffs(users.remaining.tutorial, step.labels, FALSE)
+plot.dropoffs.split(users.remaining.tutorial.split, step.labels, FALSE)
 ```
 
 
@@ -1767,14 +1806,14 @@ dropoff.labels <- c('Finish tutorial',
                     '8 missions',
                     '9 missions',
                     '10 missions')
-plot.dropoffs(users.remaining.post.tutorial, dropoff.labels)
-plot.dropoffs.split(users.remaining.post.tutorial.split, dropoff.labels)
+plot.dropoffs(users.remaining.post.tutorial, dropoff.labels, FALSE)
+plot.dropoffs.split(users.remaining.post.tutorial.split, dropoff.labels, FALSE)
 ```
 
 
 #### Tutorial and post tutorial dropoffs
 
-Below are simply concatenations of the graphs from each of the two sub-sections above.
+Below are simply concatenations of the graphs from each of the two sub-sections above. These are followed by versions that use percentage of total users remaining instead of counts.
 
 
 ```{r public.deployment.user.dropoff.plot, echo=FALSE, fig.width=6, fig.height=3}
@@ -1792,8 +1831,10 @@ users.remaining.all.split <-
 
 combined.dropoff.labels <- c(step.labels, dropoff.labels[2:length(dropoff.labels)])
 
-plot.dropoffs(users.remaining.all, combined.dropoff.labels)
-plot.dropoffs.split(users.remaining.all.split, combined.dropoff.labels)
+plot.dropoffs(users.remaining.all, combined.dropoff.labels, FALSE)
+plot.dropoffs.split(users.remaining.all.split, combined.dropoff.labels, FALSE)
+plot.dropoffs(users.remaining.all, combined.dropoff.labels, TRUE)
+plot.dropoffs.split(users.remaining.all.split, combined.dropoff.labels, TRUE)
 ```
 
 
