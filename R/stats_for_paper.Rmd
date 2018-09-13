@@ -1097,7 +1097,9 @@ speeds <-
          m_per_min = meters_audited / minutes_audited,
          mins_per_mission = approx.min.per.mission(minutes_audited, mission_count, feet_audited),
          hours_audited = minutes_audited / 60,
-         minutes_per_session = minutes_audited / n_sessions)
+         minutes_per_session = minutes_audited / n_sessions,
+         total_paid = if_else(role == 'Turker', 0.43 + 4.17 * feet_audited / 5280, 0),
+         pay_per_hr = total_paid / hours_audited)
 
 filtered.speeds <-
   speeds %>%
@@ -1322,7 +1324,8 @@ nonfiltered.speeds <-
 kable(
   nonfiltered.speeds %>%
     mutate(km = meters_audited / 1000) %>%
-    dplyr::select(-meters_audited, -feet_audited, -mins_per_mission, -hours_audited) %>%
+    dplyr::select(-meters_audited, -feet_audited, -mins_per_mission, -hours_audited,
+                  -total_paid, -pay_per_hr) %>%
     summarise_vars('role', include.n = TRUE),
   digits = 3,
   align = 'l'
@@ -1358,7 +1361,8 @@ filtered.speeds.with.researchers <-
 kable(
   filtered.speeds.with.researchers %>%
     mutate(km = meters_audited / 1000) %>%
-    dplyr::select(-meters_audited, -feet_audited, -mins_per_mission, -hours_audited) %>%
+    dplyr::select(-meters_audited, -feet_audited, -mins_per_mission, -hours_audited,
+                  -total_paid, -pay_per_hr) %>%
     summarise_vars('role', include.n = TRUE),
   digits = 3,
   align = 'l'
@@ -2967,44 +2971,49 @@ Here are the distribution of the streets across DC, registered user routes, and 
 ```{r turk.zone.type.bar.graphs.setup, echo=FALSE}
 quadrant.distro.data <-
   read.csv('../data/dc_quadrant_distribution.csv', stringsAsFactors = FALSE) %>%
-  rename('Anonymous Users' = anon_user_quadrant_distrib..,
-         'Registered Users' = registered_user_quadrant_dist..,
-         DC = all_street_quadrant_distribution..) %>%
-  gather(key = 'user_group', value = 'distribution', 'Anonymous Users', 'Registered Users', DC) %>%
-  mutate(user_group = factor(user_group, levels = c('DC', 'Registered Users', 'Anonymous Users')),
+  rename(' Anonymous Users' = anon_user_quadrant_distrib..,
+         ' Registered Users' = registered_user_quadrant_dist..,
+         ' DC' = all_street_quadrant_distribution..) %>%
+  gather(key = 'user_group', value = 'distribution',
+         ' Anonymous Users', ' Registered Users', ' DC') %>%
+  mutate(user_group = factor(user_group,
+                             levels = c(' DC', ' Registered Users', ' Anonymous Users')),
          DC_quadrant = factor(DC_quadrant),
          distribution = as.numeric(sub('%', '', distribution)) / 100)
 
 zone.distro.data <-
   read.csv('../data/zone_type_distribution.csv', stringsAsFactors = FALSE) %>%
-  rename('Anonymous Users' = anon_user_zone_distrib..,
-         'Registered Users' = registered_user_zone_dist..,
-         DC = all_street_zone_distribution..) %>%
-  gather(key = 'user_group', value = 'distribution', 'Anonymous Users', 'Registered Users', DC) %>%
+  rename(' Anonymous Users' = anon_user_zone_distrib..,
+         ' Registered Users' = registered_user_zone_dist..,
+         ' DC' = all_street_zone_distribution..) %>%
+  gather(key = 'user_group',
+         value = 'distribution', ' Anonymous Users', ' Registered Users', ' DC') %>%
   mutate(user_group = factor(user_group,
-                             levels = c('DC', 'Registered Users', 'Anonymous Users')),
+                             levels = c(' DC', ' Registered Users', ' Anonymous Users')),
          DC_zone_type = factor(DC_zone_type),
          distribution = as.numeric(sub('%', '', distribution)) / 100)
 ```
 
 ```{r turk.zone.type.bar.graph.1, echo=FALSE, fig.width=5, fig.height=3}
 ggplot(data = quadrant.distro.data, aes(x = DC_quadrant, y = distribution, fill = user_group)) +
-  geom_col(position = 'dodge') +
+  geom_col(position = 'dodge', colour = '#616161') +
   my.theme.discrete.x +
   theme(legend.title = element_blank()) +
   xlab('DC Quadrant') +
   ylab('Share of Streets (%)') +
-  scale_y_continuous(expand = c(0.01, 0), labels = scales::percent)
+  scale_y_continuous(expand = c(0, 0), labels = scales::percent, limits = c(0, 0.75)) +
+  scale_fill_brewer(type = "qual", palette = 'Blues', direction = 2, aesthetics = "fill")
 ```
 ```{r turk.zone.type.bar.graph.2, echo=FALSE, fig.width=6, fig.height=5}
 ggplot(data = zone.distro.data, aes(x = DC_zone_type, y = distribution, fill = user_group)) +
-  geom_col(position = 'dodge') +
+  geom_col(position = 'dodge', colour = '#616161') +
   my.theme.discrete.x +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
         legend.title = element_blank()) +
   xlab('Zone Type') +
   ylab('Share of Streets (%)') +
-  scale_y_continuous(expand = c(0.01, 0), labels = scales::percent)
+  scale_y_continuous(expand = c(0, 0), labels = scales::percent, limits = c(0, 0.75)) +
+  scale_fill_brewer(type = "qual", palette = 'Blues', direction = 2, aesthetics = "fill")
 ```
 
 #### Semantic grouping
