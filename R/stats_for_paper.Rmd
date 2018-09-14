@@ -2308,7 +2308,7 @@ kable(
 
 NOTE: In these tables, the data is binary (not ordinal), and is at the street level (not 5 meter level).
 
-Our average (mean) IRR (kripp alpha) over the 7 rounds, by label type, is in the first table below, followed by the IRR in each round by label type:
+Our average (mean) IRR (kripp alpha) over the 7 rounds, by label type, is in the first table below, followed by mean kripp alpha across label types for each round, followed by the IRR in each round by label type:
 
 ```{r turk.irr.stats, echo=FALSE}
 kable(
@@ -2318,6 +2318,13 @@ kable(
   digits = 3,
   align = 'l'
   )
+kable(
+  clean.agreement.data %>%
+    group_by(round.code) %>%
+    dplyr::summarise(mean.kripp.alpha = mean(kripp.alpha)),
+  digits = 3,
+  align = 'l'
+)
 kable(
   clean.agreement.data %>%
     arrange(label.type, round.code) %>%
@@ -2341,7 +2348,7 @@ NOTE: In this section, the data is binary (not ordinal), we are only considering
 
 Below is a table showing label type accuracy at the two granularity levels, followed by a graph that gives a visual representation of the mean and standard error.
 
-```{r turk.granularity.analysis, echo=FALSE, fig.width=7.5, fig.height=6}
+```{r turk.granularity.analysis, echo=FALSE, fig.width=7.5, fig.height=5}
 granularity.analysis.data <-
   data.with.raw.accuracy %>%
   dplyr::filter(included.severity == 'all',
@@ -2396,7 +2403,7 @@ ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.val
 
 And here is the same graph as above for only "good users", i.e., those with a labeling frequency over 3.75 labels per 100 meters.
 
-```{r turk.granularity.analysis.good.users, echo=FALSE, fig.width=7.5, fig.height=6}
+```{r turk.granularity.analysis.good.users, echo=FALSE, fig.width=7.5, fig.height=5}
 good.validation.study.users <-
   data.with.raw.accuracy %>%
   dplyr::filter(n.workers == 1, binary == FALSE, included.severity == 'all',

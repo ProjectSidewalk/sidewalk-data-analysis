@@ -377,7 +377,7 @@ NOTE: In this table, we are only considering single users auditing (i.e., no mul
 
 NOTE: In these tables, the data is binary (not ordinal), and is at the street level (not 5 meter level).
 
-Our average (mean) IRR (kripp alpha) over the 7 rounds, by label type, is in the first table below, followed by the IRR in each round by label type:
+Our average (mean) IRR (kripp alpha) over the 7 rounds, by label type, is in the first table below, followed by mean kripp alpha across label types for each round, followed by the IRR in each round by label type:
 
 | label.type  | mean.kripp.alpha |
 |:------------|:-----------------|
@@ -386,6 +386,16 @@ Our average (mean) IRR (kripp alpha) over the 7 rounds, by label type, is in the
 | Obstacle    | 0.342            |
 | SurfaceProb | 0.477            |
 | Problem     | 0.475            |
+
+| round.code | mean.kripp.alpha |
+|:-----------|:-----------------|
+| 1          | 0.717            |
+| 2          | 0.503            |
+| 3          | 0.651            |
+| 4          | 0.405            |
+| 5          | 0.574            |
+| 6          | 0.808            |
+| 7          | 0.526            |
 
 | label.type.round | kripp.alpha |
 |:-----------------|:------------|
