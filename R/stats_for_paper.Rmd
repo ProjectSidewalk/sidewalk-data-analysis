@@ -2341,7 +2341,7 @@ NOTE: In this section, the data is binary (not ordinal), we are only considering
 
 Below is a table showing label type accuracy at the two granularity levels, followed by a graph that gives a visual representation of the mean and standard error.
 
-```{r turk.granularity.analysis, echo=FALSE, fig.width=7.5, fig.height=4.5}
+```{r turk.granularity.analysis, echo=FALSE, fig.width=7.5, fig.height=6}
 granularity.analysis.data <-
   data.with.raw.accuracy %>%
   dplyr::filter(included.severity == 'all',
@@ -2388,6 +2388,53 @@ ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.val
   geom_errorbar(aes(ymin = error.bar.min, ymax = error.bar.max, group = granularity),
                 width = 0.25, position = position_dodge(0.9)) +
   scale_x_discrete(labels = granularity.analysis.labels) +
+  scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.0), expand = c(0.01, 0)) +
+  facet_grid(accuracy.type ~ .) +
+  ggtitle('Street vs. 5 Meter level Granularity') +
+  my.theme.discrete.x
+```
+
+And here is the same graph as above for only "good users", i.e., those with a labeling frequency over 3.75 labels per 100 meters.
+
+```{r turk.granularity.analysis.good.users, echo=FALSE, fig.width=7.5, fig.height=6}
+good.validation.study.users <-
+  data.with.raw.accuracy %>%
+  dplyr::filter(n.workers == 1, binary == FALSE, included.severity == 'all',
+                granularity == 'street', label.type == 'All') %>%
+  mutate(label.count = true.pos + false.pos,
+         labels.per.100m = if_else(is.anon.route,
+         label.count / 6.096, label.count / 12.192)) %>%
+  dplyr::filter(labels.per.100m >= 3.75) %>%
+  distinct(worker1) %>%
+  pull()
+
+granularity.analysis.summary.good.users <-
+  granularity.analysis.data %>%
+  dplyr::filter(worker1 %in% good.validation.study.users) %>%
+  group_by(label.type, accuracy.type, granularity) %>%
+  dplyr::summarize(sd = sd(accuracy.value, na.rm = TRUE),
+                   se = sd(accuracy.value, na.rm = TRUE) / sqrt(n()),
+                   mean.accuracy.value = mean(accuracy.value, na.rm = TRUE),
+                   median.accuracy.value = median(accuracy.value, na.rm = TRUE),
+                   accuracy.value = mean(accuracy.value, na.rm = TRUE),
+                   error.bar.min = max(0, accuracy.value - se),
+                   error.bar.max = min(1, accuracy.value + se)) %>%
+  ungroup()
+
+granularity.analysis.labels.good.users <-
+  granularity.analysis.summary.good.users %>%
+  dplyr::filter(granularity == 'street', accuracy.type == 'recall') %>%
+  group_by(label.type) %>%
+  dplyr::summarise(n.users = sum(!is.na(accuracy.value))) %>%
+  inner_join(gt.count.by.label.type, by = 'label.type') %>%
+  mutate(label = paste0(label.type, '\nN=', n.users, ';L=', gt.labels)) %>%
+  pull(label)
+
+ggplot(data = granularity.analysis.summary.good.users, aes(x = label.type, y = accuracy.value)) +
+  geom_col(aes(group = granularity, fill = granularity), position = position_dodge()) +
+  geom_errorbar(aes(ymin = error.bar.min, ymax = error.bar.max, group = granularity),
+                width = 0.25, position = position_dodge(0.9)) +
+  scale_x_discrete(labels = granularity.analysis.labels.good.users) +
   scale_y_continuous(breaks = ACCURACY_BREAKS, limits = c(0, 1.0), expand = c(0.01, 0)) +
   facet_grid(accuracy.type ~ .) +
   ggtitle('Street vs. 5 Meter level Granularity') +

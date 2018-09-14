@@ -477,6 +477,10 @@ Below is a table showing label type accuracy at the two granularity levels, foll
 
 ![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
 
+And here is the same graph as above for only "good users", i.e., those with a labeling frequency over 3.75 labels per 100 meters.
+
+![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis.good.users-1.png)
+
 *Takeaways*:
 
 -   Analyzing at the 5 meter level shows higher raw accuracy and specificity, both because of the large number of true negatives that we get from splitting into 5 meter segments; there are very few street segments with no labels at all.
