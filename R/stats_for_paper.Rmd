@@ -2306,15 +2306,24 @@ kable(
 
 ### IRR
 
-Our average (mean) IRR over the 7 rounds, by label type, is in the table below:
+NOTE: In these tables, the data is binary (not ordinal), and is at the street level (not 5 meter level).
 
-NOTE: In this table, the data is binary (not ordinal), and is at the street level (not 5 meter level).
+Our average (mean) IRR (kripp alpha) over the 7 rounds, by label type, is in the first table below, followed by the IRR in each round by label type:
 
 ```{r turk.irr.stats, echo=FALSE}
 kable(
   clean.agreement.data %>%
     group_by(label.type) %>%
     dplyr::summarize(mean.kripp.alpha = mean(kripp.alpha)),
+  digits = 3,
+  align = 'l'
+  )
+kable(
+  clean.agreement.data %>%
+    arrange(label.type, round.code) %>%
+    mutate(label.type.round = paste0(label.type, ', ', round.code),
+           label.type.round = factor(label.type.round, levels = unique(label.type.round))) %>%
+    dplyr::select(label.type.round, kripp.alpha),
   digits = 3,
   align = 'l'
   )

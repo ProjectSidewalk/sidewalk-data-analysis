@@ -375,9 +375,9 @@ NOTE: In this table, we are only considering single users auditing (i.e., no mul
 
 ### IRR
 
-Our average (mean) IRR over the 7 rounds, by label type, is in the table below:
+NOTE: In these tables, the data is binary (not ordinal), and is at the street level (not 5 meter level).
 
-NOTE: In this table, the data is binary (not ordinal), and is at the street level (not 5 meter level).
+Our average (mean) IRR (kripp alpha) over the 7 rounds, by label type, is in the first table below, followed by the IRR in each round by label type:
 
 | label.type  | mean.kripp.alpha |
 |:------------|:-----------------|
@@ -386,6 +386,44 @@ NOTE: In this table, the data is binary (not ordinal), and is at the street leve
 | Obstacle    | 0.342            |
 | SurfaceProb | 0.477            |
 | Problem     | 0.475            |
+
+| label.type.round | kripp.alpha |
+|:-----------------|:------------|
+| CurbRamp, 1      | 1.000       |
+| CurbRamp, 2      | 0.712       |
+| CurbRamp, 3      | 1.000       |
+| CurbRamp, 4      | 1.000       |
+| CurbRamp, 5      | 0.636       |
+| CurbRamp, 6      | 1.000       |
+| CurbRamp, 7      | 1.000       |
+| NoCurbRamp, 1    | 1.000       |
+| NoCurbRamp, 2    | 0.000       |
+| NoCurbRamp, 3    | 1.000       |
+| NoCurbRamp, 4    | 0.769       |
+| NoCurbRamp, 5    | 1.000       |
+| NoCurbRamp, 6    | 1.000       |
+| NoCurbRamp, 7    | 0.741       |
+| Obstacle, 1      | 0.546       |
+| Obstacle, 2      | 0.659       |
+| Obstacle, 3      | 0.304       |
+| Obstacle, 4      | 0.192       |
+| Obstacle, 5      | 0.227       |
+| Obstacle, 6      | 0.351       |
+| Obstacle, 7      | 0.115       |
+| SurfaceProb, 1   | 0.470       |
+| SurfaceProb, 2   | 0.532       |
+| SurfaceProb, 3   | 0.425       |
+| SurfaceProb, 4   | 0.130       |
+| SurfaceProb, 5   | 0.605       |
+| SurfaceProb, 6   | 0.846       |
+| SurfaceProb, 7   | 0.333       |
+| Problem, 1       | 0.568       |
+| Problem, 2       | 0.611       |
+| Problem, 3       | 0.525       |
+| Problem, 4       | -0.068      |
+| Problem, 5       | 0.404       |
+| Problem, 6       | 0.843       |
+| Problem, 7       | 0.442       |
 
 Possible Stories
 ----------------
