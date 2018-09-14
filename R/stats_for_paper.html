@@ -53,6 +53,7 @@ April 17, 2018</p>
 <ul>
 <li><a href="#ground-truth-label-counts">Ground truth label counts</a></li>
 <li><a href="#aggregate-accuracy">Aggregate accuracy</a></li>
+<li><a href="#raw-accuracy">Raw accuracy</a></li>
 <li><a href="#voting-improved-recall-when-at-least-one-turker-marks">Voting: Improved recall when at least one turker marks</a></li>
 <li><a href="#descriptive-stats-for-users">Descriptive stats for users</a></li>
 <li><a href="#irr">IRR</a></li>
@@ -1351,6 +1352,249 @@ April 17, 2018</p>
 <td align="left">0.181</td>
 <td align="left">0.285</td>
 <td align="left">0.223</td>
+</tr>
+</tbody>
+</table>
+<h3 id="raw-accuracy">Raw accuracy</h3>
+<p>Mean/median/sd raw accuracy by user group and label type - street level:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">user.group.label.type</th>
+<th align="left">md</th>
+<th align="left">mn</th>
+<th align="left">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">anon, All</td>
+<td align="left">0.692</td>
+<td align="left">0.673</td>
+<td align="left">0.164</td>
+</tr>
+<tr class="even">
+<td align="left">anon, Problem</td>
+<td align="left">0.500</td>
+<td align="left">0.494</td>
+<td align="left">0.256</td>
+</tr>
+<tr class="odd">
+<td align="left">anon, CurbRamp</td>
+<td align="left">0.944</td>
+<td align="left">0.764</td>
+<td align="left">0.322</td>
+</tr>
+<tr class="even">
+<td align="left">anon, NoCurbRamp</td>
+<td align="left">0.764</td>
+<td align="left">0.774</td>
+<td align="left">0.197</td>
+</tr>
+<tr class="odd">
+<td align="left">anon, Obstacle</td>
+<td align="left">0.667</td>
+<td align="left">0.697</td>
+<td align="left">0.203</td>
+</tr>
+<tr class="even">
+<td align="left">anon, SurfaceProb</td>
+<td align="left">0.400</td>
+<td align="left">0.456</td>
+<td align="left">0.323</td>
+</tr>
+<tr class="odd">
+<td align="left">reg, All</td>
+<td align="left">0.750</td>
+<td align="left">0.737</td>
+<td align="left">0.112</td>
+</tr>
+<tr class="even">
+<td align="left">reg, Problem</td>
+<td align="left">0.615</td>
+<td align="left">0.606</td>
+<td align="left">0.173</td>
+</tr>
+<tr class="odd">
+<td align="left">reg, CurbRamp</td>
+<td align="left">0.926</td>
+<td align="left">0.836</td>
+<td align="left">0.236</td>
+</tr>
+<tr class="even">
+<td align="left">reg, NoCurbRamp</td>
+<td align="left">0.760</td>
+<td align="left">0.771</td>
+<td align="left">0.187</td>
+</tr>
+<tr class="odd">
+<td align="left">reg, Obstacle</td>
+<td align="left">0.793</td>
+<td align="left">0.748</td>
+<td align="left">0.186</td>
+</tr>
+<tr class="even">
+<td align="left">reg, SurfaceProb</td>
+<td align="left">0.612</td>
+<td align="left">0.595</td>
+<td align="left">0.242</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1, All</td>
+<td align="left">0.720</td>
+<td align="left">0.712</td>
+<td align="left">0.132</td>
+</tr>
+<tr class="even">
+<td align="left">turk1, Problem</td>
+<td align="left">0.667</td>
+<td align="left">0.646</td>
+<td align="left">0.198</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1, CurbRamp</td>
+<td align="left">0.909</td>
+<td align="left">0.854</td>
+<td align="left">0.201</td>
+</tr>
+<tr class="even">
+<td align="left">turk1, NoCurbRamp</td>
+<td align="left">0.750</td>
+<td align="left">0.685</td>
+<td align="left">0.240</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1, Obstacle</td>
+<td align="left">0.714</td>
+<td align="left">0.689</td>
+<td align="left">0.186</td>
+</tr>
+<tr class="even">
+<td align="left">turk1, SurfaceProb</td>
+<td align="left">0.667</td>
+<td align="left">0.620</td>
+<td align="left">0.225</td>
+</tr>
+</tbody>
+</table>
+<p>Mean/median/sd raw accuracy by user group and label type - 5 meter level:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">user.group.label.type</th>
+<th align="left">md</th>
+<th align="left">mn</th>
+<th align="left">sd</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">anon, All</td>
+<td align="left">0.954</td>
+<td align="left">0.946</td>
+<td align="left">0.026</td>
+</tr>
+<tr class="even">
+<td align="left">anon, Problem</td>
+<td align="left">0.870</td>
+<td align="left">0.863</td>
+<td align="left">0.076</td>
+</tr>
+<tr class="odd">
+<td align="left">anon, CurbRamp</td>
+<td align="left">0.948</td>
+<td align="left">0.936</td>
+<td align="left">0.053</td>
+</tr>
+<tr class="even">
+<td align="left">anon, NoCurbRamp</td>
+<td align="left">0.984</td>
+<td align="left">0.981</td>
+<td align="left">0.019</td>
+</tr>
+<tr class="odd">
+<td align="left">anon, Obstacle</td>
+<td align="left">0.976</td>
+<td align="left">0.970</td>
+<td align="left">0.025</td>
+</tr>
+<tr class="even">
+<td align="left">anon, SurfaceProb</td>
+<td align="left">0.912</td>
+<td align="left">0.898</td>
+<td align="left">0.075</td>
+</tr>
+<tr class="odd">
+<td align="left">reg, All</td>
+<td align="left">0.955</td>
+<td align="left">0.952</td>
+<td align="left">0.021</td>
+</tr>
+<tr class="even">
+<td align="left">reg, Problem</td>
+<td align="left">0.924</td>
+<td align="left">0.909</td>
+<td align="left">0.055</td>
+</tr>
+<tr class="odd">
+<td align="left">reg, CurbRamp</td>
+<td align="left">0.918</td>
+<td align="left">0.911</td>
+<td align="left">0.046</td>
+</tr>
+<tr class="even">
+<td align="left">reg, NoCurbRamp</td>
+<td align="left">0.987</td>
+<td align="left">0.981</td>
+<td align="left">0.021</td>
+</tr>
+<tr class="odd">
+<td align="left">reg, Obstacle</td>
+<td align="left">0.976</td>
+<td align="left">0.971</td>
+<td align="left">0.025</td>
+</tr>
+<tr class="even">
+<td align="left">reg, SurfaceProb</td>
+<td align="left">0.960</td>
+<td align="left">0.945</td>
+<td align="left">0.047</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1, All</td>
+<td align="left">0.951</td>
+<td align="left">0.941</td>
+<td align="left">0.033</td>
+</tr>
+<tr class="even">
+<td align="left">turk1, Problem</td>
+<td align="left">0.893</td>
+<td align="left">0.874</td>
+<td align="left">0.081</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1, CurbRamp</td>
+<td align="left">0.933</td>
+<td align="left">0.918</td>
+<td align="left">0.043</td>
+</tr>
+<tr class="even">
+<td align="left">turk1, NoCurbRamp</td>
+<td align="left">0.984</td>
+<td align="left">0.961</td>
+<td align="left">0.069</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1, Obstacle</td>
+<td align="left">0.970</td>
+<td align="left">0.958</td>
+<td align="left">0.038</td>
+</tr>
+<tr class="even">
+<td align="left">turk1, SurfaceProb</td>
+<td align="left">0.948</td>
+<td align="left">0.929</td>
+<td align="left">0.057</td>
 </tr>
 </tbody>
 </table>

@@ -19,6 +19,7 @@ April 17, 2018
     -   [High level results](#high-level-results-1)
         -   [Ground truth label counts](#ground-truth-label-counts)
         -   [Aggregate accuracy](#aggregate-accuracy)
+        -   [Raw accuracy](#raw-accuracy)
         -   [Voting: Improved recall when at least one turker marks](#voting-improved-recall-when-at-least-one-turker-marks)
         -   [Descriptive stats for users](#descriptive-stats-for-users)
         -   [IRR](#irr)
@@ -284,6 +285,54 @@ Mean accuracy across all users - 5 meter level:
 |:-----------|:-------|:----------|:----------|
 | All        | 0.445  | 0.490     | 0.445     |
 | Problem    | 0.181  | 0.285     | 0.223     |
+
+### Raw accuracy
+
+Mean/median/sd raw accuracy by user group and label type - street level:
+
+| user.group.label.type | md    | mn    | sd    |
+|:----------------------|:------|:------|:------|
+| anon, All             | 0.692 | 0.673 | 0.164 |
+| anon, Problem         | 0.500 | 0.494 | 0.256 |
+| anon, CurbRamp        | 0.944 | 0.764 | 0.322 |
+| anon, NoCurbRamp      | 0.764 | 0.774 | 0.197 |
+| anon, Obstacle        | 0.667 | 0.697 | 0.203 |
+| anon, SurfaceProb     | 0.400 | 0.456 | 0.323 |
+| reg, All              | 0.750 | 0.737 | 0.112 |
+| reg, Problem          | 0.615 | 0.606 | 0.173 |
+| reg, CurbRamp         | 0.926 | 0.836 | 0.236 |
+| reg, NoCurbRamp       | 0.760 | 0.771 | 0.187 |
+| reg, Obstacle         | 0.793 | 0.748 | 0.186 |
+| reg, SurfaceProb      | 0.612 | 0.595 | 0.242 |
+| turk1, All            | 0.720 | 0.712 | 0.132 |
+| turk1, Problem        | 0.667 | 0.646 | 0.198 |
+| turk1, CurbRamp       | 0.909 | 0.854 | 0.201 |
+| turk1, NoCurbRamp     | 0.750 | 0.685 | 0.240 |
+| turk1, Obstacle       | 0.714 | 0.689 | 0.186 |
+| turk1, SurfaceProb    | 0.667 | 0.620 | 0.225 |
+
+Mean/median/sd raw accuracy by user group and label type - 5 meter level:
+
+| user.group.label.type | md    | mn    | sd    |
+|:----------------------|:------|:------|:------|
+| anon, All             | 0.954 | 0.946 | 0.026 |
+| anon, Problem         | 0.870 | 0.863 | 0.076 |
+| anon, CurbRamp        | 0.948 | 0.936 | 0.053 |
+| anon, NoCurbRamp      | 0.984 | 0.981 | 0.019 |
+| anon, Obstacle        | 0.976 | 0.970 | 0.025 |
+| anon, SurfaceProb     | 0.912 | 0.898 | 0.075 |
+| reg, All              | 0.955 | 0.952 | 0.021 |
+| reg, Problem          | 0.924 | 0.909 | 0.055 |
+| reg, CurbRamp         | 0.918 | 0.911 | 0.046 |
+| reg, NoCurbRamp       | 0.987 | 0.981 | 0.021 |
+| reg, Obstacle         | 0.976 | 0.971 | 0.025 |
+| reg, SurfaceProb      | 0.960 | 0.945 | 0.047 |
+| turk1, All            | 0.951 | 0.941 | 0.033 |
+| turk1, Problem        | 0.893 | 0.874 | 0.081 |
+| turk1, CurbRamp       | 0.933 | 0.918 | 0.043 |
+| turk1, NoCurbRamp     | 0.984 | 0.961 | 0.069 |
+| turk1, Obstacle       | 0.970 | 0.958 | 0.038 |
+| turk1, SurfaceProb    | 0.948 | 0.929 | 0.057 |
 
 ### Voting: Improved recall when at least one turker marks
 

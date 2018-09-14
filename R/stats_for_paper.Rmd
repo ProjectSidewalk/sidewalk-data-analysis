@@ -2170,6 +2170,43 @@ kable(
   )
 ```
 
+### Raw accuracy
+
+Mean/median/sd raw accuracy by user group and label type - street level:
+
+```{r turk.showing.stats.raw.accuracy.1, echo=FALSE}
+turk.showing.raw.accuracy.by.label.type <-
+  data.with.raw.accuracy %>%
+  dplyr::filter(binary == TRUE,
+                n.workers == 1,
+                included.severity == 'all',
+                label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
+  arrange(worker.type, label.type) %>%
+  mutate(user.group.label.type = paste0(worker.type, ', ', label.type),
+         # Making a factor and passing levels param to prevent auto-ordering levels alphabetically
+         user.group.label.type = factor(user.group.label.type,
+                                        levels = unique(user.group.label.type)))
+
+kable(
+  turk.showing.raw.accuracy.by.label.type %>%
+    dplyr::filter(granularity == 'street') %>%
+    summarise_vars('user.group.label.type', c('raw.accuracy')),
+  digits = 3,
+  align = 'l'
+  )
+```
+
+Mean/median/sd raw accuracy by user group and label type - 5 meter level:
+
+```{r turk.showing.stats.raw.accuracy.2, echo=FALSE}
+kable(
+  turk.showing.raw.accuracy.by.label.type %>%
+    dplyr::filter(granularity == '5_meter') %>%
+    summarise_vars('user.group.label.type', c('raw.accuracy')),
+  digits = 3,
+  align = 'l'
+  )
+```
 
 ### Voting: Improved recall when at least one turker marks
 
