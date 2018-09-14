@@ -462,6 +462,18 @@ Below is a table showing label type accuracy at the two granularity levels, foll
 | precision     | Obstacle    | 5\_meter    | 0.182         | 0.091           | 0.235 | 0.024 |
 | precision     | SurfaceProb | street      | 0.726         | 1.000           | 0.354 | 0.039 |
 | precision     | SurfaceProb | 5\_meter    | 0.342         | 0.250           | 0.354 | 0.039 |
+| raw.accuracy  | All         | street      | 0.717         | 0.729           | 0.130 | 0.011 |
+| raw.accuracy  | All         | 5\_meter    | 0.946         | 0.952           | 0.029 | 0.002 |
+| raw.accuracy  | Problem     | street      | 0.612         | 0.625           | 0.201 | 0.018 |
+| raw.accuracy  | Problem     | 5\_meter    | 0.886         | 0.907           | 0.074 | 0.006 |
+| raw.accuracy  | CurbRamp    | street      | 0.837         | 0.909           | 0.231 | 0.020 |
+| raw.accuracy  | CurbRamp    | 5\_meter    | 0.918         | 0.928           | 0.046 | 0.004 |
+| raw.accuracy  | NoCurbRamp  | street      | 0.729         | 0.750           | 0.219 | 0.019 |
+| raw.accuracy  | NoCurbRamp  | 5\_meter    | 0.971         | 0.984           | 0.052 | 0.005 |
+| raw.accuracy  | Obstacle    | street      | 0.712         | 0.750           | 0.188 | 0.016 |
+| raw.accuracy  | Obstacle    | 5\_meter    | 0.964         | 0.972           | 0.033 | 0.003 |
+| raw.accuracy  | SurfaceProb | street      | 0.590         | 0.625           | 0.248 | 0.022 |
+| raw.accuracy  | SurfaceProb | 5\_meter    | 0.931         | 0.952           | 0.057 | 0.005 |
 
 ![](stats_for_paper_files/figure-markdown_github/turk.granularity.analysis-1.png)
 

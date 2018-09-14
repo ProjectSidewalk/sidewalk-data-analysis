@@ -2348,7 +2348,8 @@ granularity.analysis.data <-
                 binary == TRUE,
                 n.workers == 1,
                 label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
-  gather(accuracy.type, accuracy.value, recall, precision, na.rm = TRUE, factor_key = TRUE)
+  gather(accuracy.type, accuracy.value, recall, precision, raw.accuracy,
+         na.rm = TRUE, factor_key = TRUE)
 
 granularity.analysis.summary <-
   granularity.analysis.data %>%
