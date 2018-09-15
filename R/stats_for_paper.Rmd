@@ -3595,15 +3595,14 @@ TODO: Make some graphs.
 
 NOTE: I did this analysis using both >=3 and >=4, and both produced significant results. The difference between low and high severity is larger for >=3 compared to >=4, and thus the p-value is smaller. However, we could use >=4 if the story is more compelling.
 
-NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+NOTE: In this section, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 ```{r turk.high.severity.setup.1, echo=FALSE}
 low.severity.check.data.1 <-
   data.with.raw.accuracy %>%
   dplyr::filter(included.severity %in% c('all', '<=3', '>=4'),
                 label.type == 'Problem',
-                worker.type %in% c('reg', 'anon', 'turk1'),
-                granularity == 'street') %>%
+                worker.type %in% c('reg', 'anon', 'turk1')) %>%
   droplevels %>%
   mutate(included.severity = factor(included.severity,
                                     labels = c('all', '<=3', '>=4'),
@@ -3613,15 +3612,19 @@ recall.by.severity.1 <-
   low.severity.check.data.1 %>%
   dplyr::filter(binary == TRUE) %>%
   group_by(included.severity) %>%
-  summarize(n.users = sum(!is.na(recall)),
-            mean.recall = mean(recall, na.rm = TRUE),
-            median.recall = median(recall, na.rm = TRUE),
-            sd.recall = sd(recall, na.rm = TRUE))
+  summarize(n.users = sum(!is.na(recall[granularity == 'street'])),
+            mn.rec.st = mean(recall[granularity == 'street'], na.rm = TRUE),
+            md.rec.st = median(recall[granularity == 'street'], na.rm = TRUE),
+            sd.rec.st = sd(recall[granularity == 'street'], na.rm = TRUE),
+            mn.rec.5m = mean(recall[granularity == '5_meter'], na.rm = TRUE),
+            md.rec.5m = median(recall[granularity == '5_meter'], na.rm = TRUE),
+            sd.rec.5m = sd(recall[granularity == '5_meter'], na.rm = TRUE))
 
 gt.counts.by.severity.1 <-
   low.severity.check.data.1 %>%
   dplyr::filter(worker.type == 'turk1',
-                binary == FALSE) %>%
+                binary == FALSE,
+                granularity == 'street') %>%
   group_by(included.severity) %>%
   summarize(gt.problem.labels = sum(true.pos, false.neg))
 
@@ -3629,28 +3632,46 @@ severity.test.data.1 <-
   low.severity.check.data.1 %>%
   dplyr::filter(binary == TRUE, included.severity != 'all') %>%
   mutate(user.id = factor(worker1),
-         condition.id = factor(condition.id)) %>%
+         condition.id = factor(condition.id))
+
+severity.test.data.1.5m <-
+  severity.test.data.1 %>%
+  dplyr::filter(granularity == '5_meter') %>%
+  dplyr::select(user.id, condition.id, included.severity, true.pos, false.neg, recall) %>%
+  na.omit() %>%
+  droplevels()
+severity.test.data.1.street <-
+  severity.test.data.1 %>%
+  dplyr::filter(granularity == 'street') %>%
   dplyr::select(user.id, condition.id, included.severity, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 
-severity.model.1 <- glmer(recall ~ included.severity + (1 | condition.id / user.id),
-                        data = severity.test.data.1,
-                        family = binomial(link = 'logit'),
-                        weights = true.pos + false.neg,
-                        control = glmerControl(optimizer = "bobyqa",
-                                               optCtrl = list(maxfun = 100000)))
+severity.model.1.5m <- glmer(recall ~ included.severity + (1 | condition.id / user.id),
+                             data = severity.test.data.1.5m,
+                             family = binomial(link = 'logit'),
+                             weights = true.pos + false.neg,
+                             control = glmerControl(optimizer = "bobyqa",
+                                                    optCtrl = list(maxfun = 100000)))
+severity.model.1.street <- glmer(recall ~ included.severity + (1 | condition.id / user.id),
+                                data = severity.test.data.1.street,
+                                family = binomial(link = 'logit'),
+                                weights = true.pos + false.neg,
+                                control = glmerControl(optimizer = "bobyqa",
+                                                       optCtrl = list(maxfun = 100000)))
 
-lrt.severity.1 <- drop1(severity.model.1, test = 'Chisq')
+lrt.severity.1.5m <- drop1(severity.model.1.5m, test = 'Chisq')
+lrt.severity.1.street <- drop1(severity.model.1.street, test = 'Chisq')
 ```
 
 Below is a table showing the average recall across all users for labels that had severity <=3 (in the ground truth) and labels that had severity >=4, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (`r print.lrt.results(lrt.severity.1, severity.model.1, 'included.severity')`). You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (street-level: `r print.lrt.results(lrt.severity.1.street, severity.model.1.street, 'included.severity')`; 5 meter-level: `r print.lrt.results(lrt.severity.1.5m, severity.model.1.5m, 'included.severity')`). You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
 ```{r turk.high.severity.analysis.1, echo=FALSE, fig.width=8, fig.height=6}
 kable(
-  inner_join(gt.counts.by.severity.1, recall.by.severity.1, by = 'included.severity'),
+  inner_join(gt.counts.by.severity.1, recall.by.severity.1, by = 'included.severity') %>%
+    rename(sev = included.severity, gt.prob.labs = gt.problem.labels),
   format = 'markdown',
   digits = 3,
   align = 'l'
@@ -3663,8 +3684,7 @@ low.severity.check.data.2 <-
   data.with.raw.accuracy %>%
   dplyr::filter(included.severity %in% c('all', '<=2', '>=3'),
                 label.type == 'Problem',
-                worker.type %in% c('reg', 'anon', 'turk1'),
-                granularity == 'street') %>%
+                worker.type %in% c('reg', 'anon', 'turk1')) %>%
   droplevels %>%
   mutate(included.severity = factor(included.severity,
                                     labels = c('all', '<=2', '>=3'),
@@ -3674,15 +3694,19 @@ recall.by.severity.2 <-
   low.severity.check.data.2 %>%
   dplyr::filter(binary == TRUE) %>%
   group_by(included.severity) %>%
-  summarize(n.users = sum(!is.na(recall)),
-            mean.recall = mean(recall, na.rm = TRUE),
-            median.recall = median(recall, na.rm = TRUE),
-            sd.recall = sd(recall, na.rm = TRUE))
+  summarize(n.users = sum(!is.na(recall[granularity == 'street'])),
+            mn.rec.st = mean(recall[granularity == 'street'], na.rm = TRUE),
+            md.rec.st = median(recall[granularity == 'street'], na.rm = TRUE),
+            sd.rec.st = sd(recall[granularity == 'street'], na.rm = TRUE),
+            mn.rec.5m = mean(recall[granularity == '5_meter'], na.rm = TRUE),
+            md.rec.5m = median(recall[granularity == '5_meter'], na.rm = TRUE),
+            sd.rec.5m = sd(recall[granularity == '5_meter'], na.rm = TRUE))
 
 gt.counts.by.severity.2 <-
   low.severity.check.data.2 %>%
   dplyr::filter(worker.type == 'turk1',
-                binary == FALSE) %>%
+                binary == FALSE,
+                granularity == 'street') %>%
   group_by(included.severity) %>%
   summarize(gt.problem.labels = sum(true.pos, false.neg))
 
@@ -3690,19 +3714,36 @@ severity.test.data.2 <-
   low.severity.check.data.2 %>%
   dplyr::filter(binary == TRUE, included.severity != 'all') %>%
   mutate(user.id = factor(worker1),
-         condition.id = factor(condition.id)) %>%
+         condition.id = factor(condition.id))
+
+severity.test.data.2.5m <-
+  severity.test.data.2 %>%
+  dplyr::filter(granularity == '5_meter') %>%
+  dplyr::select(user.id, condition.id, included.severity, true.pos, false.neg, recall) %>%
+  na.omit() %>%
+  droplevels()
+severity.test.data.2.street <-
+  severity.test.data.2 %>%
+  dplyr::filter(granularity == 'street') %>%
   dplyr::select(user.id, condition.id, included.severity, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 
-severity.model.2 <- glmer(recall ~ included.severity + (1 | condition.id / user.id),
-                        data = severity.test.data.2,
-                        family = binomial(link = 'logit'),
-                        weights = true.pos + false.neg,
-                        control = glmerControl(optimizer = "bobyqa",
-                                               optCtrl = list(maxfun = 100000)))
+severity.model.2.5m <- glmer(recall ~ included.severity + (1 | condition.id / user.id),
+                                    data = severity.test.data.2.5m,
+                                    family = binomial(link = 'logit'),
+                                    weights = true.pos + false.neg,
+                                    control = glmerControl(optimizer = "bobyqa",
+                                                           optCtrl = list(maxfun = 100000)))
+severity.model.2.street <- glmer(recall ~ included.severity + (1 | condition.id / user.id),
+                                        data = severity.test.data.2.street,
+                                        family = binomial(link = 'logit'),
+                                        weights = true.pos + false.neg,
+                                        control = glmerControl(optimizer = "bobyqa",
+                                                               optCtrl = list(maxfun = 100000)))
 
-lrt.severity.2 <- drop1(severity.model.2, test = 'Chisq')
+lrt.severity.2.5m <- drop1(severity.model.2.5m, test = 'Chisq')
+lrt.severity.2.street <- drop1(severity.model.2.street, test = 'Chisq')
 
 # Possible diagnostic plots...
 # qqnorm(residuals(severity.model))
@@ -3714,11 +3755,12 @@ lrt.severity.2 <- drop1(severity.model.2, test = 'Chisq')
 
 Below is a table showing the average recall across all users for labels that had severity <=2 (in the ground truth) and labels that had severity >=3, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant ((`r print.lrt.results(lrt.severity.2, severity.model.2, 'included.severity')`).
+We also created binomial mixed effects models to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (street-level: `r print.lrt.results(lrt.severity.2.street, severity.model.2.street, 'included.severity')`; 5 meter-level: `r print.lrt.results(lrt.severity.2.5m, severity.model.2.5m, 'included.severity')`). You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
 ```{r turk.high.severity.analysis.2, echo=FALSE, fig.width=8, fig.height=6}
 kable(
-  inner_join(gt.counts.by.severity.2, recall.by.severity.2, by = 'included.severity'),
+  inner_join(gt.counts.by.severity.2, recall.by.severity.2, by = 'included.severity') %>%
+    rename(sev = included.severity, gt.prob.labs = gt.problem.labels),
   format = 'markdown',
   digits = 3,
   align = 'l'

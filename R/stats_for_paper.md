@@ -890,29 +890,35 @@ TODO: Make some graphs.
 
 NOTE: I did this analysis using both &gt;=3 and &gt;=4, and both produced significant results. The difference between low and high severity is larger for &gt;=3 compared to &gt;=4, and thus the p-value is smaller. However, we could use &gt;=4 if the story is more compelling.
 
-NOTE: In this section, the data are binary (not ordinal), and is at the street level (not 5 meter level), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+NOTE: In this section, the data are binary (not ordinal), we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
 
 Below is a table showing the average recall across all users for labels that had severity &lt;=3 (in the ground truth) and labels that had severity &gt;=4, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (likelihood ratio = 9.3761, df = 1, n = 214, p = 0.002). You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
+We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (street-level: likelihood ratio = 9.3761, df = 1, n = 214, p = 0.002; 5 meter-level: likelihood ratio = 29.76, df = 1, n = 214, p &lt; 0.001). You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
 <table style="width:100%;">
 <colgroup>
-<col width="22%" />
-<col width="22%" />
-<col width="10%" />
-<col width="15%" />
-<col width="17%" />
-<col width="12%" />
+<col width="5%" />
+<col width="14%" />
+<col width="9%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">included.severity</th>
-<th align="left">gt.problem.labels</th>
+<th align="left">sev</th>
+<th align="left">gt.prob.labs</th>
 <th align="left">n.users</th>
-<th align="left">mean.recall</th>
-<th align="left">median.recall</th>
-<th align="left">sd.recall</th>
+<th align="left">mn.rec.st</th>
+<th align="left">md.rec.st</th>
+<th align="left">sd.rec.st</th>
+<th align="left">mn.rec.5m</th>
+<th align="left">md.rec.5m</th>
+<th align="left">sd.rec.5m</th>
 </tr>
 </thead>
 <tbody>
@@ -923,6 +929,9 @@ We also created a binomial mixed effects model to determine the relationship bet
 <td align="left">0.577</td>
 <td align="left">0.6</td>
 <td align="left">0.312</td>
+<td align="left">0.181</td>
+<td align="left">0.131</td>
+<td align="left">0.175</td>
 </tr>
 <tr class="even">
 <td align="left">&lt;=3</td>
@@ -931,6 +940,9 @@ We also created a binomial mixed effects model to determine the relationship bet
 <td align="left">0.572</td>
 <td align="left">0.6</td>
 <td align="left">0.321</td>
+<td align="left">0.167</td>
+<td align="left">0.125</td>
+<td align="left">0.178</td>
 </tr>
 <tr class="odd">
 <td align="left">&gt;=4</td>
@@ -939,31 +951,40 @@ We also created a binomial mixed effects model to determine the relationship bet
 <td align="left">0.675</td>
 <td align="left">1.0</td>
 <td align="left">0.397</td>
+<td align="left">0.305</td>
+<td align="left">0.196</td>
+<td align="left">0.364</td>
 </tr>
 </tbody>
 </table>
 
 Below is a table showing the average recall across all users for labels that had severity &lt;=2 (in the ground truth) and labels that had severity &gt;=3, along with the number of labels that fall into each of those categories.
 
-We also created a binomial mixed effects model to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant ((likelihood ratio = 10.596, df = 1, n = 246, p = 0.001).
+We also created binomial mixed effects models to determine the relationship between severity and recall. We had severity (high or low) as the fixed effect and user id nested in route id as random effects. We modeled recall as binomial and used a logistic link function. Using a likelihood ratio test (LRT), we found the contribution of the fixed effect (severity) to be statistically significant (street-level: likelihood ratio = 10.596, df = 1, n = 246, p = 0.001; 5 meter-level: likelihood ratio = 41.89, df = 1, n = 246, p &lt; 0.001). You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
 <table style="width:100%;">
 <colgroup>
-<col width="22%" />
-<col width="22%" />
-<col width="10%" />
-<col width="15%" />
-<col width="17%" />
-<col width="12%" />
+<col width="5%" />
+<col width="14%" />
+<col width="9%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
+<col width="11%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">included.severity</th>
-<th align="left">gt.problem.labels</th>
+<th align="left">sev</th>
+<th align="left">gt.prob.labs</th>
 <th align="left">n.users</th>
-<th align="left">mean.recall</th>
-<th align="left">median.recall</th>
-<th align="left">sd.recall</th>
+<th align="left">mn.rec.st</th>
+<th align="left">md.rec.st</th>
+<th align="left">sd.rec.st</th>
+<th align="left">mn.rec.5m</th>
+<th align="left">md.rec.5m</th>
+<th align="left">sd.rec.5m</th>
 </tr>
 </thead>
 <tbody>
@@ -974,6 +995,9 @@ We also created a binomial mixed effects model to determine the relationship bet
 <td align="left">0.577</td>
 <td align="left">0.600</td>
 <td align="left">0.312</td>
+<td align="left">0.181</td>
+<td align="left">0.131</td>
+<td align="left">0.175</td>
 </tr>
 <tr class="even">
 <td align="left">&lt;=2</td>
@@ -982,6 +1006,9 @@ We also created a binomial mixed effects model to determine the relationship bet
 <td align="left">0.570</td>
 <td align="left">0.563</td>
 <td align="left">0.323</td>
+<td align="left">0.158</td>
+<td align="left">0.120</td>
+<td align="left">0.180</td>
 </tr>
 <tr class="odd">
 <td align="left">&gt;=3</td>
@@ -990,6 +1017,9 @@ We also created a binomial mixed effects model to determine the relationship bet
 <td align="left">0.698</td>
 <td align="left">0.833</td>
 <td align="left">0.355</td>
+<td align="left">0.290</td>
+<td align="left">0.199</td>
+<td align="left">0.322</td>
 </tr>
 </tbody>
 </table>
