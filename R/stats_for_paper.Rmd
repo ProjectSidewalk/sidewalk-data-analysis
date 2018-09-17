@@ -2284,6 +2284,45 @@ kable(
 ```
 
 
+### Giant table with accuracy
+
+```{r turk.big.table, echo=FALSE}
+all.users.with.raw.accuracy <-
+  data.with.raw.accuracy %>%
+  dplyr::filter(worker.type %in% c('turk1', 'anon', 'reg')) %>%
+  mutate(worker.type = 'all')
+
+turk.with.raw.accuracy <-
+  data.with.raw.accuracy %>%
+  dplyr::filter(n.workers %in% c(3, 5)) %>%
+  mutate(worker.type = case_when(n.workers == 3 ~ 'turk3.all',
+                                 n.workers == 5 ~ 'turk5.all'))
+
+expanded.data.with.raw.accuracy <-
+  data.with.raw.accuracy %>%
+  mutate(worker.type = case_when(worker.type == 'turk3' ~ 'turk3.maj.vote',
+                                 worker.type == 'turk5' ~ 'turk5.maj.vote',
+                                 TRUE                   ~ as.character(worker.type))) %>%
+  bind_rows(all.users.with.raw.accuracy, turk.with.raw.accuracy)
+
+kable(
+  expanded.data.with.raw.accuracy %>%
+    dplyr::filter(included.severity == 'all',
+                  binary == TRUE,
+                  worker.type != 'turk0',
+                  label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
+    rename(prec = precision, rec = recall, raw.acc = raw.accuracy) %>%
+    arrange(label.type, granularity, worker.type) %>%
+    mutate(label.type.granularity.user.group = paste0(label.type, ', ', granularity, ', ', worker.type),
+           label.type.granularity.user.group = factor(label.type.granularity.user.group,
+                                                      levels = unique(label.type.granularity.user.group))) %>%
+    summarise_vars('label.type.granularity.user.group', var.names = c('rec', 'prec', 'raw.acc')),
+  digits = 3,
+  align = 'l'
+)
+```
+
+
 Below, we have a table of aggregate (sum) stats by user group.
 
 NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
