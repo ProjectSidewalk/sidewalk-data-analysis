@@ -2294,7 +2294,8 @@ all.users.with.raw.accuracy <-
 
 turk.with.raw.accuracy <-
   data.with.raw.accuracy %>%
-  dplyr::filter(n.workers %in% c(3, 5)) %>%
+  dplyr::filter(n.workers %in% c(3, 5),
+                worker.thresh == 1) %>%
   mutate(worker.type = case_when(n.workers == 3 ~ 'turk3.all',
                                  n.workers == 5 ~ 'turk5.all'))
 
