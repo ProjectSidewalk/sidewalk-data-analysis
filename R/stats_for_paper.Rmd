@@ -63,6 +63,7 @@ ACCURACY_BREAKS <- c(0, 0.25, 0.5, 0.75, 1.0)
 
 # Helpful functions
 '%not-in%' <- function(x,y)!('%in%'(x,y))
+se <- function(x, na.rm = TRUE) { sqrt(var(x, na.rm = TRUE) / length(na.omit(x))) }
 print.p.value <- function(p) {
   if_else(p < 0.001, 'p < 0.001', paste0('p = ', base::format(round(p, digits = 3),
                                                               scientific = FALSE)))
@@ -2283,6 +2284,25 @@ kable(
   )
 ```
 
+Below, we have a table of aggregate (sum) stats by user group.
+
+NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
+
+```{r turk.showing.stats.7, echo=FALSE}
+kable(
+  turk.study.summary.stats.with.labels %>%
+    dplyr::filter(granularity == 'street') %>%  # granularity doesn't affect these stats
+    mutate(distance.miles = distance.feet / 5280,
+           distance.km = distance.feet / 3280.84) %>%
+    summarise_vars('worker.type',
+                   c('n.missions', 'distance.miles', 'distance.km', 'n.labels', 'hours.audited'),
+                   funcs = sum,
+                   include.n = TRUE),
+  digits = 3,
+  align = 'l'
+  )
+```
+
 
 ### Giant table with accuracy
 
@@ -2317,30 +2337,12 @@ kable(
     mutate(label.type.granularity.user.group = paste0(label.type, ', ', granularity, ', ', worker.type),
            label.type.granularity.user.group = factor(label.type.granularity.user.group,
                                                       levels = unique(label.type.granularity.user.group))) %>%
-    summarise_vars('label.type.granularity.user.group', var.names = c('rec', 'prec', 'raw.acc')),
+    summarise_vars('label.type.granularity.user.group',
+                   var.names = c('rec', 'prec', 'raw.acc'),
+                   funcs = funs(md = median, mn = mean, sd = sd, se = se)),
   digits = 3,
   align = 'l'
 )
-```
-
-
-Below, we have a table of aggregate (sum) stats by user group.
-
-NOTE: In this table, we are only considering single users auditing (i.e., no multi-user clustering or majority vote), and we only consider the first turker to audit each route.
-
-```{r turk.showing.stats.7, echo=FALSE}
-kable(
-  turk.study.summary.stats.with.labels %>%
-    dplyr::filter(granularity == 'street') %>%  # granularity doesn't affect these stats
-    mutate(distance.miles = distance.feet / 5280,
-           distance.km = distance.feet / 3280.84) %>%
-    summarise_vars('worker.type',
-                   c('n.missions', 'distance.miles', 'distance.km', 'n.labels', 'hours.audited'),
-                   funcs = sum,
-                   include.n = TRUE),
-  digits = 3,
-  align = 'l'
-  )
 ```
 
 
