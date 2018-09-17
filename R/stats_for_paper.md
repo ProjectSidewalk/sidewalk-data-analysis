@@ -645,6 +645,80 @@ Mean/median/sd accuracy by user group - 5 meter level:
 
 #### Statistical significance
 
+NOTE: This is at the street level (not 5 meter level) and only looks at the aggregation of all label types ("All").
+
+We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision/raw accuracy as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
+
+##### Comparing anon reg and turk1
+
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (worker type) to have a statistically significant association with recall (likelihood ratio = 21.616, df = 2, n = 132, p &lt; 0.001) and precision (likelihood ratio = 7.1219, df = 2, n = 131, p = 0.028), but we did *not* find a statistically significant difference for raw accuracy (likelihood ratio = 1.6217, df = 2, n = 132, p = 0.444).
+
+To test that the orderings of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.
+
+NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
+
+Recall: likelihood ratio = 21.616, df = 2, n = 132, p &lt; 0.001.
+
+| worker.type | test       | p.value    | z.value | recall |
+|:------------|:-----------|:-----------|:--------|:-------|
+| turk1       | -          | -          | -       | 0.678  |
+| reg         | &lt; turk1 | 0.009 \*\* | 2.853   | 0.614  |
+| anon        | &lt; reg   | 0.020 \*   | 2.321   | 0.488  |
+
+Precision: likelihood ratio = 7.1219, df = 2, n = 131, p = 0.028
+
+| worker.type | test      | p.value | z.value | precision |
+|:------------|:----------|:--------|:--------|:----------|
+| anon        | -         | -       | -       | 0.745     |
+| reg         | &lt; anon | 0.270   | 1.103   | 0.722     |
+| turk1       | &lt; reg  | 0.134   | 1.937   | 0.688     |
+| turk1       | &lt; anon | 0.134   | 2.007   | 0.688     |
+
+##### Comparing different turker groups
+
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (worker type) to have a statistically significant association with recall (likelihood ratio = 498.96, df = 4, n = 330, p &lt; 0.001), precision (likelihood ratio = 374.88, df = 4, n = 330, p &lt; 0.001), and raw accuracy (likelihood ratio = 195.99, df = 4, n = 330, p &lt; 0.001).
+
+To test that the orderings of the user groups are statistically significant (e.g., that turk5 majority vote precision is significantly higher than turk3 majority vote precision, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.
+
+NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
+
+Recall: likelihood ratio = 498.96, df = 4, n = 330, p &lt; 0.001.
+
+| worker.type    | test                | p.value           | z.value | recall |
+|:---------------|:--------------------|:------------------|:--------|:-------|
+| turk5.all      | -                   | -                 | -       | 0.917  |
+| turk3.all      | &lt; turk5.all      | &lt; 0.001 \*\*\* | 3.7244  | 0.867  |
+| turk1          | &lt; turk3.all      | &lt; 0.001 \*\*\* | 10.0798 | 0.678  |
+| turk3.maj.vote | &lt; turk1          | 0.015 \*          | 2.6652  | 0.621  |
+| turk5.maj.vote | &lt; turk3.maj.vote | 0.326             | 0.9828  | 0.595  |
+| turk5.maj.vote | &lt; turk1          | &lt; 0.001 \*\*\* | 3.6420  | 0.595  |
+
+Precision: likelihood ratio = 374.88, df = 4, n = 330, p &lt; 0.001
+
+| worker.type    | test                | p.value           | z.value | precision |
+|:---------------|:--------------------|:------------------|:--------|:----------|
+| turk5.maj.vote | -                   | -                 | -       | 0.874     |
+| turk3.maj.vote | &lt; turk5.maj.vote | &lt; 0.001 \*\*\* | 3.704   | 0.810     |
+| turk1          | &lt; turk3.maj.vote | &lt; 0.001 \*\*\* | 5.872   | 0.688     |
+| turk3.all      | &lt; turk1          | &lt; 0.001 \*\*\* | 4.341   | 0.601     |
+| turk5.all      | &lt; turk3.all      | 0.004 \*\*        | 2.913   | 0.550     |
+
+Raw accuracy: likelihood ratio = 195.99, df = 4, n = 330, p &lt; 0.001
+
+| worker.type    | test                | p.value           | z.value | raw.accuracy |
+|:---------------|:--------------------|:------------------|:--------|:-------------|
+| turk5.maj.vote | -                   | -                 | -       | 0.777        |
+| turk3.maj.vote | &lt; turk5.maj.vote | 0.087             | 1.713   | 0.759        |
+| turk1          | &lt; turk3.maj.vote | &lt; 0.001 \*\*\* | 4.145   | 0.712        |
+| turk3.all      | &lt; turk1          | 0.021 \*          | 2.564   | 0.692        |
+| turk5.all      | &lt; turk3.all      | &lt; 0.001 \*\*\* | 3.786   | 0.645        |
+
+#### Old statistical significance section
+
 NOTE: This is at the street level (not 5 meter level).
 
 We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).

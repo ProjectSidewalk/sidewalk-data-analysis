@@ -134,10 +134,12 @@ format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, orderin
                z.value = unname(tukey$test$tstat)) %>%
     mutate(comparison = if_else((descending == TRUE & z.value > 0)
                                 | (descending == FALSE & z.value < 0),
-                                gsub("([[:alnum:]]+) - ([[:alnum:]]+)", "\\2 - \\1", comparison),
+                                gsub("([[:alnum:]|\\.]+) - ([[:alnum:]|\\.]+)",
+                                     "\\2 - \\1",
+                                     comparison),
                                 as.character(comparison)),
-           first.type = gsub("([[:alnum:]]+) - ([[:alnum:]]+)", "\\1", comparison),
-           second.type = gsub("([[:alnum:]]+) - ([[:alnum:]]+)", "\\2", comparison),
+           first.type = gsub("([[:alnum:]|\\.]+) - ([[:alnum:]|\\.]+)", "\\1", comparison),
+           second.type = gsub("([[:alnum:]|\\.]+) - ([[:alnum:]|\\.]+)", "\\2", comparison),
            first.index = match(first.type, ordering),
            second.index = match(second.type, ordering),
            test = paste(ordering.sign, second.type),
@@ -2573,13 +2575,215 @@ kable(
 
 #### Statistical significance
 
-NOTE: This is at the street level (not 5 meter level).
+NOTE: This is at the street level (not 5 meter level) and only looks at the aggregation of all label types ("All").
 
-We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
+We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision/raw accuracy as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
 ```{r turk.user.group.accuracy.glmm, echo=FALSE}
 # TODO include the fact that the single turker is included in turk3, etc as a random effect
 user.group.test.data <-
+  expanded.data.with.raw.accuracy %>%
+  dplyr::filter(worker.type != 'turk0',
+                granularity == 'street',
+                binary == TRUE,
+                included.severity == 'all',
+                label.type %in% c('All', 'Problem')) %>%
+  mutate(label.type = factor(label.type),
+         condition.id = factor(condition.id),
+         worker.type = factor(worker.type))
+
+user.group.test.data.single.recall <-
+  user.group.test.data %>%
+  dplyr::filter(worker.type %in% c('anon', 'reg', 'turk1'), label.type == 'All') %>%
+  dplyr::select(condition.id, worker.type, true.pos, false.neg, recall) %>%
+  na.omit() %>%
+  droplevels()
+user.group.test.data.single.prec <-
+  user.group.test.data %>%
+  dplyr::filter(worker.type %in% c('anon', 'reg', 'turk1'), label.type == 'All') %>%
+  dplyr::select(condition.id, worker.type, true.pos, false.pos, precision) %>%
+  na.omit() %>%
+  droplevels()
+user.group.test.data.single.raw <-
+  user.group.test.data %>%
+  dplyr::filter(worker.type %in% c('anon', 'reg', 'turk1'), label.type == 'All') %>%
+  dplyr::select(condition.id, worker.type, true.pos, false.pos, true.neg, false.neg, raw.accuracy) %>%
+  na.omit() %>%
+  droplevels()
+
+user.group.single.recall.model <- glmer(recall ~ worker.type + (1 | condition.id),
+                           data = user.group.test.data.single.recall,
+                           family = binomial(link = 'logit'),
+                           weights = true.pos + false.neg,
+                           control = glmerControl(optimizer = "bobyqa",
+                                                  optCtrl = list(maxfun = 100000)))
+lrt.user.group.single.recall <- drop1(user.group.single.recall.model, test = 'Chisq')
+
+user.group.single.prec.model <- glmer(precision ~ worker.type + (1 | condition.id),
+                         data = user.group.test.data.single.prec,
+                         family = binomial(link = 'logit'),
+                         weights = true.pos + false.pos,
+                         control = glmerControl(optimizer = "bobyqa",
+                                                optCtrl = list(maxfun = 100000)))
+lrt.user.group.single.prec <- drop1(user.group.single.prec.model, test = 'Chisq')
+
+user.group.single.raw.model <- glmer(raw.accuracy ~ worker.type + (1 | condition.id),
+                         data = user.group.test.data.single.raw,
+                         family = binomial(link = 'logit'),
+                         weights = true.pos + false.pos + true.neg + false.neg,
+                         control = glmerControl(optimizer = "bobyqa",
+                                                optCtrl = list(maxfun = 100000)))
+lrt.user.group.single.raw <- drop1(user.group.single.raw.model, test = 'Chisq')
+
+user.group.test.data.multi.recall <-
+  user.group.test.data %>%
+  dplyr::filter(worker.type %in% c('turk1', 'turk3.maj.vote', 'turk3.all', 'turk5.maj.vote', 'turk5.all'),
+                label.type == 'All') %>%
+  dplyr::select(condition.id, worker.type, true.pos, false.neg, recall) %>%
+  na.omit() %>%
+  droplevels()
+user.group.test.data.multi.prec <-
+  user.group.test.data %>%
+  dplyr::filter(worker.type %in% c('turk1', 'turk3.maj.vote', 'turk3.all', 'turk5.maj.vote', 'turk5.all'),
+                label.type == 'All') %>%
+  dplyr::select(condition.id, worker.type, true.pos, false.pos, precision) %>%
+  na.omit() %>%
+  droplevels()
+user.group.test.data.multi.raw <-
+  user.group.test.data %>%
+  dplyr::filter(worker.type %in% c('turk1', 'turk3.maj.vote', 'turk3.all', 'turk5.maj.vote', 'turk5.all'),
+                label.type == 'All') %>%
+  dplyr::select(condition.id, worker.type, true.pos, false.pos, true.neg, false.neg, raw.accuracy) %>%
+  na.omit() %>%
+  droplevels()
+
+user.group.multi.recall.model <- glmer(recall ~ worker.type + (1 | condition.id),
+                           data = user.group.test.data.multi.recall,
+                           family = binomial(link = 'logit'),
+                           weights = true.pos + false.neg,
+                           control = glmerControl(optimizer = "bobyqa",
+                                                  optCtrl = list(maxfun = 100000)))
+lrt.user.group.multi.recall <- drop1(user.group.multi.recall.model, test = 'Chisq')
+
+user.group.multi.prec.model <- glmer(precision ~ worker.type + (1 | condition.id),
+                         data = user.group.test.data.multi.prec,
+                         family = binomial(link = 'logit'),
+                         weights = true.pos + false.pos,
+                         control = glmerControl(optimizer = "bobyqa",
+                                                optCtrl = list(maxfun = 100000)))
+lrt.user.group.multi.prec <- drop1(user.group.multi.prec.model, test = 'Chisq')
+
+user.group.multi.raw.model <- glmer(raw.accuracy ~ worker.type + (1 | condition.id),
+                         data = user.group.test.data.multi.raw,
+                         family = binomial(link = 'logit'),
+                         weights = true.pos + false.pos + true.neg + false.neg,
+                         control = glmerControl(optimizer = "bobyqa",
+                                                optCtrl = list(maxfun = 100000)))
+lrt.user.group.multi.raw <- drop1(user.group.multi.raw.model, test = 'Chisq')
+```
+
+##### Comparing anon reg and turk1
+
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (worker type) to have a statistically significant association with recall (`r print.lrt.results(lrt.user.group.single.recall, user.group.single.recall.model, 'worker.type')`) and precision (`r print.lrt.results(lrt.user.group.single.prec, user.group.single.prec.model, 'worker.type')`), but we did _not_ find a statistically significant difference for raw accuracy (`r print.lrt.results(lrt.user.group.single.raw, user.group.single.raw.model, 'worker.type')`).
+
+To test that the orderings of the user groups are statistically significant (e.g., that turk1 recall is significantly higher than registered user recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.
+
+NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
+
+Recall: `r print.lrt.results(lrt.user.group.single.recall, user.group.single.recall.model, 'worker.type')`.
+
+```{r turk.user.group.single.recall.tukey, echo=FALSE}
+# Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
+tukey.user.group.single.recall <- base::summary(glht(user.group.single.recall.model,
+                                                  linfct = mcp(worker.type = 'Tukey')),
+                                             test = adjusted('holm'))
+tukey.user.group.single.recall.clean <- format.tukey.table(tukey.user.group.single.recall,
+                                                  'recall',
+                                                  'worker.type',
+                                                  user.group.test.data.single.recall,
+                                                  descending = TRUE)
+kable(tukey.user.group.single.recall.clean, digits = 3, align = 'l')
+```
+
+Precision: `r print.lrt.results(lrt.user.group.single.prec, user.group.single.prec.model, 'worker.type')`
+
+```{r turk.user.group.single.prec.tukey, echo=FALSE}
+tukey.user.group.single.prec <- base::summary(glht(user.group.single.prec.model,
+                                                linfct = mcp(worker.type = 'Tukey')),
+                                           test = adjusted('holm'))
+tukey.user.group.single.prec.clean <- format.tukey.table(tukey.user.group.single.prec,
+                                            'precision',
+                                            'worker.type',
+                                            user.group.test.data.single.prec,
+                                            descending = TRUE)
+kable(tukey.user.group.single.prec.clean, digits = 3, align = 'l')
+```
+
+##### Comparing different turker groups
+
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (worker type) to have a statistically significant association with recall (`r print.lrt.results(lrt.user.group.multi.recall, user.group.multi.recall.model, 'worker.type')`), precision (`r print.lrt.results(lrt.user.group.multi.prec, user.group.multi.prec.model, 'worker.type')`), and raw accuracy (`r print.lrt.results(lrt.user.group.multi.raw, user.group.multi.raw.model, 'worker.type')`).
+
+To test that the orderings of the user groups are statistically significant (e.g., that turk5 majority vote precision is significantly higher than turk3 majority vote precision, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.
+
+NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
+
+Recall: `r print.lrt.results(lrt.user.group.multi.recall, user.group.multi.recall.model, 'worker.type')`.
+
+```{r turk.user.group.multi.recall.tukey, echo=FALSE}
+# Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
+tukey.user.group.multi.recall <- base::summary(glht(user.group.multi.recall.model,
+                                                  linfct = mcp(worker.type = 'Tukey')),
+                                             test = adjusted('holm'))
+tukey.user.group.multi.recall.clean <- format.tukey.table(tukey.user.group.multi.recall,
+                                                  'recall',
+                                                  'worker.type',
+                                                  user.group.test.data.multi.recall,
+                                                  descending = TRUE)
+kable(tukey.user.group.multi.recall.clean, digits = 3, align = 'l')
+```
+
+Precision: `r print.lrt.results(lrt.user.group.multi.prec, user.group.multi.prec.model, 'worker.type')`
+
+```{r turk.user.group.multi.prec.tukey, echo=FALSE}
+tukey.user.group.multi.prec <- base::summary(glht(user.group.multi.prec.model,
+                                                linfct = mcp(worker.type = 'Tukey')),
+                                           test = adjusted('holm'))
+tukey.user.group.multi.prec.clean <- format.tukey.table(tukey.user.group.multi.prec,
+                                            'precision',
+                                            'worker.type',
+                                            user.group.test.data.multi.prec,
+                                            descending = TRUE)
+kable(tukey.user.group.multi.prec.clean, digits = 3, align = 'l')
+```
+
+Raw accuracy: `r print.lrt.results(lrt.user.group.multi.raw, user.group.multi.raw.model, 'worker.type')`
+
+```{r turk.user.group.multi.raw.tukey, echo=FALSE}
+tukey.user.group.multi.raw <- base::summary(glht(user.group.multi.raw.model,
+                                                linfct = mcp(worker.type = 'Tukey')),
+                                           test = adjusted('holm'))
+tukey.user.group.multi.raw.clean <- format.tukey.table(tukey.user.group.multi.raw,
+                                            'raw.accuracy',
+                                            'worker.type',
+                                            user.group.test.data.multi.raw,
+                                            descending = TRUE)
+kable(tukey.user.group.multi.raw.clean, digits = 3, align = 'l')
+```
+
+
+#### Old statistical significance section
+
+NOTE: This is at the street level (not 5 meter level).
+
+We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
+
+```{r turk.user.group.accuracy.glmm.old, echo=FALSE}
+# TODO include the fact that the single turker is included in turk3, etc as a random effect
+user.group.test.data.old <-
   data.with.raw.accuracy %>%
   dplyr::filter(worker.type != 'turk0',
                 n.workers == 1
@@ -2594,25 +2798,25 @@ user.group.test.data <-
          worker.type = factor(worker.type))
 
 user.group.test.data.recall.all <-
-  user.group.test.data %>%
+  user.group.test.data.old %>%
   dplyr::filter(label.type == 'All') %>%
   dplyr::select(condition.id, worker.type, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 user.group.test.data.prec.all <-
-  user.group.test.data %>%
+  user.group.test.data.old %>%
   dplyr::filter(label.type == 'All') %>%
   dplyr::select(condition.id, worker.type, true.pos, false.pos, precision) %>%
   na.omit() %>%
   droplevels()
 user.group.test.data.recall.prob <-
-  user.group.test.data %>%
+  user.group.test.data.old %>%
   dplyr::filter(label.type == 'Problem') %>%
   dplyr::select(condition.id, worker.type, true.pos, false.neg, recall) %>%
   na.omit() %>%
   droplevels()
 user.group.test.data.prec.prob <-
-  user.group.test.data %>%
+  user.group.test.data.old %>%
   dplyr::filter(label.type == 'Problem') %>%
   dplyr::select(condition.id, worker.type, true.pos, false.pos, precision) %>%
   na.omit() %>%
@@ -2661,7 +2865,7 @@ NOTE: In places where one user group's accuracy was not statistically different 
 
 Recall, all label types: `r print.lrt.results(lrt.user.group.recall.all, user.group.recall.all.model, 'worker.type')`.
 
-```{r turk.user.group.recall.all.tukey, echo=FALSE}
+```{r turk.user.group.recall.all.tukey.old, echo=FALSE}
 # Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
 tukey.user.group.recall.all <- base::summary(glht(user.group.recall.all.model,
                                                   linfct = mcp(worker.type = 'Tukey')),
@@ -2676,7 +2880,7 @@ kable(tukey.user.group.recall.all.clean, digits = 3, align = 'l')
 
 Precision, all label types: `r print.lrt.results(lrt.user.group.prec.all, user.group.prec.all.model, 'worker.type')`
 
-```{r turk.user.group.prec.all.tukey, echo=FALSE}
+```{r turk.user.group.prec.all.tukey.old, echo=FALSE}
 tukey.user.group.prec.all <- base::summary(glht(user.group.prec.all.model,
                                                 linfct = mcp(worker.type = 'Tukey')),
                                            test = adjusted('holm'))
@@ -2690,7 +2894,7 @@ kable(tukey.user.group.prec.all.clean, digits = 3, align = 'l')
 
 Recall, Problem type: `r print.lrt.results(lrt.user.group.recall.prob, user.group.recall.prob.model, 'worker.type')`
 
-```{r turk.user.group.recall.prob.tukey, echo=FALSE}
+```{r turk.user.group.recall.prob.tukey.old, echo=FALSE}
 tukey.user.group.recall.prob <- base::summary(glht(user.group.recall.prob.model,
                                                    linfct = mcp(worker.type = 'Tukey')),
                                               test = adjusted('holm'))
@@ -2706,7 +2910,7 @@ Precision, Problem type: `r print.lrt.results(lrt.user.group.prec.prob, user.gro
 
 NOTE: Although anon user have a higher average problem type precision than turk5, the model actually says that turk5 has higher precision (though it is not statistically significant). This is because there is just higher precision across the board on the anon user routes; the mixed effects model takes this into account! More on this below.
 
-```{r turk.user.group.prec.prob.tukey, echo=FALSE}
+```{r turk.user.group.prec.prob.tukey.old, echo=FALSE}
 tukey.user.group.prec.prob <- base::summary(glht(user.group.prec.prob.model,
                                                  linfct = mcp(worker.type = 'Tukey')),
                                             test = adjusted('holm'))
@@ -2722,7 +2926,7 @@ kable(tukey.user.group.prec.prob.clean, digits = 3, align = 'l')
 # seem to have gotten the routes where everyone had more precision:
 problem.prec.anon.routes.table <-
   kable(
-    user.group.test.data %>%
+    user.group.test.data.old %>%
       dplyr::filter(label.type == 'Problem', is.anon.route == TRUE) %>%
       group_by(worker.type) %>%
       dplyr::summarise(problem.precision.on.anon.routes = mean(precision, na.rm = TRUE)),
