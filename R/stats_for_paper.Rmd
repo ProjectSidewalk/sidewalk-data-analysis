@@ -1999,6 +1999,25 @@ data.with.raw.accuracy <-
                               levels = c('street', '5_meter'),
                               labels = c('street', '5_meter'))) %>%
   dplyr::filter(label.type != 'NoSidewalk' | (granularity == 'street' & binary == TRUE))
+
+all.users.with.raw.accuracy <-
+  data.with.raw.accuracy %>%
+  dplyr::filter(worker.type %in% c('turk1', 'anon', 'reg')) %>%
+  mutate(worker.type = 'all')
+
+turk.with.raw.accuracy <-
+  data.with.raw.accuracy %>%
+  dplyr::filter(n.workers %in% c(3, 5),
+                worker.thresh == 1) %>%
+  mutate(worker.type = case_when(n.workers == 3 ~ 'turk3.all',
+                                 n.workers == 5 ~ 'turk5.all'))
+
+expanded.data.with.raw.accuracy <-
+  data.with.raw.accuracy %>%
+  mutate(worker.type = case_when(worker.type == 'turk3' ~ 'turk3.maj.vote',
+                                 worker.type == 'turk5' ~ 'turk5.maj.vote',
+                                 TRUE                   ~ as.character(worker.type))) %>%
+  bind_rows(all.users.with.raw.accuracy, turk.with.raw.accuracy)
 ```
 
 
@@ -2029,8 +2048,8 @@ n.anon <-
   n_distinct()
 
 aggregate.accuracy.data <-
-  data.with.raw.accuracy %>%
-  dplyr::filter(n.workers == 1,
+  expanded.data.with.raw.accuracy %>%
+  dplyr::filter(worker.type %in% c('anon', 'reg', 'turk1'),
                 binary == TRUE,
                 included.severity == 'all',
                 label.type %in% c('All', 'Problem')) %>%
@@ -2048,7 +2067,7 @@ aggregate.accuracy.data <-
 # NA is treated as 0, this doesn't work when the value that was _supposed_ to be there is NA also!
 # So we use an if_else to set to NA if both are NA, and take the some o/w.
 turk.study.summary.stats <-
-  data.with.raw.accuracy %>%
+  expanded.data.with.raw.accuracy %>%
   dplyr::filter(worker.type != 'turk0',
                 binary == TRUE,
                 included.severity == 'all',
@@ -2307,25 +2326,6 @@ kable(
 ### Giant table with accuracy
 
 ```{r turk.big.table, echo=FALSE}
-all.users.with.raw.accuracy <-
-  data.with.raw.accuracy %>%
-  dplyr::filter(worker.type %in% c('turk1', 'anon', 'reg')) %>%
-  mutate(worker.type = 'all')
-
-turk.with.raw.accuracy <-
-  data.with.raw.accuracy %>%
-  dplyr::filter(n.workers %in% c(3, 5),
-                worker.thresh == 1) %>%
-  mutate(worker.type = case_when(n.workers == 3 ~ 'turk3.all',
-                                 n.workers == 5 ~ 'turk5.all'))
-
-expanded.data.with.raw.accuracy <-
-  data.with.raw.accuracy %>%
-  mutate(worker.type = case_when(worker.type == 'turk3' ~ 'turk3.maj.vote',
-                                 worker.type == 'turk5' ~ 'turk5.maj.vote',
-                                 TRUE                   ~ as.character(worker.type))) %>%
-  bind_rows(all.users.with.raw.accuracy, turk.with.raw.accuracy)
-
 kable(
   expanded.data.with.raw.accuracy %>%
     dplyr::filter(included.severity == 'all',
@@ -2525,21 +2525,27 @@ turk.showing.stats.4.and.5 <-
       all.rec.mn = mean(all.recall, na.rm = TRUE),
       all.rec.md = median(all.recall, na.rm = TRUE),
       all.rec.sd = sd(all.recall, na.rm = TRUE),
+      all.rec.se = se(all.recall),
       all.prec.mn = mean(all.precision, na.rm = TRUE),
       all.prec.md = median(all.precision, na.rm = TRUE),
       all.prec.sd = sd(all.precision, na.rm = TRUE),
+      all.prec.se = se(all.precision),
       all.f.mn = mean(all.f.measure, na.rm = TRUE),
       all.f.md = median(all.f.measure, na.rm = TRUE),
       all.f.sd = sd(all.f.measure, na.rm = TRUE),
+      all.f.se = se(all.f.measure),
       prob.rec.mn = mean(prob.recall, na.rm = TRUE),
       prob.rec.md = median(prob.recall, na.rm = TRUE),
       prob.rec.sd = sd(prob.recall, na.rm = TRUE),
+      prob.rec.se = se(prob.recall),
       prob.prec.mn = mean(prob.precision, na.rm = TRUE),
       prob.prec.md = median(prob.precision, na.rm = TRUE),
       prob.prec.sd = sd(prob.precision, na.rm = TRUE),
+      prob.prec.se = se(prob.precision),
       prob.f.mn = mean(prob.f.measure, na.rm = TRUE),
       prob.f.md = median(prob.f.measure, na.rm = TRUE),
-      prob.f.sd = sd(prob.f.measure, na.rm = TRUE)
+      prob.f.sd = sd(prob.f.measure, na.rm = TRUE),
+      prob.f.se = se(prob.f.measure)
     ) %>%
     rename(user.type = worker.type)
 
