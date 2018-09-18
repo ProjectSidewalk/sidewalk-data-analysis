@@ -128,10 +128,9 @@ format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, orderin
       }
   }
 
-  tukey.with.vars.split <-
-    data.frame(comparison = names(tukey$test$pvalues),
-               p = unname(tukey$test$pvalues),
-               z.value = unname(tukey$test$tstat)) %>%
+  data.frame(comparison = names(tukey$test$pvalues),
+             p = unname(tukey$test$pvalues),
+             z.value = unname(tukey$test$tstat)) %>%
     mutate(comparison = if_else((descending == TRUE & z.value > 0)
                                 | (descending == FALSE & z.value < 0),
                                 gsub("([[:alnum:]|\\.]+) - ([[:alnum:]|\\.]+)",
@@ -144,23 +143,12 @@ format.tukey.table <- function(tukey, outcome.var, fixed.var, test.data, orderin
            second.index = match(second.type, ordering),
            test = paste(ordering.sign, second.type),
            p.value = p.num.to.p.str.with.sig.code(p),
-           z.value = base::format(abs(z.value), digits = 4, scientific = FALSE))
-
-  indices.to.start <-
-    tukey.with.vars.split %>%
-    dplyr::filter(p < 0.05 | second.index == 1) %>%
-    group_by(first.index) %>%
-    dplyr::summarise(start.second.index = max(second.index))
-
-  inner_join(tukey.with.vars.split, indices.to.start, by = 'first.index') %>%
-    dplyr::filter(second.index >= start.second.index) %>%
+           z.value = base::format(abs(z.value), digits = 4, scientific = FALSE)) %>%
     right_join(outcome.by.type, by = c('first.type' = fixed.var)) %>%
     mutate(!!fixed.var := factor(first.type, levels = ordering)) %>%
     arrange(!!sym(fixed.var), desc(second.index)) %>%
     dplyr::select(fixed.var, test, p.value, z.value, outcome.var)
 }
-
-
 summarise_vars <- function(data, group, var.names = NULL, col.start = NULL, col.end = NULL,
                            funcs = funs(md = median, mn = mean, sd = sd), only.numeric = TRUE,
                            include.n = FALSE) {
@@ -2690,8 +2678,6 @@ To test that the orderings of the user groups are statistically significant (e.g
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
-NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
-
 Recall: `r print.lrt.results(lrt.user.group.single.recall, user.group.single.recall.model, 'worker.type')`.
 
 ```{r turk.user.group.single.recall.tukey, echo=FALSE}
@@ -2728,8 +2714,6 @@ Using likelihood ratio tests (LRTs), we found the contribution of the fixed effe
 To test that the orderings of the user groups are statistically significant (e.g., that turk5 majority vote precision is significantly higher than turk3 majority vote precision, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
-
-NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
 
 Recall: `r print.lrt.results(lrt.user.group.multi.recall, user.group.multi.recall.model, 'worker.type')`.
 
@@ -2861,8 +2845,6 @@ To test that the orderings of the user groups are statistically significant (e.g
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
-NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
-
 Recall, all label types: `r print.lrt.results(lrt.user.group.recall.all, user.group.recall.all.model, 'worker.type')`.
 
 ```{r turk.user.group.recall.all.tukey.old, echo=FALSE}
@@ -2951,7 +2933,7 @@ Mean/median/sd accuracy by label type - street level:
 turk.showing.stats.by.label.type <-
   data.with.raw.accuracy %>%
   dplyr::filter(binary == TRUE,
-                n.workers == 1,
+                worker.type %in% c('anon', 'reg', 'turk1'),
                 included.severity == 'all',
                 label.type != 'AllProb')
 
@@ -3004,6 +2986,11 @@ type.test.data.prec <-
   dplyr::select(condition.id, user.id, label.type, true.pos, false.pos, precision) %>%
   na.omit() %>%
   droplevels()
+type.test.data.raw <-
+  type.test.data %>%
+  dplyr::select(condition.id, user.id, label.type, true.pos, false.pos, true.neg, false.neg, raw.accuracy) %>%
+  na.omit() %>%
+  droplevels()
 
 type.recall.model <- glmer(recall ~ label.type + (1 | condition.id / user.id),
                            data = type.test.data.recall,
@@ -3015,7 +3002,6 @@ lrt.type.recall <- drop1(type.recall.model, test = 'Chisq')
 tukey.type.recall <- base::summary(glht(type.recall.model, linfct = mcp(label.type = 'Tukey')),
                                    test = adjusted('holm'))
 
-
 type.prec.model <- glmer(precision ~ label.type + (1 | condition.id / user.id),
                          data = type.test.data.prec,
                          family = binomial(link = 'logit'),
@@ -3025,29 +3011,55 @@ type.prec.model <- glmer(precision ~ label.type + (1 | condition.id / user.id),
 lrt.type.prec <- drop1(type.prec.model, test = 'Chisq')
 tukey.type.prec <- base::summary(glht(type.prec.model, linfct = mcp(label.type = 'Tukey')),
                                  test = adjusted('holm'))
+
+type.raw.model <- glmer(raw.accuracy ~ label.type + (1 | condition.id / user.id),
+                        data = type.test.data.raw,
+                        family = binomial(link = 'logit'),
+                        weights = true.pos + false.pos + true.neg + false.neg,
+                        control = glmerControl(optimizer = "bobyqa",
+                                               optCtrl = list(maxfun = 100000)))
+lrt.type.raw <- drop1(type.raw.model, test = 'Chisq')
+tukey.type.raw <- base::summary(glht(type.raw.model, linfct = mcp(label.type = 'Tukey')),
+                                test = adjusted('holm'))
 ```
 
-Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (`r print.lrt.results(lrt.type.recall, type.recall.model, 'label.type')`). We also found label type to have a statistically significant association with precision (`r print.lrt.results(lrt.type.prec, type.prec.model, 'label.type')`).
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (`r print.lrt.results(lrt.type.recall, type.recall.model, 'label.type')`), precision (`r print.lrt.results(lrt.type.prec, type.prec.model, 'label.type')`), and raw accuracy (`r print.lrt.results(lrt.type.raw, type.raw.model, 'label.type')`.
 
 To test that the ordering of the label types are statistically significant (e.g., that NoCurbRamp recall is significantly lower than CurbRamp recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall, then precision).
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
-```{r turk.label.type.accuracy.tukey, echo=FALSE}
+Recall: `r print.lrt.results(lrt.type.recall, type.recall.model, 'label.type')`
+```{r turk.label.type.accuracy.tukey.recall, echo=FALSE}
 # Extracts the info we want from the Tukey HSD, and formats it nicely for a table.
 tukey.type.recall.clean <- format.tukey.table(tukey.type.recall,
                                               'recall',
                                               'label.type',
                                               type.test.data.recall,
                                               descending = TRUE)
+kable(tukey.type.recall.clean, digits = 3, align = 'l')
+```
+
+Precision: `r print.lrt.results(lrt.type.prec, type.prec.model, 'label.type')`
+```{r turk.label.type.accuracy.tukey.prec, echo=FALSE}
 tukey.type.prec.clean <- format.tukey.table(tukey.type.prec,
                                             'precision',
                                             'label.type',
                                             type.test.data.prec,
                                             descending = TRUE)
 
-kable(tukey.type.recall.clean, digits = 3, align = 'l')
 kable(tukey.type.prec.clean, digits = 3, align = 'l')
+```
+
+Raw accuracy: `r print.lrt.results(lrt.type.raw, type.raw.model, 'label.type')`
+```{r turk.label.type.accuracy.tukey.raw, echo=FALSE}
+tukey.type.raw.clean <- format.tukey.table(tukey.type.raw,
+                                           'raw.accuracy',
+                                           'label.type',
+                                           type.test.data.raw,
+                                           descending = TRUE)
+
+kable(tukey.type.raw.clean, digits = 3, align = 'l')
 ```
 
 

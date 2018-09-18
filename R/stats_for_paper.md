@@ -653,19 +653,18 @@ We created binomial mixed effects models to determine the relationship between u
 
 Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (worker type) to have a statistically significant association with recall (likelihood ratio = 21.616, df = 2, n = 132, p &lt; 0.001) and precision (likelihood ratio = 7.1219, df = 2, n = 131, p = 0.028), but we did *not* find a statistically significant difference for raw accuracy (likelihood ratio = 1.6217, df = 2, n = 132, p = 0.444).
 
-To test that the orderings of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.
+To test that the orderings of the user groups are statistically significant (e.g., that turk1 recall is significantly higher than registered user recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
-NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
-
 Recall: likelihood ratio = 21.616, df = 2, n = 132, p &lt; 0.001.
 
-| worker.type | test       | p.value    | z.value | recall |
-|:------------|:-----------|:-----------|:--------|:-------|
-| turk1       | -          | -          | -       | 0.678  |
-| reg         | &lt; turk1 | 0.009 \*\* | 2.853   | 0.614  |
-| anon        | &lt; reg   | 0.020 \*   | 2.321   | 0.488  |
+| worker.type | test       | p.value           | z.value | recall |
+|:------------|:-----------|:------------------|:--------|:-------|
+| turk1       | -          | -                 | -       | 0.678  |
+| reg         | &lt; turk1 | 0.009 \*\*        | 2.853   | 0.614  |
+| anon        | &lt; reg   | 0.020 \*          | 2.321   | 0.488  |
+| anon        | &lt; turk1 | &lt; 0.001 \*\*\* | 3.976   | 0.488  |
 
 Precision: likelihood ratio = 7.1219, df = 2, n = 131, p = 0.028
 
@@ -684,8 +683,6 @@ To test that the orderings of the user groups are statistically significant (e.g
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
 
-NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
-
 Recall: likelihood ratio = 498.96, df = 4, n = 330, p &lt; 0.001.
 
 | worker.type    | test                | p.value           | z.value | recall |
@@ -693,9 +690,14 @@ Recall: likelihood ratio = 498.96, df = 4, n = 330, p &lt; 0.001.
 | turk5.all      | -                   | -                 | -       | 0.917  |
 | turk3.all      | &lt; turk5.all      | &lt; 0.001 \*\*\* | 3.7244  | 0.867  |
 | turk1          | &lt; turk3.all      | &lt; 0.001 \*\*\* | 10.0798 | 0.678  |
+| turk1          | &lt; turk5.all      | &lt; 0.001 \*\*\* | 12.9464 | 0.678  |
 | turk3.maj.vote | &lt; turk1          | 0.015 \*          | 2.6652  | 0.621  |
+| turk3.maj.vote | &lt; turk3.all      | &lt; 0.001 \*\*\* | 12.4353 | 0.621  |
+| turk3.maj.vote | &lt; turk5.all      | &lt; 0.001 \*\*\* | 15.0197 | 0.621  |
 | turk5.maj.vote | &lt; turk3.maj.vote | 0.326             | 0.9828  | 0.595  |
 | turk5.maj.vote | &lt; turk1          | &lt; 0.001 \*\*\* | 3.6420  | 0.595  |
+| turk5.maj.vote | &lt; turk3.all      | &lt; 0.001 \*\*\* | 13.2806 | 0.595  |
+| turk5.maj.vote | &lt; turk5.all      | &lt; 0.001 \*\*\* | 15.7607 | 0.595  |
 
 Precision: likelihood ratio = 374.88, df = 4, n = 330, p &lt; 0.001
 
@@ -704,8 +706,14 @@ Precision: likelihood ratio = 374.88, df = 4, n = 330, p &lt; 0.001
 | turk5.maj.vote | -                   | -                 | -       | 0.874     |
 | turk3.maj.vote | &lt; turk5.maj.vote | &lt; 0.001 \*\*\* | 3.704   | 0.810     |
 | turk1          | &lt; turk3.maj.vote | &lt; 0.001 \*\*\* | 5.872   | 0.688     |
+| turk1          | &lt; turk5.maj.vote | &lt; 0.001 \*\*\* | 9.019   | 0.688     |
 | turk3.all      | &lt; turk1          | &lt; 0.001 \*\*\* | 4.341   | 0.601     |
+| turk3.all      | &lt; turk3.maj.vote | &lt; 0.001 \*\*\* | 9.897   | 0.601     |
+| turk3.all      | &lt; turk5.maj.vote | &lt; 0.001 \*\*\* | 12.466  | 0.601     |
 | turk5.all      | &lt; turk3.all      | 0.004 \*\*        | 2.913   | 0.550     |
+| turk5.all      | &lt; turk1          | &lt; 0.001 \*\*\* | 6.986   | 0.550     |
+| turk5.all      | &lt; turk3.maj.vote | &lt; 0.001 \*\*\* | 12.150  | 0.550     |
+| turk5.all      | &lt; turk5.maj.vote | &lt; 0.001 \*\*\* | 14.336  | 0.550     |
 
 Raw accuracy: likelihood ratio = 195.99, df = 4, n = 330, p &lt; 0.001
 
@@ -714,8 +722,14 @@ Raw accuracy: likelihood ratio = 195.99, df = 4, n = 330, p &lt; 0.001
 | turk5.maj.vote | -                   | -                 | -       | 0.777        |
 | turk3.maj.vote | &lt; turk5.maj.vote | 0.087             | 1.713   | 0.759        |
 | turk1          | &lt; turk3.maj.vote | &lt; 0.001 \*\*\* | 4.145   | 0.712        |
+| turk1          | &lt; turk5.maj.vote | &lt; 0.001 \*\*\* | 5.839   | 0.712        |
 | turk3.all      | &lt; turk1          | 0.021 \*          | 2.564   | 0.692        |
+| turk3.all      | &lt; turk3.maj.vote | &lt; 0.001 \*\*\* | 6.682   | 0.692        |
+| turk3.all      | &lt; turk5.maj.vote | &lt; 0.001 \*\*\* | 8.352   | 0.692        |
 | turk5.all      | &lt; turk3.all      | &lt; 0.001 \*\*\* | 3.786   | 0.645        |
+| turk5.all      | &lt; turk1          | &lt; 0.001 \*\*\* | 6.331   | 0.645        |
+| turk5.all      | &lt; turk3.maj.vote | &lt; 0.001 \*\*\* | 10.377  | 0.645        |
+| turk5.all      | &lt; turk5.maj.vote | &lt; 0.001 \*\*\* | 12.002  | 0.645        |
 
 #### Old statistical significance section
 
@@ -728,8 +742,6 @@ Using likelihood ratio tests (LRTs), we found the contribution of the fixed effe
 To test that the orderings of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall for the Problem type, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
-
-NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.
 
 Recall, all label types: likelihood ratio = 23.057, df = 4, n = 264, p &lt; 0.001.
 
@@ -757,21 +769,27 @@ Precision, all label types: likelihood ratio = 108.36, df = 4, n = 263, p &lt; 0
 | anon        | &lt; turk5 | 0.029 \*          | 2.7554  | 0.745     |
 | reg         | &lt; anon  | 0.612             | 1.0234  | 0.722     |
 | reg         | &lt; turk3 | &lt; 0.001 \*\*\* | 3.8108  | 0.722     |
+| reg         | &lt; turk5 | &lt; 0.001 \*\*\* | 7.0635  | 0.722     |
 | turk1       | &lt; reg   | 0.253             | 1.7959  | 0.688     |
 | turk1       | &lt; anon  | 0.253             | 1.8573  | 0.688     |
 | turk1       | &lt; turk3 | &lt; 0.001 \*\*\* | 6.0213  | 0.688     |
+| turk1       | &lt; turk5 | &lt; 0.001 \*\*\* | 9.1436  | 0.688     |
 
 Recall, Problem type: likelihood ratio = 47.022, df = 4, n = 260, p &lt; 0.001
 
-| worker.type | test       | p.value    | z.value | recall |
-|:------------|:-----------|:-----------|:--------|:-------|
-| turk1       | -          | -          | -       | 0.658  |
-| turk3       | &lt; reg   | 0.481      | 1.120   | 0.554  |
-| turk3       | &lt; turk1 | 0.006 \*\* | 3.355   | 0.554  |
-| reg         | &lt; turk1 | 0.123      | 2.043   | 0.529  |
-| turk5       | &lt; reg   | 0.002 \*\* | 3.684   | 0.425  |
-| anon        | &lt; turk5 | 0.481      | 1.174   | 0.394  |
-| anon        | &lt; reg   | 0.012 \*   | 3.082   | 0.394  |
+| worker.type | test       | p.value           | z.value | recall |
+|:------------|:-----------|:------------------|:--------|:-------|
+| turk1       | -          | -                 | -       | 0.658  |
+| turk3       | &lt; reg   | 0.481             | 1.120   | 0.554  |
+| turk3       | &lt; turk1 | 0.006 \*\*        | 3.355   | 0.554  |
+| reg         | &lt; turk1 | 0.123             | 2.043   | 0.529  |
+| turk5       | &lt; reg   | 0.002 \*\*        | 3.684   | 0.425  |
+| turk5       | &lt; turk3 | 0.028 \*          | 2.768   | 0.425  |
+| turk5       | &lt; turk1 | &lt; 0.001 \*\*\* | 6.025   | 0.425  |
+| anon        | &lt; turk5 | 0.481             | 1.174   | 0.394  |
+| anon        | &lt; reg   | 0.012 \*          | 3.082   | 0.394  |
+| anon        | &lt; turk3 | 0.035 \*          | 2.619   | 0.394  |
+| anon        | &lt; turk1 | &lt; 0.001 \*\*\* | 4.345   | 0.394  |
 
 Precision, Problem type: likelihood ratio = 8.3102, df = 4, n = 252, p = 0.081
 
@@ -835,25 +853,47 @@ NOTE: This is at the street level (not 5 meter level).
 
 We created binomial mixed effects models to determine the relationship between label type and recall/precision. We had label type as the fixed effect and user id nested in route id as random effects. We modeled recall/precision as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
-Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = 750.31, df = 3, n = 436, p &lt; 0.001). We also found label type to have a statistically significant association with precision (likelihood ratio = 874.12, df = 3, n = 423, p &lt; 0.001).
+Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = 750.31, df = 3, n = 436, p &lt; 0.001), precision (likelihood ratio = 874.12, df = 3, n = 423, p &lt; 0.001), and raw accuracy (likelihood ratio = 160.47, df = 3, n = 528, p &lt; 0.001.
 
 To test that the ordering of the label types are statistically significant (e.g., that NoCurbRamp recall is significantly lower than CurbRamp recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall, then precision).
 
 NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less than 0.001
+
+Recall: likelihood ratio = 750.31, df = 3, n = 436, p &lt; 0.001
 
 | label.type  | test            | p.value           | z.value | recall |
 |:------------|:----------------|:------------------|:--------|:-------|
 | CurbRamp    | -               | -                 | -       | 0.860  |
 | NoCurbRamp  | &lt; CurbRamp   | &lt; 0.001 \*\*\* | 4.171   | 0.693  |
 | Obstacle    | &lt; NoCurbRamp | &lt; 0.001 \*\*\* | 5.419   | 0.399  |
+| Obstacle    | &lt; CurbRamp   | &lt; 0.001 \*\*\* | 15.006  | 0.399  |
 | SurfaceProb | &lt; Obstacle   | &lt; 0.001 \*\*\* | 5.234   | 0.271  |
+| SurfaceProb | &lt; NoCurbRamp | &lt; 0.001 \*\*\* | 8.793   | 0.271  |
+| SurfaceProb | &lt; CurbRamp   | &lt; 0.001 \*\*\* | 21.014  | 0.271  |
+
+Precision: likelihood ratio = 874.12, df = 3, n = 423, p &lt; 0.001
 
 | label.type  | test             | p.value           | z.value | precision |
 |:------------|:-----------------|:------------------|:--------|:----------|
 | CurbRamp    | -                | -                 | -       | 0.954     |
 | SurfaceProb | &lt; CurbRamp    | &lt; 0.001 \*\*\* | 10.621  | 0.726     |
 | Obstacle    | &lt; SurfaceProb | &lt; 0.001 \*\*\* | 4.615   | 0.475     |
+| Obstacle    | &lt; CurbRamp    | &lt; 0.001 \*\*\* | 16.150  | 0.475     |
 | NoCurbRamp  | &lt; Obstacle    | &lt; 0.001 \*\*\* | 7.116   | 0.205     |
+| NoCurbRamp  | &lt; SurfaceProb | &lt; 0.001 \*\*\* | 10.638  | 0.205     |
+| NoCurbRamp  | &lt; CurbRamp    | &lt; 0.001 \*\*\* | 21.253  | 0.205     |
+
+Raw accuracy: likelihood ratio = 160.47, df = 3, n = 528, p &lt; 0.001
+
+| label.type  | test            | p.value           | z.value | raw.accuracy |
+|:------------|:----------------|:------------------|:--------|:-------------|
+| CurbRamp    | -               | -                 | -       | 0.837        |
+| NoCurbRamp  | &lt; CurbRamp   | &lt; 0.001 \*\*\* | 6.1894  | 0.729        |
+| Obstacle    | &lt; NoCurbRamp | 0.641             | 0.4668  | 0.712        |
+| Obstacle    | &lt; CurbRamp   | &lt; 0.001 \*\*\* | 6.6374  | 0.712        |
+| SurfaceProb | &lt; Obstacle   | &lt; 0.001 \*\*\* | 6.0165  | 0.590        |
+| SurfaceProb | &lt; NoCurbRamp | &lt; 0.001 \*\*\* | 6.4709  | 0.590        |
+| SurfaceProb | &lt; CurbRamp   | &lt; 0.001 \*\*\* | 12.2482 | 0.590        |
 
 ### Visual search time: Time to label by type
 
@@ -894,7 +934,10 @@ NOTE: `*` means less than 0.05, `**` means less than 0.01, and `***` means less 
 | CurbRamp    | -               | -                 | -       | 8.139            |
 | Obstacle    | &gt; CurbRamp   | &lt; 0.001 \*\*\* | 3.862   | 10.102           |
 | NoCurbRamp  | &gt; Obstacle   | 0.007 \*\*        | 2.935   | 12.784           |
+| NoCurbRamp  | &gt; CurbRamp   | &lt; 0.001 \*\*\* | 7.247   | 12.784           |
 | SurfaceProb | &gt; NoCurbRamp | 0.048 \*          | 1.981   | 13.766           |
+| SurfaceProb | &gt; Obstacle   | &lt; 0.001 \*\*\* | 4.577   | 13.766           |
+| SurfaceProb | &gt; CurbRamp   | &lt; 0.001 \*\*\* | 8.458   | 13.766           |
 
 ### Zone type: Land use effect on accuracy
 

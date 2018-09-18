@@ -4384,12 +4384,379 @@ April 17, 2018</p>
 </tbody>
 </table>
 <h4 id="statistical-significance">Statistical significance</h4>
+<p>NOTE: This is at the street level (not 5 meter level) and only looks at the aggregation of all label types (&quot;All&quot;).</p>
+<p>We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision/raw accuracy as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: <a href="#rationale-and-description-of-mixed-effect-models">here</a>.</p>
+<h5 id="comparing-anon-reg-and-turk1">Comparing anon reg and turk1</h5>
+<p>Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (worker type) to have a statistically significant association with recall (likelihood ratio = 21.616, df = 2, n = 132, p &lt; 0.001) and precision (likelihood ratio = 7.1219, df = 2, n = 131, p = 0.028), but we did <em>not</em> find a statistically significant difference for raw accuracy (likelihood ratio = 1.6217, df = 2, n = 132, p = 0.444).</p>
+<p>To test that the orderings of the user groups are statistically significant (e.g., that turk1 recall is significantly higher than registered user recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.</p>
+<p>NOTE: <code>*</code> means less than 0.05, <code>**</code> means less than 0.01, and <code>***</code> means less than 0.001</p>
+<p>Recall: likelihood ratio = 21.616, df = 2, n = 132, p &lt; 0.001.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">worker.type</th>
+<th align="left">test</th>
+<th align="left">p.value</th>
+<th align="left">z.value</th>
+<th align="left">recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">turk1</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">0.678</td>
+</tr>
+<tr class="even">
+<td align="left">reg</td>
+<td align="left">&lt; turk1</td>
+<td align="left">0.009 **</td>
+<td align="left">2.853</td>
+<td align="left">0.614</td>
+</tr>
+<tr class="odd">
+<td align="left">anon</td>
+<td align="left">&lt; reg</td>
+<td align="left">0.020 *</td>
+<td align="left">2.321</td>
+<td align="left">0.488</td>
+</tr>
+<tr class="even">
+<td align="left">anon</td>
+<td align="left">&lt; turk1</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">3.976</td>
+<td align="left">0.488</td>
+</tr>
+</tbody>
+</table>
+<p>Precision: likelihood ratio = 7.1219, df = 2, n = 131, p = 0.028</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">worker.type</th>
+<th align="left">test</th>
+<th align="left">p.value</th>
+<th align="left">z.value</th>
+<th align="left">precision</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">anon</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">0.745</td>
+</tr>
+<tr class="even">
+<td align="left">reg</td>
+<td align="left">&lt; anon</td>
+<td align="left">0.270</td>
+<td align="left">1.103</td>
+<td align="left">0.722</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1</td>
+<td align="left">&lt; reg</td>
+<td align="left">0.134</td>
+<td align="left">1.937</td>
+<td align="left">0.688</td>
+</tr>
+<tr class="even">
+<td align="left">turk1</td>
+<td align="left">&lt; anon</td>
+<td align="left">0.134</td>
+<td align="left">2.007</td>
+<td align="left">0.688</td>
+</tr>
+</tbody>
+</table>
+<h5 id="comparing-different-turker-groups">Comparing different turker groups</h5>
+<p>Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (worker type) to have a statistically significant association with recall (likelihood ratio = 498.96, df = 4, n = 330, p &lt; 0.001), precision (likelihood ratio = 374.88, df = 4, n = 330, p &lt; 0.001), and raw accuracy (likelihood ratio = 195.99, df = 4, n = 330, p &lt; 0.001).</p>
+<p>To test that the orderings of the user groups are statistically significant (e.g., that turk5 majority vote precision is significantly higher than turk3 majority vote precision, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.</p>
+<p>NOTE: <code>*</code> means less than 0.05, <code>**</code> means less than 0.01, and <code>***</code> means less than 0.001</p>
+<p>Recall: likelihood ratio = 498.96, df = 4, n = 330, p &lt; 0.001.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">worker.type</th>
+<th align="left">test</th>
+<th align="left">p.value</th>
+<th align="left">z.value</th>
+<th align="left">recall</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">turk5.all</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">0.917</td>
+</tr>
+<tr class="even">
+<td align="left">turk3.all</td>
+<td align="left">&lt; turk5.all</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">3.7244</td>
+<td align="left">0.867</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1</td>
+<td align="left">&lt; turk3.all</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">10.0798</td>
+<td align="left">0.678</td>
+</tr>
+<tr class="even">
+<td align="left">turk1</td>
+<td align="left">&lt; turk5.all</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">12.9464</td>
+<td align="left">0.678</td>
+</tr>
+<tr class="odd">
+<td align="left">turk3.maj.vote</td>
+<td align="left">&lt; turk1</td>
+<td align="left">0.015 *</td>
+<td align="left">2.6652</td>
+<td align="left">0.621</td>
+</tr>
+<tr class="even">
+<td align="left">turk3.maj.vote</td>
+<td align="left">&lt; turk3.all</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">12.4353</td>
+<td align="left">0.621</td>
+</tr>
+<tr class="odd">
+<td align="left">turk3.maj.vote</td>
+<td align="left">&lt; turk5.all</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">15.0197</td>
+<td align="left">0.621</td>
+</tr>
+<tr class="even">
+<td align="left">turk5.maj.vote</td>
+<td align="left">&lt; turk3.maj.vote</td>
+<td align="left">0.326</td>
+<td align="left">0.9828</td>
+<td align="left">0.595</td>
+</tr>
+<tr class="odd">
+<td align="left">turk5.maj.vote</td>
+<td align="left">&lt; turk1</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">3.6420</td>
+<td align="left">0.595</td>
+</tr>
+<tr class="even">
+<td align="left">turk5.maj.vote</td>
+<td align="left">&lt; turk3.all</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">13.2806</td>
+<td align="left">0.595</td>
+</tr>
+<tr class="odd">
+<td align="left">turk5.maj.vote</td>
+<td align="left">&lt; turk5.all</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">15.7607</td>
+<td align="left">0.595</td>
+</tr>
+</tbody>
+</table>
+<p>Precision: likelihood ratio = 374.88, df = 4, n = 330, p &lt; 0.001</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">worker.type</th>
+<th align="left">test</th>
+<th align="left">p.value</th>
+<th align="left">z.value</th>
+<th align="left">precision</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">turk5.maj.vote</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">0.874</td>
+</tr>
+<tr class="even">
+<td align="left">turk3.maj.vote</td>
+<td align="left">&lt; turk5.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">3.704</td>
+<td align="left">0.810</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1</td>
+<td align="left">&lt; turk3.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">5.872</td>
+<td align="left">0.688</td>
+</tr>
+<tr class="even">
+<td align="left">turk1</td>
+<td align="left">&lt; turk5.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">9.019</td>
+<td align="left">0.688</td>
+</tr>
+<tr class="odd">
+<td align="left">turk3.all</td>
+<td align="left">&lt; turk1</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">4.341</td>
+<td align="left">0.601</td>
+</tr>
+<tr class="even">
+<td align="left">turk3.all</td>
+<td align="left">&lt; turk3.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">9.897</td>
+<td align="left">0.601</td>
+</tr>
+<tr class="odd">
+<td align="left">turk3.all</td>
+<td align="left">&lt; turk5.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">12.466</td>
+<td align="left">0.601</td>
+</tr>
+<tr class="even">
+<td align="left">turk5.all</td>
+<td align="left">&lt; turk3.all</td>
+<td align="left">0.004 **</td>
+<td align="left">2.913</td>
+<td align="left">0.550</td>
+</tr>
+<tr class="odd">
+<td align="left">turk5.all</td>
+<td align="left">&lt; turk1</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">6.986</td>
+<td align="left">0.550</td>
+</tr>
+<tr class="even">
+<td align="left">turk5.all</td>
+<td align="left">&lt; turk3.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">12.150</td>
+<td align="left">0.550</td>
+</tr>
+<tr class="odd">
+<td align="left">turk5.all</td>
+<td align="left">&lt; turk5.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">14.336</td>
+<td align="left">0.550</td>
+</tr>
+</tbody>
+</table>
+<p>Raw accuracy: likelihood ratio = 195.99, df = 4, n = 330, p &lt; 0.001</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">worker.type</th>
+<th align="left">test</th>
+<th align="left">p.value</th>
+<th align="left">z.value</th>
+<th align="left">raw.accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">turk5.maj.vote</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">0.777</td>
+</tr>
+<tr class="even">
+<td align="left">turk3.maj.vote</td>
+<td align="left">&lt; turk5.maj.vote</td>
+<td align="left">0.087</td>
+<td align="left">1.713</td>
+<td align="left">0.759</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1</td>
+<td align="left">&lt; turk3.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">4.145</td>
+<td align="left">0.712</td>
+</tr>
+<tr class="even">
+<td align="left">turk1</td>
+<td align="left">&lt; turk5.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">5.839</td>
+<td align="left">0.712</td>
+</tr>
+<tr class="odd">
+<td align="left">turk3.all</td>
+<td align="left">&lt; turk1</td>
+<td align="left">0.021 *</td>
+<td align="left">2.564</td>
+<td align="left">0.692</td>
+</tr>
+<tr class="even">
+<td align="left">turk3.all</td>
+<td align="left">&lt; turk3.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">6.682</td>
+<td align="left">0.692</td>
+</tr>
+<tr class="odd">
+<td align="left">turk3.all</td>
+<td align="left">&lt; turk5.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">8.352</td>
+<td align="left">0.692</td>
+</tr>
+<tr class="even">
+<td align="left">turk5.all</td>
+<td align="left">&lt; turk3.all</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">3.786</td>
+<td align="left">0.645</td>
+</tr>
+<tr class="odd">
+<td align="left">turk5.all</td>
+<td align="left">&lt; turk1</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">6.331</td>
+<td align="left">0.645</td>
+</tr>
+<tr class="even">
+<td align="left">turk5.all</td>
+<td align="left">&lt; turk3.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">10.377</td>
+<td align="left">0.645</td>
+</tr>
+<tr class="odd">
+<td align="left">turk5.all</td>
+<td align="left">&lt; turk5.maj.vote</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">12.002</td>
+<td align="left">0.645</td>
+</tr>
+</tbody>
+</table>
+<h4 id="old-statistical-significance-section">Old statistical significance section</h4>
 <p>NOTE: This is at the street level (not 5 meter level).</p>
 <p>We created binomial mixed effects models to determine the relationship between user group and recall/precision. We had user group as the fixed effect and route id as the random effect. We modeled recall/precision as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: <a href="#rationale-and-description-of-mixed-effect-models">here</a>.</p>
 <p>Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (worker type) to have a statistically significant association with both recall and precision for both the Problem type and all label types aggregated (results shown below).</p>
 <p>To test that the orderings of the user groups are statistically significant (e.g., that turk1 recall is significantly lower than registered user recall for the Problem type, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each user group, which lets us determine what parts of the ordering are significant. The results of which are shown in the tables below.</p>
 <p>NOTE: <code>*</code> means less than 0.05, <code>**</code> means less than 0.01, and <code>***</code> means less than 0.001</p>
-<p>NOTE: In places where one user group's accuracy was not statistically different from the one with the closest accuracy to it, I also am showing comparisons to user groups with larger differences in accuracy.</p>
 <p>Recall, all label types: likelihood ratio = 23.057, df = 4, n = 264, p &lt; 0.001.</p>
 <table>
 <thead>
@@ -4536,24 +4903,38 @@ April 17, 2018</p>
 <td align="left">0.722</td>
 </tr>
 <tr class="odd">
+<td align="left">reg</td>
+<td align="left">&lt; turk5</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">7.0635</td>
+<td align="left">0.722</td>
+</tr>
+<tr class="even">
 <td align="left">turk1</td>
 <td align="left">&lt; reg</td>
 <td align="left">0.253</td>
 <td align="left">1.7959</td>
 <td align="left">0.688</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">turk1</td>
 <td align="left">&lt; anon</td>
 <td align="left">0.253</td>
 <td align="left">1.8573</td>
 <td align="left">0.688</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">turk1</td>
 <td align="left">&lt; turk3</td>
 <td align="left">&lt; 0.001 ***</td>
 <td align="left">6.0213</td>
+<td align="left">0.688</td>
+</tr>
+<tr class="odd">
+<td align="left">turk1</td>
+<td align="left">&lt; turk5</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">9.1436</td>
 <td align="left">0.688</td>
 </tr>
 </tbody>
@@ -4606,6 +4987,20 @@ April 17, 2018</p>
 <td align="left">0.425</td>
 </tr>
 <tr class="even">
+<td align="left">turk5</td>
+<td align="left">&lt; turk3</td>
+<td align="left">0.028 *</td>
+<td align="left">2.768</td>
+<td align="left">0.425</td>
+</tr>
+<tr class="odd">
+<td align="left">turk5</td>
+<td align="left">&lt; turk1</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">6.025</td>
+<td align="left">0.425</td>
+</tr>
+<tr class="even">
 <td align="left">anon</td>
 <td align="left">&lt; turk5</td>
 <td align="left">0.481</td>
@@ -4617,6 +5012,20 @@ April 17, 2018</p>
 <td align="left">&lt; reg</td>
 <td align="left">0.012 *</td>
 <td align="left">3.082</td>
+<td align="left">0.394</td>
+</tr>
+<tr class="even">
+<td align="left">anon</td>
+<td align="left">&lt; turk3</td>
+<td align="left">0.035 *</td>
+<td align="left">2.619</td>
+<td align="left">0.394</td>
+</tr>
+<tr class="odd">
+<td align="left">anon</td>
+<td align="left">&lt; turk1</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">4.345</td>
 <td align="left">0.394</td>
 </tr>
 </tbody>
@@ -4940,9 +5349,10 @@ April 17, 2018</p>
 <h4 id="statistical-significance-1">Statistical significance</h4>
 <p>NOTE: This is at the street level (not 5 meter level).</p>
 <p>We created binomial mixed effects models to determine the relationship between label type and recall/precision. We had label type as the fixed effect and user id nested in route id as random effects. We modeled recall/precision as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: <a href="#rationale-and-description-of-mixed-effect-models">here</a>.</p>
-<p>Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = 750.31, df = 3, n = 436, p &lt; 0.001). We also found label type to have a statistically significant association with precision (likelihood ratio = 874.12, df = 3, n = 423, p &lt; 0.001).</p>
+<p>Using likelihood ratio tests (LRTs), we found the contribution of the fixed effect (label type) to have a statistically significant association with recall (likelihood ratio = 750.31, df = 3, n = 436, p &lt; 0.001), precision (likelihood ratio = 874.12, df = 3, n = 423, p &lt; 0.001), and raw accuracy (likelihood ratio = 160.47, df = 3, n = 528, p &lt; 0.001.</p>
 <p>To test that the ordering of the label types are statistically significant (e.g., that NoCurbRamp recall is significantly lower than CurbRamp recall, etc), we do post-hoc Tukey's HSD tests. This essentially gives us a pairwise test between each label type, which lets us determine what parts of the ordering are significant. The results of which are shown in a tables below (first recall, then precision).</p>
 <p>NOTE: <code>*</code> means less than 0.05, <code>**</code> means less than 0.01, and <code>***</code> means less than 0.001</p>
+<p>Recall: likelihood ratio = 750.31, df = 3, n = 436, p &lt; 0.001</p>
 <table>
 <thead>
 <tr class="header">
@@ -4976,14 +5386,36 @@ April 17, 2018</p>
 <td align="left">0.399</td>
 </tr>
 <tr class="even">
+<td align="left">Obstacle</td>
+<td align="left">&lt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">15.006</td>
+<td align="left">0.399</td>
+</tr>
+<tr class="odd">
 <td align="left">SurfaceProb</td>
 <td align="left">&lt; Obstacle</td>
 <td align="left">&lt; 0.001 ***</td>
 <td align="left">5.234</td>
 <td align="left">0.271</td>
 </tr>
+<tr class="even">
+<td align="left">SurfaceProb</td>
+<td align="left">&lt; NoCurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">8.793</td>
+<td align="left">0.271</td>
+</tr>
+<tr class="odd">
+<td align="left">SurfaceProb</td>
+<td align="left">&lt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">21.014</td>
+<td align="left">0.271</td>
+</tr>
 </tbody>
 </table>
+<p>Precision: likelihood ratio = 874.12, df = 3, n = 423, p &lt; 0.001</p>
 <table>
 <thead>
 <tr class="header">
@@ -5017,11 +5449,95 @@ April 17, 2018</p>
 <td align="left">0.475</td>
 </tr>
 <tr class="even">
+<td align="left">Obstacle</td>
+<td align="left">&lt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">16.150</td>
+<td align="left">0.475</td>
+</tr>
+<tr class="odd">
 <td align="left">NoCurbRamp</td>
 <td align="left">&lt; Obstacle</td>
 <td align="left">&lt; 0.001 ***</td>
 <td align="left">7.116</td>
 <td align="left">0.205</td>
+</tr>
+<tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">&lt; SurfaceProb</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">10.638</td>
+<td align="left">0.205</td>
+</tr>
+<tr class="odd">
+<td align="left">NoCurbRamp</td>
+<td align="left">&lt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">21.253</td>
+<td align="left">0.205</td>
+</tr>
+</tbody>
+</table>
+<p>Raw accuracy: likelihood ratio = 160.47, df = 3, n = 528, p &lt; 0.001</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">label.type</th>
+<th align="left">test</th>
+<th align="left">p.value</th>
+<th align="left">z.value</th>
+<th align="left">raw.accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">CurbRamp</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">-</td>
+<td align="left">0.837</td>
+</tr>
+<tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">&lt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">6.1894</td>
+<td align="left">0.729</td>
+</tr>
+<tr class="odd">
+<td align="left">Obstacle</td>
+<td align="left">&lt; NoCurbRamp</td>
+<td align="left">0.641</td>
+<td align="left">0.4668</td>
+<td align="left">0.712</td>
+</tr>
+<tr class="even">
+<td align="left">Obstacle</td>
+<td align="left">&lt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">6.6374</td>
+<td align="left">0.712</td>
+</tr>
+<tr class="odd">
+<td align="left">SurfaceProb</td>
+<td align="left">&lt; Obstacle</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">6.0165</td>
+<td align="left">0.590</td>
+</tr>
+<tr class="even">
+<td align="left">SurfaceProb</td>
+<td align="left">&lt; NoCurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">6.4709</td>
+<td align="left">0.590</td>
+</tr>
+<tr class="odd">
+<td align="left">SurfaceProb</td>
+<td align="left">&lt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">12.2482</td>
+<td align="left">0.590</td>
 </tr>
 </tbody>
 </table>
@@ -5128,10 +5644,31 @@ April 17, 2018</p>
 <td align="left">12.784</td>
 </tr>
 <tr class="even">
+<td align="left">NoCurbRamp</td>
+<td align="left">&gt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">7.247</td>
+<td align="left">12.784</td>
+</tr>
+<tr class="odd">
 <td align="left">SurfaceProb</td>
 <td align="left">&gt; NoCurbRamp</td>
 <td align="left">0.048 *</td>
 <td align="left">1.981</td>
+<td align="left">13.766</td>
+</tr>
+<tr class="even">
+<td align="left">SurfaceProb</td>
+<td align="left">&gt; Obstacle</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">4.577</td>
+<td align="left">13.766</td>
+</tr>
+<tr class="odd">
+<td align="left">SurfaceProb</td>
+<td align="left">&gt; CurbRamp</td>
+<td align="left">&lt; 0.001 ***</td>
+<td align="left">8.458</td>
 <td align="left">13.766</td>
 </tr>
 </tbody>
