@@ -2008,6 +2008,17 @@ expanded.data.with.raw.accuracy <-
                                  worker.type == 'turk5' ~ 'turk5.maj.vote',
                                  TRUE                   ~ as.character(worker.type))) %>%
   bind_rows(all.users.with.raw.accuracy, turk.with.raw.accuracy)
+
+validation.study.good.users <-
+  data.with.raw.accuracy %>%
+  dplyr::filter(n.workers == 1, binary == FALSE, included.severity == 'all',
+                granularity == 'street', label.type == 'All') %>%
+  mutate(label.count = true.pos + false.pos,
+         labels.per.100m = if_else(is.anon.route,
+         label.count / 6.096, label.count / 12.192)) %>%
+  dplyr::filter(labels.per.100m >= 3.75) %>%
+  distinct(worker1) %>%
+  pull()
 ```
 
 
@@ -2336,6 +2347,54 @@ kable(
 ```
 
 
+### Effects of filtering
+
+_Non filtered_ large table like above, for individual users (i.e., anon, reg, and turk1) only.
+
+```{r turk.big.table.unfiltered, echo=FALSE}
+kable(
+  data.with.raw.accuracy %>%
+    dplyr::filter(included.severity == 'all',
+                  binary == TRUE,
+                  worker.type %in% c('anon', 'reg', 'turk1'),
+                  label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
+    rename(prec = precision, rec = recall, raw.acc = raw.accuracy) %>%
+    arrange(label.type, granularity, worker.type) %>%
+    mutate(label.type.granularity.user.group = paste0(label.type, ', ', granularity, ', ', worker.type),
+           label.type.granularity.user.group = factor(label.type.granularity.user.group,
+                                                      levels = unique(label.type.granularity.user.group))) %>%
+    summarise_vars('label.type.granularity.user.group',
+                   var.names = c('rec', 'prec', 'raw.acc'),
+                   funcs = funs(md = median, mn = mean, sd = sd, se = se)),
+  digits = 3,
+  align = 'l'
+)
+```
+
+_Filtered_ large table like above, for individual users (i.e., anon, reg, and turk1) only. Filtered in terms of GUAs.
+
+```{r turk.big.table.filtered, echo=FALSE}
+kable(
+  data.with.raw.accuracy %>%
+    dplyr::filter(included.severity == 'all',
+                  binary == TRUE,
+                  worker.type %in% c('anon', 'reg', 'turk1'),
+                  worker1 %in% validation.study.good.users,
+                  label.type %in% LABEL_TYPES_TO_ANALYZE) %>%
+    rename(prec = precision, rec = recall, raw.acc = raw.accuracy) %>%
+    arrange(label.type, granularity, worker.type) %>%
+    mutate(label.type.granularity.user.group = paste0(label.type, ', ', granularity, ', ', worker.type),
+           label.type.granularity.user.group = factor(label.type.granularity.user.group,
+                                                      levels = unique(label.type.granularity.user.group))) %>%
+    summarise_vars('label.type.granularity.user.group',
+                   var.names = c('rec', 'prec', 'raw.acc'),
+                   funcs = funs(md = median, mn = mean, sd = sd, se = se)),
+  digits = 3,
+  align = 'l'
+)
+```
+
+
 ### IRR
 
 NOTE: In these tables, the data is binary (not ordinal), and is at the street level (not 5 meter level).
@@ -2436,20 +2495,9 @@ ggplot(data = granularity.analysis.summary, aes(x = label.type, y = accuracy.val
 And here is the same graph as above for only "good users", i.e., those with a labeling frequency over 3.75 labels per 100 meters.
 
 ```{r turk.granularity.analysis.good.users, echo=FALSE, fig.width=7.5, fig.height=5}
-good.validation.study.users <-
-  data.with.raw.accuracy %>%
-  dplyr::filter(n.workers == 1, binary == FALSE, included.severity == 'all',
-                granularity == 'street', label.type == 'All') %>%
-  mutate(label.count = true.pos + false.pos,
-         labels.per.100m = if_else(is.anon.route,
-         label.count / 6.096, label.count / 12.192)) %>%
-  dplyr::filter(labels.per.100m >= 3.75) %>%
-  distinct(worker1) %>%
-  pull()
-
 granularity.analysis.summary.good.users <-
   granularity.analysis.data %>%
-  dplyr::filter(worker1 %in% good.validation.study.users) %>%
+  dplyr::filter(worker1 %in% validation.study.good.users) %>%
   group_by(label.type, accuracy.type, granularity) %>%
   dplyr::summarize(sd = sd(accuracy.value, na.rm = TRUE),
                    se = sd(accuracy.value, na.rm = TRUE) / sqrt(n()),
