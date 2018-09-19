@@ -12,6 +12,7 @@ April 17, 2018
         -   [Data characteristics](#data-characteristics)
         -   [Data lost due to filtering](#data-lost-due-to-filtering)
         -   [User stats and tool usage](#user-stats-and-tool-usage)
+        -   [Time to complete tutorial by user group](#time-to-complete-tutorial-by-user-group)
     -   [Possible Stories](#possible-stories)
         -   [Data overlap and agreement between users](#data-overlap-and-agreement-between-users)
         -   [User dropoffs](#user-dropoffs)
@@ -183,6 +184,28 @@ Below are trimmed down tables; non-filtered followed by filtered.
 | Registered | 188     | 5171   | 35923  | 391.57  | 1044     | 38%        | 6.80                  | 1.39               | 29.34                | 1.25                           |
 | Turker     | 122     | 13207  | 103820 | 1016.42 | 2953     | 23%        | 8.90                  | 0.88               | 26.94                | 1.34                           |
 | Researcher | 21      | 2717   | 30488  | 211.73  | 604      | 71%        | 7.08                  | 1.90               | 33.56                | 0.75                           |
+
+### Time to complete tutorial by user group
+
+NOTE: We don't have the time to complete the tutorial for every user that we have data for elsewhere in our analysis. I suspect that this is largely due to us increasing the amount of logging that occurs over time (this is backed up by us missing only a couple turkers, but dozens of users in other user groups). This can also happen if two users use the same computer, because whether you have completed the tutorial or not was saved in the browser.
+
+First for the non-filtered dataset, then for the filtered dataset. This is in minutes.
+
+| role           | n.users | md   | mn    | sd    |
+|:---------------|:--------|:-----|:------|:------|
+| All Volunteers | 568     | 3.46 | 4.649 | 4.130 |
+| Anon           | 283     | 3.12 | 3.827 | 2.524 |
+| Registered     | 119     | 4.74 | 6.999 | 7.083 |
+| Researcher     | 12      | 3.14 | 4.333 | 6.802 |
+| Turker         | 166     | 3.58 | 4.365 | 2.573 |
+
+| role           | n.users | md    | mn    | sd    |
+|:---------------|:--------|:------|:------|:------|
+| All Volunteers | 438     | 3.375 | 4.451 | 3.624 |
+| Anon           | 228     | 3.110 | 3.803 | 2.556 |
+| Registered     | 91      | 4.740 | 6.500 | 5.781 |
+| Researcher     | 7       | 3.440 | 5.947 | 8.667 |
+| Turker         | 119     | 3.450 | 4.125 | 2.536 |
 
 Possible Stories
 ----------------

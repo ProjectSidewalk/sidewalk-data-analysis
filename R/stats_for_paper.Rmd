@@ -201,6 +201,7 @@ if (REFRESH_TURK_STUDY_DATA) {
 ```{r reading.data, echo=FALSE, include=FALSE}
 audits.path <- '../data/stats_for_paper_audits.csv'
 times.path <- '../data/stats_for_paper_times.csv'
+tutorial.times.path <- '../data/stats_for_paper_tutorial_times.csv'
 labels.path <- '../data/stats_for_paper_labels.csv'
 attributes.path <- '../data/stats_for_paper_attributes.csv'
 sessions.path <- '../data/stats_for_paper_sessions.csv'
@@ -326,6 +327,74 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
       WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
       GROUP BY ip_address;'
       )
+  reg.tutorial.times <-
+    dbGetQuery(
+      db.connection.public.deployment,
+      'SELECT user_audit_times.user_id,
+             CAST(extract( second from SUM(diff) ) / 60 +
+                  extract( minute from SUM(diff) ) +
+                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS minutes_audited
+      FROM
+      (
+          SELECT tutorial_task.user_id,
+                 (timestamp - LAG(timestamp, 1) OVER(PARTITION BY user_id ORDER BY timestamp)) AS diff
+          FROM
+          (
+              SELECT DISTINCT ON (audit_task.user_id)
+                     audit_task.audit_task_id, audit_task.user_id
+              FROM audit_task_interaction
+              INNER JOIN audit_task ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+              INNER JOIN user_role ON audit_task.user_id = user_role.user_id
+              INNER JOIN role ON user_role.role_id = role.role_id
+              WHERE action = \'Onboarding_End\'
+                  AND audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+                ORDER BY audit_task.user_id, audit_task_interaction.timestamp, audit_task_interaction.audit_task_interaction_id
+          ) tutorial_task
+          INNER JOIN audit_task_interaction ON tutorial_task.audit_task_id = audit_task_interaction.audit_task_id
+          WHERE action IN (\'ViewControl_MouseDown\', \'LabelingCanvas_MouseDown\', \'Onboarding_Transition\')
+      ) user_audit_times
+      WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
+      GROUP BY user_audit_times.user_id;'
+    )
+  anon.tutorial.times <-
+    dbGetQuery(
+      db.connection.public.deployment,
+      'SELECT user_audit_times.ip_address AS user_id,
+             CAST(extract( second from SUM(diff) ) / 60 +
+                  extract( minute from SUM(diff) ) +
+                  extract( hour from SUM(diff) ) * 60 AS decimal(10,2)) AS minutes_audited
+      FROM
+      (
+          SELECT  ip_address,
+                  (
+                      timestamp - Lag(timestamp, 1)
+                      OVER(PARTITION BY ip_address ORDER BY timestamp)
+                  ) AS diff
+          FROM
+          (
+              SELECT DISTINCT ON (audit_task_environment.ip_address)
+                     audit_task.audit_task_id, audit_task_environment.ip_address
+              FROM audit_task_interaction
+              INNER JOIN audit_task ON audit_task_interaction.audit_task_id = audit_task.audit_task_id
+              INNER JOIN audit_task_environment ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+              WHERE action = \'Onboarding_End\'
+                  AND audit_task.user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+                  AND ip_address IN
+                  (
+                      SELECT ip_address
+                      FROM audit_task_environment
+                      INNER JOIN audit_task
+                          ON audit_task.audit_task_id = audit_task_environment.audit_task_id
+                      WHERE completed = true
+                  )
+              ORDER BY audit_task_environment.ip_address, audit_task_interaction.timestamp, audit_task_interaction.audit_task_interaction_id
+          ) tutorial_task
+          INNER JOIN audit_task_interaction ON tutorial_task.audit_task_id = audit_task_interaction.audit_task_id
+          WHERE action IN (\'ViewControl_MouseDown\', \'LabelingCanvas_MouseDown\', \'Onboarding_Transition\')
+      ) user_audit_times
+      WHERE diff < \'00:05:00.000\' AND diff > \'00:00:00.000\'
+      GROUP BY ip_address;'
+    )
   reg.sessions <-
     dbGetQuery(
       db.connection.public.deployment,
@@ -586,6 +655,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   # Combine registered and anonymous user results.
   audits <- bind_rows(reg.audits, anon.audits)
   times <- bind_rows(reg.times, anon.times)
+  tutorial.times <- bind_rows(reg.tutorial.times, anon.tutorial.times)
   labels <- bind_rows(reg.labels, anon.labels)
   sessions <- bind_rows(reg.sessions, anon.sessions)
   tutorials <- bind_rows(turk.tutorials, volunteer.tutorials)
@@ -595,6 +665,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   now <- gsub(' ', '_', Sys.time())
   file.copy(audits.path, paste('../data/old/stats_for_paper_audits', now, sep = '_'))
   file.copy(times.path, paste('../data/old/stats_for_paper_times.csv', now, sep = '_'))
+  file.copy(tutorial.times.path, paste('../data/old/stats_for_paper_tutorial_times.csv', now, sep = '_'))
   file.copy(labels.path, paste('../data/old/stats_for_paper_labels.csv', now, sep = '_'))
   file.copy(attributes.path, paste('../data/old/stats_for_paper_attributes.csv', now, sep = '_'))
   file.copy(sessions.path, paste('../data/old/stats_for_paper_sessions.csv', now, sep = '_'))
@@ -605,6 +676,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   # Overwrite old data files with new results of queries.
   write.csv(audits, audits.path, row.names = FALSE)
   write.csv(times, times.path, row.names = FALSE)
+  write.csv(tutorial.times, tutorial.times.path, row.names = FALSE)
   write.csv(labels, labels.path, row.names = FALSE)
   write.csv(attributes, attributes.path, row.names = FALSE)
   write.csv(sessions, sessions.path, row.names = FALSE)
@@ -616,6 +688,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
                      colClasses = c('character', 'character', 'POSIXct',
                                     'logical', replicate(3, 'numeric')))
   times <- read.csv(times.path, colClasses = c('character', 'numeric'))
+  tutorial.times <- read.csv(tutorial.times.path, colClasses = c('character', 'numeric'))
   labels <- read.csv(labels.path,
                      colClasses = c(replicate(3, 'numeric'), 'character', 'character', 'logical'))
   attributes <- read.csv(attributes.path, colClasses = c('character', 'numeric'))
@@ -1421,6 +1494,51 @@ kable(
     inner_join(important.average.stats.filtered, by = c('role', 'n.users')),
   align = 'l',
   digits = 2
+)
+```
+
+### Time to complete tutorial by user group
+
+NOTE: We don't have the time to complete the tutorial for every user that we have data for elsewhere in our analysis. I suspect that this is largely due to us increasing the amount of logging that occurs over time (this is backed up by us missing only a couple turkers, but dozens of users in other user groups). This can also happen if two users use the same computer, because whether you have completed the tutorial or not was saved in the browser.
+
+First for the non-filtered dataset, then for the filtered dataset. This is in minutes.
+
+```{r public.deployment.tutorial.times, echo=FALSE}
+tutorial.times.nonfiltered.by.user.group <-
+  tutorial.times %>%
+  rename(tutorial_minutes = minutes_audited) %>%
+  inner_join(speeds, by = 'user_id') %>%
+  dplyr::select(user_id, role, tutorial_minutes) %>%
+  mutate(role = recode_factor(role,
+                              `Anonymous` = 'Anon',
+                              `User` = 'Registered',
+                              `Turker` = 'Turker',
+                              `Administrator` = 'Researcher',
+                              `Owner` = 'Researcher'),
+         role = as.character(role))
+
+tutorial.times.nonfiltered <-
+  tutorial.times.nonfiltered.by.user.group %>%
+  dplyr::filter(role %in% c('Anon', 'Turker', 'Registered')) %>%
+  mutate(role = 'All Volunteers') %>%
+  bind_rows(tutorial.times.nonfiltered.by.user.group)
+
+kable(
+  tutorial.times.nonfiltered %>%
+    summarise_vars('role', include.n = TRUE),
+  digits = 3,
+  align = 'l'
+)
+
+tutorial.times.filtered <-
+  tutorial.times.nonfiltered %>%
+  dplyr::filter(user_id %in% good.user.list)
+
+kable(
+  tutorial.times.filtered %>%
+    summarise_vars('role', include.n = TRUE),
+  digits = 3,
+  align = 'l'
 )
 ```
 
