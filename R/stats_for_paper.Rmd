@@ -2523,14 +2523,16 @@ Our average (mean) IRR (kripp alpha) over the 7 rounds, by label type, is in the
 kable(
   clean.agreement.data %>%
     group_by(label.type) %>%
-    dplyr::summarize(mean.kripp.alpha = mean(kripp.alpha)),
+    dplyr::summarize(mean.kripp.alpha = mean(kripp.alpha),
+                     mean.agreement = mean(agreement)),
   digits = 3,
   align = 'l'
   )
 kable(
   clean.agreement.data %>%
     group_by(round.code) %>%
-    dplyr::summarise(mean.kripp.alpha = mean(kripp.alpha)),
+    dplyr::summarise(mean.kripp.alpha = mean(kripp.alpha),
+                     mean.agreement = mean(agreement)),
   digits = 3,
   align = 'l'
 )
@@ -2539,7 +2541,7 @@ kable(
     arrange(label.type, round.code) %>%
     mutate(label.type.round = paste0(label.type, ', ', round.code),
            label.type.round = factor(label.type.round, levels = unique(label.type.round))) %>%
-    dplyr::select(label.type.round, kripp.alpha),
+    dplyr::select(label.type.round, kripp.alpha, agreement),
   digits = 3,
   align = 'l'
   )

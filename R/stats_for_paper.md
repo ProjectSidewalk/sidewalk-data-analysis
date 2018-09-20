@@ -589,61 +589,61 @@ NOTE: In these tables, the data is binary (not ordinal), and is at the street le
 
 Our average (mean) IRR (kripp alpha) over the 7 rounds, by label type, is in the first table below, followed by mean kripp alpha across label types for each round, followed by the IRR in each round by label type:
 
-| label.type  | mean.kripp.alpha |
-|:------------|:-----------------|
-| CurbRamp    | 0.907            |
-| NoCurbRamp  | 0.787            |
-| Obstacle    | 0.342            |
-| SurfaceProb | 0.477            |
-| Problem     | 0.475            |
+| label.type  | mean.kripp.alpha | mean.agreement |
+|:------------|:-----------------|:---------------|
+| CurbRamp    | 0.907            | 97.457         |
+| NoCurbRamp  | 0.787            | 97.014         |
+| Obstacle    | 0.342            | 75.757         |
+| SurfaceProb | 0.477            | 75.586         |
+| Problem     | 0.475            | 81.286         |
 
-| round.code | mean.kripp.alpha |
-|:-----------|:-----------------|
-| 1          | 0.717            |
-| 2          | 0.503            |
-| 3          | 0.651            |
-| 4          | 0.405            |
-| 5          | 0.574            |
-| 6          | 0.808            |
-| 7          | 0.526            |
+| round.code | mean.kripp.alpha | mean.agreement |
+|:-----------|:-----------------|:---------------|
+| 1          | 0.717            | 86.66          |
+| 2          | 0.503            | 86.66          |
+| 3          | 0.651            | 83.34          |
+| 4          | 0.405            | 82.50          |
+| 5          | 0.574            | 83.32          |
+| 6          | 0.808            | 93.72          |
+| 7          | 0.526            | 81.74          |
 
-| label.type.round | kripp.alpha |
-|:-----------------|:------------|
-| CurbRamp, 1      | 1.000       |
-| CurbRamp, 2      | 0.712       |
-| CurbRamp, 3      | 1.000       |
-| CurbRamp, 4      | 1.000       |
-| CurbRamp, 5      | 0.636       |
-| CurbRamp, 6      | 1.000       |
-| CurbRamp, 7      | 1.000       |
-| NoCurbRamp, 1    | 1.000       |
-| NoCurbRamp, 2    | 0.000       |
-| NoCurbRamp, 3    | 1.000       |
-| NoCurbRamp, 4    | 0.769       |
-| NoCurbRamp, 5    | 1.000       |
-| NoCurbRamp, 6    | 1.000       |
-| NoCurbRamp, 7    | 0.741       |
-| Obstacle, 1      | 0.546       |
-| Obstacle, 2      | 0.659       |
-| Obstacle, 3      | 0.304       |
-| Obstacle, 4      | 0.192       |
-| Obstacle, 5      | 0.227       |
-| Obstacle, 6      | 0.351       |
-| Obstacle, 7      | 0.115       |
-| SurfaceProb, 1   | 0.470       |
-| SurfaceProb, 2   | 0.532       |
-| SurfaceProb, 3   | 0.425       |
-| SurfaceProb, 4   | 0.130       |
-| SurfaceProb, 5   | 0.605       |
-| SurfaceProb, 6   | 0.846       |
-| SurfaceProb, 7   | 0.333       |
-| Problem, 1       | 0.568       |
-| Problem, 2       | 0.611       |
-| Problem, 3       | 0.525       |
-| Problem, 4       | -0.068      |
-| Problem, 5       | 0.404       |
-| Problem, 6       | 0.843       |
-| Problem, 7       | 0.442       |
+| label.type.round | kripp.alpha | agreement |
+|:-----------------|:------------|:----------|
+| CurbRamp, 1      | 1.000       | 100.0     |
+| CurbRamp, 2      | 0.712       | 88.9      |
+| CurbRamp, 3      | 1.000       | 100.0     |
+| CurbRamp, 4      | 1.000       | 100.0     |
+| CurbRamp, 5      | 0.636       | 93.3      |
+| CurbRamp, 6      | 1.000       | 100.0     |
+| CurbRamp, 7      | 1.000       | 100.0     |
+| NoCurbRamp, 1    | 1.000       | 100.0     |
+| NoCurbRamp, 2    | 0.000       | 94.4      |
+| NoCurbRamp, 3    | 1.000       | 100.0     |
+| NoCurbRamp, 4    | 0.769       | 91.7      |
+| NoCurbRamp, 5    | 1.000       | 100.0     |
+| NoCurbRamp, 6    | 1.000       | 100.0     |
+| NoCurbRamp, 7    | 0.741       | 93.0      |
+| Obstacle, 1      | 0.546       | 80.0      |
+| Obstacle, 2      | 0.659       | 83.3      |
+| Obstacle, 3      | 0.304       | 66.7      |
+| Obstacle, 4      | 0.192       | 70.8      |
+| Obstacle, 5      | 0.227       | 73.3      |
+| Obstacle, 6      | 0.351       | 84.3      |
+| Obstacle, 7      | 0.115       | 71.9      |
+| SurfaceProb, 1   | 0.470       | 73.3      |
+| SurfaceProb, 2   | 0.532       | 77.8      |
+| SurfaceProb, 3   | 0.425       | 70.8      |
+| SurfaceProb, 4   | 0.130       | 66.7      |
+| SurfaceProb, 5   | 0.605       | 80.0      |
+| SurfaceProb, 6   | 0.846       | 92.1      |
+| SurfaceProb, 7   | 0.333       | 68.4      |
+| Problem, 1       | 0.568       | 80.0      |
+| Problem, 2       | 0.611       | 88.9      |
+| Problem, 3       | 0.525       | 79.2      |
+| Problem, 4       | -0.068      | 83.3      |
+| Problem, 5       | 0.404       | 70.0      |
+| Problem, 6       | 0.843       | 92.2      |
+| Problem, 7       | 0.442       | 75.4      |
 
 Possible Stories
 ----------------
