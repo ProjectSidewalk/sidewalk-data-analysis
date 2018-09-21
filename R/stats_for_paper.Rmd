@@ -1560,6 +1560,114 @@ percent.streets.with.multiple.audits <-
 A total of `r base::format(percent.streets.with.multiple.audits, digits = 3)`% of streets were audited by multiple users. 
 
 
+### User behavior statistical tests
+
+TODO add tests for tutorial completion times
+TODO add tests for adding label descriptions
+
+We ran an ANOVA test for each of the variables we discuss in the paper: mission count, label count, auditing speed (in miles per hour), time audited (in minutes), onboarding completion time (in minutes), and label description count. Because the variables do not meet the homogeneity of variance assumption, we use an inverse hyperbolic sine transformation on the data before running the tests; it is similar to a log transformation. Web reference that references actual papers: http://worthwhile.typepad.com/worthwhile_canadian_initi/2011/07/a-rant-on-inverse-hyperbolic-sine-transformations.html
+
+Since we are comparing 3 user groups, we then use post-hoc Tukey's HSD tests to determine statistical orderings.
+
+Here are the results for the _unfiltered_ data. ANOVA results followed by Tukey's HSD results.
+
+```{r public.deployment.user.behavior.stats.unfiltered, echo=FALSE, warning=FALSE}
+nonfiltered.user.behavior.data <-
+  speeds %>%
+  dplyr::filter(role %in% c('Registered', 'Turker', 'Anonymous')) %>%
+  mutate(miles_per_hour = m_per_min / 26.8224)
+filtered.user.behavior.data <-
+  filtered.speeds %>%
+  dplyr::filter(role %in% c('Registered', 'Turker', 'Anonymous')) %>%
+  mutate(miles_per_hour = m_per_min / 26.8224)
+
+# Inverse hyperbolic sine (similar to log, but defined at 0)
+# http://worthwhile.typepad.com/worthwhile_canadian_initi/2011/07/a-rant-on-inverse-hyperbolic-sine-transformations.html
+ihs <- function(x) { log(x + sqrt(x ^ 2 + 1)) }
+
+mission.aov.nonfilter <- aov(mission_count ~ role, data = nonfiltered.user.behavior.data)
+label.aov.nonfilter <- aov(ihs(label_count) ~ role, data = nonfiltered.user.behavior.data)
+speed.aov.nonfilter <- aov(ihs(miles_per_hour) ~ role, data = nonfiltered.user.behavior.data)
+time.aov.nonfilter <- aov(ihs(minutes_audited) ~ role, data = nonfiltered.user.behavior.data)
+# tutorial.aov.nonfilter
+# description.aov.nonfilter
+
+kable(
+  bind_rows(
+    base::summary(mission.aov.nonfilter)[[1]]['role',],
+    base::summary(label.aov.nonfilter)[[1]]['role',],
+    base::summary(speed.aov.nonfilter)[[1]]['role',],
+    base::summary(time.aov.nonfilter)[[1]]['role',]
+  ) %>%
+    cbind(list(variable = c('mission_count', 'label_count', 'miles_per_hour', 'minutes_audited'))) %>%
+    mutate(F = !!sym('F value'),
+           p = p.num.to.p.str.with.sig.code(!!sym('Pr(>F)'))) %>%
+    dplyr::select(variable, Df, F, p),
+  digits = 3,
+  align = 'l'
+)
+
+kable(
+  bind_rows(
+    TukeyHSD(mission.aov.nonfilter)[[1]] %>% data.frame() %>%
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'mission_count'),
+    TukeyHSD(label.aov.nonfilter)[[1]] %>% data.frame() %>%
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'label_count'),
+    TukeyHSD(speed.aov.nonfilter)[[1]] %>% data.frame() %>%
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'miles_per_hour'),
+    TukeyHSD(time.aov.nonfilter)[[1]] %>% data.frame() %>%
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'minutes_audited')
+  ) %>%
+    mutate(p = p.num.to.p.str.with.sig.code(p.adj)) %>%
+    dplyr::select(variable, comparison, diff, p),
+  digits = 3,
+  align = 'l'
+)
+```
+
+Here are the results for the _filtered_ data. ANOVA results followed by Tukey's HSD results.
+
+```{r public.deployment.user.behavior.stats.filtered, echo=FALSE, warning=FALSE}
+mission.aov.filter <- aov(ihs(mission_count) ~ role, data = filtered.user.behavior.data)
+label.aov.filter <- aov(ihs(label_count) ~ role, data = filtered.user.behavior.data)
+speed.aov.filter <- aov(ihs(miles_per_hour) ~ role, data = filtered.user.behavior.data)
+time.aov.filter <- aov(ihs(minutes_audited) ~ role, data = filtered.user.behavior.data)
+# tutorial.aov.filter
+# description.aov.filter
+
+kable(
+  bind_rows(
+    base::summary(mission.aov.filter)[[1]]['role',],
+    base::summary(label.aov.filter)[[1]]['role',],
+    base::summary(speed.aov.filter)[[1]]['role',],
+    base::summary(time.aov.filter)[[1]]['role',]
+  ) %>%
+    cbind(list(variable = c('mission_count', 'label_count', 'miles_per_hour', 'minutes_audited'))) %>%
+    mutate(F = !!sym('F value'),
+           p = p.num.to.p.str.with.sig.code(!!sym('Pr(>F)'))) %>%
+    dplyr::select(variable, Df, F, p),
+  digits = 3,
+  align = 'l'
+)
+
+kable(
+  bind_rows(
+    TukeyHSD(mission.aov.filter)[[1]] %>% data.frame() %>%
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'mission_count'),
+    TukeyHSD(label.aov.filter)[[1]] %>% data.frame() %>%
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'label_count'),
+    TukeyHSD(speed.aov.filter)[[1]] %>% data.frame() %>%
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'miles_per_hour'),
+    TukeyHSD(time.aov.filter)[[1]] %>% data.frame() %>%
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'minutes_audited')
+  ) %>%
+    mutate(p = p.num.to.p.str.with.sig.code(p.adj)) %>%
+    dplyr::select(variable, comparison, diff, p),
+  digits = 3,
+  align = 'l'
+)
+```
+
 ### User dropoffs
 
 NOTE: there are graphs that combine the tutorial and post-tutorial dropoff graphs at the end of this section.

@@ -45,6 +45,7 @@ April 17, 2018</p>
 <li><a href="#possible-stories">Possible Stories</a>
 <ul>
 <li><a href="#data-overlap-and-agreement-between-users">Data overlap and agreement between users</a></li>
+<li><a href="#user-behavior-statistical-tests">User behavior statistical tests</a></li>
 <li><a href="#user-dropoffs">User dropoffs</a></li>
 </ul></li>
 </ul></li>
@@ -1310,6 +1311,252 @@ April 17, 2018</p>
 <h3 id="data-overlap-and-agreement-between-users">Data overlap and agreement between users</h3>
 <p>Among all the data collected in DC, how much of DC is labeled by multiple users and what is the disagreement among them? (see comment in Outline document for details on implementation)</p>
 <p>A total of 43.1% of streets were audited by multiple users.</p>
+<h3 id="user-behavior-statistical-tests">User behavior statistical tests</h3>
+<p>TODO add tests for tutorial completion times TODO add tests for adding label descriptions</p>
+<p>We ran an ANOVA test for each of the variables we discuss in the paper: mission count, label count, auditing speed (in miles per hour), time audited (in minutes), onboarding completion time (in minutes), and label description count. Because the variables do not meet the homogeneity of variance assumption, we use an inverse hyperbolic sine transformation on the data before running the tests; it is similar to a log transformation. Web reference that references actual papers: <a href="http://worthwhile.typepad.com/worthwhile_canadian_initi/2011/07/a-rant-on-inverse-hyperbolic-sine-transformations.html" class="uri">http://worthwhile.typepad.com/worthwhile_canadian_initi/2011/07/a-rant-on-inverse-hyperbolic-sine-transformations.html</a></p>
+<p>Since we are comparing 3 user groups, we then use post-hoc Tukey's HSD tests to determine statistical orderings.</p>
+<p>Here are the results for the <em>unfiltered</em> data. ANOVA results followed by Tukey's HSD results.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">variable</th>
+<th align="left">Df</th>
+<th align="left">F</th>
+<th align="left">p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">mission_count</td>
+<td align="left">2</td>
+<td align="left">34.587</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">label_count</td>
+<td align="left">2</td>
+<td align="left">104.541</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="odd">
+<td align="left">miles_per_hour</td>
+<td align="left">2</td>
+<td align="left">44.715</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">minutes_audited</td>
+<td align="left">2</td>
+<td align="left">105.813</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">variable</th>
+<th align="left">comparison</th>
+<th align="left">diff</th>
+<th align="left">p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">mission_count</td>
+<td align="left">Turker-Anonymous</td>
+<td align="left">33.894</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">mission_count</td>
+<td align="left">Registered-Anonymous</td>
+<td align="left">4.286</td>
+<td align="left">0.480</td>
+</tr>
+<tr class="odd">
+<td align="left">mission_count</td>
+<td align="left">Registered-Turker</td>
+<td align="left">-29.608</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">label_count</td>
+<td align="left">Turker-Anonymous</td>
+<td align="left">1.804</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="odd">
+<td align="left">label_count</td>
+<td align="left">Registered-Anonymous</td>
+<td align="left">1.329</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">label_count</td>
+<td align="left">Registered-Turker</td>
+<td align="left">-0.476</td>
+<td align="left">0.005 **</td>
+</tr>
+<tr class="odd">
+<td align="left">miles_per_hour</td>
+<td align="left">Turker-Anonymous</td>
+<td align="left">0.310</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">miles_per_hour</td>
+<td align="left">Registered-Anonymous</td>
+<td align="left">0.477</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="odd">
+<td align="left">miles_per_hour</td>
+<td align="left">Registered-Turker</td>
+<td align="left">0.168</td>
+<td align="left">0.023 *</td>
+</tr>
+<tr class="even">
+<td align="left">minutes_audited</td>
+<td align="left">Turker-Anonymous</td>
+<td align="left">1.511</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="odd">
+<td align="left">minutes_audited</td>
+<td align="left">Registered-Anonymous</td>
+<td align="left">0.882</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">minutes_audited</td>
+<td align="left">Registered-Turker</td>
+<td align="left">-0.630</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+</tbody>
+</table>
+<p>Here are the results for the <em>filtered</em> data. ANOVA results followed by Tukey's HSD results.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">variable</th>
+<th align="left">Df</th>
+<th align="left">F</th>
+<th align="left">p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">mission_count</td>
+<td align="left">2</td>
+<td align="left">113.740</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">label_count</td>
+<td align="left">2</td>
+<td align="left">79.922</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="odd">
+<td align="left">miles_per_hour</td>
+<td align="left">2</td>
+<td align="left">58.746</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">minutes_audited</td>
+<td align="left">2</td>
+<td align="left">61.578</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr class="header">
+<th align="left">variable</th>
+<th align="left">comparison</th>
+<th align="left">diff</th>
+<th align="left">p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">mission_count</td>
+<td align="left">Registered-Anonymous</td>
+<td align="left">1.042</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">mission_count</td>
+<td align="left">Turker-Anonymous</td>
+<td align="left">1.505</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="odd">
+<td align="left">mission_count</td>
+<td align="left">Turker-Registered</td>
+<td align="left">0.463</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">label_count</td>
+<td align="left">Registered-Anonymous</td>
+<td align="left">1.255</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="odd">
+<td align="left">label_count</td>
+<td align="left">Turker-Anonymous</td>
+<td align="left">1.510</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">label_count</td>
+<td align="left">Turker-Registered</td>
+<td align="left">0.255</td>
+<td align="left">0.223</td>
+</tr>
+<tr class="odd">
+<td align="left">miles_per_hour</td>
+<td align="left">Registered-Anonymous</td>
+<td align="left">0.507</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">miles_per_hour</td>
+<td align="left">Turker-Anonymous</td>
+<td align="left">0.266</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="odd">
+<td align="left">miles_per_hour</td>
+<td align="left">Turker-Registered</td>
+<td align="left">-0.241</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">minutes_audited</td>
+<td align="left">Registered-Anonymous</td>
+<td align="left">0.846</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="odd">
+<td align="left">minutes_audited</td>
+<td align="left">Turker-Anonymous</td>
+<td align="left">1.189</td>
+<td align="left">&lt; 0.001 ***</td>
+</tr>
+<tr class="even">
+<td align="left">minutes_audited</td>
+<td align="left">Turker-Registered</td>
+<td align="left">0.343</td>
+<td align="left">0.023 *</td>
+</tr>
+</tbody>
+</table>
 <h3 id="user-dropoffs">User dropoffs</h3>
 <p>NOTE: there are graphs that combine the tutorial and post-tutorial dropoff graphs at the end of this section.</p>
 <h4 id="tutorial-dropoffs">Tutorial dropoffs</h4>
