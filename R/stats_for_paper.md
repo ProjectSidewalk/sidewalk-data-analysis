@@ -219,59 +219,69 @@ A total of 43.1% of streets were audited by multiple users.
 
 ### User behavior statistical tests
 
-TODO add tests for tutorial completion times TODO add tests for adding label descriptions
+TODO add tests for adding label descriptions
 
-We ran an ANOVA test for each of the variables we discuss in the paper: mission count, label count, auditing speed (in miles per hour), time audited (in minutes), onboarding completion time (in minutes), and label description count. Because the variables do not meet the homogeneity of variance assumption, we use an inverse hyperbolic sine transformation on the data before running the tests; it is similar to a log transformation. Web reference that references actual papers: <http://worthwhile.typepad.com/worthwhile_canadian_initi/2011/07/a-rant-on-inverse-hyperbolic-sine-transformations.html>
+We ran an ANOVA test for each of the variables we discuss in the paper: mission count, label count, auditing speed (in miles per hour), time audited (in minutes), onboarding completion time (in minutes), and label description count. Because the variables do not meet the homogeneity of variance assumption (i.e., all comparison groups should have approx the same variance), we use an inverse hyperbolic sine transformation on the data before running the tests; it is similar to a log transformation. Web reference that references actual papers: <http://worthwhile.typepad.com/worthwhile_canadian_initi/2011/07/a-rant-on-inverse-hyperbolic-sine-transformations.html>
 
 Since we are comparing 3 user groups, we then use post-hoc Tukey's HSD tests to determine statistical orderings.
 
 Here are the results for the *unfiltered* data. ANOVA results followed by Tukey's HSD results.
 
-| variable         | Df  | F       | p                 |
-|:-----------------|:----|:--------|:------------------|
-| mission\_count   | 2   | 34.587  | &lt; 0.001 \*\*\* |
-| label\_count     | 2   | 104.541 | &lt; 0.001 \*\*\* |
-| miles\_per\_hour | 2   | 44.715  | &lt; 0.001 \*\*\* |
-| minutes\_audited | 2   | 105.813 | &lt; 0.001 \*\*\* |
+NOTE you can find the actual values mean values and N for the different user groups in the [User stats and tool usage section](#user-stats-and-tool-usage) above. I'm not copying that info down here due to time constraints.
 
-| variable         | comparison           | diff    | p                 |
-|:-----------------|:---------------------|:--------|:------------------|
-| mission\_count   | Turker-Anonymous     | 33.894  | &lt; 0.001 \*\*\* |
-| mission\_count   | Registered-Anonymous | 4.286   | 0.480             |
-| mission\_count   | Registered-Turker    | -29.608 | &lt; 0.001 \*\*\* |
-| label\_count     | Turker-Anonymous     | 1.804   | &lt; 0.001 \*\*\* |
-| label\_count     | Registered-Anonymous | 1.329   | &lt; 0.001 \*\*\* |
-| label\_count     | Registered-Turker    | -0.476  | 0.005 \*\*        |
-| miles\_per\_hour | Turker-Anonymous     | 0.310   | &lt; 0.001 \*\*\* |
-| miles\_per\_hour | Registered-Anonymous | 0.477   | &lt; 0.001 \*\*\* |
-| miles\_per\_hour | Registered-Turker    | 0.168   | 0.023 \*          |
-| minutes\_audited | Turker-Anonymous     | 1.511   | &lt; 0.001 \*\*\* |
-| minutes\_audited | Registered-Anonymous | 0.882   | &lt; 0.001 \*\*\* |
-| minutes\_audited | Registered-Turker    | -0.630  | &lt; 0.001 \*\*\* |
+| variable          | Df  | F       | p                 |
+|:------------------|:----|:--------|:------------------|
+| mission\_count    | 2   | 34.587  | &lt; 0.001 \*\*\* |
+| label\_count      | 2   | 104.541 | &lt; 0.001 \*\*\* |
+| miles\_per\_hour  | 2   | 44.715  | &lt; 0.001 \*\*\* |
+| minutes\_audited  | 2   | 105.813 | &lt; 0.001 \*\*\* |
+| tutorial\_minutes | 2   | 22.554  | &lt; 0.001 \*\*\* |
+
+| variable          | comparison           | diff    | p                 |
+|:------------------|:---------------------|:--------|:------------------|
+| mission\_count    | Turker-Anonymous     | 33.894  | &lt; 0.001 \*\*\* |
+| mission\_count    | Registered-Anonymous | 4.286   | 0.480             |
+| mission\_count    | Registered-Turker    | -29.608 | &lt; 0.001 \*\*\* |
+| label\_count      | Turker-Anonymous     | 1.804   | &lt; 0.001 \*\*\* |
+| label\_count      | Registered-Anonymous | 1.329   | &lt; 0.001 \*\*\* |
+| label\_count      | Registered-Turker    | -0.476  | 0.005 \*\*        |
+| miles\_per\_hour  | Turker-Anonymous     | 0.310   | &lt; 0.001 \*\*\* |
+| miles\_per\_hour  | Registered-Anonymous | 0.477   | &lt; 0.001 \*\*\* |
+| miles\_per\_hour  | Registered-Turker    | 0.168   | 0.023 \*          |
+| minutes\_audited  | Turker-Anonymous     | 1.511   | &lt; 0.001 \*\*\* |
+| minutes\_audited  | Registered-Anonymous | 0.882   | &lt; 0.001 \*\*\* |
+| minutes\_audited  | Registered-Turker    | -0.630  | &lt; 0.001 \*\*\* |
+| tutorial\_minutes | Turker-Anonymous     | 0.130   | 0.039 \*          |
+| tutorial\_minutes | Registered-Anonymous | 0.399   | &lt; 0.001 \*\*\* |
+| tutorial\_minutes | Registered-Turker    | 0.269   | &lt; 0.001 \*\*\* |
 
 Here are the results for the *filtered* data. ANOVA results followed by Tukey's HSD results.
 
-| variable         | Df  | F       | p                 |
-|:-----------------|:----|:--------|:------------------|
-| mission\_count   | 2   | 113.740 | &lt; 0.001 \*\*\* |
-| label\_count     | 2   | 79.922  | &lt; 0.001 \*\*\* |
-| miles\_per\_hour | 2   | 58.746  | &lt; 0.001 \*\*\* |
-| minutes\_audited | 2   | 61.578  | &lt; 0.001 \*\*\* |
+| variable          | Df  | F       | p                 |
+|:------------------|:----|:--------|:------------------|
+| mission\_count    | 2   | 113.740 | &lt; 0.001 \*\*\* |
+| label\_count      | 2   | 79.922  | &lt; 0.001 \*\*\* |
+| miles\_per\_hour  | 2   | 58.746  | &lt; 0.001 \*\*\* |
+| minutes\_audited  | 2   | 61.578  | &lt; 0.001 \*\*\* |
+| tutorial\_minutes | 2   | 17.596  | &lt; 0.001 \*\*\* |
 
-| variable         | comparison           | diff   | p                 |
-|:-----------------|:---------------------|:-------|:------------------|
-| mission\_count   | Registered-Anonymous | 1.042  | &lt; 0.001 \*\*\* |
-| mission\_count   | Turker-Anonymous     | 1.505  | &lt; 0.001 \*\*\* |
-| mission\_count   | Turker-Registered    | 0.463  | &lt; 0.001 \*\*\* |
-| label\_count     | Registered-Anonymous | 1.255  | &lt; 0.001 \*\*\* |
-| label\_count     | Turker-Anonymous     | 1.510  | &lt; 0.001 \*\*\* |
-| label\_count     | Turker-Registered    | 0.255  | 0.223             |
-| miles\_per\_hour | Registered-Anonymous | 0.507  | &lt; 0.001 \*\*\* |
-| miles\_per\_hour | Turker-Anonymous     | 0.266  | &lt; 0.001 \*\*\* |
-| miles\_per\_hour | Turker-Registered    | -0.241 | &lt; 0.001 \*\*\* |
-| minutes\_audited | Registered-Anonymous | 0.846  | &lt; 0.001 \*\*\* |
-| minutes\_audited | Turker-Anonymous     | 1.189  | &lt; 0.001 \*\*\* |
-| minutes\_audited | Turker-Registered    | 0.343  | 0.023 \*          |
+| variable          | comparison           | diff   | p                 |
+|:------------------|:---------------------|:-------|:------------------|
+| mission\_count    | Registered-Anonymous | 1.042  | &lt; 0.001 \*\*\* |
+| mission\_count    | Turker-Anonymous     | 1.505  | &lt; 0.001 \*\*\* |
+| mission\_count    | Turker-Registered    | 0.463  | &lt; 0.001 \*\*\* |
+| label\_count      | Registered-Anonymous | 1.255  | &lt; 0.001 \*\*\* |
+| label\_count      | Turker-Anonymous     | 1.510  | &lt; 0.001 \*\*\* |
+| label\_count      | Turker-Registered    | 0.255  | 0.223             |
+| miles\_per\_hour  | Registered-Anonymous | 0.507  | &lt; 0.001 \*\*\* |
+| miles\_per\_hour  | Turker-Anonymous     | 0.266  | &lt; 0.001 \*\*\* |
+| miles\_per\_hour  | Turker-Registered    | -0.241 | &lt; 0.001 \*\*\* |
+| minutes\_audited  | Registered-Anonymous | 0.846  | &lt; 0.001 \*\*\* |
+| minutes\_audited  | Turker-Anonymous     | 1.189  | &lt; 0.001 \*\*\* |
+| minutes\_audited  | Turker-Registered    | 0.343  | 0.023 \*          |
+| tutorial\_minutes | Registered-Anonymous | 0.383  | &lt; 0.001 \*\*\* |
+| tutorial\_minutes | Turker-Anonymous     | 0.079  | 0.380             |
+| tutorial\_minutes | Turker-Registered    | -0.304 | &lt; 0.001 \*\*\* |
 
 ### User dropoffs
 
