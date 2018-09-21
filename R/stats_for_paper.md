@@ -219,15 +219,13 @@ A total of 43.1% of streets were audited by multiple users.
 
 ### User behavior statistical tests
 
-TODO add tests for adding label descriptions
-
 We ran an ANOVA test for each of the variables we discuss in the paper: mission count, label count, auditing speed (in miles per hour), time audited (in minutes), onboarding completion time (in minutes), and label description count. Because the variables do not meet the homogeneity of variance assumption (i.e., all comparison groups should have approx the same variance), we use an inverse hyperbolic sine transformation on the data before running the tests; it is similar to a log transformation. Web reference that references actual papers: <http://worthwhile.typepad.com/worthwhile_canadian_initi/2011/07/a-rant-on-inverse-hyperbolic-sine-transformations.html>
 
 Since we are comparing 3 user groups, we then use post-hoc Tukey's HSD tests to determine statistical orderings.
 
-Here are the results for the *unfiltered* data. ANOVA results followed by Tukey's HSD results.
-
 NOTE you can find the actual values mean values and N for the different user groups in the [User stats and tool usage section](#user-stats-and-tool-usage) above. I'm not copying that info down here due to time constraints.
+
+Here are the results for the *unfiltered* data. ANOVA results followed by Tukey's HSD results.
 
 | variable          | Df  | F       | p                 |
 |:------------------|:----|:--------|:------------------|
@@ -236,6 +234,7 @@ NOTE you can find the actual values mean values and N for the different user gro
 | miles\_per\_hour  | 2   | 44.715  | &lt; 0.001 \*\*\* |
 | minutes\_audited  | 2   | 105.813 | &lt; 0.001 \*\*\* |
 | tutorial\_minutes | 2   | 22.554  | &lt; 0.001 \*\*\* |
+| n\_descriptions   | 2   | 23.802  | &lt; 0.001 \*\*\* |
 
 | variable          | comparison           | diff    | p                 |
 |:------------------|:---------------------|:--------|:------------------|
@@ -254,6 +253,9 @@ NOTE you can find the actual values mean values and N for the different user gro
 | tutorial\_minutes | Turker-Anonymous     | 0.130   | 0.039 \*          |
 | tutorial\_minutes | Registered-Anonymous | 0.399   | &lt; 0.001 \*\*\* |
 | tutorial\_minutes | Registered-Turker    | 0.269   | &lt; 0.001 \*\*\* |
+| n\_descriptions   | Turker-Anonymous     | 0.522   | &lt; 0.001 \*\*\* |
+| n\_descriptions   | Registered-Anonymous | 0.773   | &lt; 0.001 \*\*\* |
+| n\_descriptions   | Registered-Turker    | 0.251   | 0.180             |
 
 Here are the results for the *filtered* data. ANOVA results followed by Tukey's HSD results.
 
@@ -264,6 +266,7 @@ Here are the results for the *filtered* data. ANOVA results followed by Tukey's 
 | miles\_per\_hour  | 2   | 58.746  | &lt; 0.001 \*\*\* |
 | minutes\_audited  | 2   | 61.578  | &lt; 0.001 \*\*\* |
 | tutorial\_minutes | 2   | 17.596  | &lt; 0.001 \*\*\* |
+| n\_descriptions   | 2   | 21.083  | &lt; 0.001 \*\*\* |
 
 | variable          | comparison           | diff   | p                 |
 |:------------------|:---------------------|:-------|:------------------|
@@ -282,6 +285,9 @@ Here are the results for the *filtered* data. ANOVA results followed by Tukey's 
 | tutorial\_minutes | Registered-Anonymous | 0.383  | &lt; 0.001 \*\*\* |
 | tutorial\_minutes | Turker-Anonymous     | 0.079  | 0.380             |
 | tutorial\_minutes | Turker-Registered    | -0.304 | &lt; 0.001 \*\*\* |
+| n\_descriptions   | Registered-Anonymous | 0.826  | &lt; 0.001 \*\*\* |
+| n\_descriptions   | Turker-Anonymous     | 0.711  | &lt; 0.001 \*\*\* |
+| n\_descriptions   | Turker-Registered    | -0.115 | 0.783             |
 
 ### User dropoffs
 

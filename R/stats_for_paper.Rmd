@@ -203,6 +203,7 @@ audits.path <- '../data/stats_for_paper_audits.csv'
 times.path <- '../data/stats_for_paper_times.csv'
 tutorial.times.path <- '../data/stats_for_paper_tutorial_times.csv'
 labels.path <- '../data/stats_for_paper_labels.csv'
+descriptions.path <- '../data/stats_for_paper_descriptions.csv'
 attributes.path <- '../data/stats_for_paper_attributes.csv'
 sessions.path <- '../data/stats_for_paper_sessions.csv'
 missions.path <- '../data/stats_for_paper_reg_missions.csv'
@@ -246,6 +247,27 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
           AND street_edge.deleted = FALSE
           AND user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\''
       )
+  reg.descriptions <-
+    dbGetQuery(
+      db.connection.public.deployment,
+      'SELECT DISTINCT audit_task.user_id, label.label_id, problem_description.description
+      FROM label
+      INNER JOIN problem_description ON problem_description.label_id = label.label_id
+      INNER JOIN audit_task ON audit_task.audit_task_id = label.audit_task_id
+      WHERE audit_task.user_id <> \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+          AND label.gsv_panorama_id NOT IN (SELECT gsv_panorama_id FROM gsv_onboarding_pano);'
+    )
+  anon.descriptions <-
+    dbGetQuery(
+      db.connection.public.deployment,
+      'SELECT DISTINCT audit_task_environment.ip_address AS user_id, label.label_id, problem_description.description
+      FROM label
+      INNER JOIN problem_description ON problem_description.label_id = label.label_id
+      INNER JOIN audit_task ON audit_task.audit_task_id = label.audit_task_id
+      INNER JOIN audit_task_environment ON audit_task_environment.audit_task_id = label.audit_task_id
+      WHERE  audit_task.user_id = \'97760883-8ef0-4309-9a5e-0c086ef27573\'
+          AND label.gsv_panorama_id NOT IN (SELECT gsv_panorama_id FROM gsv_onboarding_pano);'
+    )
   reg.audits <-
     dbGetQuery(
       db.connection.public.deployment,
@@ -657,6 +679,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   times <- bind_rows(reg.times, anon.times)
   tutorial.times <- bind_rows(reg.tutorial.times, anon.tutorial.times)
   labels <- bind_rows(reg.labels, anon.labels)
+  descriptions <- bind_rows(reg.descriptions, anon.descriptions)
   sessions <- bind_rows(reg.sessions, anon.sessions)
   tutorials <- bind_rows(turk.tutorials, volunteer.tutorials)
   dropoffs <- bind_rows(turk.dropoffs, volunteer.dropoffs)
@@ -667,6 +690,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   file.copy(times.path, paste('../data/old/stats_for_paper_times.csv', now, sep = '_'))
   file.copy(tutorial.times.path, paste('../data/old/stats_for_paper_tutorial_times.csv', now, sep = '_'))
   file.copy(labels.path, paste('../data/old/stats_for_paper_labels.csv', now, sep = '_'))
+  file.copy(descriptions.path, paste('../data/old/stats_for_paper_descriptions.csv', now, sep = '_'))
   file.copy(attributes.path, paste('../data/old/stats_for_paper_attributes.csv', now, sep = '_'))
   file.copy(sessions.path, paste('../data/old/stats_for_paper_sessions.csv', now, sep = '_'))
   file.copy(missions.path, paste('../data/old/stats_for_paper_reg_missions.csv', now, sep = '_'))
@@ -678,6 +702,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   write.csv(times, times.path, row.names = FALSE)
   write.csv(tutorial.times, tutorial.times.path, row.names = FALSE)
   write.csv(labels, labels.path, row.names = FALSE)
+  write.csv(descriptions, descriptions.path, row.names = FALSE)
   write.csv(attributes, attributes.path, row.names = FALSE)
   write.csv(sessions, sessions.path, row.names = FALSE)
   write.csv(reg.missions, missions.path, row.names = FALSE)
@@ -691,6 +716,7 @@ if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
   tutorial.times <- read.csv(tutorial.times.path, colClasses = c('character', 'numeric'))
   labels <- read.csv(labels.path,
                      colClasses = c(replicate(3, 'numeric'), 'character', 'character', 'logical'))
+  descriptions <- read.csv(descriptions.path, colClasses = c('character', 'numeric', 'character'))
   attributes <- read.csv(attributes.path, colClasses = c('character', 'numeric'))
   sessions <- read.csv(sessions.path, colClasses = c('character', 'numeric'))
   reg.missions <- read.csv(missions.path, colClasses = c('character', 'numeric'))
@@ -1562,15 +1588,13 @@ A total of `r base::format(percent.streets.with.multiple.audits, digits = 3)`% o
 
 ### User behavior statistical tests
 
-TODO add tests for adding label descriptions
-
 We ran an ANOVA test for each of the variables we discuss in the paper: mission count, label count, auditing speed (in miles per hour), time audited (in minutes), onboarding completion time (in minutes), and label description count. Because the variables do not meet the homogeneity of variance assumption (i.e., all comparison groups should have approx the same variance), we use an inverse hyperbolic sine transformation on the data before running the tests; it is similar to a log transformation. Web reference that references actual papers: http://worthwhile.typepad.com/worthwhile_canadian_initi/2011/07/a-rant-on-inverse-hyperbolic-sine-transformations.html
 
 Since we are comparing 3 user groups, we then use post-hoc Tukey's HSD tests to determine statistical orderings.
 
-Here are the results for the _unfiltered_ data. ANOVA results followed by Tukey's HSD results.
-
 NOTE you can find the actual values mean values and N for the different user groups in the [User stats and tool usage section](#user-stats-and-tool-usage) above. I'm not copying that info down here due to time constraints.
+
+Here are the results for the _unfiltered_ data. ANOVA results followed by Tukey's HSD results.
 
 ```{r public.deployment.user.behavior.stats.unfiltered, echo=FALSE, warning=FALSE}
 nonfiltered.user.behavior.data <-
@@ -1581,6 +1605,12 @@ nonfiltered.tutorial.data <-
   tutorial.times %>%
   rename(tutorial_minutes = minutes_audited) %>%
   inner_join(nonfiltered.user.behavior.data, by = 'user_id')
+nonfiltered.descriptions.data <-
+  descriptions %>%
+  group_by(user_id) %>%
+  dplyr::summarise(n_descriptions = n()) %>%
+  right_join(nonfiltered.user.behavior.data, by = 'user_id') %>%
+  replace_na(list(n_descriptions = 0))
 
 filtered.user.behavior.data <-
   filtered.speeds %>%
@@ -1590,6 +1620,12 @@ filtered.tutorial.data <-
   tutorial.times %>%
   rename(tutorial_minutes = minutes_audited) %>%
   inner_join(filtered.user.behavior.data, by = 'user_id')
+filtered.descriptions.data <-
+  descriptions %>%
+  group_by(user_id) %>%
+  dplyr::summarise(n_descriptions = n()) %>%
+  right_join(filtered.user.behavior.data, by = 'user_id') %>%
+  replace_na(list(n_descriptions = 0))
 
 # Inverse hyperbolic sine (similar to log, but defined at 0)
 # http://worthwhile.typepad.com/worthwhile_canadian_initi/2011/07/a-rant-on-inverse-hyperbolic-sine-transformations.html
@@ -1600,7 +1636,7 @@ label.aov.nonfilter <- aov(ihs(label_count) ~ role, data = nonfiltered.user.beha
 speed.aov.nonfilter <- aov(ihs(miles_per_hour) ~ role, data = nonfiltered.user.behavior.data)
 time.aov.nonfilter <- aov(ihs(minutes_audited) ~ role, data = nonfiltered.user.behavior.data)
 tutorial.aov.nonfilter <- aov(ihs(tutorial_minutes) ~ role, data = nonfiltered.tutorial.data)
-# description.aov.nonfilter
+description.aov.nonfilter <- aov(ihs(n_descriptions) ~ role, data = nonfiltered.descriptions.data)
 
 kable(
   bind_rows(
@@ -1608,10 +1644,11 @@ kable(
     base::summary(label.aov.nonfilter)[[1]]['role',],
     base::summary(speed.aov.nonfilter)[[1]]['role',],
     base::summary(time.aov.nonfilter)[[1]]['role',],
-    base::summary(tutorial.aov.nonfilter)[[1]]['role',]
+    base::summary(tutorial.aov.nonfilter)[[1]]['role',],
+    base::summary(description.aov.nonfilter)[[1]]['role',]
   ) %>%
     cbind(list(variable = c('mission_count', 'label_count', 'miles_per_hour', 'minutes_audited',
-                            'tutorial_minutes'))) %>%
+                            'tutorial_minutes', 'n_descriptions'))) %>%
     mutate(F = !!sym('F value'),
            p = p.num.to.p.str.with.sig.code(!!sym('Pr(>F)'))) %>%
     dplyr::select(variable, Df, F, p),
@@ -1630,7 +1667,9 @@ kable(
     TukeyHSD(time.aov.nonfilter)[[1]] %>% data.frame() %>%
       tibble::rownames_to_column('comparison') %>% mutate(variable = 'minutes_audited'),
     TukeyHSD(tutorial.aov.nonfilter)[[1]] %>% data.frame() %>%
-      tibble::rownames_to_column('comparison') %>% mutate(variable = 'tutorial_minutes')
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'tutorial_minutes'),
+    TukeyHSD(description.aov.nonfilter)[[1]] %>% data.frame() %>%
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'n_descriptions')
   ) %>%
     mutate(p = p.num.to.p.str.with.sig.code(p.adj)) %>%
     dplyr::select(variable, comparison, diff, p),
@@ -1647,7 +1686,7 @@ label.aov.filter <- aov(ihs(label_count) ~ role, data = filtered.user.behavior.d
 speed.aov.filter <- aov(ihs(miles_per_hour) ~ role, data = filtered.user.behavior.data)
 time.aov.filter <- aov(ihs(minutes_audited) ~ role, data = filtered.user.behavior.data)
 tutorial.aov.filter <- aov(ihs(tutorial_minutes) ~ role, data = filtered.tutorial.data)
-# description.aov.filter
+description.aov.filter <- aov(ihs(n_descriptions) ~ role, data = filtered.descriptions.data)
 
 kable(
   bind_rows(
@@ -1655,10 +1694,11 @@ kable(
     base::summary(label.aov.filter)[[1]]['role',],
     base::summary(speed.aov.filter)[[1]]['role',],
     base::summary(time.aov.filter)[[1]]['role',],
-    base::summary(tutorial.aov.filter)[[1]]['role',]
+    base::summary(tutorial.aov.filter)[[1]]['role',],
+    base::summary(description.aov.filter)[[1]]['role',]
   ) %>%
     cbind(list(variable = c('mission_count', 'label_count', 'miles_per_hour', 'minutes_audited',
-                            'tutorial_minutes'))) %>%
+                            'tutorial_minutes', 'n_descriptions'))) %>%
     mutate(F = !!sym('F value'),
            p = p.num.to.p.str.with.sig.code(!!sym('Pr(>F)'))) %>%
     dplyr::select(variable, Df, F, p),
@@ -1677,7 +1717,9 @@ kable(
     TukeyHSD(time.aov.filter)[[1]] %>% data.frame() %>%
       tibble::rownames_to_column('comparison') %>% mutate(variable = 'minutes_audited'),
     TukeyHSD(tutorial.aov.filter)[[1]] %>% data.frame() %>%
-      tibble::rownames_to_column('comparison') %>% mutate(variable = 'tutorial_minutes')
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'tutorial_minutes'),
+    TukeyHSD(description.aov.filter)[[1]] %>% data.frame() %>%
+      tibble::rownames_to_column('comparison') %>% mutate(variable = 'n_descriptions')
   ) %>%
     mutate(p = p.num.to.p.str.with.sig.code(p.adj)) %>%
     dplyr::select(variable, comparison, diff, p),
