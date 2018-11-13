@@ -1,4 +1,4 @@
----
+--- 
 title: "Statistics for Paper"
 author: "Mikey Saugstad"
 date: "April 17, 2018"
