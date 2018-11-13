@@ -3303,7 +3303,7 @@ NOTE: This is at the street level (not 5 meter level).
 
 We created binomial mixed effects models to determine the relationship between label type and recall/precision. We had label type as the fixed effect and user id nested in route id as random effects. We modeled recall/precision as binomial and used a logistic link function. You can check out some notes on mixed effects models at the end of this document: [here](#rationale-and-description-of-mixed-effect-models).
 
-```{r turk.label.type.accuracy.glmm, echo=FALSE}
+```{r turk.label.type.accuracy.glmm, echo=FALSE, message=FALSE}
 type.test.data <-
   turk.showing.stats.by.label.type %>%
   dplyr::filter(granularity == 'street',
@@ -4086,7 +4086,7 @@ To test for the associations between the user behaviors and accuracy, we created
 
 Below is a table showing the summaries of the models and results of the LRTs. The estimate and standard error columns come from the models (along with the association column, which denotes direction of relationship), and the p value and LRT stat come from the likelihood ratio tests.
 
-```{r turk.user.behavior.tests, echo=FALSE}
+```{r turk.user.behavior.tests, echo=FALSE, message=FALSE}
 # Create the different models, along with likelihood ratio tests and data frames with relevant
 # stats extracted from the model and LRT.
 # Found the following link helpful in looking for solutions to convergence errors:
