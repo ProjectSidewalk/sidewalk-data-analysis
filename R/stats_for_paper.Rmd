@@ -183,7 +183,7 @@ summarise_vars <- function(data, group, var.names = NULL, col.start = NULL, col.
 ```{r connect, echo=FALSE}
 if (REFRESH_PUBLIC_DEPLOYMENT_DATA | REFRESH_TURK_STUDY_DATA) drv <- dbDriver("PostgreSQL")
 if (REFRESH_PUBLIC_DEPLOYMENT_DATA) {
-  db.connection.public.deployment <- dbConnect(drv, dbname = "sidewalk",
+  db.connection.public.deployment <- dbConnect(drv, dbname = "sidewalk-april",
                    host = "localhost", port = 5432,
                    user = "sidewalk", password = 'sidewalk')
 }
