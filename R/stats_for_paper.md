@@ -5,9 +5,9 @@ April 17, 2018
 
 -   [Public Deployment](#public-deployment)
     -   [High-level results](#high-level-results)
-        -   [Top-line numbers (no filtering)](#top-line-numbers-no-filtering)
-        -   [Top-line numbers (no filtering, but only with users who completed at least one audit + placed a label)](#top-line-numbers-no-filtering-but-only-with-users-who-completed-at-least-one-audit-placed-a-label)
-        -   [Top-line numbers (with filtering)](#top-line-numbers-with-filtering)
+        -   [Top-line numbers with no filtering](#top-line-numbers-with-no-filtering)
+        -   [Top-line numbers with no filtering, but only with users with 1 audit and a label](#top-line-numbers-with-no-filtering-but-only-with-users-with-1-audit-and-a-label)
+        -   [Top-line numbers with filtering](#top-line-numbers-with-filtering)
         -   [Attribute counts by type](#attribute-counts-by-type)
         -   [Dataset 1st 100% vs full deployment](#dataset-1st-100-vs-full-deployment)
         -   [Data characteristics](#data-characteristics)
@@ -51,7 +51,7 @@ NOTE: Public deployment data includes all data up through March 31st (and part o
 High-level results
 ------------------
 
-### Top-line numbers (no filtering)
+### Top-line numbers with no filtering
 
 The following are the label counts (not attribute counts) by user group and label type. There are a total of 251438 labels, 11347 are tutorial labels and 240091 are non tutorial labels. We consider only non tutorial labels throughout this document.
 
@@ -66,7 +66,7 @@ The following are the label counts (not attribute counts) by user group and labe
 | Other          | 92 (0.0%)    | 148 (0.1%)       | 1137 (0.5%)    | 34 (0.0%)       | 1411 (0.6%)     |
 | Total          | 15385 (6.4%) | 41786 (17.4%)    | 150966 (62.9%) | 31954 (13.3%)   | 240091 (100.0%) |
 
-### Top-line numbers (no filtering, but only with users who completed at least one audit + placed a label)
+### Top-line numbers with no filtering, but only with users with 1 audit and a label
 
 | label\_type    | Anon (384)   | Registered (243) | Turker (170)   | Researcher (28) | Total           |
 |:---------------|:-------------|:-----------------|:---------------|:----------------|:----------------|
@@ -79,7 +79,7 @@ The following are the label counts (not attribute counts) by user group and labe
 | Other          | 62 (0.0%)    | 147 (0.1%)       | 1137 (0.5%)    | 34 (0.0%)       | 1380 (0.6%)     |
 | Total          | 12950 (5.5%) | 41588 (17.5%)    | 150847 (63.6%) | 31954 (13.5%)   | 237339 (100.0%) |
 
-### Top-line numbers (with filtering)
+### Top-line numbers with filtering
 
 | label\_type    | Anon (293)   | Registered (188) | Turker (122)   | Researcher (21) | Total           |
 |:---------------|:-------------|:-----------------|:---------------|:----------------|:----------------|

@@ -1207,7 +1207,7 @@ NOTE: Public deployment data includes all data up through March 31st (and part o
 
 ## High-level results
 
-### Top-line numbers (no filtering)
+### Top-line numbers with no filtering
 
 The following are the label counts (not attribute counts) by user group and label type. There are a total of `r n.tutorial.labels + n.non.tutorial.labels` labels, `r n.tutorial.labels` are tutorial labels and `r n.non.tutorial.labels` are non tutorial labels. We consider only non tutorial labels throughout this document.
 
@@ -1250,7 +1250,7 @@ kable(
 )
 ```
 
-### Top-line numbers (no filtering, but only with users who completed at least one audit + placed a label)
+### Top-line numbers with no filtering, but only with users with 1 audit and a label
 
 ```{r public.deployment.how.much.data.unfiltered, echo=FALSE, warning=FALSE}
 kable(
@@ -1276,7 +1276,7 @@ kable(
 )
 ```
 
-### Top-line numbers (with filtering)
+### Top-line numbers with filtering
 
 ```{r public.deployment.how.much.data.filtered, echo=FALSE, warning=FALSE}
 ordered.label.type.levs <- c('CurbRamp', 'NoCurbRamp', 'Obstacle', 'SurfaceProblem', 'NoSidewalk',
