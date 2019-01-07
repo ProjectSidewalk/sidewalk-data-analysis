@@ -1250,6 +1250,32 @@ kable(
 )
 ```
 
+### Top-line numbers (no filtering, but only with users who completed at least one audit + placed a label)
+
+```{r public.deployment.how.much.data.unfiltered, echo=FALSE, warning=FALSE}
+kable(
+  non.tutorial.labels %>%
+    dplyr::filter(user_id %in% user.list) %>%
+    mutate(label_type = LABEL_TYPE_MAPPING[label_type_id]) %>%
+    mutate(label_type = factor(label_type, ordered.label.type.levs)) %>%
+    mutate(role = recode_factor(
+      role,
+      `Anonymous` = paste0('Anon ', '(', n.users.list['Anon'], ')'),
+      `User` = paste0('Registered ', '(', n.users.list['Registered'], ')'),
+      `Turker` = paste0('Turker ', '(', n.users.list['Turker'], ')'),
+      `Researcher` = paste0('Researcher ', '(', n.users.list['Researcher'], ')'),
+      `Administrator` = paste0('Researcher ', '(', n.users.list['Researcher'], ')'),
+      `Owner` = paste0('Researcher ', '(', n.users.list['Researcher'], ')'))) %>%
+    dplyr::select(label_type, role) %>%
+    tabyl(label_type, role) %>%
+    adorn_totals(where = c('row', 'col')) %>%
+    adorn_percentages(denominator = 'all') %>%
+    adorn_pct_formatting() %>%
+    adorn_ns(position = 'front'),
+  align = 'l'
+)
+```
+
 ### Top-line numbers (with filtering)
 
 ```{r public.deployment.how.much.data.filtered, echo=FALSE, warning=FALSE}

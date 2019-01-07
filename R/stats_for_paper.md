@@ -6,6 +6,7 @@ April 17, 2018
 -   [Public Deployment](#public-deployment)
     -   [High-level results](#high-level-results)
         -   [Top-line numbers (no filtering)](#top-line-numbers-no-filtering)
+        -   [Top-line numbers (no filtering, but only with users who completed at least one audit + placed a label)](#top-line-numbers-no-filtering-but-only-with-users-who-completed-at-least-one-audit-placed-a-label)
         -   [Top-line numbers (with filtering)](#top-line-numbers-with-filtering)
         -   [Attribute counts by type](#attribute-counts-by-type)
         -   [Dataset 1st 100% vs full deployment](#dataset-1st-100-vs-full-deployment)
@@ -64,6 +65,19 @@ The following are the label counts (not attribute counts) by user group and labe
 | Occlusion      | 68 (0.0%)    | 310 (0.1%)       | 462 (0.2%)     | 438 (0.2%)      | 1278 (0.5%)     |
 | Other          | 92 (0.0%)    | 148 (0.1%)       | 1137 (0.5%)    | 34 (0.0%)       | 1411 (0.6%)     |
 | Total          | 15385 (6.4%) | 41786 (17.4%)    | 150966 (62.9%) | 31954 (13.3%)   | 240091 (100.0%) |
+
+### Top-line numbers (no filtering, but only with users who completed at least one audit + placed a label)
+
+| label\_type    | Anon (384)   | Registered (243) | Turker (170)   | Researcher (28) | Total           |
+|:---------------|:-------------|:-----------------|:---------------|:----------------|:----------------|
+| CurbRamp       | 9017 (3.8%)  | 27016 (11.4%)    | 88466 (37.3%)  | 18336 (7.7%)    | 142835 (60.2%)  |
+| NoCurbRamp     | 1085 (0.5%)  | 3239 (1.4%)      | 13257 (5.6%)   | 1138 (0.5%)     | 18719 (7.9%)    |
+| Obstacle       | 934 (0.4%)   | 2799 (1.2%)      | 16145 (6.8%)   | 1498 (0.6%)     | 21376 (9.0%)    |
+| SurfaceProblem | 620 (0.3%)   | 1885 (0.8%)      | 3213 (1.4%)    | 2591 (1.1%)     | 8309 (3.5%)     |
+| NoSidewalk     | 1185 (0.5%)  | 6192 (2.6%)      | 28167 (11.9%)  | 7919 (3.3%)     | 43463 (18.3%)   |
+| Occlusion      | 47 (0.0%)    | 310 (0.1%)       | 462 (0.2%)     | 438 (0.2%)      | 1257 (0.5%)     |
+| Other          | 62 (0.0%)    | 147 (0.1%)       | 1137 (0.5%)    | 34 (0.0%)       | 1380 (0.6%)     |
+| Total          | 12950 (5.5%) | 41588 (17.5%)    | 150847 (63.6%) | 31954 (13.5%)   | 237339 (100.0%) |
 
 ### Top-line numbers (with filtering)
 
